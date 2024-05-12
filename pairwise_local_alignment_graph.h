@@ -5,7 +5,6 @@
 #include <tuple>
 #include <stdexcept>
 #include <format>
-#include <string>
 #include <utility>
 #include <vector>
 #include <functional>
@@ -13,12 +12,27 @@
 #include "utils.h"
 
 namespace offbynull::pairwise_aligner::local {
+    enum class edge_type : uint8_t {
+        FREE_RIDE,
+        NORMAL
+    };
+
+    template<typename T = unsigned int>
+    class edge {
+    public:
+        using N = std::pair<T, T>;
+        edge_type type;
+        std::pair<N, N> inner_edge;
+
+        std::strong_ordering operator<=>(const edge& rhs) const = default;
+    };
+
     template<typename _ED, typename T = unsigned int>
         requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
     class node_data {
     private:
         using N = std::pair<T, T>;
-        using E = std::pair<N, N>;
+        using E = edge<T>;
         using ED = _ED;
     public:
         E backtracking_edge;
@@ -30,7 +44,7 @@ namespace offbynull::pairwise_aligner::local {
     class pairwise_local_alignment_graph {
     public:
         using N = std::pair<T, T>;
-        using E = std::pair<N, N>;
+        using E = edge<T>;
         using ED = _ED;
         using ND = node_data<_ED, T>;
 
@@ -47,22 +61,6 @@ namespace offbynull::pairwise_aligner::local {
         )
         : g{_down_node_cnt, _right_node_cnt, nd_container_creator, ed_container_creator}, freeride_ed{0.0} {}
 
-        bool is_freeridge_edge(const E& edge) {
-            if constexpr (error_check) {
-                if (!is_valid_edge(edge)) {
-                    throw std::runtime_error {"Edge doesn't exist"};
-                }
-            }
-            if (g.has_edge(edge)) {
-                return false;
-            }
-            const auto & [n1, n2] { edge };
-            const auto & [n1_down, n1_right] { n1 };
-            const auto & [n2_down, n2_right] { n1 };
-            return (n1_down == 0u && n1_right == 0u && n2_down > 0u && n2_right > 0u)
-                || (n1_down < g.down_node_cnt - 1u && n1_right < g.right_node_cnt - 1u && n2_down == g.down_node_cnt - 1u && n2_right == g.right_node_cnt - 1u);
-        }
-
         void update_node_data(const N& node, ND&& data) {
             if constexpr (error_check) {
                 if (!has_node(node)) {
@@ -78,55 +76,40 @@ namespace offbynull::pairwise_aligner::local {
 
         void update_edge_data(const E& edge, ED&& data) {
             if constexpr (error_check) {
-                if (!is_valid_edge(edge)) {
+                if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            if (is_freeridge_edge(edge)) {
+            if (edge.type == edge_type::FREE_RIDE) {
                 freeride_ed = std::forward<ED>(data);
             } else {
-                g.update_edge_data(edge, data);
+                g.update_edge_data(edge.inner_edge, data);
             }
         }
 
         ED& get_edge_data(const E& edge) {
-            if constexpr (error_check) {
-                if (!is_valid_edge(edge)) {
-                    throw std::runtime_error("Edge doesn't exist");
-                }
-            }
             return std::get<2>(get_edge());
         }
 
         N get_edge_from(const E& edge) {
-            if constexpr (error_check) {
-                if (!is_valid_edge(edge)) {
-                    throw std::runtime_error {"Edge doesn't exist"};
-                }
-            }
             return std::get<0>(get_edge());
         }
 
         N get_edge_to(const E& edge) {
-            if constexpr (error_check) {
-                if (!is_valid_edge(edge)) {
-                    throw std::runtime_error {"Edge doesn't exist"};
-                }
-            }
             return std::get<1>(get_edge());
         }
 
         std::tuple<N, N, ED&> get_edge(const E& edge) {
             if constexpr (error_check) {
-                if (!is_valid_edge(edge)) {
+                if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            if (is_freeridge_edge(edge)) {
-                auto [n1, n2] = edge;
+            if (edge.type == edge_type::FREE_RIDE) {
+                auto [n1, n2] = edge.inner_edge;
                 return std::tuple<N, N, ED&> {n1, n2, freeride_ed};
             } else {
-                return g.get_edge(edge);
+                return g.get_edge(edge.inner_edge);
             }
         }
 
@@ -156,7 +139,7 @@ namespace offbynull::pairwise_aligner::local {
                 | std::views::transform([&](const auto & p) noexcept {
                     N n1 { 0u, 0u };
                     N n2 { std::get<0>(p), std::get<1>(p) };
-                    return E { n1, n2 };
+                    return E { edge_type::FREE_RIDE, { n1, n2 } };
                 })
             };
             auto to_sink_range {
@@ -167,27 +150,24 @@ namespace offbynull::pairwise_aligner::local {
                 | ( std::views::reverse | std::views::drop(1) | std::views::reverse ) // drop bottom right
                 | std::views::transform([&](const auto & p) noexcept {
                     N n1 { std::get<0>(p), std::get<1>(p) };
-                    N n2 { g.down_node_cnt, g.right_node_cnt };
-                    return E { n1, n2 };
+                    N n2 { g.down_node_cnt - 1u, g.right_node_cnt - 1u };
+                    return E { edge_type::FREE_RIDE, { n1, n2 } };
                 })
             };
             auto real_range {
                 g.get_edges()
+                | std::views::transform([&](const auto & p) noexcept {
+                    return E { edge_type::NORMAL, p };
+                })
             };
-            // TypeDisplayer<decltype(*from_src_range.begin())> x1;
-            // TypeDisplayer<decltype(*to_sink_range.begin())> x2;
-            // TypeDisplayer<decltype(*g.get_edges().begin())> x3;
-            // TypeDisplayer<decltype(std::begin(real_range))> x4;
-            // TypeDisplayer<decltype(std::begin(from_src_range))> x5;
-            // return concat_view {
-            //     std::move(to_sink_range),
-            //     std::move(from_src_range)
-            // };
+            // This should be using std::views::conat, but it wasn't included in this version of the C++ standard
+            // library. The concat implementation below lacks several features (e.g. doesn't support the pipe operator)
+            // and forcefully returns copies (concat_view::iterator::value_type ==
+            // concat_view::iterator::reference_type).
             return concat_view {
                 std::move(real_range),
                 concat_view { from_src_range, to_sink_range }
             };
-            // return concat_view { from_src_range, to_sink_range };
         }
 
         bool has_node(const N& node) {
@@ -195,17 +175,72 @@ namespace offbynull::pairwise_aligner::local {
         }
 
         bool has_edge(const E& edge) {
-            return is_valid_edge(edge);
+            if (edge.type == edge_type::NORMAL) {
+                return g.has_edge(edge.inner_edge);
+            } else {
+                const auto & [n1, n2] { edge.inner_edge };
+                const auto & [n1_down, n1_right] { n1 };
+                const auto & [n2_down, n2_right] { n2 };
+                if (n1_down == 0u && n1_right == 0u) {
+                    if (n2_down == 0u && n2_right == 0u) {
+                        return false;
+                    } else if (n2_down <= g.down_node_cnt - 1u && n2_right <= g.right_node_cnt - 1u) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else if (n2_down == g.down_node_cnt - 1u && n2_right == g.right_node_cnt - 1u) {
+                    if (n1_down == g.down_node_cnt - 1u && n1_right == g.right_node_cnt - 1u) {
+                        return false;
+                    } else if (n1_down <= g.down_node_cnt - 1u && n1_right <= g.right_node_cnt - 1u) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
         }
 
         auto get_outputs_full(const N& node) {
-            if (node == N{ g.down_node_cnt - 1u, g.right_node_cnt - 1u }) {
-                return g.get_outputs(node);
+            // auto normals {
+            //     g.get_outputs(node)
+            //     | std::views::transform([](const auto& e) noexcept { return E { edge_type::NORMAL, e }; })
+            // };
+            // boost::container::static_vector<E, 1> freerides;
+            // if (node == N{ g.down_node_cnt - 1u, g.right_node_cnt - 1u }) {
+            //     // do nothing
+            // } else {
+            //     freerides.push_back({ edge_type::FREE_RIDE, { node, { g.down_node_cnt - 1u, g.right_node_cnt - 1u } } });
+            // }
+            // auto freerides_no_ref {
+            //     std::move(freerides)
+            //     | std::views::transform([](const auto& e) noexcept -> E { return e; })
+            // };
+            // return concat_view(
+            //     std::move(normals),
+            //     std::move(freerides_no_ref)
+            // );
+            // // COMMENTED OUT BECAUSE concat_view DOESN'T SUPPORT PIPE OPERATOR, WHICH CALLERS USE.
+            boost::container::static_vector<std::tuple<E, N, N, ED&>, 4> ret {};
+            for (const auto& [e, n1, n2, ed_ptr] : g.get_outputs_full(node)) { // will iterate at-most 3 times
+                E new_e { edge_type::NORMAL, e };
+                ret.push_back(std::tuple<E, N, N, ED&> {new_e, n1, n2, ed_ptr});
             }
-            return make_concat_view(
-                g.get_outputs(node),
-                std::views::single({ node, { g.down_node_cnt - 1u, g.right_node_cnt - 1u } })
-            );
+            // I had to use the for-loop above because g.get_outputs_full(node) doesn't allow pipe operator?
+            const auto & [n_down, n_right] { node };
+            if (!(n_down == g.down_node_cnt - 1u && n_right == g.right_node_cnt - 1u)) {
+                ret.push_back(
+                    {
+                        { edge_type::FREE_RIDE, { node, { g.down_node_cnt - 1u, g.right_node_cnt - 1u } } },
+                        node,
+                        {g.down_node_cnt - 1u, g.right_node_cnt - 1u},
+                        freeride_ed
+                    }
+                );
+            }
+            return ret;
         }
 
         std::tuple<E, N, N, ED&> get_output_full(const N& node) {
@@ -224,13 +259,24 @@ namespace offbynull::pairwise_aligner::local {
         }
 
         auto get_inputs_full(const N& node) {
-            if (node == N{ 0u, 0u }) {
-                return g.get_inputs(node);
+            boost::container::static_vector<std::tuple<E, N, N, ED&>, 4> ret {};
+            for (const auto& [e, n1, n2, ed_ptr] : g.get_inputs_full(node)) { // will iterate at-most 3 times
+                E new_e { edge_type::NORMAL, e };
+                ret.push_back(std::tuple<E, N, N, ED&> {new_e, n1, n2, ed_ptr});
             }
-            return make_concat_view(
-                g.get_inputs(node),
-                std::views::single({ { 0u, 0u }, node })
-            );
+            // I had to use the for-loop above because g.get_outputs_full(node) doesn't allow pipe operator?
+            const auto & [n_down, n_right] { node };
+            if (!(n_down == 0u && n_right == 0u)) {
+                ret.push_back(
+                    {
+                        { edge_type::FREE_RIDE, { { 0u, 0u }, node } },
+                        { 0u, 0u },
+                        node,
+                        freeride_ed
+                    }
+                );
+            }
+            return ret;
         }
 
         std::tuple<E, N, N, ED&> get_input_full(const N& node) {
