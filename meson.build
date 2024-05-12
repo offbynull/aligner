@@ -21,6 +21,7 @@ tests_src = [
         'tests/test_grid_graph_4.cpp',
         'tests/test_grid_graph_right.cpp',
         'tests/test_grid_graph_down.cpp',
+        'tests/test_grid_graph_diagonal.cpp',
         'tests/test_pairwise_local_alignment_graph.cpp',
         'tests/test_pairwise_global_alignment_graph.cpp',
         'tests/test_pairwise_fitting_alignment_graph.cpp',
