@@ -136,15 +136,17 @@ namespace offbynull::grid_graph::grid_graph_right {
         }
 
         auto get_root_nodes() {
-            return std::ranges::single_view { std::pair<T, T>(0u, 0u) };
+            return std::views::iota(0u, right_node_cnt)
+                | std::views::transform([](const auto& n_right) { return N { 0u, n_right }; });
         }
 
         N get_root_node() {
-            return std::pair<T, T>(0u, 0u);
+            throw std::runtime_error { "Exactly 1 root node required" };
         }
 
         auto get_leaf_nodes() {
-            return std::ranges::single_view { std::pair<T, T>(down_node_cnt - 1u, right_node_cnt - 1u) };
+            return std::views::iota(0u, right_node_cnt)
+                | std::views::transform([&](const auto& n_right) { return N { down_node_cnt - 1u, n_right }; });
         }
 
         auto get_nodes() {
