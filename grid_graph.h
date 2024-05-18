@@ -5,7 +5,6 @@
 #include <tuple>
 #include <stdexcept>
 #include <format>
-#include <string>
 #include <utility>
 #include <vector>
 #include <functional>
@@ -364,18 +363,6 @@ namespace offbynull::grid_graph::grid_graph {
                 }
             }
             return this->get_inputs(node).size();
-        }
-
-        std::string to_string() {
-            std::string out {};
-            for (const N& node : this->get_nodes()) {
-                out += std::format("node {}: {}\n", node, this->get_node_data(node));
-                for (const E& edge : this->get_outputs(node)) {
-                    auto [from_node, to_node, edge_data] = this->get_edge(edge);
-                    out += std::format("  edge {} pointing to node {}: {}\n", edge, to_node, edge_data);
-                }
-            }
-            return out;
         }
     };
 
