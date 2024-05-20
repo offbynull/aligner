@@ -1,5 +1,5 @@
-#ifndef PAIRWISE_LOCAL_ALIGNMENT_GRAPH_H
-#define PAIRWISE_LOCAL_ALIGNMENT_GRAPH_H
+#ifndef OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_LOCAL_ALIGNMENT_GRAPH_H
+#define OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_LOCAL_ALIGNMENT_GRAPH_H
 
 #include <ranges>
 #include <tuple>
@@ -9,17 +9,21 @@
 #include <vector>
 #include <functional>
 #include "offbynull/aligner/graphs/grid_graph.h"
+#include "offbynull/aligner/graph/grid_allocator.h"
+#include "offbynull/aligner/graph/grid_allocators.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
+    using offbynull::aligner::graph::grid_allocator::grid_allocator;
+    using offbynull::aligner::graph::grid_allocators::VectorAllocator;
 
     enum class edge_type : uint8_t {
         FREE_RIDE,
         NORMAL
     };
 
-    template<typename T>
+    template<std::unsigned_integral T>
     class edge {
     public:
         using N = std::pair<T, T>;
@@ -32,12 +36,12 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     template<
         typename _ND,
         typename _ED,
-        typename T = unsigned int,
-        typename _ND_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ND, T, false>,
-        typename _ED_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T, false>,
+        std::unsigned_integral T = unsigned int,
+        grid_allocator<T> _ND_ALLOCATOR = VectorAllocator<_ND, T, false>,
+        grid_allocator<T> _ED_ALLOCATOR = VectorAllocator<_ED, T, false>,
         bool error_check = true
     >
-        requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
+        requires std::is_integral_v<T> && std::is_unsigned_v<T>
     class pairwise_local_alignment_graph {
     public:
         using N = std::pair<T, T>;
@@ -56,13 +60,13 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         pairwise_local_alignment_graph(
             T _down_node_cnt,
             T _right_node_cnt,
-            ED indel_weight = {},
-            ED freeride_weight = {},
+            ED indel_data = {},
+            ED freeride_data = {},
             _ND_ALLOCATOR nd_container_creator = {},
             _ED_ALLOCATOR ed_container_creator = {}
         )
-        : g{_down_node_cnt, _right_node_cnt, indel_weight, nd_container_creator, ed_container_creator}
-        , freeride_ed{freeride_weight}
+        : g{_down_node_cnt, _right_node_cnt, indel_data, nd_container_creator, ed_container_creator}
+        , freeride_ed{freeride_data}
         , down_node_cnt{_down_node_cnt}
         , right_node_cnt{_right_node_cnt} {}
 
@@ -383,12 +387,14 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return this->get_inputs(node).size();
         }
 
-        template<typename ELEM>
+        template<typename ELEM, typename F=double>
+            requires std::is_floating_point_v<F>
         void assign_weights(
             const auto& v,  // random access container
             const auto& w,  // random access container
-            std::function<ED(const std::optional<std::reference_wrapper<const ELEM>>&, const std::optional<std::reference_wrapper<const ELEM>>&)> weight_lookup,
-            const ED freeride_weight = {}
+            std::function<F(const std::optional<std::reference_wrapper<const ELEM>>&, const std::optional<std::reference_wrapper<const ELEM>>&)> weight_lookup,
+            std::function<void(const ED&, F weight)> weight_setter,
+            const F freeride_weight = {}
         ) {
             static_assert(std::is_same_v<ELEM, std::decay_t<decltype(*v.begin())>>, "ELEM is wrong");
             if constexpr (error_check) {
@@ -397,7 +403,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                 }
             }
             for (const auto& edge : get_edges()) {
-                ED weight;
+                F weight;
                 if (edge.type == edge_type::FREE_RIDE) {
                     weight = freeride_weight;
                 } else {
@@ -414,7 +420,8 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                     }
                     weight = weight_lookup(v_elem, w_elem);
                 }
-                update_edge_data(edge, weight);
+                ED& ed { get_edge_data(ed) };
+                weight_setter(ed, weight);
             }
         }
 
@@ -458,4 +465,4 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         }
     };
 }
-#endif //PAIRWISE_LOCAL_ALIGNMENT_GRAPH_H
+#endif //OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_LOCAL_ALIGNMENT_GRAPH_H

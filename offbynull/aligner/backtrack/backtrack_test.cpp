@@ -1,4 +1,5 @@
 #include "offbynull/aligner/graph/graph_helpers.h"
+#include "offbynull/aligner/graph/grid_allocators.h"
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/aligner/graphs/directed_graph.h"
 #include "offbynull/aligner/backtrack/backtrack.h"
@@ -14,8 +15,8 @@ namespace {
             _ND,
             _ED,
             T,
-            offbynull::aligner::graph::graph_helpers::VectorAllocator<_ND, T>,
-            offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T>,
+            offbynull::aligner::graph::grid_allocators::VectorAllocator<_ND, T>,
+            offbynull::aligner::graph::grid_allocators::VectorAllocator<_ED, T>,
             error_check
         > {
             down_cnt,

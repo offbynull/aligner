@@ -1,5 +1,5 @@
-#ifndef COMMON_ALLOCATORS_H
-#define COMMON_ALLOCATORS_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACK_ALLOCATORS_H
+#define OFFBYNULL_ALIGNER_BACKTRACK_ALLOCATORS_H
 
 #include <stdexcept>
 #include <cstddef>
@@ -7,7 +7,7 @@
 #include "boost/container/small_vector.hpp"
 #include "boost/container/static_vector.hpp"
 
-namespace offbynull::aligner::backtrack::common_allocators {
+namespace offbynull::aligner::backtrack::allocators {
     template<typename ELEM, bool error_check = true>
     class VectorAllocator {
     public:
@@ -73,4 +73,4 @@ namespace offbynull::aligner::backtrack::common_allocators {
     };
 }
 
-#endif //COMMON_ALLOCATORS_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACK_ALLOCATORS_H

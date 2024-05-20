@@ -1,5 +1,5 @@
-#ifndef DIRECTED_GRAPH_H
-#define DIRECTED_GRAPH_H
+#ifndef OFFBYNULL_ALIGNER_GRAPHS_DIRECTED_GRAPH_H
+#define OFFBYNULL_ALIGNER_GRAPHS_DIRECTED_GRAPH_H
 
 #include <ranges>
 #include <map>
@@ -240,11 +240,11 @@ namespace offbynull::aligner::graphs::directed_graph {
         }
 
         auto get_nodes() {
-            return this->node_outbound | std::views::transform([](auto& p) noexcept { return std::reference_wrapper<const N>(p.first); });
+            return this->node_outbound | std::views::transform([](const auto& p) noexcept -> const N& { return p.first; });
         }
 
         auto get_edges() {
-            return this->edges | std::views::transform([](auto& p) noexcept { return std::reference_wrapper<const E>(p.first); });
+            return this->edges | std::views::transform([](auto& p) noexcept -> const E& { return p.first; });
         }
 
         bool has_node(const N& node) {
@@ -403,4 +403,4 @@ namespace offbynull::aligner::graphs::directed_graph {
     };
     */
 };
-#endif //DIRECTED_GRAPH_H
+#endif //OFFBYNULL_ALIGNER_GRAPHS_DIRECTED_GRAPH_H

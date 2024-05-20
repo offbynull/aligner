@@ -1,5 +1,5 @@
-#ifndef PAIRWISE_EXTENDED_GAP_ALIGNMENT_GRAPH_H
-#define PAIRWISE_EXTENDED_GAP_ALIGNMENT_GRAPH_H
+#ifndef OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_EXTENDED_GAP_ALIGNMENT_GRAPH_H
+#define OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_EXTENDED_GAP_ALIGNMENT_GRAPH_H
 
 #include <ranges>
 #include <tuple>
@@ -8,18 +8,21 @@
 #include <functional>
 #include "boost/container/static_vector.hpp"
 #include "boost/container/small_vector.hpp"
-#include "offbynull/aligner/graph/graph_helpers.h"
+#include "offbynull/aligner/graph/grid_allocator.h"
+#include "offbynull/aligner/graph/grid_allocators.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
+    using offbynull::aligner::graph::grid_allocator::grid_allocator;
+    using offbynull::aligner::graph::grid_allocators::VectorAllocator;
+
     enum class layer : uint8_t {
         DIAGONAL,
         DOWN,
         RIGHT
     };
 
-    template<typename _ND, typename _ED, typename T>
-        requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
+    template<typename _ND, typename _ED, std::unsigned_integral T>
     struct slot {
         using ED = _ED;
         using ND = _ND;
@@ -35,11 +38,10 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     template<
         typename _ND,
         typename _ED,
-        typename T = unsigned int,
-        typename _SLOT_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<slot<_ND, _ED, T>, T, false>,
+        std::unsigned_integral T = unsigned int,
+        grid_allocator<T> _SLOT_ALLOCATOR = VectorAllocator<slot<_ND, _ED, T>, T, false>,
         bool error_check = true
     >
-        requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
     class pairwise_extended_gap_alignment_graph {
     public:
         using N = std::tuple<layer, T, T>;
@@ -49,9 +51,9 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
 
     private:
         decltype(std::declval<_SLOT_ALLOCATOR>().allocate(0u, 0u)) slots;
-        _ED extended_indel_ed;
-        _ED initial_indel_ed;
-        _ED freeride_ed;
+        ED extended_indel_ed;
+        ED initial_indel_ed;
+        ED freeride_ed;
 
         auto construct_full_edge(N n1, N n2) {
             return std::tuple<E, N, N, ED*> {
@@ -73,17 +75,17 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         pairwise_extended_gap_alignment_graph(
             T _down_node_cnt,
             T _right_node_cnt,
-            ED initial_indel_weight = 0.0,
-            ED extended_indel_weight = 0.0,
-            ED freeride_weight = 0.0,
+            ED initial_indel_data = {},
+            ED extended_indel_data = {},
+            ED freeride_data = {},
             _SLOT_ALLOCATOR slot_container_creator = {}
         )
         : down_node_cnt{_down_node_cnt}
         , right_node_cnt{_right_node_cnt}
         , slots{slot_container_creator.allocate(_down_node_cnt, _right_node_cnt)}
-        , initial_indel_ed{initial_indel_weight}
-        , extended_indel_ed{extended_indel_weight}
-        , freeride_ed{freeride_weight} {}
+        , initial_indel_ed{initial_indel_data}
+        , extended_indel_ed{extended_indel_data}
+        , freeride_ed{freeride_data} {}
 
         void update_node_data(const N& node, ND&& data) {
             if constexpr (error_check) {
@@ -502,13 +504,15 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             return this->get_inputs(node).size();
         }
 
-        template<typename ELEM>
+        template<typename ELEM, typename F=double>
+            requires std::is_floating_point_v<F>
         void assign_weights(
             const auto& v,  // random access container
             const auto& w,  // random access container
-            std::function<ED(const std::optional<std::reference_wrapper<const ELEM>>&, const std::optional<std::reference_wrapper<const ELEM>>&)> && weight_lookup,
-            const ED gap_weight,
-            const ED freeride_weight = {}
+            std::function<F(const std::optional<std::reference_wrapper<const ELEM>>&, const std::optional<std::reference_wrapper<const ELEM>>&)> weight_lookup,
+            std::function<void(const ED&, F weight)> weight_setter,
+            const F gap_weight = {},
+            const F freeride_weight = {}
         ) {
             static_assert(std::is_same_v<ELEM, std::decay_t<decltype(*v.begin())>>, "ELEM is wrong");
             if constexpr (error_check) {
@@ -525,7 +529,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     update_edge_data(edge, gap_weight);
                 } else if ((n1_layer == layer::DOWN && n2_layer == layer::DIAGONAL)
                         || (n1_layer == layer::RIGHT && n2_layer == layer::DIAGONAL)) {  // freeride
-                    update_edge_data(edge, 0.0);
+                    update_edge_data(edge, freeride_weight);
                 } else {
                     std::optional<std::reference_wrapper<const ELEM>> v_elem { std::nullopt };
                     if (n1_down + 1u == n2_down) {
@@ -588,4 +592,4 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         }
     };
 }
-#endif //PAIRWISE_EXTENDED_GAP_ALIGNMENT_GRAPH_H
+#endif //OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_EXTENDED_GAP_ALIGNMENT_GRAPH_H

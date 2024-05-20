@@ -1,5 +1,5 @@
-#ifndef PAIRWISE_GLOBAL_ALIGNMENT_GRAPH_H
-#define PAIRWISE_GLOBAL_ALIGNMENT_GRAPH_H
+#ifndef OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_GLOBAL_ALIGNMENT_GRAPH_H
+#define OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_GLOBAL_ALIGNMENT_GRAPH_H
 
 #include <ranges>
 #include <tuple>
@@ -8,20 +8,23 @@
 #include <functional>
 #include <type_traits>
 #include "offbynull/aligner/graphs/grid_graph.h"
-#include "offbynull/aligner/graph/graph_helpers.h"
+#include "offbynull/aligner/graph/grid_allocator.h"
+#include "offbynull/aligner/graph/grid_allocators.h"
 
 namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
+    using offbynull::aligner::graph::grid_allocator::grid_allocator;
+    using offbynull::aligner::graph::grid_allocators::VectorAllocator;
 
     template<
         typename _ND,
         typename _ED,
-        typename T = unsigned int,
-        typename _ND_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ND, T, false>,
-        typename _ED_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T, false>,
+        std::unsigned_integral T = unsigned int,
+        grid_allocator<T> _ND_ALLOCATOR = VectorAllocator<_ND, T, false>,
+        grid_allocator<T> _ED_ALLOCATOR = VectorAllocator<_ED, T, false>,
         bool error_check = true
     >
-        requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
+        requires std::is_integral_v<T> && std::is_unsigned_v<T>
     class pairwise_global_alignment_graph {
     public:
         using N = std::pair<T, T>;
@@ -39,11 +42,11 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         pairwise_global_alignment_graph(
             T _down_node_cnt,
             T _right_node_cnt,
-            ED indel_weight = {},
+            ED indel_data = {},
             _ND_ALLOCATOR nd_container_creator = {},
             _ED_ALLOCATOR ed_container_creator = {}
         )
-        : g{_down_node_cnt, _right_node_cnt, indel_weight, nd_container_creator, ed_container_creator}
+        : g{_down_node_cnt, _right_node_cnt, indel_data, nd_container_creator, ed_container_creator}
         , down_node_cnt{_down_node_cnt}
         , right_node_cnt{_right_node_cnt} {}
 
@@ -226,11 +229,13 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             return g.get_in_degree(node);
         }
 
-        template<typename ELEM>
+        template<typename ELEM, typename F=double>
+            requires std::is_floating_point_v<F>
         void assign_weights(
             const auto& v,  // random access container
             const auto& w,  // random access container
-            std::function<ED(const std::optional<std::reference_wrapper<const ELEM>>&, const std::optional<std::reference_wrapper<const ELEM>>&)> weight_lookup
+            std::function<F(const std::optional<std::reference_wrapper<const ELEM>>&, const std::optional<std::reference_wrapper<const ELEM>>&)> weight_lookup,
+            std::function<void(const ED&, F weight)> weight_setter
         ) {
             static_assert(std::is_same_v<ELEM, std::decay_t<decltype(*v.begin())>>, "ELEM is wrong");
             if constexpr (error_check) {
@@ -250,7 +255,9 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
                 if (n1_right + 1u == n2_right) {
                     w_elem = { w[n1_right] };
                 }
-                update_edge_data(edge, weight_lookup(v_elem, w_elem));
+                F weight { weight_lookup(v_elem, w_elem) };
+                ED& ed { get_edge_data(ed) };
+                weight_setter(ed, weight);
             }
         }
 
@@ -291,4 +298,4 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         }
     };
 }
-#endif //PAIRWISE_GLOBAL_ALIGNMENT_GRAPH_H
+#endif //OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_GLOBAL_ALIGNMENT_GRAPH_H

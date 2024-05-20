@@ -1,10 +1,11 @@
-#include "offbynull/aligner/graph/graph_helpers.h"
 #include "offbynull/aligner/graphs/grid_graph.h"
+#include "offbynull/aligner/graph/graph_helpers.h"
+#include "offbynull/aligner/graph/grid_allocators.h"
 #include "gtest/gtest.h"
 
 namespace {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
-    
+
     template<typename _ND, typename _ED, typename T = unsigned int, bool error_check = true>
         requires std::is_integral_v<T> && std::is_unsigned_v<T>
     auto create_vector(T down_cnt, T right_cnt) {
@@ -12,8 +13,8 @@ namespace {
             _ND,
             _ED,
             T,
-            offbynull::aligner::graph::graph_helpers::VectorAllocator<_ND, T>,
-            offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T>,
+            offbynull::aligner::graph::grid_allocators::VectorAllocator<_ND, T>,
+            offbynull::aligner::graph::grid_allocators::VectorAllocator<_ED, T>,
             error_check
         > {
             down_cnt,
@@ -28,8 +29,8 @@ namespace {
             _ND,
             _ED,
             T,
-            offbynull::aligner::graph::graph_helpers::ArrayAllocator<_ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
-            offbynull::aligner::graph::graph_helpers::ArrayAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_allocators::ArrayAllocator<_ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_allocators::ArrayAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             STATIC_DOWN_CNT,
@@ -44,8 +45,8 @@ namespace {
             _ND,
             _ED,
             T,
-            offbynull::aligner::graph::graph_helpers::StaticVectorAllocator<_ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
-            offbynull::aligner::graph::graph_helpers::StaticVectorAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_allocators::StaticVectorAllocator<_ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_allocators::StaticVectorAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             down_cnt,
@@ -60,13 +61,18 @@ namespace {
             _ND,
             _ED,
             T,
-            offbynull::aligner::graph::graph_helpers::SmallVectorAllocator<_ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
-            offbynull::aligner::graph::graph_helpers::SmallVectorAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_allocators::SmallVectorAllocator<_ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_allocators::SmallVectorAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             down_cnt,
             right_cnt
         };
+    }
+
+    TEST(GridGraphTest, ConceptCheck) {
+        using G = grid_graph<std::string, std::string>;
+        static_assert(offbynull::aligner::graph::graph_helpers::readable_graph<G>);
     }
 
     TEST(GridGraphTest, ListNodes) {

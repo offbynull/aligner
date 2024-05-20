@@ -1,25 +1,27 @@
-#ifndef GRID_GRAPH_H
-#define GRID_GRAPH_H
+#ifndef OFFBYNULL_ALIGNER_GRAPHS_GRID_GRAPH_H
+#define OFFBYNULL_ALIGNER_GRAPHS_GRID_GRAPH_H
 
 #include <ranges>
 #include <tuple>
 #include <stdexcept>
 #include <format>
 #include <utility>
-#include <vector>
 #include "boost/container/static_vector.hpp"
-#include "offbynull/aligner/graph/graph_helpers.h"
+#include "offbynull/aligner/graph/grid_allocator.h"
+#include "offbynull/aligner/graph/grid_allocators.h"
 
 namespace offbynull::aligner::graphs::grid_graph {
+    using offbynull::aligner::graph::grid_allocator::grid_allocator;
+    using offbynull::aligner::graph::grid_allocators::VectorAllocator;
+
     template<
         typename _ND,
         typename _ED,
-        typename T = unsigned int,
-        typename _ND_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ND, T, false>,
-        typename _ED_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T, false>,
+        std::unsigned_integral T = unsigned int,
+        grid_allocator<T> _ND_ALLOCATOR = VectorAllocator<_ND, T, false>,
+        grid_allocator<T> _ED_ALLOCATOR = VectorAllocator<_ED, T, false>,
         bool error_check = true
     >
-        requires std::is_integral_v<T> && std::is_unsigned_v<T>
     class grid_graph {
     public:
         using N = std::pair<T, T>;
@@ -360,4 +362,4 @@ namespace offbynull::aligner::graphs::grid_graph {
         }
     };
 }
-#endif //GRID_GRAPH_H
+#endif //OFFBYNULL_ALIGNER_GRAPHS_GRID_GRAPH_H

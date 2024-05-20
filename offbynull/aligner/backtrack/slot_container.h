@@ -1,9 +1,8 @@
-#ifndef SLOT_CONTAINER_H
-#define SLOT_CONTAINER_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACK_SLOT_CONTAINER_H
+#define OFFBYNULL_ALIGNER_BACKTRACK_SLOT_CONTAINER_H
 
 #include <cstddef>
-#include <stdexcept>
-#include "offbynull/aligner/backtrack/common_allocators.h"
+#include "offbynull/aligner/backtrack/allocators.h"
 
 namespace offbynull::aligner::backtrack::slot_container {
     template<typename N, typename E>
@@ -17,7 +16,7 @@ namespace offbynull::aligner::backtrack::slot_container {
     template<
         typename N,
         typename E,
-        typename ALLOCATOR=offbynull::aligner::backtrack::common_allocators::VectorAllocator<slot<N, E>>
+        typename ALLOCATOR=offbynull::aligner::backtrack::allocators::VectorAllocator<slot<N, E>>
     >
     class slot_container {
     private:
@@ -70,4 +69,4 @@ namespace offbynull::aligner::backtrack::slot_container {
     };
 }
 
-#endif //SLOT_CONTAINER_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACK_

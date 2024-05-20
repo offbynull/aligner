@@ -1,13 +1,13 @@
-#ifndef READY_QUEUE_H
-#define READY_QUEUE_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACK_READY_QUEUE_H
+#define OFFBYNULL_ALIGNER_BACKTRACK_READY_QUEUE_H
 
 #include <cstddef>
 #include <stdexcept>
-#include "offbynull/aligner/backtrack/common_allocators.h"
+#include "offbynull/aligner/backtrack/allocators.h"
 
 namespace offbynull::aligner::backtrack::ready_queue {
     template<
-        typename ALLOCATOR=offbynull::aligner::backtrack::common_allocators::VectorAllocator<size_t>,
+        typename ALLOCATOR=offbynull::aligner::backtrack::allocators::VectorAllocator<size_t>,
         bool error_check=true
     >
     class ready_queue {
@@ -40,4 +40,4 @@ namespace offbynull::aligner::backtrack::ready_queue {
         }
     };
 }
-#endif //READY_QUEUE_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACK_READY_QUEUE_H

@@ -1,29 +1,10 @@
-#include <iostream>
-#include <string>
-#include <format>
-#include "directed_graph.h"
-#include "pairwise_global_alignment_graph.h"
-
-void test_global() {
-    using namespace offbynull::pairwise_aligner::global;
-
-    create_vector_and_assign<double, char>(
-        std::string {"hello"},
-        std::string {"mellow"},
-        [](const std::optional<std::reference_wrapper<const char>>& v_elem, const std::optional<std::reference_wrapper<const char>>& w_elem) {
-            if (v_elem == std::nullopt || w_elem == std::nullopt) {
-                return -1.0;
-            } else if ((*v_elem).get() == (*w_elem).get()) {
-                return 1.0;
-            } else {
-                return 0.0;
-            }
-        }
-    );
-}
+#include "offbynull/aligner/graph/graph_helpers.h"
+#include "offbynull/aligner/graphs/directed_graph.h"
 
 int main() {
-    test_global();
+    using G = offbynull::aligner::graph::graph_helpers::VectorAllocator<std::string, unsigned int>;
+    static_assert(offbynull::aligner::graph::graph_helpers::allocator<G>);
+    return 0;
     // directed_graph<std::string, std::string, std::string, std::string> g {};
     //
     // g.insert_node("A", "");

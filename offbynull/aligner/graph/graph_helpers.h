@@ -1,65 +1,83 @@
-#ifndef GRAPH_HELPERS_H
-#define GRAPH_HELPERS_H
+#ifndef OFFBYNULL_ALIGNER_GRAPH_GRAPH_HELPERS_H
+#define OFFBYNULL_ALIGNER_GRAPH_GRAPH_HELPERS_H
 
+#include <concepts>
+#include <iterator>
 #include <format>
 #include <string>
-#include <vector>
-#include <array>
-#include "boost/container/small_vector.hpp"
-#include "boost/container/static_vector.hpp"
+#include <ranges>
 
 namespace offbynull::aligner::graph::graph_helpers {
-    template<typename ELEM, typename T, bool error_check = true>
-        requires std::is_integral_v<T> && std::is_unsigned_v<T>
-    class VectorAllocator {
-    public:
-        std::vector<ELEM> allocate(T down_node_cnt, T right_node_cnt) {
-            return std::vector<ELEM>(down_node_cnt * right_node_cnt);
-        }
-    };
+    template<typename T, typename ... Ts>
+    concept one_of = (std::same_as<T, Ts> || ...);
 
-    template<typename ELEM, typename T, T STATIC_DOWN_CNT, T STATIC_RIGHT_CNT, bool error_check = true>
-        requires std::is_integral_v<T> && std::is_unsigned_v<T>
-    class ArrayAllocator {
-    private:
-        static constexpr T size = STATIC_DOWN_CNT * STATIC_RIGHT_CNT;
-    public:
-        std::array<ELEM, size> allocate(T down_node_cnt, T right_node_cnt) {
-            if constexpr (error_check) {
-                if (down_node_cnt != STATIC_DOWN_CNT || right_node_cnt != STATIC_RIGHT_CNT) {
-                    throw std::runtime_error("Unexpected number of elements");
-                }
-            }
-            return std::array<ELEM, size>{};
-        }
-    };
+    template<typename T, typename... Ts>
+    concept range_of_one_of = std::ranges::range<T> && (std::same_as<std::ranges::range_value_t<T>, Ts> || ...);
 
-    template<typename ELEM, typename T, T STATIC_DOWN_CNT, T STATIC_RIGHT_CNT, bool error_check = true>
-        requires std::is_integral_v<T> && std::is_unsigned_v<T>
-    class StaticVectorAllocator {
-    private:
-        static constexpr T max_size = STATIC_DOWN_CNT * STATIC_RIGHT_CNT;
-    public:
-        boost::container::static_vector<ELEM, max_size> allocate(T down_node_cnt, T right_node_cnt) {
-            if constexpr (error_check) {
-                if (down_node_cnt > STATIC_DOWN_CNT || right_node_cnt > STATIC_RIGHT_CNT) {
-                    throw std::runtime_error("Too many elements");
-                }
-            }
-            return boost::container::static_vector<ELEM, max_size>(down_node_cnt * right_node_cnt);
-        }
-    };
+    template <typename G>
+    concept readable_graph =
+        requires(G g, G::N n, G::E e) {
+            typename G::N;
+            typename G::ND;
+            typename G::E;
+            typename G::ED;
+            { g.get_node_data(n) } -> std::same_as<typename G::ND&>;
+            { g.get_edge_data(e) } -> std::same_as<typename G::ED&>;
+            { g.get_edge_from(e) } -> one_of<typename G::N, const typename G::N&>;
+            { g.get_edge_to(e) } -> one_of<typename G::N, const typename G::N&>;
+            { g.get_edge(e) } -> one_of<
+                std::tuple<typename G::N, typename G::N, typename G::ED&>,
+                std::tuple<const typename G::N&, const typename G::N&, typename G::ED&>
+            >;
+            { g.get_root_nodes() } -> range_of_one_of<typename G::N, const typename G::N&>;
+            { g.get_root_node() } -> one_of<typename G::N, const typename G::N&>;
+            { g.get_leaf_nodes() } -> range_of_one_of<typename G::N, const typename G::N&>;
+            { g.get_nodes() } -> range_of_one_of<typename G::N, const typename G::N&>;
+            { g.get_edges() } -> range_of_one_of<typename G::E, const typename G::E&>;
+            { g.has_node(n) } -> std::same_as<bool>;
+            { g.has_edge(e) } -> std::same_as<bool>;
+            { g.get_outputs_full(n) } -> range_of_one_of<
+                std::tuple<typename G::E, typename G::N, typename G::N, typename G::ED&>,
+                std::tuple<const typename G::E&, const typename G::N&, const typename G::N&, typename G::ED&>
+            >;
+            { g.get_inputs_full(n) } -> range_of_one_of<
+                std::tuple<typename G::E, typename G::N, typename G::N, typename G::ED&>,
+                std::tuple<const typename G::E&, const typename G::N&, const typename G::N&, typename G::ED&>
+            >;
+            { g.get_output_full(n) } -> one_of<
+                std::tuple<typename G::E, typename G::N, typename G::N, typename G::ED&>,
+                std::tuple<const typename G::E&, const typename G::N&, const typename G::N&, typename G::ED&>
+            >;
+            { g.get_input_full(n) } -> one_of<
+                std::tuple<typename G::E, typename G::N, typename G::N, typename G::ED&>,
+                std::tuple<const typename G::E&, const typename G::N&, const typename G::N&, typename G::ED&>
+            >;
+            { g.get_outputs(n) } -> range_of_one_of<typename G::E, const typename G::E&>;
+            { g.get_inputs(n) } -> range_of_one_of<typename G::E, const typename G::E&>;
+            { g.get_output(n) } -> one_of<typename G::E, const typename G::E&>;
+            { g.get_input(n) } -> one_of<typename G::E, const typename G::E&>;
+            { g.has_outputs(n) } -> std::same_as<bool>;
+            { g.has_inputs(n) } -> std::same_as<bool>;
+            { g.get_out_degree(n) } -> std::same_as<size_t>;
+            { g.get_in_degree(n) } -> std::same_as<size_t>;
+        };
 
-    template<typename ELEM, typename T, T STATIC_DOWN_CNT, T STATIC_RIGHT_CNT, bool error_check = true>
-        requires std::is_integral_v<T> && std::is_unsigned_v<T>
-    class SmallVectorAllocator {
-    private:
-        static constexpr T max_stack_size = STATIC_DOWN_CNT * STATIC_RIGHT_CNT;
-    public:
-        boost::container::small_vector<ELEM, max_stack_size> allocate(T down_node_cnt, T right_node_cnt) {
-            return boost::container::small_vector<ELEM, max_stack_size>(down_node_cnt * right_node_cnt);
-        }
-    };
+    template <typename T, typename V>
+    concept random_access_range_of_type = std::ranges::random_access_range<T> && std::same_as<std::ranges::range_reference_t<T>, V&>;
+
+    template <typename T, typename SIZE_T>
+    concept allocator =
+        std::unsigned_integral<SIZE_T> &&
+        requires(T t, SIZE_T size) {
+            typename T::ELEM;
+            { t.allocate(size, size) } -> random_access_range_of_type<typename T::ELEM>;
+        };
+
+
+
+
+
+
 
 
 
@@ -79,4 +97,4 @@ namespace offbynull::aligner::graph::graph_helpers {
     }
 }
 
-#endif //GRAPH_HELPERS_H
+#endif //OFFBYNULL_ALIGNER_GRAPH_GRAPH_HELPERS_H

@@ -1,4 +1,5 @@
 #include "offbynull/aligner/graph/graph_helpers.h"
+#include "offbynull/aligner/graph/grid_allocators.h"
 #include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
 #include "gtest/gtest.h"
 
@@ -14,7 +15,7 @@ namespace {
             std::tuple<>,
             _ED,
             T,
-            offbynull::aligner::graph::graph_helpers::VectorAllocator<slot<std::tuple<>,_ED, T>, T>,
+            offbynull::aligner::graph::grid_allocators::VectorAllocator<slot<std::tuple<>,_ED, T>, T>,
             error_check
         > {
             down_cnt,
@@ -29,7 +30,7 @@ namespace {
             std::tuple<>,
             _ED,
             T,
-            offbynull::aligner::graph::graph_helpers::ArrayAllocator<slot<std::tuple<>, _ED, T>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_allocators::ArrayAllocator<slot<std::tuple<>, _ED, T>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             STATIC_DOWN_CNT,
@@ -44,7 +45,7 @@ namespace {
             std::tuple<>,
             _ED,
             T,
-            offbynull::aligner::graph::graph_helpers::StaticVectorAllocator<slot<std::tuple<>, _ED, T>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_allocators::StaticVectorAllocator<slot<std::tuple<>, _ED, T>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             down_cnt,
@@ -59,12 +60,17 @@ namespace {
             std::tuple<>,
             _ED,
             T,
-            offbynull::aligner::graph::graph_helpers::SmallVectorAllocator<slot<std::tuple<>, _ED, T>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_allocators::SmallVectorAllocator<slot<std::tuple<>, _ED, T>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             down_cnt,
             right_cnt
         };
+    }
+
+    TEST(PairwiseExtendedGapAlignmentGraphTest, ConceptCheck) {
+        using G = pairwise_extended_gap_alignment_graph<std::string, std::string>;
+        static_assert(offbynull::aligner::graph::graph_helpers::readable_graph<G>);
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, ListNodes) {

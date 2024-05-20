@@ -1,5 +1,5 @@
-#ifndef BACKTRACKER_H
-#define BACKTRACKER_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACK_BACKTRACK_H
+#define OFFBYNULL_ALIGNER_BACKTRACK_BACKTRACK_H
 
 #include <tuple>
 #include <vector>
@@ -165,4 +165,4 @@ namespace offbynull::aligner::backtrack::backtrack {
     }
 }
 
-#endif //BACKTRACKER_2_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACK_BACKTRACK_H

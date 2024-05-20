@@ -1,8 +1,14 @@
+#include "offbynull/aligner/graph/graph_helpers.h"
 #include "offbynull/aligner/graphs/directed_graph.h"
 #include "gtest/gtest.h"
 
 namespace {
     using offbynull::aligner::graphs::directed_graph::directed_graph;
+
+    TEST(DirectedGraphTest, ConceptCheck) {
+        using G = directed_graph<std::string, std::string, std::string, std::string>;
+        static_assert(offbynull::aligner::graph::graph_helpers::readable_graph<G>);
+    }
 
     TEST(DirectedGraphTest, InsertNodesAndEdges) {
         directed_graph<std::string, std::string, std::string, std::string> g {};
