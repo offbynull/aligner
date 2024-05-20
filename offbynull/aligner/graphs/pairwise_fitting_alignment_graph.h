@@ -8,10 +8,12 @@
 #include <utility>
 #include <vector>
 #include <functional>
-#include "grid_graph.h"
-#include "utils.h"
+#include "offbynull/aligner/graphs/grid_graph.h"
+#include "offbynull/utils.h"
 
-namespace offbynull::pairwise_aligner::fitting {
+namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
+    using offbynull::aligner::graphs::grid_graph::grid_graph;
+
     enum class edge_type : uint8_t {
         FREE_RIDE,
         NORMAL
@@ -31,8 +33,8 @@ namespace offbynull::pairwise_aligner::fitting {
         typename _ND,
         typename _ED,
         typename T = unsigned int,
-        typename _ND_ALLOCATOR = offbynull::graph::graph_helpers::VectorAllocator<_ND, T, false>,
-        typename _ED_ALLOCATOR = offbynull::graph::graph_helpers::VectorAllocator<_ED, T, false>,
+        typename _ND_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ND, T, false>,
+        typename _ED_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T, false>,
         bool error_check = true
     >
         requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
@@ -44,7 +46,7 @@ namespace offbynull::pairwise_aligner::fitting {
         using ND = _ND;
 
     private:
-        offbynull::grid_graph::grid_graph::grid_graph<ND, ED, T, _ND_ALLOCATOR, _ED_ALLOCATOR, error_check> g;
+        grid_graph<ND, ED, T, _ND_ALLOCATOR, _ED_ALLOCATOR, error_check> g;
         ED freeride_ed;
 
     public:

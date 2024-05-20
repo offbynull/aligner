@@ -3,10 +3,12 @@
 
 #include <format>
 #include <string>
+#include <vector>
+#include <array>
 #include "boost/container/small_vector.hpp"
 #include "boost/container/static_vector.hpp"
 
-namespace offbynull::graph::graph_helpers {
+namespace offbynull::aligner::graph::graph_helpers {
     template<typename ELEM, typename T, bool error_check = true>
         requires std::is_integral_v<T> && std::is_unsigned_v<T>
     class VectorAllocator {

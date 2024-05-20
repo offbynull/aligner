@@ -1,184 +1,19 @@
-#ifndef BACKTRACKER_2_H
-#define BACKTRACKER_2_H
+#ifndef BACKTRACKER_H
+#define BACKTRACKER_H
 
 #include <tuple>
 #include <vector>
 #include <functional>
 #include <ranges>
 #include <algorithm>
+#include "offbynull/aligner/backtrack/ready_queue.h"
+#include "offbynull/aligner/backtrack/slot_container.h"
 
-namespace offbynull::aligner::backtracker {
-    template<typename ELEM, bool error_check = true>
-    class VectorAllocator {
-    public:
-        std::vector<ELEM> allocate(size_t cnt) {
-            return std::vector<ELEM>(cnt);
-        }
+namespace offbynull::aligner::backtrack::backtrack {
 
-        std::vector<ELEM> allocate(auto& begin, auto& end) {
-            return std::vector<ELEM>(begin, end);
-        }
-    };
-
-    template<typename ELEM, size_t size, bool error_check = true>
-    class ArrayAllocator {
-    public:
-        std::array<ELEM, size> allocate(size_t cnt) {
-            if constexpr (error_check) {
-                if (cnt != size) {
-                    throw std::runtime_error("Unexpected number of elements");
-                }
-            }
-            return std::array<ELEM, size>{};
-        }
-
-        std::array<ELEM, size> allocate(auto& begin, auto& end) {
-            return std::array<ELEM, size>(begin, end);
-        }
-    };
-
-    template<typename ELEM, size_t max_size, bool error_check = true>
-    class StaticVectorAllocator {
-    public:
-        boost::container::static_vector<ELEM, max_size> allocate(size_t cnt) {
-            if constexpr (error_check) {
-                if (cnt > max_size) {
-                    throw std::runtime_error("Too many elements");
-                }
-            }
-            return boost::container::static_vector<ELEM, max_size>(max_size);
-        }
-
-        boost::container::static_vector<ELEM, max_size> allocate(auto& begin, auto& end) {
-            if constexpr (error_check) {
-                auto cnt { end - begin };
-                if (cnt > max_size) {
-                    throw std::runtime_error("Too many elements");
-                }
-            }
-            return boost::container::static_vector<ELEM, max_size>(begin, end);
-        }
-    };
-
-    template<typename ELEM, size_t max_stack_size, bool error_check = true>
-    class SmallVectorAllocator {
-    public:
-        boost::container::small_vector<ELEM, max_stack_size> allocate(size_t cnt) {
-            return boost::container::small_vector<ELEM, max_stack_size>(cnt);
-        }
-
-        boost::container::small_vector<ELEM, max_stack_size> allocate(auto& begin, auto& end) {
-            return boost::container::small_vector<ELEM, max_stack_size>(begin, end);
-        }
-    };
-
-
-
-
-
-
-
-
-
-
-
-
-    template<typename N, typename E>
-    struct slot {
-        N node;
-        size_t unwalked_parent_cnt;
-        E backtracking_edge;
-        double backtracking_weight;
-    };
-
-    template<
-        typename N,
-        typename E,
-        typename ALLOCATOR=VectorAllocator<slot<N, E>>
-    >
-    class slot_container {
-    private:
-        struct slots_comparator {
-            bool operator()(const slot<N, E>& lhs, const slot<N, E>& rhs) const {
-                return lhs.node < rhs.node;
-            }
-
-            bool operator()(const slot<N, E>& lhs, const N& rhs) const {
-                return lhs.node < rhs;
-            }
-
-            bool operator()(const N& lhs, const slot<N, E>& rhs) const {
-                return lhs < rhs.node;
-            }
-        };
-
-        decltype(std::declval<ALLOCATOR>().allocate(0u)) slots;
-    public:
-        slot_container(
-            auto&& begin,
-            auto&& end,
-            ALLOCATOR container_creator = {}
-        ) : slots(container_creator.allocate(begin, end)) {
-            std::ranges::sort(
-                slots.begin(),
-                slots.end(),
-                slots_comparator{}
-            );
-        }
-        size_t find_idx(const auto& node){
-            auto it { std::lower_bound(slots.begin(), slots.end(), node, slots_comparator{}) };
-            return it - slots.begin();
-        }
-
-        slot<N, E>& find_ref(const auto& node) {
-            auto it { std::lower_bound(slots.begin(), slots.end(), node, slots_comparator{}) };
-            return *it;
-        }
-
-        slot<N, E>& at_idx(const size_t idx) {
-            return slots[idx];        }
-
-        std::pair<size_t, slot<N, E>&> find(const auto& node) {
-            auto it { std::lower_bound(slots.begin(), slots.end(), node, slots_comparator{}) };
-            size_t idx { it - slots.begin() };
-            slot<N, E>& slot { *it };
-            return { idx, slot };
-        }
-    };
-
-    template<
-        typename ALLOCATOR=VectorAllocator<size_t>,
-        bool error_check=true
-    >
-    class ready_queue {
-    private:
-        decltype(std::declval<ALLOCATOR>().allocate(0u)) queue;
-
-    public:
-        ready_queue(
-            ALLOCATOR container_creator = {}
-        ) : queue{container_creator.allocate(0u)} {
-            if constexpr (error_check) {
-                if (!queue.empty()) {
-                    throw std::runtime_error("Queue must be sized 0 on creation");  // typically a problem when you use std::array
-                }
-            }
-        }
-
-        bool empty() {
-            return queue.empty();
-        }
-
-        void push(size_t idx) {
-            queue.push_back(idx);
-        }
-
-        size_t pop() {
-            auto ret { queue.back() };
-            queue.pop_back();
-            return ret;
-        }
-    };
+    using offbynull::aligner::backtrack::slot_container::slot_container;
+    using offbynull::aligner::backtrack::slot_container::slot;
+    using offbynull::aligner::backtrack::ready_queue::ready_queue;
 
     template<typename G, bool error_check = true>
     slot_container<typename G::N, typename G::E> populate_weights_and_backtrack_pointers(

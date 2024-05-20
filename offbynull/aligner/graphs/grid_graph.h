@@ -8,15 +8,15 @@
 #include <utility>
 #include <vector>
 #include "boost/container/static_vector.hpp"
-#include "graph_helpers.h"
+#include "offbynull/aligner/graph/graph_helpers.h"
 
-namespace offbynull::grid_graph::grid_graph {
+namespace offbynull::aligner::graphs::grid_graph {
     template<
         typename _ND,
         typename _ED,
         typename T = unsigned int,
-        typename _ND_ALLOCATOR = offbynull::graph::graph_helpers::VectorAllocator<_ND, T, false>,
-        typename _ED_ALLOCATOR = offbynull::graph::graph_helpers::VectorAllocator<_ED, T, false>,
+        typename _ND_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ND, T, false>,
+        typename _ED_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T, false>,
         bool error_check = true
     >
         requires std::is_integral_v<T> && std::is_unsigned_v<T>

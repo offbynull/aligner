@@ -4,19 +4,21 @@
 #include <ranges>
 #include <tuple>
 #include <stdexcept>
-#include <format>
 #include <utility>
 #include <functional>
 #include <type_traits>
-#include "grid_graph.h"
+#include "offbynull/aligner/graphs/grid_graph.h"
+#include "offbynull/aligner/graph/graph_helpers.h"
 
-namespace offbynull::pairwise_aligner::global {
+namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
+    using offbynull::aligner::graphs::grid_graph::grid_graph;
+
     template<
         typename _ND,
         typename _ED,
         typename T = unsigned int,
-        typename _ND_ALLOCATOR = offbynull::graph::graph_helpers::VectorAllocator<_ND, T, false>,
-        typename _ED_ALLOCATOR = offbynull::graph::graph_helpers::VectorAllocator<_ED, T, false>,
+        typename _ND_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ND, T, false>,
+        typename _ED_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T, false>,
         bool error_check = true
     >
         requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
@@ -28,7 +30,7 @@ namespace offbynull::pairwise_aligner::global {
         using ND = _ND;
 
     private:
-        offbynull::grid_graph::grid_graph::grid_graph<ND, ED, T, _ND_ALLOCATOR, _ED_ALLOCATOR, error_check> g;
+        grid_graph<ND, ED, T, _ND_ALLOCATOR, _ED_ALLOCATOR, error_check> g;
 
     public:
         const T down_node_cnt;

@@ -1,20 +1,20 @@
-#include "pairwise_fitting_alignment_graph.h"
+#include "offbynull/aligner/graphs/pairwise_local_alignment_graph.h"
 #include "gtest/gtest.h"
-#include <iostream>
-#include <map>
-
-using namespace offbynull::pairwise_aligner::fitting;
 
 namespace {
+    using offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph;
+    using offbynull::aligner::graphs::pairwise_local_alignment_graph::edge;
+    using offbynull::aligner::graphs::pairwise_local_alignment_graph::edge_type;
+
     template<typename _ED, typename T = unsigned int, bool error_check = true>
         requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
     auto create_vector(T down_cnt, T right_cnt) {
-        return pairwise_fitting_alignment_graph<
+        return pairwise_local_alignment_graph<
             std::tuple<>,
             _ED,
             T,
-            offbynull::graph::graph_helpers::VectorAllocator<std::tuple<>, T>,
-            offbynull::graph::graph_helpers::VectorAllocator<_ED, T>,
+            offbynull::aligner::graph::graph_helpers::VectorAllocator<std::tuple<>, T>,
+            offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T>,
             error_check
         > {
             down_cnt,
@@ -25,12 +25,12 @@ namespace {
     template<typename _ED, size_t STATIC_DOWN_CNT, size_t STATIC_RIGHT_CNT, typename T = unsigned int, bool error_check = true>
         requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
     auto create_array() {
-        return pairwise_fitting_alignment_graph<
+        return pairwise_local_alignment_graph<
             std::tuple<>,
             _ED,
             T,
-            offbynull::graph::graph_helpers::ArrayAllocator<std::tuple<>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
-            offbynull::graph::graph_helpers::ArrayAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::graph_helpers::ArrayAllocator<std::tuple<>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::graph_helpers::ArrayAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             STATIC_DOWN_CNT,
@@ -41,12 +41,12 @@ namespace {
     template<typename _ED, size_t STATIC_DOWN_CNT, size_t STATIC_RIGHT_CNT, typename T = unsigned int, bool error_check = true>
         requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
     auto create_small_vector(T down_cnt, T right_cnt) {
-        return pairwise_fitting_alignment_graph<
+        return pairwise_local_alignment_graph<
             std::tuple<>,
             _ED,
             T,
-            offbynull::graph::graph_helpers::StaticVectorAllocator<std::tuple<>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
-            offbynull::graph::graph_helpers::StaticVectorAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::graph_helpers::StaticVectorAllocator<std::tuple<>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::graph_helpers::StaticVectorAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             down_cnt,
@@ -57,12 +57,12 @@ namespace {
     template<typename _ED, size_t STATIC_DOWN_CNT, size_t STATIC_RIGHT_CNT, typename T = unsigned int, bool error_check = true>
     requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
     auto create_static_vector(T down_cnt, T right_cnt) {
-        return pairwise_fitting_alignment_graph<
+        return pairwise_local_alignment_graph<
             std::tuple<>,
             _ED,
             T,
-            offbynull::graph::graph_helpers::SmallVectorAllocator<std::tuple<>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
-            offbynull::graph::graph_helpers::SmallVectorAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::graph_helpers::SmallVectorAllocator<std::tuple<>, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::graph_helpers::SmallVectorAllocator<_ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             down_cnt,
@@ -70,7 +70,7 @@ namespace {
         };
     }
 
-    TEST(PairwiseFittingAlignmentGraph, ListNodes) {
+    TEST(PairwiseLocalAlignmentGraph, ListNodes) {
         auto x = [](auto&& g) {
             auto n = g.get_nodes();
             EXPECT_EQ(
@@ -87,7 +87,7 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, ListEdges) {
+    TEST(PairwiseLocalAlignmentGraph, ListEdges) {
         auto x = [](auto&& g) {
             using E = typename std::remove_reference_t<decltype(g)>::E;
 
@@ -99,7 +99,11 @@ namespace {
             EXPECT_EQ(
                 actual,
                 (std::multiset<E> {
+                    edge { edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{0u, 1u} } },
+                    edge { edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{0u, 2u} } },
                     edge { edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 0u} } },
+                    edge { edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 1u} } },
+                    edge { edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 2u} } },
 
                     edge { edge_type::NORMAL, std::pair { std::pair{0u, 0u}, std::pair{0u, 1u} } },
                     edge { edge_type::NORMAL, std::pair { std::pair{0u, 1u}, std::pair{0u, 2u} } },
@@ -111,7 +115,11 @@ namespace {
                     edge { edge_type::NORMAL, std::pair { std::pair{0u, 0u}, std::pair{1u, 1u} } },
                     edge { edge_type::NORMAL, std::pair { std::pair{0u, 1u}, std::pair{1u, 2u} } },
 
-                    edge { edge_type::FREE_RIDE, std::pair { std::pair{0u, 2u}, std::pair{1u, 2u} } }
+                    edge { edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 2u} } },
+                    edge { edge_type::FREE_RIDE, std::pair { std::pair{0u, 1u}, std::pair{1u, 2u} } },
+                    edge { edge_type::FREE_RIDE, std::pair { std::pair{0u, 2u}, std::pair{1u, 2u} } },
+                    edge { edge_type::FREE_RIDE, std::pair { std::pair{1u, 0u}, std::pair{1u, 2u} } },
+                    edge { edge_type::FREE_RIDE, std::pair { std::pair{1u, 1u}, std::pair{1u, 2u} } }
                 })
             );
         };
@@ -121,7 +129,7 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, NodesExist) {
+    TEST(PairwiseLocalAlignmentGraph, NodesExist) {
         auto x = [](auto&& g) {
             EXPECT_TRUE(g.has_node({0u, 0u}));
             EXPECT_TRUE(g.has_node({0u, 1u}));
@@ -139,7 +147,7 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, RightEdgesExist) {
+    TEST(PairwiseLocalAlignmentGraph, RightEdgesExist) {
         auto x = [](auto&& g) {
             EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0u, 0u}, {0u, 1u}}}));
             EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0u, 1u}, {0u, 2u}}}));
@@ -154,7 +162,7 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, DownEdgesExist) {
+    TEST(PairwiseLocalAlignmentGraph, DownEdgesExist) {
         auto x = [](auto&& g) {
 
             EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0u, 0u}, {1u, 0u}}}));
@@ -170,7 +178,7 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, DiagEdgesExist) {
+    TEST(PairwiseLocalAlignmentGraph, DiagEdgesExist) {
         auto x = [](auto&& g) {
             EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0u, 0u}, {1u, 1u}}}));
             EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{1u, 0u}, {2u, 1u}}}));
@@ -185,20 +193,20 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, FreeRideEdgesExist) {
+    TEST(PairwiseLocalAlignmentGraph, FreeRideEdgesExist) {
         auto x = [](auto&& g) {
             EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{0u, 0u} } }));
-            EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{0u, 1u} } }));
-            EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{0u, 2u} } }));
+            EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{0u, 1u} } }));
+            EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{0u, 2u} } }));
             EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 0u} } }));
-            EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 1u} } }));
-            EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 2u} } }));
+            EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 1u} } }));
+            EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 2u} } }));
 
-            EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 2u} } }));
-            EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 1u}, std::pair{1u, 2u} } }));
+            EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 0u}, std::pair{1u, 2u} } }));
+            EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 1u}, std::pair{1u, 2u} } }));
             EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0u, 2u}, std::pair{1u, 2u} } }));
-            EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{1u, 0u}, std::pair{1u, 2u} } }));
-            EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{1u, 1u}, std::pair{1u, 2u} } }));
+            EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{1u, 0u}, std::pair{1u, 2u} } }));
+            EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{1u, 1u}, std::pair{1u, 2u} } }));
             EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{1u, 2u}, std::pair{1u, 2u} } }));
         };
         x(create_vector<float>(2u, 3u));
@@ -207,7 +215,7 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, GetOutputs) {
+    TEST(PairwiseLocalAlignmentGraph, GetOutputs) {
         auto x = [](auto&& g) {
             using E = typename std::remove_reference_t<decltype(g)>::E;
 
@@ -269,7 +277,7 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, GetInputs) {
+    TEST(PairwiseLocalAlignmentGraph, GetInputs) {
         auto x = [](auto&& g) {
             using E = typename std::remove_reference_t<decltype(g)>::E;
 
@@ -331,7 +339,7 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, GetOutputDegree) {
+    TEST(PairwiseLocalAlignmentGraph, GetOutputDegree) {
         auto x = [](auto&& g) {
             EXPECT_EQ(g.get_out_degree(std::pair{ 0u, 0u } ), 4);
             EXPECT_EQ(g.get_out_degree(std::pair{ 1u, 2u } ), 0);
@@ -344,7 +352,7 @@ namespace {
         x(create_static_vector<float, 2u, 3u>(2u, 3u));
     }
 
-    TEST(PairwiseFittingAlignmentGraph, GetInputDegree) {
+    TEST(PairwiseLocalAlignmentGraph, GetInputDegree) {
         auto x = [](auto&& g) {
             EXPECT_EQ(g.get_in_degree(std::pair{ 0u, 0u } ), 0);
             EXPECT_EQ(g.get_in_degree(std::pair{ 1u, 2u } ), 4);

@@ -4,16 +4,14 @@
 #include <ranges>
 #include <tuple>
 #include <stdexcept>
-#include <format>
 #include <utility>
-#include <vector>
 #include <functional>
 #include "boost/container/static_vector.hpp"
 #include "boost/container/small_vector.hpp"
-#include "graph_helpers.h"
-#include "utils.h"
+#include "offbynull/aligner/graph/graph_helpers.h"
+#include "offbynull/utils.h"
 
-namespace offbynull::pairwise_aligner::extended_gap {
+namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     enum class layer : uint8_t {
         DIAGONAL,
         DOWN,
@@ -38,11 +36,11 @@ namespace offbynull::pairwise_aligner::extended_gap {
         typename _ND,
         typename _ED,
         typename T = unsigned int,
-        typename _SLOT_ALLOCATOR = offbynull::graph::graph_helpers::VectorAllocator<slot<_ND, _ED, T>, T, false>,
+        typename _SLOT_ALLOCATOR = offbynull::aligner::graph::graph_helpers::VectorAllocator<slot<_ND, _ED, T>, T, false>,
         bool error_check = true
     >
         requires std::is_floating_point_v<_ED> && std::is_integral_v<T> && std::is_unsigned_v<T>
-    class pairwise_extended_alignment_graph {
+    class pairwise_extended_gap_alignment_graph {
     public:
         using N = std::tuple<layer, T, T>;
         using ND = _ND;
@@ -72,7 +70,7 @@ namespace offbynull::pairwise_aligner::extended_gap {
         const T down_node_cnt;
         const T right_node_cnt;
 
-        pairwise_extended_alignment_graph(
+        pairwise_extended_gap_alignment_graph(
             T _down_node_cnt,
             T _right_node_cnt,
             ED initial_indel_weight = 0.0,

@@ -1,6 +1,7 @@
-#include "grid_graph.h"
-#include "directed_graph.h"
-#include "backtracker_2.h"
+#include "offbynull/aligner/graph/graph_helpers.h"
+#include "offbynull/aligner/graphs/grid_graph.h"
+#include "offbynull/aligner/graphs/directed_graph.h"
+#include "offbynull/aligner/backtrack/backtrack.h"
 #include "gtest/gtest.h"
 #include <iostream>
 #include <format>
@@ -9,12 +10,12 @@ namespace {
     template<typename _ND, typename _ED, typename T = unsigned int, bool error_check = true>
         requires std::is_integral_v<T> && std::is_unsigned_v<T>
     auto create_vector(T down_cnt, T right_cnt) {
-        return offbynull::grid_graph::grid_graph::grid_graph<
+        return offbynull::aligner::graphs::grid_graph::grid_graph<
             _ND,
             _ED,
             T,
-            offbynull::graph::graph_helpers::VectorAllocator<_ND, T>,
-            offbynull::graph::graph_helpers::VectorAllocator<_ED, T>,
+            offbynull::aligner::graph::graph_helpers::VectorAllocator<_ND, T>,
+            offbynull::aligner::graph::graph_helpers::VectorAllocator<_ED, T>,
             error_check
         > {
             down_cnt,
@@ -22,7 +23,7 @@ namespace {
         };
     }
 
-    TEST(BacktrackTest2, FindMaxPathOnGridGraph) {
+    TEST(BacktrackTest, FindMaxPathOnGridGraph) {
         using N = std::pair<unsigned int, unsigned int>;
         using E = std::pair<N, N>;
         using ND = std::tuple<std::optional<double>, std::optional<E>>;
@@ -31,7 +32,7 @@ namespace {
         auto g { create_vector<ND, ED>(2u, 3u) };
         g.update_edge_data({ {0u, 0u}, {0u, 1u} }, -1.0); // this updates ALL indel edges
         g.update_edge_data({ {0u, 0u}, {1u, 1u} }, 3.0);
-        auto [path, weight] = offbynull::aligner::backtracker::find_max_path(
+        auto [path, weight] = offbynull::aligner::backtrack::backtrack::find_max_path(
             g,
             g.get_root_node(),
             *g.get_leaf_nodes().begin(),
@@ -53,12 +54,12 @@ namespace {
         EXPECT_EQ(weight, 2.0);
     }
 
-    TEST(BacktrackTest2, FindMaxPathOnDirectedGraph) {
+    TEST(BacktrackTest, FindMaxPathOnDirectedGraph) {
         using N = std::pair<unsigned int, unsigned int>;
         using E = std::pair<N, N>;
         using ND = std::tuple<std::optional<double>, std::optional<E>>;
         using ED = double;
-        using G = directed_graph<N, ND, E, ED>;
+        using G = offbynull::aligner::graphs::directed_graph::directed_graph<N, ND, E, ED>;
 
         G g {};
         g.insert_node(std::pair{0u, 0u}, {std::nullopt, std::nullopt});
@@ -78,7 +79,7 @@ namespace {
         g.insert_edge(std::pair { std::pair{0u, 1u}, std::pair{1u, 2u} }, std::pair{0u, 1u}, std::pair{1u, 2u}, 0.0);
         g.update_edge_data({ {0u, 0u}, {0u, 1u} }, 1.1);
         g.update_edge_data({ {1u, 1u}, {1u, 2u} }, 1.4);
-        auto [path, weight] = offbynull::aligner::backtracker::find_max_path(
+        auto [path, weight] = offbynull::aligner::backtrack::backtrack::find_max_path(
             g,
             g.get_root_node(),
             *g.get_leaf_nodes().begin(),
