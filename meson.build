@@ -17,7 +17,7 @@ test('test', example)
 
 library = shared_library(
         'obnaligner',
-        sources: ['library.cpp'],
+        sources: ['offbynull/aligner/library.cpp'],
         dependencies: [boost_dep],
         install: true,
         version: meson.project_version(),
@@ -30,6 +30,7 @@ gtest_dep = gtest.get_variable('gtest_dep')
 gmock_dep = gtest.get_variable('gmock_dep')
 tests_src = [
         'gtest-all.cpp',
+        'offbynull/aligner/graph/utils_test.cpp',
         'offbynull/aligner/graphs/directed_graph_test.cpp',
         'offbynull/aligner/graphs/grid_graph_test.cpp',
         'offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph_test.cpp',

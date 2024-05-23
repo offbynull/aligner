@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <format>
 #include <utility>
-#include <vector>
 #include <functional>
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/aligner/graph/grid_allocator.h"
@@ -17,6 +16,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
     using offbynull::aligner::graph::grid_allocator::grid_allocator;
     using offbynull::aligner::graph::grid_allocators::VectorAllocator;
+    using offbynull::utils::concat_view;
 
     enum class edge_type : uint8_t {
         FREE_RIDE,
@@ -386,8 +386,13 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
         void assign_weights(
             const auto& v,  // random access container
             const auto& w,  // random access container
-            std::function<F(const std::optional<std::reference_wrapper<const ELEM>>&, const std::optional<std::reference_wrapper<const ELEM>>&)> weight_lookup,
-            std::function<void(const ED&, F weight)> weight_setter,
+            std::function<
+                double(
+                    const std::optional<std::reference_wrapper<const std::remove_reference_t<decltype(v[0u])>>>&,
+                    const std::optional<std::reference_wrapper<const std::remove_reference_t<decltype(w[0u])>>>&
+                )
+            > weight_lookup,
+            std::function<void(ED&, F weight)> weight_setter,
             const F freeride_weight = {}
         ) {
             static_assert(std::is_same_v<ELEM, std::decay_t<decltype(*v.begin())>>, "ELEM is wrong");
@@ -414,17 +419,22 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
                     }
                     weight = weight_lookup(v_elem, w_elem);
                 }
-                ED& ed { get_edge_data(ed) };
+                ED& ed { get_edge_data(edge) };
                 weight_setter(ed, weight);
             }
         }
 
-        template<typename ELEM>
-        static std::optional<std::tuple<std::optional<std::reference_wrapper<const ELEM>>, std::optional<std::reference_wrapper<const ELEM>>>> edge_to_elements(
+        static auto edge_to_elements(
             const E& edge,
             const auto& v,  // random access container
             const auto& w   // random access container
-        ) {
+        )
+            requires requires(decltype(v) v_, decltype(w) w_) { { v[0] } -> std::same_as<decltype(w_)>; }
+        {
+            using ELEM = std::decay_t<decltype(v[0])>;
+            using OPT_ELEM_REF = std::optional<std::reference_wrapper<const ELEM>>;
+            using RET = std::optional<std::pair<OPT_ELEM_REF, OPT_ELEM_REF>>;
+
             if (edge.type == edge_type::FREE_RIDE) {
                 return std::nullopt;
             }
@@ -437,21 +447,21 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
                         throw std::runtime_error("Out of bounds");
                     }
                 }
-                return { { { v[n1_down] }, { w[n1_right] } } };
+                return RET { { { v[n1_down] }, { w[n1_right] } } };
             } else if (n1_down + 1u == n2_down && n1_right == n2_right) {
                 if constexpr (error_check) {
                     if (n1_down >= v.size()) {
                         throw std::runtime_error("Out of bounds");
                     }
                 }
-                return { { { v[n1_down] }, std::nullopt } };
+                return RET { { { v[n1_down] }, std::nullopt } };
             } else if (n1_down == n2_down && n1_right + 1u == n2_right) {
                 if constexpr (error_check) {
                     if (n1_right >= w.size()) {
                         throw std::runtime_error("Out of bounds");
                     }
                 }
-                return { { std::nullopt, { v[n1_down] } } };
+                return RET { { std::nullopt, { w[n1_right] } } };
             }
             if constexpr (error_check) {
                 throw std::runtime_error("Bad edge");

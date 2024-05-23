@@ -2,19 +2,16 @@
 #define OFFBYNULL_ALIGNER_GRAPH_GRAPH_H
 
 #include <concepts>
-#include <iterator>
-#include <ranges>
+#include <utility>
+#include "offbynull/concepts.h"
 
 namespace offbynull::aligner::graph::graph {
-    template<typename T, typename ... Ts>
-    concept one_of = (std::same_as<T, Ts> || ...);
-
-    template<typename T, typename... Ts>
-    concept range_of_one_of = std::ranges::range<T> && (std::same_as<std::ranges::range_value_t<T>, Ts> || ...);
+    using offbynull::concepts::one_of;
+    using offbynull::concepts::range_of_one_of;
 
     template <typename G>
     concept readable_graph =
-        requires(G g, G::N n, G::E e) {
+        requires(G g, typename G::N n, typename G::E e) {
             typename G::N;
             typename G::ND;
             typename G::E;

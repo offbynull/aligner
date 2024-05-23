@@ -2,10 +2,10 @@
 #define OFFBYNULL_ALIGNER_GRAPH_GRID_ALLOCATOR_H
 
 #include <concepts>
+#include "offbynull/concepts.h"
 
 namespace offbynull::aligner::graph::grid_allocator {
-    template <typename T, typename V>
-    concept random_access_range_of_type = std::ranges::random_access_range<T> && std::same_as<std::ranges::range_reference_t<T>, V&>;
+    using offbynull::concepts::random_access_range_of_type;
 
     template <typename T, typename SIZE_T>
     concept grid_allocator =

@@ -374,11 +374,11 @@ namespace {
             using N = typename std::remove_reference_t<decltype(g)>::N;
             auto to_outputs {
                 [&](N n) {
-                    std::set<E> x {}; // TODO: I can't use being() and end() within set's constructor to automate this?
+                    std::set<E> ret {}; // TODO: I can't use being() and end() within set's constructor to automate this?
                     for (auto e : g.get_outputs(n)) {
-                        x.insert(e);
+                        ret.insert(e);
                     }
-                    return x;
+                    return ret;
                 }
             };
             // Diagonal 0,0 to 0,3
@@ -655,11 +655,11 @@ namespace {
             using N = typename std::remove_reference_t<decltype(g)>::N;
             auto to_inputs {
                 [&](N n) {
-                    std::set<E> x {}; // TODO: I can't use being() and end() within set's constructor to automate this?
+                    std::set<E> ret {}; // TODO: I can't use being() and end() within set's constructor to automate this?
                     for (auto e : g.get_inputs(n)) {
-                        x.insert(e);
+                        ret.insert(e);
                     }
-                    return x;
+                    return ret;
                 }
             };
             // Diagonal 0,0 to 0,3

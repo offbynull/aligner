@@ -118,7 +118,9 @@ namespace offbynull::aligner::graphs::grid_graph {
             } else if (n1_down + 1u == n2_down && n1_right + 1u == n2_right) {
                 return this->edges[to_raw_idx(n1_down, n1_right)];
             }
-            // throw std::runtime_error("This shouldn't happen if error checking is enabled");
+            if constexpr (error_check) {
+                throw std::runtime_error("Bad edge");
+            }
             std::unreachable();
         }
 
@@ -146,7 +148,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            return std::tuple<N, N, ED&> {this->get_edge_from(edge), this->get_edge_from(edge), this->get_edge_data(edge)};
+            return std::tuple<N, N, ED&> {this->get_edge_from(edge), this->get_edge_to(edge), this->get_edge_data(edge)};
         }
 
         auto get_root_nodes() {

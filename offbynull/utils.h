@@ -1,7 +1,7 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef OFFBYNULL_UTILS_H
+#define OFFBYNULL_UTILS_H
 
-namespace offbynull {
+namespace offbynull::utils {
     // https://www.reddit.com/r/cpp_questions/comments/1cp0rwu/how_to_lazily_concatenate_two_views/
     template <typename R1, typename R2>
     class concat_view : public std::ranges::view_interface<concat_view<R1, R2>> {
@@ -106,7 +106,7 @@ namespace offbynull {
     };
 
     template<typename T>
-    struct TypeDisplayer;  // Intentionally undefined
+    struct type_displayer;
 }
 
-#endif //UTILS_H
+#endif //OFFBYNULL_UTILS_H

@@ -6,9 +6,12 @@
 #include <format>
 #include <string>
 #include <ranges>
+#include "offbynull/aligner/graph/graph.h"
 
 namespace offbynull::aligner::graph::utils {
-    std::string graph_to_string(const auto &g) {
+    using offbynull::aligner::graph::graph::readable_graph;
+
+    std::string graph_to_string(readable_graph auto &g) {
         std::string out {};
         for (const auto& node : g.get_nodes()) {
             out += std::format("node {}: {}\n", node, g.get_node_data(node));

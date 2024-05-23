@@ -1,17 +1,16 @@
 #ifndef OFFBYNULL_ALIGNER_GRAPH_GRID_ALLOCATORS_H
 #define OFFBYNULL_ALIGNER_GRAPH_GRID_ALLOCATORS_H
 
-#include <concepts>
-#include <iterator>
-#include <format>
-#include <string>
 #include <vector>
 #include <array>
-#include <ranges>
 #include "boost/container/small_vector.hpp"
 #include "boost/container/static_vector.hpp"
+#include "offbynull/aligner/graph/grid_allocator.h"
+
 
 namespace offbynull::aligner::graph::grid_allocators {
+    using offbynull::aligner::graph::grid_allocator::grid_allocator;
+
     template<typename ELEM_, typename T, bool error_check = true>
         requires std::is_integral_v<T> && std::is_unsigned_v<T>
     class VectorAllocator {
@@ -21,6 +20,7 @@ namespace offbynull::aligner::graph::grid_allocators {
             return std::vector<ELEM>(down_node_cnt * right_node_cnt);
         }
     };
+    static_assert(grid_allocator<VectorAllocator<int, size_t>, size_t>);  // Sanity check
 
     template<typename ELEM_, typename T, T STATIC_DOWN_CNT, T STATIC_RIGHT_CNT, bool error_check = true>
         requires std::is_integral_v<T> && std::is_unsigned_v<T>
@@ -38,6 +38,7 @@ namespace offbynull::aligner::graph::grid_allocators {
             return std::array<ELEM, size>{};
         }
     };
+    static_assert(grid_allocator<ArrayAllocator<int, size_t, 0u, 0u>, size_t>);  // Sanity check
 
     template<typename ELEM_, typename T, T STATIC_DOWN_CNT, T STATIC_RIGHT_CNT, bool error_check = true>
         requires std::is_integral_v<T> && std::is_unsigned_v<T>
@@ -55,6 +56,7 @@ namespace offbynull::aligner::graph::grid_allocators {
             return boost::container::static_vector<ELEM, max_size>(down_node_cnt * right_node_cnt);
         }
     };
+    static_assert(grid_allocator<StaticVectorAllocator<int, size_t, 0u, 0u>, size_t>);  // Sanity check
 
     template<typename ELEM_, typename T, T STATIC_DOWN_CNT, T STATIC_RIGHT_CNT, bool error_check = true>
         requires std::is_integral_v<T> && std::is_unsigned_v<T>
@@ -67,6 +69,7 @@ namespace offbynull::aligner::graph::grid_allocators {
             return boost::container::small_vector<ELEM, max_stack_size>(down_node_cnt * right_node_cnt);
         }
     };
+    static_assert(grid_allocator<SmallVectorAllocator<int, size_t, 0u, 0u>, size_t>);  // Sanity check
 }
 
 #endif //OFFBYNULL_ALIGNER_GRAPH_GRID_ALLOCATORS_H

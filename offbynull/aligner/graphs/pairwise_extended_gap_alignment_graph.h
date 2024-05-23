@@ -15,6 +15,7 @@
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::aligner::graph::grid_allocator::grid_allocator;
     using offbynull::aligner::graph::grid_allocators::VectorAllocator;
+    using offbynull::utils::concat_view;
 
     enum class layer : uint8_t {
         DIAGONAL,
@@ -78,12 +79,12 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             ED freeride_data = {},
             SLOT_ALLOCATOR_ slot_container_creator = {}
         )
-        : down_node_cnt{_down_node_cnt}
-        , right_node_cnt{_right_node_cnt}
-        , slots{slot_container_creator.allocate(_down_node_cnt, _right_node_cnt)}
-        , initial_indel_ed{initial_indel_data}
+        : slots{slot_container_creator.allocate(_down_node_cnt, _right_node_cnt)}
         , extended_indel_ed{extended_indel_data}
-        , freeride_ed{freeride_data} {}
+        , initial_indel_ed{initial_indel_data}
+        , freeride_ed{freeride_data}
+        , down_node_cnt{_down_node_cnt}
+        , right_node_cnt{_right_node_cnt} {}
 
         void update_node_data(const N& node, ND&& data) {
             if constexpr (error_check) {
@@ -165,6 +166,10 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             } else if (n1_layer == layer::RIGHT && n2_layer == layer::DIAGONAL) {  // freeride
                 return freeride_ed;
             }
+            if constexpr (error_check) {
+                throw std::runtime_error("Bad edge");
+            }
+            std::unreachable();
         }
 
         N get_edge_from(const E& edge) {
@@ -507,8 +512,13 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         void assign_weights(
             const auto& v,  // random access container
             const auto& w,  // random access container
-            std::function<F(const std::optional<std::reference_wrapper<const ELEM>>&, const std::optional<std::reference_wrapper<const ELEM>>&)> weight_lookup,
-            std::function<void(const ED&, F weight)> weight_setter,
+            std::function<
+                double(
+                    const std::optional<std::reference_wrapper<const std::remove_reference_t<decltype(v[0u])>>>&,
+                    const std::optional<std::reference_wrapper<const std::remove_reference_t<decltype(w[0u])>>>&
+                )
+            > weight_lookup,
+            std::function<void(ED&, F weight)> weight_setter,
             const F gap_weight = {},
             const F freeride_weight = {}
         ) {
@@ -524,10 +534,12 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 const auto& [n2_layer, n2_down, n2_right] { n2 };
                 if ((n1_layer == layer::DOWN && n2_layer == layer::DOWN)
                         || n1_layer == layer::RIGHT && n2_layer == layer::RIGHT) {  // gap
-                    update_edge_data(edge, gap_weight);
+                    ED& ed { get_edge_data(edge) };
+                    weight_setter(ed, gap_weight);
                 } else if ((n1_layer == layer::DOWN && n2_layer == layer::DIAGONAL)
                         || (n1_layer == layer::RIGHT && n2_layer == layer::DIAGONAL)) {  // freeride
-                    update_edge_data(edge, freeride_weight);
+                    ED& ed { get_edge_data(edge) };
+                    weight_setter(ed, freeride_weight);
                 } else {
                     std::optional<std::reference_wrapper<const ELEM>> v_elem { std::nullopt };
                     if (n1_down + 1u == n2_down) {
@@ -537,17 +549,23 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     if (n1_right + 1u == n2_right) {
                         w_elem = { w[n1_right] };
                     }
-                    update_edge_data(edge, weight_lookup(v_elem, w_elem));
+                    ED& ed { get_edge_data(edge) };
+                    weight_setter(ed, weight_lookup(v_elem, w_elem));
                 }
             }
         }
 
-        template<typename ELEM>
-        static std::optional<std::tuple<std::optional<std::reference_wrapper<const ELEM>>, std::optional<std::reference_wrapper<const ELEM>>>> edge_to_elements(
+        static auto edge_to_elements(
             const E& edge,
             const auto& v,  // random access container
             const auto& w   // random access container
-        ) {
+        )
+        requires requires(decltype(v) v_, decltype(w) w_) { { v[0] } -> std::same_as<decltype(w_)>; }
+        {
+            using ELEM = std::decay_t<decltype(v[0])>;
+            using OPT_ELEM_REF = std::optional<std::reference_wrapper<const ELEM>>;
+            using RET = std::optional<std::pair<OPT_ELEM_REF, OPT_ELEM_REF>>;
+
             const auto& [n1, n2] { edge };
             const auto& [n1_layer, n1_down, n1_right] { n1 };
             const auto& [n2_layer, n2_down, n2_right] { n2 };
@@ -558,7 +576,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                             throw std::runtime_error("Out of bounds");
                         }
                     }
-                    return { { { v[n1_down] }, { w[n1_right] } } };
+                    return RET { { { v[n1_down] }, { w[n1_right] } } };
                 }
             } else if ((n1_layer == layer::DOWN && n2_layer == layer::DOWN)  // extended indel
                 || (n1_layer == layer::DIAGONAL && n2_layer == layer::DOWN)) {  // indel
@@ -568,7 +586,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                             throw std::runtime_error("Out of bounds");
                         }
                     }
-                    return { { { v[n1_down] }, std::nullopt } };
+                    return RET { { { v[n1_down] }, std::nullopt } };
                 }
             } else if ((n1_layer == layer::RIGHT && n2_layer == layer::RIGHT)  // extended indel
                 || (n1_layer == layer::DIAGONAL && n2_layer == layer::RIGHT)) {  // indel
@@ -578,7 +596,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                             throw std::runtime_error("Out of bounds");
                         }
                     }
-                    return { { std::nullopt, { v[n1_down] } } };
+                    return RET { { std::nullopt, { w[n1_right] } } };
                 }
             } else if ((n1_layer == layer::DOWN && n2_layer == layer::DIAGONAL)  // freeride
                 || (n1_layer == layer::RIGHT && n2_layer == layer::DIAGONAL)) {  // freeride

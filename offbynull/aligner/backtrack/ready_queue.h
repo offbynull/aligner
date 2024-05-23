@@ -3,11 +3,15 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include "offbynull/aligner/backtrack/allocator.h"
 #include "offbynull/aligner/backtrack/allocators.h"
 
 namespace offbynull::aligner::backtrack::ready_queue {
+    using offbynull::aligner::backtrack::allocator::allocator;
+    using offbynull::aligner::backtrack::allocators::VectorAllocator;
+
     template<
-        typename ALLOCATOR=offbynull::aligner::backtrack::allocators::VectorAllocator<size_t>,
+        allocator ALLOCATOR=VectorAllocator<size_t>,
         bool error_check=true
     >
     class ready_queue {
@@ -20,7 +24,7 @@ namespace offbynull::aligner::backtrack::ready_queue {
         ) : queue{container_creator.allocate(0u)} {
             if constexpr (error_check) {
                 if (!queue.empty()) {
-                    throw std::runtime_error("Queue must be sized 0 on creation");  // typically a problem when you use std::array
+                    throw std::runtime_error("Queue must be sized 0 on creation");  // Happens on std::array sized > 0
                 }
             }
         }
