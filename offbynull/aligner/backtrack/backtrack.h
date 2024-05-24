@@ -5,8 +5,8 @@
 #include <ranges>
 #include <algorithm>
 #include <limits>
-#include "offbynull/aligner/backtrack/allocator.h"
-#include "offbynull/aligner/backtrack/allocators.h"
+#include "offbynull/aligner/backtrack/container_creator.h"
+#include "offbynull/aligner/backtrack/container_creators.h"
 #include "offbynull/aligner/backtrack/ready_queue.h"
 #include "offbynull/aligner/backtrack/slot_container.h"
 #include "offbynull/aligner/graph/graph.h"
@@ -17,13 +17,13 @@ namespace offbynull::aligner::backtrack::backtrack {
     using offbynull::aligner::backtrack::slot_container::slot_container;
     using offbynull::aligner::backtrack::slot_container::slot;
     using offbynull::aligner::backtrack::ready_queue::ready_queue;
-    using offbynull::aligner::backtrack::allocator::allocator;
-    using offbynull::aligner::backtrack::allocators::VectorAllocator;
+    using offbynull::aligner::backtrack::container_creator::container_creator;
+    using offbynull::aligner::backtrack::container_creators::vector_container_creator;
     using offbynull::concepts::range_of_type;
 
     template<
         readable_graph G,
-        allocator SLOT_ALLOCATOR=VectorAllocator<slot<typename G::N, typename G::E>>,
+        container_creator SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E>>,
         bool error_check = true
     >
         requires requires(typename G::N n)
@@ -134,20 +134,19 @@ namespace offbynull::aligner::backtrack::backtrack {
 
     template<
         readable_graph G,
-        allocator SLOT_ALLOCATOR,
-        allocator PATH_ALLOCATOR
+        container_creator SLOT_ALLOCATOR,
+        container_creator PATH_ALLOCATOR
     >
     range_of_type<typename G::E> auto backtrack(
             G& g,
             slot_container<typename G::N, typename G::E, SLOT_ALLOCATOR>& slots,
             const typename G::N& end_node,
-            size_t path_container_cnt = 0u,
             PATH_ALLOCATOR path_container_creator = {}
     ) {
         using N = typename G::N;
         using E = typename G::E;
         auto next_node { end_node };
-        auto path { path_container_creator.allocate(path_container_cnt) };
+        auto path { path_container_creator.create_empty(std::nullopt) };
         while (true) {
             auto node { next_node };
             if (g.get_in_degree(node) == 0u) {
@@ -165,8 +164,8 @@ namespace offbynull::aligner::backtrack::backtrack {
 
     template<
         readable_graph G,
-        allocator SLOT_ALLOCATOR=VectorAllocator<slot<typename G::N, typename G::E>>,
-        allocator PATH_ALLOCATOR=VectorAllocator<typename G::E>,
+        container_creator SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E>>,
+        container_creator PATH_ALLOCATOR=vector_container_creator<typename G::E>,
         bool error_check = true
     >
     auto find_max_path(
@@ -175,7 +174,7 @@ namespace offbynull::aligner::backtrack::backtrack {
             const typename G::N& end_node,
             std::function<double(typename G::E)> get_edge_weight_func
     ) {
-        using E = typename G::E;
+        // using E = typename G::E;
         auto slots {
             populate_weights_and_backtrack_pointers<G, SLOT_ALLOCATOR, error_check>(
                 graph,

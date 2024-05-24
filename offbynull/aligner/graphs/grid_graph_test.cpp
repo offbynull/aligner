@@ -1,6 +1,6 @@
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/aligner/graph/graph.h"
-#include "offbynull/aligner/graph/grid_allocators.h"
+#include "offbynull/aligner/graph/grid_container_creators.h"
 #include "gtest/gtest.h"
 
 namespace {
@@ -13,8 +13,8 @@ namespace {
             ND,
             ED,
             T,
-            offbynull::aligner::graph::grid_allocators::VectorGridAllocator<ND, T>,
-            offbynull::aligner::graph::grid_allocators::VectorGridAllocator<ED, T>,
+            offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator<ND, T>,
+            offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator<ED, T>,
             error_check
         > {
             down_cnt,
@@ -29,8 +29,8 @@ namespace {
             ND,
             ED,
             T,
-            offbynull::aligner::graph::grid_allocators::ArrayGridAllocator<ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
-            offbynull::aligner::graph::grid_allocators::ArrayGridAllocator<ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_container_creators::array_grid_container_creator<ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_container_creators::array_grid_container_creator<ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             STATIC_DOWN_CNT,
@@ -45,8 +45,8 @@ namespace {
             ND,
             ED,
             T,
-            offbynull::aligner::graph::grid_allocators::StaticVectorGridAllocator<ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
-            offbynull::aligner::graph::grid_allocators::StaticVectorGridAllocator<ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_container_creators::static_vector_grid_container_creator<ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_container_creators::static_vector_grid_container_creator<ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             down_cnt,
@@ -61,8 +61,8 @@ namespace {
             ND,
             ED,
             T,
-            offbynull::aligner::graph::grid_allocators::SmallVectorGridAllocator<ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
-            offbynull::aligner::graph::grid_allocators::SmallVectorGridAllocator<ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_container_creators::small_vector_grid_container_creator<ND, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
+            offbynull::aligner::graph::grid_container_creators::small_vector_grid_container_creator<ED, T, STATIC_DOWN_CNT, STATIC_RIGHT_CNT>,
             error_check
         > {
             down_cnt,

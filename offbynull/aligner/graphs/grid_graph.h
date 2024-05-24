@@ -6,19 +6,19 @@
 #include <stdexcept>
 #include <utility>
 #include "boost/container/static_vector.hpp"
-#include "offbynull/aligner/graph/grid_allocator.h"
-#include "offbynull/aligner/graph/grid_allocators.h"
+#include "offbynull/aligner/graph/grid_container_creator.h"
+#include "offbynull/aligner/graph/grid_container_creators.h"
 
 namespace offbynull::aligner::graphs::grid_graph {
-    using offbynull::aligner::graph::grid_allocator::grid_allocator;
-    using offbynull::aligner::graph::grid_allocators::VectorGridAllocator;
+    using offbynull::aligner::graph::grid_container_creator::grid_container_creator;
+    using offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator;
 
     template<
         typename ND_,
         typename ED_,
         std::unsigned_integral T = unsigned int,
-        grid_allocator<T> ND_ALLOCATOR_ = VectorGridAllocator<ND_, T, false>,
-        grid_allocator<T> ED_ALLOCATOR_ = VectorGridAllocator<ED_, T, false>,
+        grid_container_creator<T> ND_ALLOCATOR_ = vector_grid_container_creator<ND_, T, false>,
+        grid_container_creator<T> ED_ALLOCATOR_ = vector_grid_container_creator<ED_, T, false>,
         bool error_check = true
     >
     class grid_graph {
@@ -32,8 +32,8 @@ namespace offbynull::aligner::graphs::grid_graph {
         const T right_node_cnt;
 
     private:
-        decltype(std::declval<ND_ALLOCATOR_>().allocate(0u, 0u)) nodes;
-        decltype(std::declval<ED_ALLOCATOR_>().allocate(0u, 0u)) edges;
+        decltype(std::declval<ND_ALLOCATOR_>().create_objects(0u, 0u)) nodes;
+        decltype(std::declval<ED_ALLOCATOR_>().create_objects(0u, 0u)) edges;
 
         ED_ indel_ed;
 
@@ -62,8 +62,8 @@ namespace offbynull::aligner::graphs::grid_graph {
         )
         : down_node_cnt{_down_node_cnt}
         , right_node_cnt{_right_node_cnt}
-        , nodes{nd_container_creator.allocate(_down_node_cnt, _right_node_cnt)}
-        , edges{ed_container_creator.allocate(_down_node_cnt, _right_node_cnt)}
+        , nodes{nd_container_creator.create_objects(_down_node_cnt, _right_node_cnt)}
+        , edges{ed_container_creator.create_objects(_down_node_cnt, _right_node_cnt)}
         , indel_ed{indel_data} {}
 
         void update_node_data(const N& node, ND&& data) {
@@ -161,6 +161,10 @@ namespace offbynull::aligner::graphs::grid_graph {
 
         auto get_leaf_nodes() {
             return std::ranges::single_view { std::pair<T, T>(down_node_cnt - 1u, right_node_cnt - 1u) };
+        }
+
+        auto get_leaf_node() {
+            return std::pair<T, T>(down_node_cnt - 1u, right_node_cnt - 1u);
         }
 
         auto get_nodes() {

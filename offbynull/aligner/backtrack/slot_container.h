@@ -3,13 +3,13 @@
 
 #include <cstddef>
 #include <iterator>
-#include "offbynull/aligner/backtrack/allocator.h"
-#include "offbynull/aligner/backtrack/allocators.h"
+#include "offbynull/aligner/backtrack/container_creator.h"
+#include "offbynull/aligner/backtrack/container_creators.h"
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::backtrack::slot_container {
-    using offbynull::aligner::backtrack::allocator::allocator;
-    using offbynull::aligner::backtrack::allocators::VectorAllocator;
+    using offbynull::aligner::backtrack::container_creator::container_creator;
+    using offbynull::aligner::backtrack::container_creators::vector_container_creator;
     using offbynull::concepts::input_iterator_of_type;
 
     template<typename N, typename E>
@@ -36,7 +36,7 @@ namespace offbynull::aligner::backtrack::slot_container {
     template<
         typename N,
         typename E,
-        allocator ALLOCATOR=VectorAllocator<slot<N, E>>
+        container_creator ALLOCATOR=vector_container_creator<slot<N, E>>
     >
     class slot_container {
     private:
@@ -54,13 +54,13 @@ namespace offbynull::aligner::backtrack::slot_container {
             }
         };
 
-        decltype(std::declval<ALLOCATOR>().allocate(0u)) slots;
+        decltype(std::declval<ALLOCATOR>().create_empty(std::nullopt)) slots;
     public:
         slot_container(
             input_iterator_of_type<slot<N, E>> auto&& begin,
             input_iterator_of_type<slot<N, E>> auto&& end,
             ALLOCATOR container_creator = {}
-        ) : slots(container_creator.allocate(begin, end)) {
+        ) : slots(container_creator.create_copy(begin, end)) {
             std::ranges::sort(
                 slots.begin(),
                 slots.end(),

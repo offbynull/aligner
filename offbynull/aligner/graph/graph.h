@@ -27,6 +27,7 @@ namespace offbynull::aligner::graph::graph {
             { g.get_root_nodes() } -> range_of_one_of<typename G::N, const typename G::N&>;
             { g.get_root_node() } -> one_of<typename G::N, const typename G::N&>;
             { g.get_leaf_nodes() } -> range_of_one_of<typename G::N, const typename G::N&>;
+            { g.get_leaf_node() } -> one_of<typename G::N, const typename G::N&>;
             { g.get_nodes() } -> range_of_one_of<typename G::N, const typename G::N&>;
             { g.get_edges() } -> range_of_one_of<typename G::E, const typename G::E&>;
             { g.has_node(n) } -> std::same_as<bool>;

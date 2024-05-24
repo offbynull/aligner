@@ -2,6 +2,7 @@
 #include <functional>
 #include <utility>
 #include <stdfloat>
+#include <cstdint>
 #include "offbynull/aligner/backtrack/backtrack.h"
 #include "offbynull/aligner/graphs/pairwise_global_alignment_graph.h"
 #include "offbynull/aligner/graph/utils.h"
@@ -9,49 +10,24 @@
 using offbynull::aligner::backtrack::backtrack::find_max_path;
 using offbynull::aligner::backtrack::slot_container::slot;
 using offbynull::aligner::graph::graph::readable_graph;
-using offbynull::aligner::graph::grid_allocator::grid_allocator;
-using offbynull::aligner::graph::grid_allocators::VectorGridAllocator;
-using offbynull::aligner::graph::grid_allocators::ArrayGridAllocator;
+using offbynull::aligner::graph::grid_container_creator::grid_container_creator;
+using offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator;
+using offbynull::aligner::graph::grid_container_creators::array_grid_container_creator;
 using offbynull::aligner::graphs::pairwise_global_alignment_graph::pairwise_global_alignment_graph;
-using offbynull::aligner::backtrack::allocator::allocator;
-using offbynull::aligner::backtrack::allocators::VectorAllocator;
-using offbynull::aligner::backtrack::allocators::ArrayAllocator;
-using offbynull::aligner::backtrack::allocators::StaticVectorAllocator;
+using offbynull::aligner::backtrack::container_creator::container_creator;
+using offbynull::aligner::backtrack::container_creators::vector_container_creator;
+using offbynull::aligner::backtrack::container_creators::array_container_creator;
+using offbynull::aligner::backtrack::container_creators::static_vector_container_creator;
 
 using ND = std::tuple<>;
 
-template<
-    bool error_check=true,
-    std::unsigned_integral INDEXER=std::size_t,
-    std::floating_point ED=std::float64_t
->
-auto global(
-    std::ranges::range auto&& v,
-    std::ranges::range auto&& w,
-    std::function<
-        ED(
-            const std::optional<std::reference_wrapper<const std::remove_reference_t<decltype(v[0u])>>>&,
-            const std::optional<std::reference_wrapper<const std::remove_reference_t<decltype(w[0u])>>>&
-        )
-    > weight_lookup
+template <readable_graph G, container_creator SLOT_ALLOCATOR, container_creator PATH_ALLOCATOR, bool error_check>
+auto extract_alignment(
+    readable_graph auto& graph,
+    std::ranges::range auto& v,
+    std::ranges::range auto& w
 ) {
-    static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-    static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
-
-    using ND_ALLOCATOR=VectorGridAllocator<ND, INDEXER, error_check>;
-    using ED_ALLOCATOR=VectorGridAllocator<ED, INDEXER, error_check>;
-    pairwise_global_alignment_graph<ND, ED, INDEXER, ND_ALLOCATOR, ED_ALLOCATOR> graph { v.size() + 1u, w.size() + 1u };
-    graph.template assign_weights<ED>(
-        v,
-        w,
-        weight_lookup,
-        [](ED& edge_data, ED weight) { edge_data = weight; }
-    );
-    using G = decltype(graph);
-    using N = typename G::N;
     using E = typename G::E;
-    using SLOT_ALLOCATOR=VectorAllocator<slot<N, E>, error_check>;
-    using PATH_ALLOCATOR=VectorAllocator<E, error_check>;
     auto [path, weight] {
         find_max_path<G, SLOT_ALLOCATOR, PATH_ALLOCATOR, error_check>(
             graph,
@@ -70,11 +46,48 @@ auto global(
 }
 
 template<
+    bool error_check=false,
+    std::unsigned_integral INDEXER=std::size_t,
+    std::floating_point ED=std::float64_t
+>
+auto global(
+    std::ranges::range auto&& v,
+    std::ranges::range auto&& w,
+    std::function<
+        ED(
+            const std::optional<std::reference_wrapper<const std::remove_reference_t<decltype(v[0u])>>>&,
+            const std::optional<std::reference_wrapper<const std::remove_reference_t<decltype(w[0u])>>>&
+        )
+    > weight_lookup
+) {
+    static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
+    static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+
+    using ND_ALLOCATOR=vector_grid_container_creator<ND, INDEXER, error_check>;
+    using ED_ALLOCATOR=vector_grid_container_creator<ED, INDEXER, error_check>;
+    INDEXER v_node_cnt { v.size() + 1u };
+    INDEXER w_node_cnt { w.size() + 1u };
+    pairwise_global_alignment_graph<ND, ED, INDEXER, ND_ALLOCATOR, ED_ALLOCATOR, false> graph { v_node_cnt, w_node_cnt };
+    graph.template assign_weights<ED>(
+        v,
+        w,
+        weight_lookup,
+        [](ED& edge_data, ED weight) { edge_data = weight; }
+    );
+    using G = decltype(graph);
+    using N = typename G::N;
+    using E = typename G::E;
+    using SLOT_ALLOCATOR=vector_container_creator<slot<N, E>, error_check>;
+    using PATH_ALLOCATOR=vector_container_creator<E, error_check>;
+    return extract_alignment<G, SLOT_ALLOCATOR, PATH_ALLOCATOR, error_check>(graph, v, w);
+}
+
+template<
     typename V_ELEM,
     std::size_t V_SIZE,
     typename W_ELEM,
     std::size_t W_SIZE,
-    bool error_check=true,
+    bool error_check=false,
     std::unsigned_integral INDEXER=std::size_t,
     std::floating_point ED=std::float64_t
 >
@@ -93,10 +106,9 @@ auto global_stack(
 
     constexpr INDEXER v_node_cnt { V_SIZE + 1u };
     constexpr INDEXER w_node_cnt { W_SIZE + 1u };
-    // Create graph
-    using ND_ALLOCATOR=ArrayGridAllocator<ND, INDEXER, v_node_cnt, w_node_cnt, error_check>;
-    using ED_ALLOCATOR=ArrayGridAllocator<ED, INDEXER, v_node_cnt, w_node_cnt, error_check>;
-    pairwise_global_alignment_graph<ND, ED, INDEXER, ND_ALLOCATOR, ED_ALLOCATOR> graph { v_node_cnt, w_node_cnt };
+    using ND_ALLOCATOR=array_grid_container_creator<ND, INDEXER, v_node_cnt, w_node_cnt, error_check>;
+    using ED_ALLOCATOR=array_grid_container_creator<ED, INDEXER, v_node_cnt, w_node_cnt, error_check>;
+    pairwise_global_alignment_graph<ND, ED, INDEXER, ND_ALLOCATOR, ED_ALLOCATOR, false> graph { v_node_cnt, w_node_cnt };
     graph.template assign_weights<ED>(
         v,
         w,
@@ -106,30 +118,14 @@ auto global_stack(
     using G = decltype(graph);
     using N = typename G::N;
     using E = typename G::E;
-    // Find max path
-    using SLOT_ALLOCATOR=ArrayAllocator<slot<N, E>, G::node_count(v_node_cnt, w_node_cnt), error_check>;
-    using PATH_ALLOCATOR=StaticVectorAllocator<E, G::longest_path_edge_count(v_node_cnt, w_node_cnt), error_check>;
-    auto [path, weight] {
-        find_max_path<G, SLOT_ALLOCATOR, PATH_ALLOCATOR, error_check>(
-            graph,
-            graph.get_root_node(),
-            *graph.get_leaf_nodes().begin(),
-            [&](const E& e) { return graph.get_edge_data(e); }
-        )
-    };
-    // Return
-    return std::make_pair(
-        std::move(path)
-            | std::views::transform([&](const auto& edge) { return graph.edge_to_elements(edge, v, w); })
-            | std::views::filter([](const auto& elem_pair) { return elem_pair.has_value(); })
-            | std::views::transform([](const auto& elem_pair) { return *elem_pair; }),
-        weight
-    );
+    using SLOT_ALLOCATOR=array_container_creator<slot<N, E>, G::node_count(v_node_cnt, w_node_cnt), error_check>;
+    using PATH_ALLOCATOR=static_vector_container_creator<E, G::longest_path_edge_count(v_node_cnt, w_node_cnt), error_check>;
+    return extract_alignment<G, SLOT_ALLOCATOR, PATH_ALLOCATOR, error_check>(graph, v, w);
 }
 
 int main() {
     auto weight_lookup {
-        [](const auto& v_elem, const auto& w_elem) -> double {
+        [](const auto& v_elem, const auto& w_elem) -> std::float16_t {
             if (!v_elem.has_value() || !w_elem.has_value()) {
                 return 0.0;
             }
@@ -150,25 +146,25 @@ int main() {
     };
 
     // dynamic
-    // std::string v { "hello" };
-    // std::string w { "mellow" };
-    // auto [elements, weight] {
-    //     global<false, std::size_t, std::float64_t>(
-    //         v,
-    //         w,
-    //         weight_lookup
-    //     )
-    // };
-    // static
-    std::array<char, 5> v { 'h', 'e', 'l', 'l', 'o' };
-    std::array<char, 6> w { 'm', 'e', 'l', 'l', 'o', 'w' };
+    std::string v { "hello" };
+    std::string w { "mellow" };
     auto [elements, weight] {
-        global_stack<char, 5u, char, 6u, false, std::size_t, std::float64_t>(
+        global<false, std::size_t, std::float64_t>(
             v,
             w,
             weight_lookup
         )
     };
+    // static
+    // std::array<char, 5> v { 'h', 'e', 'l', 'l', 'o' };
+    // std::array<char, 6> w { 'm', 'e', 'l', 'l', 'o', 'w' };
+    // auto [elements, weight] {
+    //     global_stack<decltype(v)::value_type, v.size(), decltype(w)::value_type, w.size(), false, std::uint8_t, std::float16_t>(
+    //         v,
+    //         w,
+    //         weight_lookup
+    //     )
+    // };
 
     print(elements);
     return 0;

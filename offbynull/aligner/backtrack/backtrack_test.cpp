@@ -1,5 +1,5 @@
 #include "offbynull/aligner/graph/graph.h"
-#include "offbynull/aligner/graph/grid_allocators.h"
+#include "offbynull/aligner/graph/grid_container_creators.h"
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/aligner/graphs/directed_graph.h"
 #include "offbynull/aligner/backtrack/backtrack.h"
@@ -8,15 +8,15 @@
 #include <format>
 
 namespace {
-    template<typename _ND, typename _ED, typename T = unsigned int, bool error_check = true>
+    template<typename ND_, typename ED_, typename T = unsigned int, bool error_check = true>
         requires std::is_integral_v<T> && std::is_unsigned_v<T>
     auto create_vector(T down_cnt, T right_cnt) {
         return offbynull::aligner::graphs::grid_graph::grid_graph<
-            _ND,
-            _ED,
+            ND_,
+            ED_,
             T,
-            offbynull::aligner::graph::grid_allocators::VectorGridAllocator<_ND, T>,
-            offbynull::aligner::graph::grid_allocators::VectorGridAllocator<_ED, T>,
+            offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator<ND_, T>,
+            offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator<ED_, T>,
             error_check
         > {
             down_cnt,
@@ -36,7 +36,7 @@ namespace {
         auto [path, weight] = offbynull::aligner::backtrack::backtrack::find_max_path(
             g,
             g.get_root_node(),
-            *g.get_leaf_nodes().begin(),
+            g.get_leaf_node(),
             [&g](E edge) { return g.get_edge_data(edge); }
         );
         for (const E& e : path) {
@@ -83,7 +83,7 @@ namespace {
         auto [path, weight] = offbynull::aligner::backtrack::backtrack::find_max_path(
             g,
             g.get_root_node(),
-            *g.get_leaf_nodes().begin(),
+            g.get_leaf_node(),
             [&g](E edge) { return g.get_edge_data(edge); }
         );
         for (const E& e : path) {

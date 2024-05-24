@@ -238,6 +238,17 @@ namespace offbynull::aligner::graphs::directed_graph {
             return ret;
         }
 
+        const N& get_leaf_node() {
+            auto range = this->get_leaf_nodes();
+            auto it = range.begin();
+            const N& ret = *it;
+            ++it;
+            if (it != range.end()) {
+                throw std::runtime_error { "Exactly 1 leaf node required" };
+            }
+            return ret;
+        }
+
         auto get_nodes() {
             return this->node_outbound | std::views::transform([](const auto& p) noexcept -> const N& { return p.first; });
         }

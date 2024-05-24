@@ -1,0 +1,133 @@
+#ifndef OFFBYNULL_ALIGNER_BACKTRACK_CONTAINER_CREATORS_H
+#define OFFBYNULL_ALIGNER_BACKTRACK_CONTAINER_CREATORS_H
+
+#include <stdexcept>
+#include <cstddef>
+#include <vector>
+#include "boost/container/small_vector.hpp"
+#include "boost/container/static_vector.hpp"
+#include "offbynull/aligner/backtrack/container_creator.h"
+
+namespace offbynull::aligner::backtrack::container_creators {
+    using offbynull::aligner::backtrack::container_creator::container_creator;
+
+    template<typename ELEM_, bool error_check = true>
+    class vector_container_creator {
+    public:
+        using ELEM = ELEM_;
+
+        std::vector<ELEM> create_empty(std::optional<size_t> capacity) {
+            std::vector<ELEM> ret {};
+            if (capacity.has_value()) {
+                ret.reserve(capacity.value());
+            }
+            return ret;
+        }
+
+        std::vector<ELEM> create_objects(size_t cnt) {
+            return std::vector<ELEM>(cnt);
+        }
+
+        std::vector<ELEM> create_copy(auto& begin, auto& end) {
+            return std::vector<ELEM>(begin, end);
+        }
+    };
+    static_assert(container_creator<vector_container_creator<int>>);  // Sanity check
+
+    template<typename ELEM_, size_t size, bool error_check = true>
+    class array_container_creator {
+    public:
+        using ELEM = ELEM_;
+
+        std::array<ELEM, size> create_empty(std::optional<size_t> capacity) {
+            std::array<ELEM, size> ret{};
+            if constexpr (error_check) {
+                if (size != 0u) {
+                    throw std::runtime_error("Unexpected number of elements");
+                }
+            }
+            return ret;
+        }
+
+        std::array<ELEM, size> create_objects(size_t cnt) {
+            if constexpr (error_check) {
+                if (cnt != size) {
+                    throw std::runtime_error("Unexpected number of elements");
+                }
+            }
+            return std::array<ELEM, size>{};
+        }
+
+        std::array<ELEM, size> create_copy(auto& begin, auto& end) {
+            std::array<ELEM, size> ret;
+            if constexpr (error_check) {
+                auto it { begin };
+                size_t cnt {};
+                while (it != end) {
+                    ret[cnt] = *it;
+                    ++it;
+                    ++cnt;
+                }
+                if (cnt != size) {
+                    throw std::runtime_error("Unexpected number of elements");
+                }
+                return ret;
+            } else {
+                std::copy(begin, end, ret.begin());
+            }
+            return ret;
+        }
+    };
+    static_assert(container_creator<array_container_creator<int, 0u>>);  // Sanity check
+
+    template<typename ELEM_, size_t max_size, bool error_check = true>
+    class static_vector_container_creator {
+    public:
+        using ELEM = ELEM_;
+
+        boost::container::static_vector<ELEM, max_size> create_empty(std::optional<size_t> capacity) {
+            return boost::container::static_vector<ELEM, max_size>{};
+        }
+
+        boost::container::static_vector<ELEM, max_size> create_objects(size_t cnt) {
+            if constexpr (error_check) {
+                if (cnt > max_size) {
+                    throw std::runtime_error("Too many elements");
+                }
+            }
+            return boost::container::static_vector<ELEM, max_size>(cnt);
+        }
+
+        boost::container::static_vector<ELEM, max_size> create_copy(auto& begin, auto& end) {
+            if constexpr (error_check) {
+                auto cnt { end - begin };
+                if (cnt > max_size) {
+                    throw std::runtime_error("Too many elements");
+                }
+            }
+            return boost::container::static_vector<ELEM, max_size>(begin, end);
+        }
+    };
+    static_assert(container_creator<static_vector_container_creator<int, 0u>>);  // Sanity check
+
+    template<typename ELEM_, size_t max_stack_size, bool error_check = true>
+    class small_vector_container_creator {
+    public:
+        using ELEM = ELEM_;
+
+        boost::container::small_vector<ELEM, max_stack_size> create_empty(std::optional<size_t> capacity) {
+            return boost::container::small_vector<ELEM, max_stack_size> {};
+        }
+
+        boost::container::small_vector<ELEM, max_stack_size> create_objects(size_t cnt) {
+            return boost::container::small_vector<ELEM, max_stack_size>(cnt);
+        }
+
+        boost::container::small_vector<ELEM, max_stack_size> create_copy(auto& begin, auto& end) {
+            return boost::container::small_vector<ELEM, max_stack_size>(begin, end);
+        }
+    };
+    static_assert(container_creator<small_vector_container_creator<int, 0u>>);  // Sanity check
+}
+
+#endif //OFFBYNULL_ALIGNER_BACKTRACK_CONTAINER_CREATORS_H

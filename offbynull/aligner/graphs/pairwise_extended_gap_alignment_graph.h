@@ -8,13 +8,13 @@
 #include <functional>
 #include "boost/container/static_vector.hpp"
 #include "boost/container/small_vector.hpp"
-#include "offbynull/aligner/graph/grid_allocator.h"
-#include "offbynull/aligner/graph/grid_allocators.h"
+#include "offbynull/aligner/graph/grid_container_creator.h"
+#include "offbynull/aligner/graph/grid_container_creators.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
-    using offbynull::aligner::graph::grid_allocator::grid_allocator;
-    using offbynull::aligner::graph::grid_allocators::VectorGridAllocator;
+    using offbynull::aligner::graph::grid_container_creator::grid_container_creator;
+    using offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator;
     using offbynull::utils::concat_view;
 
     enum class layer : uint8_t {
@@ -38,7 +38,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         typename ND_,
         typename ED_,
         std::unsigned_integral T = unsigned int,
-        grid_allocator<T> SLOT_ALLOCATOR_ = VectorGridAllocator<slot<ND_, ED_, T>, T, false>,
+        grid_container_creator<T> SLOT_ALLOCATOR_ = vector_grid_container_creator<slot<ND_, ED_, T>, T, false>,
         bool error_check = true
     >
     class pairwise_extended_gap_alignment_graph {
@@ -49,7 +49,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         using ED = ED_;
 
     private:
-        decltype(std::declval<SLOT_ALLOCATOR_>().allocate(0u, 0u)) slots;
+        decltype(std::declval<SLOT_ALLOCATOR_>().create_objects(0u, 0u)) slots;
         ED extended_indel_ed;
         ED initial_indel_ed;
         ED freeride_ed;
@@ -79,7 +79,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             ED freeride_data = {},
             SLOT_ALLOCATOR_ slot_container_creator = {}
         )
-        : slots{slot_container_creator.allocate(_down_node_cnt, _right_node_cnt)}
+        : slots{slot_container_creator.create_objects(_down_node_cnt, _right_node_cnt)}
         , extended_indel_ed{extended_indel_data}
         , initial_indel_ed{initial_indel_data}
         , freeride_ed{freeride_data}
@@ -116,6 +116,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             } else if (node.type == layer::RIGHT) {
                 return this->slots[to_raw_idx(n_down, n_right)].right_nd;
             }
+            std::unreachable();
         }
 
         void update_edge_data(const E& edge, ED&& data) {
@@ -209,6 +210,10 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
 
         auto get_leaf_nodes() {
             return std::ranges::single_view { std::tuple<layer, T, T>(layer::DIAGONAL, down_node_cnt - 1u, right_node_cnt - 1u) };
+        }
+
+        auto get_leaf_node() {
+            return std::tuple<layer, T, T>(layer::DIAGONAL, down_node_cnt - 1u, right_node_cnt - 1u);
         }
 
         auto get_nodes() {

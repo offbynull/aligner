@@ -9,7 +9,7 @@ example = executable(
         'untitled',
         ['main.cpp'],
         dependencies : [boost_dep],
-        cpp_args : ['-fconcepts-diagnostics-depth=9999', '-D_GLIBCXX_DEBUG'],
+        cpp_args : ['-fconcepts-diagnostics-depth=9999'], #, '-D_GLIBCXX_DEBUG'],
         install : true
 )
 test('test', example)

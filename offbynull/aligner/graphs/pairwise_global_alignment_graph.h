@@ -8,20 +8,20 @@
 #include <functional>
 #include <type_traits>
 #include "offbynull/aligner/graphs/grid_graph.h"
-#include "offbynull/aligner/graph/grid_allocator.h"
-#include "offbynull/aligner/graph/grid_allocators.h"
+#include "offbynull/aligner/graph/grid_container_creator.h"
+#include "offbynull/aligner/graph/grid_container_creators.h"
 
 namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
-    using offbynull::aligner::graph::grid_allocator::grid_allocator;
-    using offbynull::aligner::graph::grid_allocators::VectorGridAllocator;
+    using offbynull::aligner::graph::grid_container_creator::grid_container_creator;
+    using offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator;
 
     template<
         typename ND_,
         typename ED_,
         std::unsigned_integral T = unsigned int,
-        grid_allocator<T> ND_ALLOCATOR_ = VectorGridAllocator<ND_, T, false>,
-        grid_allocator<T> ED_ALLOCATOR_ = VectorGridAllocator<ED_, T, false>,
+        grid_container_creator<T> ND_ALLOCATOR_ = vector_grid_container_creator<ND_, T, false>,
+        grid_container_creator<T> ED_ALLOCATOR_ = vector_grid_container_creator<ED_, T, false>,
         bool error_check = true
     >
         requires std::is_integral_v<T> && std::is_unsigned_v<T>
@@ -103,6 +103,10 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
 
         auto get_leaf_nodes() {
             return g.get_leaf_nodes();
+        }
+
+        auto get_leaf_node() {
+            return g.get_leaf_node();
         }
 
         auto get_nodes() {
@@ -305,6 +309,7 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             if constexpr (error_check) {
                 throw std::runtime_error("Bad edge");
             }
+            std::unreachable();
         }
 
         constexpr static T node_count(
