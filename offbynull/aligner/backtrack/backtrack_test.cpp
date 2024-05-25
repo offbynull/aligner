@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <format>
+#include <offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h>
 
 namespace {
     template<typename ND_, typename ED_, typename T = unsigned int, bool error_check = true>
@@ -27,17 +28,18 @@ namespace {
     TEST(BacktrackTest, FindMaxPathOnGridGraph) {
         using N = std::pair<unsigned int, unsigned int>;
         using E = std::pair<N, N>;
-        using ND = std::tuple<std::optional<double>, std::optional<E>>;
-        using ED = double;
+        using ND = std::tuple<std::optional<std::float64_t>, std::optional<E>>;
+        using ED = std::float64_t;
 
         auto g { create_vector<ND, ED>(2u, 3u) };
         g.update_edge_data({ {0u, 0u}, {0u, 1u} }, -1.0); // this updates ALL indel edges
         g.update_edge_data({ {0u, 0u}, {1u, 1u} }, 3.0);
-        auto [path, weight] = offbynull::aligner::backtrack::backtrack::find_max_path(
+        // offbynull::utils::type_displayer<ED> x1{};
+        // offbynull::utils::type_displayer<decltype(g)::ED> x2{};
+        // offbynull::utils::type_displayer<decltype(g.get_edge_data(std::declval<E>()))> x3{};
+        auto [path, weight] = offbynull::aligner::backtrack::backtrack::find_max_path<decltype(g), ED>(
             g,
-            g.get_root_node(),
-            g.get_leaf_node(),
-            [&g](E edge) { return g.get_edge_data(edge); }
+            [&g](const E& edge) { return g.get_edge_data(edge); }
         );
         for (const E& e : path) {
             const auto& [n1, n2] = e;
@@ -58,8 +60,8 @@ namespace {
     TEST(BacktrackTest, FindMaxPathOnDirectedGraph) {
         using N = std::pair<unsigned int, unsigned int>;
         using E = std::pair<N, N>;
-        using ND = std::tuple<std::optional<double>, std::optional<E>>;
-        using ED = double;
+        using ND = std::tuple<std::optional<std::float64_t>, std::optional<E>>;
+        using ED = std::float64_t;
         using G = offbynull::aligner::graphs::directed_graph::directed_graph<N, ND, E, ED>;
 
         G g {};
@@ -80,11 +82,9 @@ namespace {
         g.insert_edge(std::pair { std::pair{0u, 1u}, std::pair{1u, 2u} }, std::pair{0u, 1u}, std::pair{1u, 2u}, 0.0);
         g.update_edge_data({ {0u, 0u}, {0u, 1u} }, 1.1);
         g.update_edge_data({ {1u, 1u}, {1u, 2u} }, 1.4);
-        auto [path, weight] = offbynull::aligner::backtrack::backtrack::find_max_path(
+        auto [path, weight] = offbynull::aligner::backtrack::backtrack::find_max_path<decltype(g), ED>(
             g,
-            g.get_root_node(),
-            g.get_leaf_node(),
-            [&g](E edge) { return g.get_edge_data(edge); }
+            [&g](const E& edge) { return g.get_edge_data(edge); }
         );
         for (const E& e : path) {
             const auto& [n1, n2] = e;

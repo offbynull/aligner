@@ -4,7 +4,9 @@
 #include <functional>
 #include <ranges>
 #include <algorithm>
-#include <limits>
+#include <stdfloat>
+#include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
+#include "offbynull/aligner/backtrack/concepts.h"
 #include "offbynull/aligner/backtrack/container_creator.h"
 #include "offbynull/aligner/backtrack/container_creators.h"
 #include "offbynull/aligner/backtrack/ready_queue.h"
@@ -14,6 +16,7 @@
 
 namespace offbynull::aligner::backtrack::backtrack {
     using offbynull::aligner::graph::graph::readable_graph;
+    using offbynull::aligner::backtrack::concepts::weight;
     using offbynull::aligner::backtrack::slot_container::slot_container;
     using offbynull::aligner::backtrack::slot_container::slot;
     using offbynull::aligner::backtrack::ready_queue::ready_queue;
@@ -23,23 +26,18 @@ namespace offbynull::aligner::backtrack::backtrack {
 
     template<
         readable_graph G,
-        container_creator SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E>>,
+        weight WEIGHT=std::float64_t,
+        container_creator SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
         bool error_check = true
     >
         requires requires(typename G::N n)
         {
             {n < n} -> std::same_as<bool>;
         }
-    slot_container<typename G::N, typename G::E, SLOT_ALLOCATOR> populate_weights_and_backtrack_pointers(
+    slot_container<typename G::N, typename G::E, WEIGHT, SLOT_ALLOCATOR> populate_weights_and_backtrack_pointers(
             G& g,
-            const typename G::N& from_node,
-            std::function<double(typename G::E)> get_edge_weight_func
+            std::function<WEIGHT(const typename G::E&)> get_edge_weight_func
     ) {
-        if constexpr (error_check) {
-            if (from_node != g.get_root_node()) {  // get_root_node() should throw exception if none or > 1
-                throw std::runtime_error("Start node isn't root node");
-            }
-        }
         using N = typename G::N;
         using E = typename G::E;
         // Create "slots" list
@@ -49,22 +47,21 @@ namespace offbynull::aligner::backtrack::backtrack {
         // that the index for a node object can be quickly found.
         const auto& slots_lazy {
             g.get_nodes()
-            | std::views::transform([&](const auto& n) noexcept -> slot<N, E> { return { n, g.get_in_degree(n) }; })
+            | std::views::transform([&](const auto& n) noexcept -> slot<N, E, WEIGHT> { return { n, g.get_in_degree(n) }; })
         };
-        slot_container<N, E, SLOT_ALLOCATOR> slots {slots_lazy.begin(), slots_lazy.end()};
+        slot_container<N, E, WEIGHT, SLOT_ALLOCATOR> slots {slots_lazy.begin(), slots_lazy.end()};
         // Create "ready_idxes" queue
         // --------------------------
         // The "ready_idxes" queue contains indicies within "slots" that are ready-to-process (node in that slot has had all
         // parents processed, and so it can be processed). Since root nodes have no parents, they are ready-to-process from
-        // the get-go. As such, the "ready_idxes" queue is primed with the "slots" indices for root nodes.
+        // the get-go. As such, the "ready_idxes" queue is primed with the "slots" indices for root nodes (of which there
+        // should be only one).
         ready_queue ready_idxes {};
-        for (const auto& node : g.get_root_nodes()) {
-            const auto& [root_slot_idx, root_slot] { slots.find(node) };
-            ready_idxes.push(root_slot_idx);
-            // static_assert(std::numeric_limits<float>::is_iec559, "IEEE 754 required");  // Because of -infinity, or will inifinity() error on its own if not supported?
-            root_slot.backtracking_weight = -std::numeric_limits<double>::infinity();
-        }
-        slots.find_ref(from_node).backtracking_weight = 0.0;
+        const N& root_node { g.get_root_node() };
+        const auto& [root_slot_idx, root_slot] { slots.find(root_node) };
+        ready_idxes.push(root_slot_idx);
+        // static_assert(std::numeric_limits<float>::is_iec559, "IEEE 754 required"); // Require for inf and nan?
+        root_slot.backtracking_weight = 0.0;
         // Find max path within graph
         // --------------------------
         // Using the backtracking algorithm, find the path within graph that has the maximum weight. If more than one such
@@ -89,7 +86,7 @@ namespace offbynull::aligner::backtrack::backtrack {
                 | std::views::transform(
                     [&](const auto& edge) noexcept -> std::pair<E, double> {
                         const auto& src_node { g.get_edge_from(edge) };
-                        const slot<N, E>& src_node_slot { slots.find_ref(src_node) };
+                        const slot<N, E, WEIGHT>& src_node_slot { slots.find_ref(src_node) };
                         const auto& edge_weight { get_edge_weight_func(edge) };
                         return { edge, src_node_slot.backtracking_weight + edge_weight };
                     }
@@ -98,7 +95,7 @@ namespace offbynull::aligner::backtrack::backtrack {
             auto found {
                 std::ranges::max_element(
                     incoming_accumulated,
-                    [](const std::pair<E, double>& a, const std::pair<E, double>& b) noexcept {
+                    [](const std::pair<E, WEIGHT>& a, const std::pair<E, double>& b) noexcept {
                         return a.second < b.second;
                     }
                 )
@@ -110,10 +107,6 @@ namespace offbynull::aligner::backtrack::backtrack {
             // For outgoing nodes this node points to, decrement its number of unprocessed parents (this node was one of its
             // parents, and it was processed in this iteration of the loop) then add it to "ready_idxes" if it has no more
             // unprocessed parents.
-            const auto outgoing_nodes {
-                g.get_outputs(current_slot.node)
-                | std::views::transform([&g](const auto e) { return g.get_edge_to(e); })
-            };
             for (const auto& edge : g.get_outputs(current_slot.node)) {
                 const auto& dst_node { g.get_edge_to(edge) };
                 const auto& [dst_slot_idx, dst_slot] { slots.find(dst_node) };
@@ -134,17 +127,19 @@ namespace offbynull::aligner::backtrack::backtrack {
 
     template<
         readable_graph G,
+        weight WEIGHT=std::float64_t,
         container_creator SLOT_ALLOCATOR,
-        container_creator PATH_ALLOCATOR
+        container_creator PATH_ALLOCATOR,
+        bool error_check = true
     >
     range_of_type<typename G::E> auto backtrack(
             G& g,
-            slot_container<typename G::N, typename G::E, SLOT_ALLOCATOR>& slots,
+            slot_container<typename G::N, typename G::E, WEIGHT, SLOT_ALLOCATOR>& slots,
             const typename G::N& end_node,
             PATH_ALLOCATOR path_container_creator = {}
     ) {
-        using N = typename G::N;
-        using E = typename G::E;
+        // using N = typename G::N;
+        // using E = typename G::E;
         auto next_node { end_node };
         auto path { path_container_creator.create_empty(std::nullopt) };
         while (true) {
@@ -152,7 +147,7 @@ namespace offbynull::aligner::backtrack::backtrack {
             if (g.get_in_degree(node) == 0u) {
                 break;
             }
-            slot<N, E>& node_slot { slots.find_ref(node) };
+            const auto& node_slot { slots.find_ref(node) };
             path.push_back(node_slot.backtracking_edge);
             next_node = g.get_edge_from(node_slot.backtracking_edge);
         }
@@ -164,28 +159,55 @@ namespace offbynull::aligner::backtrack::backtrack {
 
     template<
         readable_graph G,
-        container_creator SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E>>,
+        weight WEIGHT=std::float64_t,
+        container_creator SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
         container_creator PATH_ALLOCATOR=vector_container_creator<typename G::E>,
         bool error_check = true
     >
     auto find_max_path(
             G& graph,
-            const typename G::N& start_node,
             const typename G::N& end_node,
-            std::function<double(typename G::E)> get_edge_weight_func
+            std::function<WEIGHT(const typename G::E&)> get_edge_weight_func
     ) {
         // using E = typename G::E;
         auto slots {
-            populate_weights_and_backtrack_pointers<G, SLOT_ALLOCATOR, error_check>(
+            populate_weights_and_backtrack_pointers<G, WEIGHT, SLOT_ALLOCATOR, error_check>(
                 graph,
-                start_node,
                 get_edge_weight_func
             )
         };
-        const auto& path { backtrack<G, SLOT_ALLOCATOR, PATH_ALLOCATOR>(graph, slots, end_node) };
+        const auto& path { backtrack<G, WEIGHT, SLOT_ALLOCATOR, PATH_ALLOCATOR, error_check>(graph, slots, end_node) };
         const auto& weight { slots.find_ref(end_node).backtracking_weight };
         return std::make_pair(path, weight);
     }
+
+    template<
+        readable_graph G,
+        weight WEIGHT=std::float64_t,
+        container_creator SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
+        container_creator PATH_ALLOCATOR=vector_container_creator<typename G::E>,
+        bool error_check = true
+    >
+    auto find_max_path(
+            G& graph,
+            std::function<WEIGHT(const typename G::E&)> get_edge_weight_func
+    ) {
+        return find_max_path<G, WEIGHT, SLOT_ALLOCATOR, PATH_ALLOCATOR, error_check>(
+            graph,
+            graph.get_leaf_node(),
+            get_edge_weight_func
+        );
+    }
 }
+//
+// get_edge_weight_func SHOULD TAKE CUSTOM FLOAT TYPE, WITH 4x4, 8x8, 16x16 STACK IMPLEMENTATIONS;
+// get_edge_weight_func SHOULD TAKE CUSTOM FLOAT TYPE, WITH 4x4, 8x8, 16x16 STACK IMPLEMENTATIONS;
+// get_edge_weight_func SHOULD TAKE CUSTOM FLOAT TYPE, WITH 4x4, 8x8, 16x16 STACK IMPLEMENTATIONS;
+// get_edge_weight_func SHOULD TAKE CUSTOM FLOAT TYPE, WITH 4x4, 8x8, 16x16 STACK IMPLEMENTATIONS;
+// get_edge_weight_func SHOULD TAKE CUSTOM FLOAT TYPE, WITH 4x4, 8x8, 16x16 STACK IMPLEMENTATIONS;
+// get_edge_weight_func SHOULD TAKE CUSTOM FLOAT TYPE, WITH 4x4, 8x8, 16x16 STACK IMPLEMENTATIONS;
+// get_edge_weight_func SHOULD TAKE CUSTOM FLOAT TYPE, WITH 4x4, 8x8, 16x16 STACK IMPLEMENTATIONS;
+// get_edge_weight_func SHOULD TAKE CUSTOM FLOAT TYPE, WITH 4x4, 8x8, 16x16 STACK IMPLEMENTATIONS;
+// get_edge_weight_func SHOULD TAKE CUSTOM FLOAT TYPE, WITH 4x4, 8x8, 16x16 STACK IMPLEMENTATIONS;
 
 #endif //OFFBYNULL_ALIGNER_BACKTRACK_BACKTRACK_H

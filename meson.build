@@ -43,6 +43,6 @@ test_exec = executable(
         'gtest-all',
         tests_src,
         dependencies : [boost_dep, gtest_dep, gmock_dep],
-        cpp_args : ['-D_GLIBCXX_DEBUG']
+        cpp_args : ['-fconcepts-diagnostics-depth=9999', '-ftemplate-backtrace-limit=0', '-D_GLIBCXX_DEBUG']
 )
 test('gtest tests', test_exec)

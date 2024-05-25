@@ -31,8 +31,6 @@ auto extract_alignment(
     auto [path, weight] {
         find_max_path<G, SLOT_ALLOCATOR, PATH_ALLOCATOR, error_check>(
             graph,
-            graph.get_root_node(),
-            *graph.get_leaf_nodes().begin(),
             [&](const E& e) { return graph.get_edge_data(e); }
         )
     };
@@ -146,25 +144,25 @@ int main() {
     };
 
     // dynamic
-    std::string v { "hello" };
-    std::string w { "mellow" };
-    auto [elements, weight] {
-        global<false, std::size_t, std::float64_t>(
-            v,
-            w,
-            weight_lookup
-        )
-    };
-    // static
-    // std::array<char, 5> v { 'h', 'e', 'l', 'l', 'o' };
-    // std::array<char, 6> w { 'm', 'e', 'l', 'l', 'o', 'w' };
+    // std::string v { "hello" };
+    // std::string w { "mellow" };
     // auto [elements, weight] {
-    //     global_stack<decltype(v)::value_type, v.size(), decltype(w)::value_type, w.size(), false, std::uint8_t, std::float16_t>(
+    //     global<false, std::size_t, std::float64_t>(
     //         v,
     //         w,
     //         weight_lookup
     //     )
     // };
+    // static
+    std::array<char, 5> v { 'h', 'e', 'l', 'l', 'o' };
+    std::array<char, 6> w { 'm', 'e', 'l', 'l', 'o', 'w' };
+    auto [elements, weight] {
+        global_stack<decltype(v)::value_type, v.size(), decltype(w)::value_type, w.size(), false, std::uint8_t, std::float16_t>(
+            v,
+            w,
+            weight_lookup
+        )
+    };
 
     print(elements);
     return 0;
