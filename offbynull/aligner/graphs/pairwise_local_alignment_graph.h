@@ -12,6 +12,7 @@
 #include "offbynull/aligner/graph/grid_container_creator.h"
 #include "offbynull/aligner/graph/grid_container_creators.h"
 #include "offbynull/aligner/concepts.h"
+#include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
@@ -19,6 +20,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::aligner::graph::grid_container_creator::grid_container_creator;
     using offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator;
     using offbynull::aligner::concepts::weight;
+    using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::concat_view;
 
     enum class edge_type : uint8_t {
@@ -26,7 +28,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         NORMAL
     };
 
-    template<std::unsigned_integral T>
+    template<widenable_to_size_t T>
     class edge {
     public:
         using N = std::pair<T, T>;
@@ -39,7 +41,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     template<
         typename ND_,
         typename ED_,
-        std::unsigned_integral INDEX_ = unsigned int,
+        widenable_to_size_t INDEX_ = unsigned int,
         grid_container_creator<INDEX_> ND_ALLOCATOR_ = vector_grid_container_creator<ND_, INDEX_, false>,
         grid_container_creator<INDEX_> ED_ALLOCATOR_ = vector_grid_container_creator<ED_, INDEX_, false>,
         bool error_check = true

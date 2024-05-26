@@ -12,12 +12,14 @@
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/graph/grid_container_creator.h"
 #include "offbynull/aligner/graph/grid_container_creators.h"
+#include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::aligner::graph::grid_container_creator::grid_container_creator;
     using offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator;
     using offbynull::aligner::concepts::weight;
+    using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::concat_view;
 
     enum class layer : uint8_t {
@@ -26,7 +28,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         RIGHT
     };
 
-    template<typename ND, typename ED, std::unsigned_integral T>
+    template<typename ND, typename ED, widenable_to_size_t T>
     struct slot {
         ND down_nd;
         ND diagonal_nd;
@@ -40,7 +42,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     template<
         typename ND_,
         typename ED_,
-        std::unsigned_integral INDEX_ = unsigned int,
+        widenable_to_size_t INDEX_ = unsigned int,
         grid_container_creator<INDEX_> SLOT_ALLOCATOR_ = vector_grid_container_creator<slot<ND_, ED_, INDEX_>, INDEX_, false>,
         bool error_check = true
     >

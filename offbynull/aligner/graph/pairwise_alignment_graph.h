@@ -11,6 +11,7 @@
 namespace offbynull::aligner::graph::pairwise_alignment_graph {
     using offbynull::concepts::one_of;
     using offbynull::concepts::range_of_one_of;
+    using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::graph::graph::readable_graph;
 
     // You can use unimplemented types as requires params -- the compiler will check to see if it has the same traits
@@ -22,7 +23,7 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
     template <typename G>
     concept readable_parwise_alignment_graph =
         readable_graph<G>
-        && std::unsigned_integral<typename G::INDEX>
+        && widenable_to_size_t<typename G::INDEX>
         && requires(
             G g,
             unimplemented_sequence v,

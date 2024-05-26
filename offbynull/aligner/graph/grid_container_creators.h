@@ -6,36 +6,57 @@
 #include <array>
 #include "boost/container/small_vector.hpp"
 #include "boost/container/static_vector.hpp"
+#include "boost/safe_numerics/safe_integer.hpp"
 #include "offbynull/aligner/graph/grid_container_creator.h"
+#include "offbynull/concepts.h"
 
 
 namespace offbynull::aligner::graph::grid_container_creators {
     using offbynull::aligner::graph::grid_container_creator::grid_container_creator;
+    using offbynull::concepts::widenable_to_size_t;
+
+    template<
+        widenable_to_size_t INDEX,
+        bool error_check = true
+    >
+    constexpr size_t to_element_count(INDEX down_node_cnt, INDEX right_node_cnt) {
+        if constexpr (error_check) {
+            boost::safe_numerics::safe<size_t> safe_down_node_cnt { down_node_cnt };
+            boost::safe_numerics::safe<size_t> safe_right_node_cnt { right_node_cnt };
+            return safe_down_node_cnt * safe_right_node_cnt;
+        } else {
+            size_t unsafe_down_node_cnt { down_node_cnt };
+            size_t unsafe_right_node_cnt { right_node_cnt };
+            return unsafe_down_node_cnt * unsafe_right_node_cnt;
+        }
+    }
 
     template<
         typename ELEM_,
-        std::unsigned_integral INDEX,
+        widenable_to_size_t INDEX,
         bool error_check = true
     >
     class vector_grid_container_creator {
     public:
         using ELEM = ELEM_;
         std::vector<ELEM> create_objects(INDEX down_node_cnt, INDEX right_node_cnt) {
-            return std::vector<ELEM>(down_node_cnt * right_node_cnt);
+            return std::vector<ELEM>(
+                to_element_count<INDEX, error_check>(down_node_cnt, right_node_cnt)
+            );
         }
     };
     static_assert(grid_container_creator<vector_grid_container_creator<int, size_t>, size_t>);  // Sanity check
 
     template<
         typename ELEM_,
-        std::unsigned_integral INDEX,
+        widenable_to_size_t INDEX,
         INDEX STATIC_DOWN_CNT,
         INDEX STATIC_RIGHT_CNT,
         bool error_check = true
     >
     class array_grid_container_creator {
     private:
-        static constexpr INDEX size = STATIC_DOWN_CNT * STATIC_RIGHT_CNT;
+        static constexpr size_t size = to_element_count<INDEX, error_check>(STATIC_DOWN_CNT, STATIC_RIGHT_CNT);
     public:
         using ELEM = ELEM_;
         std::array<ELEM, size> create_objects(INDEX down_node_cnt, INDEX right_node_cnt) {
@@ -51,14 +72,14 @@ namespace offbynull::aligner::graph::grid_container_creators {
 
     template<
         typename ELEM_,
-        std::unsigned_integral INDEX,
+        widenable_to_size_t INDEX,
         INDEX STATIC_DOWN_CNT,
         INDEX STATIC_RIGHT_CNT,
         bool error_check = true
     >
     class static_vector_grid_container_creator {
     private:
-        static constexpr INDEX max_size = STATIC_DOWN_CNT * STATIC_RIGHT_CNT;
+        static constexpr size_t max_size = to_element_count<INDEX, error_check>(STATIC_DOWN_CNT, STATIC_RIGHT_CNT);
     public:
         using ELEM = ELEM_;
         boost::container::static_vector<ELEM, max_size> create_objects(INDEX down_node_cnt, INDEX right_node_cnt) {
@@ -74,14 +95,14 @@ namespace offbynull::aligner::graph::grid_container_creators {
 
     template<
         typename ELEM_,
-        std::unsigned_integral INDEX,
+        widenable_to_size_t INDEX,
         INDEX STATIC_DOWN_CNT,
         INDEX STATIC_RIGHT_CNT,
         bool error_check = true
 >
     class small_vector_grid_container_creator {
     private:
-        static constexpr INDEX max_stack_size = STATIC_DOWN_CNT * STATIC_RIGHT_CNT;
+        static constexpr size_t max_stack_size = to_element_count<INDEX, error_check>(STATIC_DOWN_CNT, STATIC_RIGHT_CNT);
     public:
         using ELEM = ELEM_;
         boost::container::small_vector<ELEM, max_stack_size> create_objects(INDEX down_node_cnt, INDEX right_node_cnt) {

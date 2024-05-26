@@ -6,11 +6,12 @@
 
 namespace offbynull::aligner::graph::grid_container_creator {
     using offbynull::concepts::random_access_range_of_type;
+    using offbynull::concepts::widenable_to_size_t;
 
-    template <typename T, typename SIZE_T>
+    template <typename T, typename INDEX>
     concept grid_container_creator =
-        std::unsigned_integral<SIZE_T> &&
-        requires(T t, SIZE_T size) {
+        widenable_to_size_t<INDEX>
+        && requires(T t, INDEX size) {
             typename T::ELEM;
             { t.create_objects(size, size) } -> random_access_range_of_type<typename T::ELEM>;
         };

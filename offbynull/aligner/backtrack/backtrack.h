@@ -22,10 +22,11 @@ namespace offbynull::aligner::backtrack::backtrack {
     using offbynull::aligner::backtrack::container_creator::container_creator;
     using offbynull::aligner::backtrack::container_creators::vector_container_creator;
     using offbynull::concepts::range_of_type;
+    using offbynull::concepts::widenable_to_size_t;
 
     template<
         readable_graph G,
-        std::unsigned_integral INDEXER,
+        widenable_to_size_t INDEXER,
         weight WEIGHT,
         container_creator SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, INDEXER, WEIGHT>>,
         container_creator PATH_ALLOCATOR=vector_container_creator<typename G::E>,

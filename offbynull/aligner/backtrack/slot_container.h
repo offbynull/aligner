@@ -13,8 +13,9 @@ namespace offbynull::aligner::backtrack::slot_container {
     using offbynull::aligner::backtrack::container_creator::container_creator;
     using offbynull::aligner::backtrack::container_creators::vector_container_creator;
     using offbynull::concepts::input_iterator_of_type;
+    using offbynull::concepts::widenable_to_size_t;
 
-    template<typename N, typename E, std::unsigned_integral INDEXER, weight WEIGHT>
+    template<typename N, typename E, widenable_to_size_t INDEXER, weight WEIGHT>
     struct slot {
         N node;
         INDEXER unwalked_parent_cnt;
@@ -38,7 +39,7 @@ namespace offbynull::aligner::backtrack::slot_container {
     template<
         typename N,
         typename E,
-        std::unsigned_integral INDEXER,
+        widenable_to_size_t INDEXER,
         weight WEIGHT,
         container_creator ALLOCATOR=vector_container_creator<slot<N, E, INDEXER, WEIGHT>>
     >
