@@ -7,7 +7,9 @@
 #include <stdexcept>
 #include <utility>
 #include "boost/container/static_vector.hpp"
+#include "boost/container/options.hpp"
 #include "offbynull/concepts.h"
+#include "offbynull/utils.h"
 #include "offbynull/aligner/graph/grid_container_creator.h"
 #include "offbynull/aligner/graph/grid_container_creators.h"
 
@@ -15,6 +17,7 @@ namespace offbynull::aligner::graphs::grid_graph {
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::graph::grid_container_creator::grid_container_creator;
     using offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator;
+    using offbynull::utils::static_vector_typer;
 
     template<
         typename ND_,
@@ -221,7 +224,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 }
             }
             auto [n_down, n_right] = node;
-            boost::container::static_vector<std::tuple<E, N, N, ED*>, 3> ret {};
+            typename static_vector_typer<std::tuple<E, N, N, ED*>, 3u, error_check>::type ret{};
             if (n_down == down_node_cnt - 1u && n_right == right_node_cnt - 1u) {
                 // do nothing
             } else if (n_down < down_node_cnt - 1u && n_right < right_node_cnt - 1u) {
@@ -262,7 +265,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 }
             }
             auto [n_down, n_right] = node;
-            boost::container::static_vector<std::tuple<E, N, N, ED*>, 3> ret {};
+            typename static_vector_typer<std::tuple<E, N, N, ED*>, 3u, error_check>::type ret{};
             if (n_down == 0u && n_right == 0u) {
                 // do nothing
             } else if (n_down > 0u && n_right > 0u) {

@@ -8,7 +8,6 @@
 #include <utility>
 #include <functional>
 #include <stdfloat>
-#include "boost/container/static_vector.hpp"
 #include "boost/container/small_vector.hpp"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/graph/grid_container_creator.h"
@@ -22,6 +21,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::concat_view;
+    using offbynull::utils::static_vector_typer;
 
     enum class layer : uint8_t {
         DIAGONAL,
@@ -333,7 +333,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            boost::container::static_vector<std::tuple<E, N, N, ED*>, 3> ret {};
+            typename static_vector_typer<std::tuple<E, N, N, ED*>, 3u, error_check>::type ret {};
             const auto& [n1_layer, n1_down, n1_right] { node };
             if (n1_layer == layer::DIAGONAL) {
                 if (n1_down == down_node_cnt - 1u && n1_right == right_node_cnt - 1u) {
@@ -386,7 +386,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            boost::container::static_vector<std::tuple<E, N, N, ED*>, 3> ret {};
+            typename static_vector_typer<std::tuple<E, N, N, ED*>, 3u, error_check>::type ret {};
             const auto& [n2_layer, n2_down, n2_right] { node };
             if (n2_layer == layer::DIAGONAL) {
                 if (n2_down == 0u && n2_right == 0u) {

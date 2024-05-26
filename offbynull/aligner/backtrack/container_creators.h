@@ -5,11 +5,12 @@
 #include <cstddef>
 #include <vector>
 #include "boost/container/small_vector.hpp"
-#include "boost/container/static_vector.hpp"
 #include "offbynull/aligner/backtrack/container_creator.h"
+#include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrack::container_creators {
     using offbynull::aligner::backtrack::container_creator::container_creator;
+    using offbynull::utils::static_vector_typer;
 
     template<typename ELEM_, bool error_check = true>
     class vector_container_creator {
@@ -85,27 +86,29 @@ namespace offbynull::aligner::backtrack::container_creators {
     public:
         using ELEM = ELEM_;
 
-        boost::container::static_vector<ELEM, max_size> create_empty(std::optional<std::size_t> capacity) {
-            return boost::container::static_vector<ELEM, max_size>{};
+        static_vector_typer<ELEM, max_size, error_check>::type create_empty(std::optional<std::size_t> capacity) {
+            return typename static_vector_typer<ELEM, max_size, error_check>::type {};
         }
 
-        boost::container::static_vector<ELEM, max_size> create_objects(std::size_t cnt) {
+        static_vector_typer<ELEM, max_size, error_check>::type create_objects(std::size_t cnt) {
             if constexpr (error_check) {
                 if (cnt > max_size) {
                     throw std::runtime_error("Too many elements");
                 }
             }
-            return boost::container::static_vector<ELEM, max_size>(cnt);
+            return typename static_vector_typer<ELEM, max_size, error_check>::type(cnt);
         }
 
-        boost::container::static_vector<ELEM, max_size> create_copy(auto& begin, auto& end) {
+        static_vector_typer<ELEM, max_size, error_check>::type create_copy(auto& begin, auto& end) {
             if constexpr (error_check) {
                 auto cnt { end - begin };
                 if (cnt > max_size) {
                     throw std::runtime_error("Too many elements");
                 }
             }
-            return boost::container::static_vector<ELEM, max_size>(begin, end);
+            // In the signature, if I set the return type to auto, I get a bunch of concept check errors? So instead I
+            // set it to the actual return type.
+            return typename static_vector_typer<ELEM, max_size, error_check>::type(begin, end);
         }
     };
     static_assert(container_creator<static_vector_container_creator<int, 0u>>);  // Sanity check

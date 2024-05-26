@@ -1,6 +1,10 @@
 #ifndef OFFBYNULL_UTILS_H
 #define OFFBYNULL_UTILS_H
 
+#include <cstddef>
+#include "boost/container/static_vector.hpp"
+#include "boost/container/options.hpp"
+
 namespace offbynull::utils {
     // https://www.reddit.com/r/cpp_questions/comments/1cp0rwu/how_to_lazily_concatenate_two_views/
     template <typename R1, typename R2>
@@ -107,6 +111,26 @@ namespace offbynull::utils {
 
     template<typename T>
     struct type_displayer;
+
+    template<typename ELEM, std::size_t cnt, bool error_check>
+    struct static_vector_typer;
+
+    template<typename ELEM, std::size_t cnt>
+    struct static_vector_typer<ELEM, cnt, true> {
+        using type = boost::container::static_vector<ELEM, cnt>;
+    };
+
+    template<typename ELEM, std::size_t cnt>
+    struct static_vector_typer<ELEM, cnt, false> {
+        using type = boost::container::static_vector<
+            ELEM,
+            cnt,
+            boost::container::static_vector_options<
+                boost::container::throw_on_overflow<false>,
+                boost::container::inplace_alignment<0u>
+            >::type
+        >;
+    };
 }
 
 #endif //OFFBYNULL_UTILS_H

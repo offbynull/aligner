@@ -23,6 +23,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::concat_view;
+    using offbynull::utils::static_vector_typer;
 
     enum class edge_type : uint8_t {
         FREE_RIDE,
@@ -227,7 +228,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             //     g.get_outputs(node)
             //     | std::views::transform([](const auto& e) noexcept { return E { edge_type::NORMAL, e }; })
             // };
-            // boost::container::static_vector<E, 1> freerides;
+            // static_vector_typer<E, 1> freerides;
             // if (node == N{ g.down_node_cnt - 1u, g.right_node_cnt - 1u }) {
             //     // do nothing
             // } else {
@@ -242,7 +243,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             //     std::move(freerides_no_ref)
             // );
             // // COMMENTED OUT BECAUSE concat_view DOESN'T SUPPORT PIPE OPERATOR, WHICH CALLERS USE.
-            boost::container::static_vector<std::tuple<E, N, N, ED&>, 4> ret {};
+            typename static_vector_typer<std::tuple<E, N, N, ED&>, 4u, error_check>::type ret {};
             for (const auto& [e, n1, n2, ed_ptr] : g.get_outputs_full(node)) { // will iterate at-most 3 times
                 E new_e { edge_type::NORMAL, e };
                 ret.push_back(std::tuple<E, N, N, ED&> {new_e, n1, n2, ed_ptr});
@@ -278,7 +279,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         }
 
         auto get_inputs_full(const N& node) {
-            boost::container::static_vector<std::tuple<E, N, N, ED&>, 4> ret {};
+            typename static_vector_typer<std::tuple<E, N, N, ED&>, 4u, error_check>::type ret {};
             for (const auto& [e, n1, n2, ed_ptr] : g.get_inputs_full(node)) { // will iterate at-most 3 times
                 E new_e { edge_type::NORMAL, e };
                 ret.push_back(std::tuple<E, N, N, ED&> {new_e, n1, n2, ed_ptr});
