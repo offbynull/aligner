@@ -63,7 +63,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
     public:
         const INDEX down_node_cnt;
         const INDEX right_node_cnt;
-        static constexpr size_t max_in_degree { 3zu };
+        const size_t max_in_degree { static_cast<size_t>(down_node_cnt) - 1u };
 
         pairwise_fitting_alignment_graph(
             INDEX _down_node_cnt,
@@ -384,6 +384,23 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
             return this->get_outputs(node).size();
         }
 
+        std::size_t get_out_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            std::size_t degree { get_out_degree(node) };
+            const auto& [n_down, n_right] { node };
+            if (n_down == 0zu && n_right == 0zu) {
+                // indel edge AND freeride from 0,0 to 1,0 -- 2 edges to 1 child, subtract 1 to make the count unique
+                if (down_node_cnt > 1zu) {
+                    degree -= 1zu;
+                }
+            }
+            return degree;
+        }
+
         std::size_t get_in_degree(const N& node) {
             if constexpr (error_check) {
                 if (!has_node(node)) {
@@ -391,6 +408,23 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
                 }
             }
             return this->get_inputs(node).size();
+        }
+
+        std::size_t get_in_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            std::size_t degree { get_in_degree(node) };
+            const auto& [n_down, n_right] { node };
+            if (n_down == down_node_cnt - 1zu && n_right == right_node_cnt - 1zu) {
+                // indel edge AND freeride from max_d-1,maxr to max_d,max_r -- 2 edges to 1 child, subtract 1 to make the count unique
+                if (down_node_cnt > 1zu) {
+                    degree -= 1zu;
+                }
+            }
+            return degree;
         }
 
         template<weight WEIGHT=std::float64_t>

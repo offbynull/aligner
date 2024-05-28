@@ -3,7 +3,8 @@ TODO:
 * Change all occurrences of size_t to std::size_t
 * ~~Use std::unreachable() any place with known unreachable?~~
 * ~~Remove underscores from template parameters because they're causing warnings.~~
-* Add function for stack 8x8, 16x16, etc..
+* ~~Add function for stack 8x8, 16x16, etc..~~
+* Update get_in_degree() / get_out_degree() functions to calculate directly
 * Add concept checks to autos
 * Add random access container wrapper that pads out with dummy (or truncates) to a certain size
 * Add random access container wrapper that mmap (it's in boost)

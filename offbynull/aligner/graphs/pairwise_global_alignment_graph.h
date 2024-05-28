@@ -231,6 +231,15 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             return g.get_out_degree(node);
         }
 
+        std::size_t get_out_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            return g.get_out_degree_unique(node);
+        }
+
         std::size_t get_in_degree(const N& node) {
             if constexpr (error_check) {
                 if (!has_node(node)) {
@@ -238,6 +247,15 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
                 }
             }
             return g.get_in_degree(node);
+        }
+
+        std::size_t get_in_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            return g.get_in_degree_unique(node);
         }
 
         template<weight WEIGHT=std::float64_t>

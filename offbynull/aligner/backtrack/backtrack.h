@@ -55,7 +55,7 @@ namespace offbynull::aligner::backtrack::backtrack {
             const auto& slots_lazy {
                 g.get_nodes()
                 | std::views::transform([&](const auto& n) -> slot<N, E, COUNT, WEIGHT> {
-                    std::size_t in_degree { g.get_in_degree(n) };
+                    std::size_t in_degree { g.get_in_degree_unique(n) };
                     COUNT in_degree_narrowed { static_cast<COUNT>(in_degree) };
                     if constexpr (error_check) {
                         if (in_degree_narrowed != in_degree) {

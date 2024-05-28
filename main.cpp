@@ -35,7 +35,7 @@ int main() {
     // dynamic
     {
         auto [elements, weight] {
-            align_heap<alignment_mode::GLOBAL, std::uint8_t, std::float16_t, false>(
+            align_heap<alignment_mode::LOCAL, std::uint8_t, std::float16_t, false>(
                 v,
                 w,
                 weight_lookup
@@ -46,7 +46,7 @@ int main() {
     // static
     {
         auto [elements, weight] {
-            align_stack<alignment_mode::GLOBAL, std::float16_t, v.size(), w.size(), false>(
+            align_stack<alignment_mode::LOCAL, std::float16_t, v.size(), w.size(), false>(
                 v,
                 w,
                 weight_lookup

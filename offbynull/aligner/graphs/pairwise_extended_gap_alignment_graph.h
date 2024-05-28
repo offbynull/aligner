@@ -513,6 +513,15 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             return this->get_outputs(node).size();
         }
 
+        std::size_t get_out_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            return this->get_out_degree(node);
+        }
+
         std::size_t get_in_degree(const N& node) {
             if constexpr (error_check) {
                 if (!has_node(node)) {
@@ -520,6 +529,15 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 }
             }
             return this->get_inputs(node).size();
+        }
+
+        std::size_t get_in_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            return this->get_in_degree(node);
         }
 
         template<weight WEIGHT=std::float64_t>

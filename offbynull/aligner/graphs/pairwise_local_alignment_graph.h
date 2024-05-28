@@ -23,7 +23,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::concat_view;
-    using offbynull::utils::static_vector_typer;
+    using offbynull::utils::pair_counter_view;
 
     enum class edge_type : uint8_t {
         FREE_RIDE,
@@ -63,7 +63,9 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     public:
         const INDEX down_node_cnt;
         const INDEX right_node_cnt;
-        static constexpr size_t max_in_degree { 4zu };
+        const size_t max_in_degree {
+            (static_cast<size_t>(down_node_cnt) * static_cast<size_t>(right_node_cnt)) - 1u
+        };
 
         pairwise_local_alignment_graph(
             INDEX _down_node_cnt,
@@ -225,43 +227,42 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         }
 
         auto get_outputs_full(const N& node) {
-            // auto normals {
-            //     g.get_outputs(node)
-            //     | std::views::transform([](const auto& e) noexcept { return E { edge_type::NORMAL, e }; })
-            // };
-            // static_vector_typer<E, 1> freerides;
-            // if (node == N{ g.down_node_cnt - 1u, g.right_node_cnt - 1u }) {
-            //     // do nothing
-            // } else {
-            //     freerides.push_back({ edge_type::FREE_RIDE, { node, { g.down_node_cnt - 1u, g.right_node_cnt - 1u } } });
-            // }
-            // auto freerides_no_ref {
-            //     std::move(freerides)
-            //     | std::views::transform([](const auto& e) noexcept -> E { return e; })
-            // };
-            // return concat_view(
-            //     std::move(normals),
-            //     std::move(freerides_no_ref)
-            // );
-            // // COMMENTED OUT BECAUSE concat_view DOESN'T SUPPORT PIPE OPERATOR, WHICH CALLERS USE.
-            typename static_vector_typer<std::tuple<E, N, N, ED&>, 4u, error_check>::type ret {};
-            for (const auto& [e, n1, n2, ed_ptr] : g.get_outputs_full(node)) { // will iterate at-most 3 times
-                E new_e { edge_type::NORMAL, e };
-                ret.push_back(std::tuple<E, N, N, ED&> {new_e, n1, n2, ed_ptr});
-            }
-            // I had to use the for-loop above because g.get_outputs_full(node) doesn't allow pipe operator?
-            const auto & [n_down, n_right] { node };
-            if (!(n_down == g.down_node_cnt - 1u && n_right == g.right_node_cnt - 1u)) {
-                ret.push_back(
-                    {
-                        { edge_type::FREE_RIDE, { node, { g.down_node_cnt - 1u, g.right_node_cnt - 1u } } },
-                        node,
-                        {g.down_node_cnt - 1u, g.right_node_cnt - 1u},
-                        freeride_ed
-                    }
-                );
-            }
-            return ret;
+            auto standard_outputs { g.get_outputs_full(node) };
+            bool is_leaf { node == get_leaf_node() };
+            auto non_leaf_only_outputs {
+                std::views::single(get_leaf_node())
+                | std::views::transform([node, this](const N& n2) {
+                    N n1 { node };
+                    E e { edge_type::FREE_RIDE, { n1, n2 } };
+                    return std::tuple<E, N, N, ED&> {e, n1, n2, freeride_ed};
+                })
+                | std::views::filter([is_leaf](const auto& edge) {
+                    return !is_leaf;
+                })
+            };
+            bool is_root { node == get_root_node() };
+            auto root_only_outputs {
+                pair_counter_view {
+                    down_node_cnt,
+                    right_node_cnt
+                }
+                | std::views::drop(1)
+                | std::views::transform([this](const N& n2) {
+                    N n1 { 0, 0 };
+                    E e { edge_type::FREE_RIDE, { n1, n2 } };
+                    return std::tuple<E, N, N, ED&> {e, n1, n2, freeride_ed};
+                })
+                | std::views::filter([is_root](const auto& edge) {
+                    return is_root;
+                })
+            };
+            return concat_view {
+                standard_outputs,
+                concat_view {
+                    non_leaf_only_outputs,
+                    root_only_outputs
+                }
+            };
         }
 
         std::tuple<E, N, N, ED&> get_output_full(const N& node) {
@@ -280,24 +281,42 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         }
 
         auto get_inputs_full(const N& node) {
-            typename static_vector_typer<std::tuple<E, N, N, ED&>, 4u, error_check>::type ret {};
-            for (const auto& [e, n1, n2, ed_ptr] : g.get_inputs_full(node)) { // will iterate at-most 3 times
-                E new_e { edge_type::NORMAL, e };
-                ret.push_back(std::tuple<E, N, N, ED&> {new_e, n1, n2, ed_ptr});
-            }
-            // I had to use the for-loop above because g.get_outputs_full(node) doesn't allow pipe operator?
-            const auto & [n_down, n_right] { node };
-            if (!(n_down == 0u && n_right == 0u)) {
-                ret.push_back(
-                    {
-                        { edge_type::FREE_RIDE, { { 0u, 0u }, node } },
-                        { 0u, 0u },
-                        node,
-                        freeride_ed
-                    }
-                );
-            }
-            return ret;
+            auto standard_inputs { g.get_inputs_full(node) };
+            bool is_leaf { node == get_leaf_node() };
+            auto leaf_only_inputs {
+                pair_counter_view {
+                    down_node_cnt,
+                    right_node_cnt
+                }
+                | std::views::take(down_node_cnt * right_node_cnt - 1u)
+                | std::views::transform([this](const N& n1) {
+                    N n2 { down_node_cnt - 1u, right_node_cnt - 1u };
+                    E e { edge_type::FREE_RIDE, { n1, n2 } };
+                    return std::tuple<E, N, N, ED&> {e, n1, n2, freeride_ed};
+                })
+                | std::views::filter([is_leaf](const auto& edge) {
+                    return is_leaf;
+                })
+            };
+            bool is_root { node = get_root_node() };
+            auto non_root_only_inputs {
+                std::views::single(get_root_node())
+                | std::views::transform([node, this](const N& n1) {
+                    N n2 { node };
+                    E e { edge_type::FREE_RIDE, { n1, n2 } };
+                    return std::tuple<E, N, N, ED&> {e, n1, n2, freeride_ed};
+                })
+                | std::views::filter([is_root](const auto& edge) {
+                    return !is_root;
+                })
+            };
+            return concat_view {
+                standard_inputs,
+                concat_view {
+                    leaf_only_inputs,
+                    non_root_only_inputs
+                }
+            };
         }
 
         std::tuple<E, N, N, ED&> get_input_full(const N& node) {
@@ -390,6 +409,31 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return this->get_outputs(node).size();
         }
 
+        std::size_t get_out_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            std::size_t degree { get_out_degree(node) };
+            const auto& [n_down, n_right] { node };
+            if (n_down == 0zu && n_right == 0zu) {
+                // match edge AND freeride from 0,0 to 1,1 -- 2 edges to 1 child, subtract 1 to make the count unique
+                if (down_node_cnt > 1zu and right_node_cnt > 1zu) {
+                    degree -= 1zu;
+                }
+                // indel edge AND freeride from 0,0 to 1,0 -- 2 edges to 1 child, subtract 1 to make the count unique
+                if (down_node_cnt > 1zu) {
+                    degree -= 1zu;
+                }
+                // indel edge AND freeride from 0,0 to 0,1 -- 2 edges to 1 child, subtract 1 to make the count unique
+                if (right_node_cnt > 1zu) {
+                    degree -= 1zu;
+                }
+            }
+            return degree;
+        }
+
         std::size_t get_in_degree(const N& node) {
             if constexpr (error_check) {
                 if (!has_node(node)) {
@@ -397,6 +441,31 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                 }
             }
             return this->get_inputs(node).size();
+        }
+
+        std::size_t get_in_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            std::size_t degree { get_in_degree(node) };
+            const auto& [n_down, n_right] { node };
+            if (n_down == down_node_cnt - 1zu && n_right == right_node_cnt - 1zu) {
+                // match edge AND freeride from max_d-1,maxr-1 to max_d,max_r -- 2 edges to 1 child, subtract 1 to make the count unique
+                if (down_node_cnt > 1zu and right_node_cnt > 1zu) {
+                    degree -= 1zu;
+                }
+                // indel edge AND freeride from max_d-1,maxr to max_d,max_r -- 2 edges to 1 child, subtract 1 to make the count unique
+                if (down_node_cnt > 1zu) {
+                    degree -= 1zu;
+                }
+                // indel edge AND freeride from max_d,maxr-1 to max_d,max_r -- 2 edges to 1 child, subtract 1 to make the count unique
+                if (right_node_cnt > 1zu) {
+                    degree -= 1zu;
+                }
+            }
+            return degree;
         }
 
         template<weight WEIGHT=std::float64_t>

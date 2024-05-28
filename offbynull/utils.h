@@ -32,7 +32,7 @@ namespace offbynull::utils {
             S1 end1;
             It2 it2;
             S2 end2;
-            bool isFirst;
+            bool is_first;
 
            public:
             using difference_type = std::ptrdiff_t;
@@ -41,30 +41,25 @@ namespace offbynull::utils {
             using reference = value_type;
             using iterator_category = std::input_iterator_tag;
 
-            iterator(It1 first, S1 last1, It2 second, S2 last2, bool firstRange)
-                : it1(first),
-                  end1(last1),
-                  it2(second),
-                  end2(last2),
-                  isFirst(firstRange) {}
+            iterator(It1 a_first, S1 a_last, It2 b_first, S2 b_last)
+            : it1(a_first)
+            , end1(a_last)
+            , it2(b_first)
+            , end2(b_last)
+            , is_first(a_first == a_last ? false : true) {}
 
-            reference operator*() {
-                if (isFirst) {
-                    if (it1 != end1) {
-                        return *it1;
-                    } else {
-                        isFirst = false;
-                        return *it2;
-                    }
+            reference operator*() const {
+                if (is_first) {
+                    return *it1;
                 } else {
                     return *it2;
                 }
             }
 
             iterator& operator++() {
-                if (isFirst) {
+                if (is_first) {
                     if (++it1 == end1) {
-                        isFirst = false;
+                        is_first = false;
                     }
                 } else {
                     ++it2;
@@ -79,12 +74,12 @@ namespace offbynull::utils {
             }
 
             bool operator==(const iterator& other) const {
-                return isFirst == other.isFirst &&
-                       (isFirst ? it1 == other.it1 : it2 == other.it2);
+                return is_first == other.is_first &&
+                       (is_first ? it1 == other.it1 : it2 == other.it2);
             }
 
             bool operator==(const concat_view<R1, R2>::sentinel&) const {
-                return !isFirst && it2 == end2;
+                return !is_first && it2 == end2;
             }
 
         };
@@ -92,8 +87,7 @@ namespace offbynull::utils {
         auto begin() {
             return iterator(
                 std::ranges::begin(first_range), std::ranges::end(first_range),
-                std::ranges::begin(second_range), std::ranges::end(second_range),
-                true
+                std::ranges::begin(second_range), std::ranges::end(second_range)
             );
         }
 
@@ -104,12 +98,127 @@ namespace offbynull::utils {
     template <typename T1, typename T2>
     concat_view(T1&&, T2&&) -> concat_view<std::views::all_t<T1>, std::views::all_t<T2>>;
 
+    struct concat_range_adaptor_closure {
+        std::size_t count_;
+        constexpr concat_range_adaptor_closure(std::size_t count)
+        : count_(count) {}
+
+        template <std::ranges::viewable_range R>
+        constexpr auto operator()(R && r) const {
+            return concat_view(std::forward<R>(r), count_);
+        }
+    } ;
+
     struct concat_range_adaptor {
         template<typename R1, typename R2>
         constexpr auto operator() (R1&& r1, R2&& r2) const {
             return concat_view(std::forward<R1>(r1), std::forward<R2>(r2));
         }
     };
+
+    template<typename R1, typename R2, typename Adaptor>
+    auto operator|(const concat_view<R1, R2>& cv, Adaptor&& adaptor) {
+        return adaptor(std::views::all(cv));
+    }
+
+    template<typename R1, typename R2, typename Adaptor>
+    auto operator|(concat_view<R1, R2>&& cv, Adaptor&& adaptor) {
+        return adaptor(std::views::all(std::move(cv)));
+    }
+
+
+
+
+
+    // Use this as opposed to std::views::cartesian_product(std::views::iota(...), std::views::iota(...)). See
+    // https://www.reddit.com/r/cpp_questions/comments/1d2qecv/use_of_views_results_in_4x_the_number_of_assembly/.
+    template <std::integral T>
+    class pair_counter_view : public std::ranges::view_interface<pair_counter_view<T>> {
+        const T dim1_cnt;
+        const T dim2_cnt;
+
+       public:
+        pair_counter_view(T dim1_cnt_, T dim2_cnt_)
+            : dim1_cnt(dim1_cnt_)
+            , dim2_cnt(dim2_cnt_) {}
+
+        class iterator {
+            T dim1;
+            const T dim1_cnt;
+            T dim2;
+            const T dim2_cnt;
+
+           public:
+            using difference_type = std::ptrdiff_t;
+            using value_type = std::pair<T, T>;
+            using pointer = value_type*;
+            using reference = value_type;
+            using iterator_category = std::input_iterator_tag;
+
+            iterator(T dim1_, const T dim1_cnt_, T dim2_, const T dim2_cnt_)
+            : dim1(dim1_)
+            , dim1_cnt(dim1_cnt_)
+            , dim2(dim2_)
+            , dim2_cnt(dim2_cnt_) {}
+
+            reference operator*() const {
+                return std::pair {dim1, dim2};
+            }
+
+            iterator& operator++() {
+                dim1++;
+                if (dim1 == dim1_cnt) {
+                    dim1 = static_cast<T>(0u);
+                    dim2++;
+                }
+                return *this;
+            }
+
+            iterator operator++(int) {
+                iterator tmp = *this;
+                ++(*this);
+                return tmp;
+            }
+
+            bool operator==(const iterator& other) const {
+                // std::cout << this->dim1 << 'x' << this->dim2 << " vs "
+                //     << other.dim1 << 'x' << other.dim2
+                //     << std::endl;
+                return this->dim1 == other.dim1
+                    && this->dim1_cnt == other.dim1_cnt
+                    && this->dim2 == other.dim2
+                    && this->dim2_cnt == other.dim2_cnt;
+            }
+        };
+
+        auto begin() noexcept {
+            return iterator(
+                static_cast<T>(0u),
+                dim1_cnt,
+                static_cast<T>(0u),
+                dim2_cnt
+            );
+        }
+
+        auto end() noexcept {
+            return iterator(
+                0,
+                dim1_cnt,
+                dim2_cnt,
+                dim2_cnt
+            );
+        }
+    };
+
+    // Proper placement of the deduction guide
+    template <std::integral T>
+    pair_counter_view(T&&, T&&) -> pair_counter_view<T>;
+
+
+
+
+
+
 
     template<typename T>
     struct type_displayer;

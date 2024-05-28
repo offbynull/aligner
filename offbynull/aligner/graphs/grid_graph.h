@@ -6,8 +6,6 @@
 #include <tuple>
 #include <stdexcept>
 #include <utility>
-#include "boost/container/static_vector.hpp"
-#include "boost/container/options.hpp"
 #include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 #include "offbynull/aligner/graph/grid_container_creator.h"
@@ -46,11 +44,11 @@ namespace offbynull::aligner::graphs::grid_graph {
         ED_ indel_ed;
 
         auto construct_full_edge(N n1, N n2) {
-            return std::tuple<E, N, N, ED*> {
+            return std::tuple<E, N, N, ED&> {
                 E { n1, n2 },
                 n1,
                 n2,
-                &this->get_edge_data(
+                this->get_edge_data(
                     E { n1, n2 }
                 )
             };
@@ -218,22 +216,34 @@ namespace offbynull::aligner::graphs::grid_graph {
                 }
             }
             auto [n_down, n_right] = node;
-            typename static_vector_typer<std::tuple<E, N, N, ED*>, 3u, error_check>::type ret{};
-            if (n_down == down_node_cnt - 1u && n_right == right_node_cnt - 1u) {
-                // do nothing
-            } else if (n_down < down_node_cnt - 1u && n_right < right_node_cnt - 1u) {
-                ret.push_back(this->construct_full_edge(node, N {n_down, n_right + 1u}));
-                ret.push_back(this->construct_full_edge(node, N {n_down + 1u, n_right}));
-                ret.push_back(this->construct_full_edge(node, N {n_down + 1u, n_right + 1u}));
-            } else if (n_right == right_node_cnt - 1u) {
-                ret.push_back(this->construct_full_edge(node, N {n_down + 1u, n_right}));
-            } else if (n_down == down_node_cnt - 1u) {
-                ret.push_back(this->construct_full_edge(node, N {n_down, n_right + 1u}));
-            }
-            return std::move(ret)
-                | std::views::transform([](const auto& edge_full) noexcept {
-                    auto [e, n1, n2, ed_ptr] = edge_full;
-                    return std::tuple<E, N, N, ED&>(e, n1, n2, *ed_ptr);
+            // Cartesian product has some issues with bloat, so not using it here:
+            //     std::views::cartesian_product(
+            //         std::views::iota(static_cast<INDEX>(0), static_cast<INDEX>(1)),
+            //         std::views::iota(static_cast<INDEX>(0), static_cast<INDEX>(1))
+            //     )
+            //     | std::views::drop(1)
+            auto offsets = {
+                std::pair{ static_cast<INDEX>(0),static_cast<INDEX>(1) },
+                std::pair{ static_cast<INDEX>(1),static_cast<INDEX>(0) },
+                std::pair{ static_cast<INDEX>(1),static_cast<INDEX>(1) }
+            };
+            return offsets
+                | std::views::filter([node, this](const auto& offset) {
+                    const auto& [down_offset, right_offset] { offset };
+                    const auto& [n_down, n_right] { node };
+                    if (down_offset == 1u && n_down == down_node_cnt - 1u) {
+                        return false;
+                    }
+                    if (right_offset == 1u && n_right == right_node_cnt - 1u) {
+                        return false;
+                    }
+                    return true;
+                })
+                | std::views::transform([node, this](const auto& offset) {
+                    const auto& [down_offset, right_offset] { offset };
+                    const auto& [n_down, n_right] { node };
+                    N n2 { n_down + down_offset, n_right + right_offset };
+                    return this->construct_full_edge(node, n2);
                 });
         }
 
@@ -258,23 +268,28 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            auto [n_down, n_right] = node;
-            typename static_vector_typer<std::tuple<E, N, N, ED*>, 3u, error_check>::type ret{};
-            if (n_down == 0u && n_right == 0u) {
-                // do nothing
-            } else if (n_down > 0u && n_right > 0u) {
-                ret.push_back(this->construct_full_edge(N {n_down, n_right - 1u}, node));
-                ret.push_back(this->construct_full_edge(N {n_down - 1u, n_right}, node));
-                ret.push_back(this->construct_full_edge(N {n_down - 1u, n_right - 1u}, node));
-            } else if (n_right > 0u) {
-                ret.push_back(this->construct_full_edge(N {n_down, n_right - 1u}, node));
-            } else if (n_down > 0u) {
-                ret.push_back(this->construct_full_edge(N {n_down - 1u, n_right}, node));
-            }
-            return std::move(ret)
-                | std::views::transform([](auto& edge_full) noexcept {
-                    auto [e, n1, n2, ed_ptr] = edge_full;
-                    return std::tuple<E, N, N, ED&>(e, n1, n2, *ed_ptr);
+            auto offsets = {
+                std::pair{ static_cast<INDEX>(0),static_cast<INDEX>(1) },
+                std::pair{ static_cast<INDEX>(1),static_cast<INDEX>(0) },
+                std::pair{ static_cast<INDEX>(1),static_cast<INDEX>(1) }
+            };
+            return offsets
+                | std::views::filter([node, this](const auto& offset) {
+                    const auto& [down_offset, right_offset] { offset };
+                    const auto& [n_down, n_right] { node };
+                    if (down_offset == 1u && n_down == 0u) {
+                        return false;
+                    }
+                    if (right_offset == 1u && n_right == 0u) {
+                        return false;
+                    }
+                    return true;
+                })
+                | std::views::transform([node, this](const auto& offset) {
+                    const auto& [down_offset, right_offset] { offset };
+                    const auto& [n_down, n_right] { node };
+                    N n1 { n_down - down_offset, n_right - right_offset };
+                    return this->construct_full_edge(n1, node);
                 });
         }
 
@@ -299,7 +314,8 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->get_outputs_full(node) | std::views::transform([this](auto v) noexcept -> E { return std::get<0>(v); });
+            return this->get_outputs_full(node)
+                | std::views::transform([](const auto& v) noexcept -> E { return std::get<0>(v); });
         }
 
         E get_output(const N& node) {
@@ -323,7 +339,8 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->get_inputs_full(node) | std::views::transform([this](auto v) noexcept -> E { return std::get<0>(v); });
+            return this->get_inputs_full(node)
+                | std::views::transform([](const auto& v) noexcept -> E { return std::get<0>(v); });
         }
 
         E get_input(const N& node) {
@@ -347,7 +364,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->get_outputs(node).size() > 0u;
+            return this->get_out_degree(node) > 0zu;
         }
 
         bool has_inputs(const N& node) {
@@ -356,7 +373,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->get_inputs(node).size() > 0u;
+            return this->get_in_degree(node) > 0zu;
         }
 
         std::size_t get_out_degree(const N& node) {
@@ -365,7 +382,18 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->get_outputs(node).size();
+            auto outputs { this->get_outputs(node) };
+            auto dist { std::distance(outputs.begin(), outputs.end()) };
+            return static_cast<size_t>(dist);
+        }
+
+        std::size_t get_out_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            return this->get_out_degree(node);
         }
 
         std::size_t get_in_degree(const N& node) {
@@ -374,7 +402,18 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->get_inputs(node).size();
+            auto inputs { this->get_inputs(node) };
+            auto dist { std::distance(inputs.begin(), inputs.end()) };
+            return static_cast<size_t>(dist);
+        }
+
+        std::size_t get_in_degree_unique(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            return this->get_in_degree(node);
         }
 
         constexpr static INDEX node_count(
