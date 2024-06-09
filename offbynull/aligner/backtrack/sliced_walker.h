@@ -73,6 +73,8 @@ namespace offbynull::aligner::backtrack::sliced_walker {
         using INDEX = typename G::INDEX;
         using SLICE_SLOT_CONTAINER=decltype(std::declval<SLICE_SLOT_ALLOCATOR>().create_empty(0zu));
         using RESIDENT_SLOT_CONTAINER=decltype(std::declval<RESIDENT_SLOT_ALLOCATOR>().create_empty(0zu));
+        G& graph;
+        std::function<WEIGHT(const E&)> get_edge_weight_func;
         RESIDENT_SLOT_CONTAINER resident_slots;
         SLICE_SLOT_CONTAINER prev_slots;
         SLICE_SLOT_CONTAINER next_slots;
@@ -118,43 +120,43 @@ namespace offbynull::aligner::backtrack::sliced_walker {
 
     public:
         sliced_forward_walker(
-            G& g,
+            G& graph_,
+            std::function<WEIGHT(const E&)> get_edge_weight_func_,
             SLICE_SLOT_ALLOCATOR slice_slot_container_creator = {},
             RESIDENT_SLOT_ALLOCATOR resident_slot_container_creator = {}
         )
-        : resident_slots{resident_slot_container_creator.create_empty(g.max_resident_nodes_count())}
-        , prev_slots{slice_slot_container_creator.create_empty(g.max_slice_nodes_count())}
-        , next_slots{slice_slot_container_creator.create_empty(g.max_slice_nodes_count())}
+        : graph{graph_}
+        , get_edge_weight_func{get_edge_weight_func_}
+        , resident_slots{resident_slot_container_creator.create_empty(graph.max_resident_nodes_count())}
+        , prev_slots{slice_slot_container_creator.create_empty(graph.max_slice_nodes_count())}
+        , next_slots{slice_slot_container_creator.create_empty(graph.max_slice_nodes_count())}
         , n_down{0u}
         , active_slot_ptr{nullptr}
         , next_slot_ptr{nullptr} {
-            const auto& _resident_slots { g.resident_nodes() };
+            const auto& _resident_slots { graph.resident_nodes() };
             std::ranges::copy(_resident_slots.cbegin(), _resident_slots.cend(), std::back_inserter(resident_slots));
             std::ranges::sort(resident_slots.begin(), resident_slots.end(), slots_comparator<N, WEIGHT>{});
-            const auto& _next_slots { g.slice_nodes(0u) };
+            const auto& _next_slots { graph.slice_nodes(0u) };
             std::ranges::copy(_next_slots.cbegin(), _next_slots.cend(), std::back_inserter(next_slots));
             std::ranges::sort(next_slots.begin(), next_slots.end(), slots_comparator<N, WEIGHT>{});
-            next_slot_ptr = &find_slot(g.get_root_node());
+            next_slot_ptr = &find_slot(graph.get_root_node());
         }
 
         slot<N, WEIGHT> active_slot() {
             return *this->active_slot_ptr;
         }
 
-        bool next(
-            G& g,
-            std::function<WEIGHT(const E&)> get_edge_weight_func
-        ) {
+        bool next() {
             if (next_slot_ptr == nullptr) {
                 return true;
             }
             active_slot_ptr = next_slot_ptr;
             auto incoming_accumulated {
                 std::views::common(
-                    g.get_inputs(active_slot_ptr->node)
+                    graph.get_inputs(active_slot_ptr->node)
                     | std::views::transform(
                         [&](const auto& edge) noexcept -> std::pair<E, WEIGHT> {
-                            const N& n_from { g.get_edge_from(edge) };
+                            const N& n_from { graph.get_edge_from(edge) };
                             const WEIGHT& edge_weight { get_edge_weight_func(edge) };
                             slot<N, WEIGHT>& n_from_slot { find_slot(n_from) };
                             return { edge, n_from_slot.backtracking_weight + edge_weight };
@@ -179,8 +181,8 @@ namespace offbynull::aligner::backtrack::sliced_walker {
             }
 
             // Update resident node weights
-            for (const E& edge : g.outputs_to_residents(active_slot_ptr->node)) {
-                const N& resident_node { g.get_edge_to(edge) };
+            for (const E& edge : graph.outputs_to_residents(active_slot_ptr->node)) {
+                const N& resident_node { graph.get_edge_to(edge) };
                 std::optional<std::reference_wrapper<slot<N, WEIGHT>>> resident_slot_maybe {
                     find_within_slots(resident_slots, resident_node)
                 };
@@ -198,20 +200,20 @@ namespace offbynull::aligner::backtrack::sliced_walker {
             }
 
             // Move to next node / next slice
-            if (g.last_node_in_slice(n_down) != active_slot_ptr->node) {
-                next_slot_ptr = &find_slot(g.next_node_in_slice(active_slot_ptr->node, n_down));
+            if (graph.last_node_in_slice(n_down) != active_slot_ptr->node) {
+                next_slot_ptr = &find_slot(graph.next_node_in_slice(active_slot_ptr->node, n_down));
             } else {
                 n_down++;
-                if (n_down == g.down_node_cnt) {
+                if (n_down == graph.down_node_cnt) {
                     next_slot_ptr = nullptr;
                     return true;
                 }
                 prev_slots.clear();
                 std::ranges::copy(next_slots.begin(), next_slots.end(), std::back_inserter(prev_slots));
-                const auto & _next_slots { g.slice_nodes(n_down) };
+                const auto & _next_slots { graph.slice_nodes(n_down) };
                 std::ranges::copy(_next_slots.begin(), _next_slots.end(), std::back_inserter(next_slots));
                 std::ranges::sort(next_slots.begin(), next_slots.end(), slots_comparator<N, WEIGHT>{});
-                next_slot_ptr = &find_slot(g.first_node_in_slice(n_down));
+                next_slot_ptr = &find_slot(graph.first_node_in_slice(n_down));
             }
 
             return false;

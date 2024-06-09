@@ -64,60 +64,63 @@ namespace {
         }
 
         // walk
-        sliced_forward_walker<decltype(g), std::float64_t> walker{g};
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        sliced_forward_walker<decltype(g), std::float64_t> walker{
+            g,
+            [&g](const E& edge) { return g.get_edge_data(edge); }
+        };
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 0u, 0u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 0u, 1u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -1.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 0u, 2u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -2.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 0u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -3.0);
 
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 1u, 0u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -1.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 1u, 1u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -1.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 1u, 2u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -2.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 1u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -3.0);
 
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 2u, 0u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -2.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 2u, 1u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -2.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 2u, 2u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -2.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 2u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -3.0);
 
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 0u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -3.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 1u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -3.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 2u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -3.0);
-        EXPECT_TRUE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_TRUE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -3.0);
 
-        EXPECT_TRUE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_TRUE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, -3.0);
     }
@@ -159,60 +162,63 @@ namespace {
         );
 
         // walk
-        sliced_forward_walker<decltype(g), std::float64_t> walker{g};
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        sliced_forward_walker<decltype(g), std::float64_t> walker{
+            g,
+            [&g](const E& edge) { return g.get_edge_data(edge); }
+        };
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 0u, 0u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 0u, 1u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 0u, 2u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 0u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
 
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 1u, 0u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 1u, 1u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 1u, 2u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 1u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
 
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 2u, 0u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 2u, 1u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 2u, 2u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.5);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 2u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
 
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 0u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 1u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_FALSE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_FALSE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 2u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.0);
-        EXPECT_TRUE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_TRUE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.5);
 
-        EXPECT_TRUE(walker.next(g, [&g](const E& edge) { return g.get_edge_data(edge); }));
+        EXPECT_TRUE(walker.next());
         EXPECT_EQ(walker.active_slot().node, (N { 3u, 3u }));
         EXPECT_EQ(walker.active_slot().backtracking_weight, 0.5);
     }
