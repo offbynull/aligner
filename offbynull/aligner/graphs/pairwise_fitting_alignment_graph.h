@@ -100,7 +100,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
             if (edge.type == edge_type::FREE_RIDE) {
                 freeride_ed = std::forward<ED>(data);
             } else {
-                g.update_edge_data(edge.inner_edge, data);
+                g.update_edge_data(edge.inner_edge, std::forward<ED>(data));
             }
         }
 

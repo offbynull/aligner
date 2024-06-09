@@ -20,7 +20,7 @@ namespace offbynull::aligner::backtrack::sliced_walker {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::backtrack::ready_queue::ready_queue;
     using offbynull::aligner::backtrack::container_creator::container_creator;
-    using offbynull::aligner::backtrack::container_creators::static_vector_container_creator;
+    using offbynull::aligner::backtrack::container_creators::vector_container_creator;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::max_element;
@@ -30,9 +30,12 @@ namespace offbynull::aligner::backtrack::sliced_walker {
         N node;
         WEIGHT backtracking_weight;
 
-        slot(N node_)
+        slot(N node_, WEIGHT backtracking_weight_)
         : node{node_}
-        , backtracking_weight{} {}
+        , backtracking_weight{backtracking_weight_} {}
+
+        slot(N node_)
+        : slot{node_, {}} {}
     };
 
     template<typename N, weight WEIGHT>
@@ -52,9 +55,9 @@ namespace offbynull::aligner::backtrack::sliced_walker {
 
     template<
         readable_sliceable_parwise_alignment_graph G,
-        std::size_t slice_max_cnt,
-        widenable_to_size_t COUNT,
         weight WEIGHT,
+        container_creator SLICE_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, WEIGHT>>,
+        container_creator RESIDENT_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, WEIGHT>>,
         bool error_check = true
     >
     requires requires(typename G::N n)
@@ -68,13 +71,14 @@ namespace offbynull::aligner::backtrack::sliced_walker {
         using ND = typename G::ND;
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
-        using SLOT_ALLOCATOR=static_vector_container_creator<slot<N, WEIGHT>, slice_max_cnt, error_check>;
-        using SLOT_CONTAINER=decltype(std::declval<SLOT_ALLOCATOR>().create_empty(slice_max_cnt));
-        SLOT_CONTAINER resident_slots;
-        SLOT_CONTAINER prev_slots;
-        SLOT_CONTAINER next_slots;
+        using SLICE_SLOT_CONTAINER=decltype(std::declval<SLICE_SLOT_ALLOCATOR>().create_empty(0zu));
+        using RESIDENT_SLOT_CONTAINER=decltype(std::declval<RESIDENT_SLOT_ALLOCATOR>().create_empty(0zu));
+        RESIDENT_SLOT_CONTAINER resident_slots;
+        SLICE_SLOT_CONTAINER prev_slots;
+        SLICE_SLOT_CONTAINER next_slots;
         INDEX n_down;
         slot<N, WEIGHT>* active_slot_ptr;
+        slot<N, WEIGHT>* next_slot_ptr;
 
         static std::optional<std::reference_wrapper<slot<N, WEIGHT>>> find_within_slots(auto& slots, const auto& node) {
             auto it { std::lower_bound(slots.begin(), slots.end(), node, slots_comparator<N, WEIGHT>{}) };
@@ -115,29 +119,36 @@ namespace offbynull::aligner::backtrack::sliced_walker {
     public:
         sliced_forward_walker(
             G& g,
-            SLOT_ALLOCATOR container_creator = {}
+            SLICE_SLOT_ALLOCATOR slice_slot_container_creator = {},
+            RESIDENT_SLOT_ALLOCATOR resident_slot_container_creator = {}
         )
-        : resident_slots{container_creator.create_empty(g.max_resident_nodes_count())}
-        , next_slots{container_creator.create_empty(g.max_slice_nodes_count())}
-        , prev_slots{container_creator.create_empty(g.max_slice_nodes_count())}
+        : resident_slots{resident_slot_container_creator.create_empty(g.max_resident_nodes_count())}
+        , prev_slots{slice_slot_container_creator.create_empty(g.max_slice_nodes_count())}
+        , next_slots{slice_slot_container_creator.create_empty(g.max_slice_nodes_count())}
         , n_down{0u}
-        , active_slot_ptr{&find_slot(g.get_root_node())} {
+        , active_slot_ptr{nullptr}
+        , next_slot_ptr{nullptr} {
             const auto& _resident_slots { g.resident_nodes() };
-            std::ranges::copy(_resident_slots.begin(), _resident_slots.end(), std::back_inserter(resident_slots));
+            std::ranges::copy(_resident_slots.cbegin(), _resident_slots.cend(), std::back_inserter(resident_slots));
             std::ranges::sort(resident_slots.begin(), resident_slots.end(), slots_comparator<N, WEIGHT>{});
-            const auto & _next_slots { g.slice_nodes(0u) };
-            std::ranges::copy(_next_slots.begin(), _next_slots.end(), std::back_inserter(next_slots));
+            const auto& _next_slots { g.slice_nodes(0u) };
+            std::ranges::copy(_next_slots.cbegin(), _next_slots.cend(), std::back_inserter(next_slots));
             std::ranges::sort(next_slots.begin(), next_slots.end(), slots_comparator<N, WEIGHT>{});
-            // std::ranges::sort(prev_slots.begin(), prev_slots.end(), slots_comparator<N, WEIGHT>{});
+            next_slot_ptr = &find_slot(g.get_root_node());
+        }
+
+        slot<N, WEIGHT> active_slot() {
+            return *this->active_slot_ptr;
         }
 
         bool next(
             G& g,
             std::function<WEIGHT(const E&)> get_edge_weight_func
         ) {
-            if (n_down == g.down_node_cnt) {
+            if (next_slot_ptr == nullptr) {
                 return true;
             }
+            active_slot_ptr = next_slot_ptr;
             auto incoming_accumulated {
                 std::views::common(
                     g.get_inputs(active_slot_ptr->node)
@@ -167,11 +178,11 @@ namespace offbynull::aligner::backtrack::sliced_walker {
                 active_slot_ptr->backtracking_weight = (*found).second;
             }
 
-            // Update resident nodes
+            // Update resident node weights
             for (const E& edge : g.outputs_to_residents(active_slot_ptr->node)) {
                 const N& resident_node { g.get_edge_to(edge) };
                 std::optional<std::reference_wrapper<slot<N, WEIGHT>>> resident_slot_maybe {
-                    find_within_slots(resident_slots, active_slot_ptr->node)
+                    find_within_slots(resident_slots, resident_node)
                 };
                 if constexpr (error_check) {
                     if (!resident_slot_maybe.has_value()) {
@@ -187,11 +198,12 @@ namespace offbynull::aligner::backtrack::sliced_walker {
             }
 
             // Move to next node / next slice
-            if (g.last_node_in_slice(n_down) == active_slot_ptr->node) {
-                active_slot_ptr = &find_slot(g.next_node_in_slice(active_slot_ptr->node, n_down));
+            if (g.last_node_in_slice(n_down) != active_slot_ptr->node) {
+                next_slot_ptr = &find_slot(g.next_node_in_slice(active_slot_ptr->node, n_down));
             } else {
                 n_down++;
                 if (n_down == g.down_node_cnt) {
+                    next_slot_ptr = nullptr;
                     return true;
                 }
                 prev_slots.clear();
@@ -199,8 +211,10 @@ namespace offbynull::aligner::backtrack::sliced_walker {
                 const auto & _next_slots { g.slice_nodes(n_down) };
                 std::ranges::copy(_next_slots.begin(), _next_slots.end(), std::back_inserter(next_slots));
                 std::ranges::sort(next_slots.begin(), next_slots.end(), slots_comparator<N, WEIGHT>{});
-                active_slot_ptr = &find_slot(g.first_node_in_slice(n_down));
+                next_slot_ptr = &find_slot(g.first_node_in_slice(n_down));
             }
+
+            return false;
         }
     };
 }

@@ -440,45 +440,49 @@ namespace offbynull::aligner::graphs::grid_graph {
         }
 
         N first_node_in_slice(INDEX n_down) {
+            N first_node { n_down, 0u };
             if constexpr (error_check) {
-                if (n_down + 1u == down_node_cnt) {
+                if (std::get<0>(first_node) >= down_node_cnt) {
                     throw std::runtime_error("Node too far down");
                 }
             }
-            return N { n_down, 0u };
+            return first_node;
         }
 
         N last_node_in_slice(INDEX n_down) {
+            N last_node { n_down, right_node_cnt - 1u };
             if constexpr (error_check) {
-                if (n_down + 1u == down_node_cnt) {
+                if (std::get<0>(last_node) >= down_node_cnt) {
                     throw std::runtime_error("Node too far down");
                 }
             }
-            return N { n_down, right_node_cnt - 1u };
+            return last_node;
         }
 
         N next_node_in_slice(const N& node, INDEX n_down) {
+            N next_node { std::get<0>(node), std::get<1>(node) + 1u};
             if constexpr (error_check) {
-                if (std::get<0>(node) == n_down) {
+                if (std::get<0>(next_node) >= down_node_cnt) {
                     throw std::runtime_error("Node too far down");
                 }
-                if (std::get<1>(node) + 1u == right_node_cnt) {
+                if (std::get<1>(next_node) >= right_node_cnt) {
                     throw std::runtime_error("Node too far right");
                 }
             }
-            return N { std::get<0>(node), std::get<1>(node) + 1u};
+            return next_node;
         }
 
         N prev_node_in_slice(const N& node, INDEX n_down) {
+            N prev_node { std::get<0>(node), std::get<1>(node) - 1u};
             if constexpr (error_check) {
-                if (std::get<0>(node) == n_down) {
+                if (std::get<0>(prev_node) >= down_node_cnt) {
                     throw std::runtime_error("Node too far down");
                 }
-                if (std::get<1>(node) == 0u) {
-                    throw std::runtime_error("Node too far left");
+                if (std::get<1>(prev_node) >= right_node_cnt) {
+                    throw std::runtime_error("Node too far right");
                 }
             }
-            return N { std::get<0>(node), std::get<1>(node) - 1u};
+            return prev_node;
         }
 
         std::size_t max_resident_nodes_count() {
