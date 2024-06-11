@@ -382,8 +382,8 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             return g.outputs_to_residents(node);
         }
 
-        auto inputs_to_residents(const N& node) {
-            return g.inputs_to_residents(node);
+        auto inputs_from_residents(const N& node) {
+            return g.inputs_from_residents(node);
         }
     };
 }

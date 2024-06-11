@@ -595,29 +595,33 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         auto outputs_to_residents(const N& node) {
             using CONTAINER = static_vector_typer<E, 2zu, error_check>::type;
             CONTAINER ret {};
-            if (node != get_leaf_node()) {
-                ret.push_back(E { edge_type::FREE_RIDE, { node, get_leaf_node() } });
+            const N& leaf_node { get_leaf_node() };
+            if (node != leaf_node) {
+                ret.push_back(E { edge_type::FREE_RIDE, { node, leaf_node } });
             }
+            const auto& [leaf_n_down, leaf_n_right] { leaf_node };
             const auto& [n_down, n_right] { node };
-            if ((n_down + 2u == down_node_cnt && n_right + 2u == right_node_cnt)
-                    || (n_down + 1u == down_node_cnt && n_right + 2u == right_node_cnt)
-                    || (n_down + 2u == down_node_cnt && n_right + 1u == right_node_cnt)) {
-                ret.push_back(E { edge_type::NORMAL, { node, get_leaf_node() } });
+            if ((n_down + 1u == leaf_n_down && n_right + 1u == leaf_n_right)
+                    || (n_down == leaf_n_down && n_right + 1u == leaf_n_right)
+                    || (n_down + 1u == leaf_n_down && n_right == leaf_n_right)) {
+                ret.push_back(E { edge_type::NORMAL, { node, leaf_node } });
             }
             return ret;
         }
 
-        auto inputs_to_residents(const N& node) {
+        auto inputs_from_residents(const N& node) {
             using CONTAINER = static_vector_typer<E, 2zu, error_check>::type;
             CONTAINER ret {};
-            if (node != get_root_node()) {
-                ret.push_back(E { edge_type::FREE_RIDE, { get_root_node(), node } });
+            const N& root_node { get_root_node() };
+            if (node != root_node) {
+                ret.push_back(E { edge_type::FREE_RIDE, { root_node, node } });
             }
+            const auto& [root_n_down, root_n_right] { root_node };
             const auto& [n_down, n_right] { node };
-            if ((n_down == 1u && n_right == 1u)
-                    || (n_down == 1u && n_right == 0u)
-                    || (n_down == 0u && n_right == 1u)) {
-                ret.push_back(E { edge_type::NORMAL, { get_root_node(), node } });
+            if ((n_down - 1u == root_n_down && n_right - 1u == root_n_right)
+                    || (n_down - 1u == root_n_down && n_right == root_n_right)
+                    || (n_down == root_n_down && n_right - 1u == root_n_right)) {
+                ret.push_back(E { edge_type::NORMAL, { root_node, node } });
             }
             return ret;
         }

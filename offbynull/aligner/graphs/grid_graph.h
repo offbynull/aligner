@@ -497,7 +497,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return std::views::empty<E>;
         }
 
-        auto inputs_to_residents(const N& node) {
+        auto inputs_from_residents(const N& node) {
             return std::views::empty<E>;
         }
     };

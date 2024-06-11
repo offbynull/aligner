@@ -676,6 +676,117 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         ) {
             return (_right_node_cnt - 1u) * 2u + (_down_node_cnt - 1u) * 2u;
         }
+
+        std::size_t max_slice_nodes_count() {
+            return 1zu + 3zu * (right_node_cnt - 1zu);
+        }
+
+        auto slice_nodes(INDEX n_down) {
+            return std::views::iota(1u, right_node_cnt)
+                | std::views::transform(
+                    [n_down](const auto& n_right) {
+                        using CONTAINER = typename static_vector_typer<N, 3zu, error_check>::type;
+                        CONTAINER ret {};
+                        if (n_down == 0u) {
+                            ret.push_back(N { layer::DIAGONAL, n_down, n_right });
+                        } else {
+                            if (n_right != 0u) {
+                                ret.push_back(N { layer::DOWN, n_down, n_right });
+                                ret.push_back(N { layer::RIGHT, n_down, n_right });
+                            }
+                            ret.push_back(N { layer::DIAGONAL, n_down, n_right });
+                        }
+                        return ret;
+                    }
+                )
+                | std::views::join;
+        }
+
+        N first_node_in_slice(INDEX n_down) {
+            N first_node { layer::DIAGONAL, n_down, 0u };
+            if constexpr (error_check) {
+                if (std::get<1>(first_node) >= down_node_cnt) {
+                    throw std::runtime_error("Node too far down");
+                }
+            }
+            return first_node;
+        }
+
+        N last_node_in_slice(INDEX n_down) {
+            N last_node { layer::DIAGONAL, n_down, right_node_cnt - 1u };
+            if constexpr (error_check) {
+                if (std::get<1>(last_node) >= down_node_cnt) {
+                    throw std::runtime_error("Node too far down");
+                }
+            }
+            return last_node;
+        }
+
+        N next_node_in_slice(const N& node, INDEX n_down) {
+            const auto& [_layer, n_down, n_right] { node };
+            N next_node;
+            if (_layer == layer::DOWN) {
+                next_node = N { layer::RIGHT, n_down, n_right };
+            } else if (_layer == layer::RIGHT) {
+                next_node = N { layer::DIAGONAL, n_down, n_right };
+            } else if (_layer == layer::DIAGONAL) {
+                next_node = N { layer::DOWN, n_down, n_right + 1u };
+            } else {
+                if (error_check) {
+                    throw std::runtime_error("This should never happen");
+                }
+            }
+            if constexpr (error_check) {
+                if (std::get<1>(next_node) >= down_node_cnt) {
+                    throw std::runtime_error("Node too far down");
+                }
+                if (std::get<2>(next_node) >= right_node_cnt) {
+                    throw std::runtime_error("Node too far right");
+                }
+            }
+            return next_node;
+        }
+
+        N prev_node_in_slice(const N& node, INDEX n_down) {
+            const auto& [_layer, n_down, n_right] { node };
+            N prev_node;
+            if (_layer == layer::DIAGONAL) {
+                prev_node = N { layer::RIGHT, n_down, n_right };
+            } else if (_layer == layer::RIGHT) {
+                prev_node = N { layer::DOWN, n_down, n_right };
+            } else if (_layer == layer::DOWN) {
+                prev_node = N { layer::DIAGONAL, n_down, n_right - 1u };
+            } else {
+                if (error_check) {
+                    throw std::runtime_error("This should never happen");
+                }
+            }
+            if constexpr (error_check) {
+                if (std::get<1>(prev_node) >= down_node_cnt) {
+                    throw std::runtime_error("Node too far down");
+                }
+                if (std::get<2>(prev_node) >= right_node_cnt) {
+                    throw std::runtime_error("Node too far right");
+                }
+            }
+            return prev_node;
+        }
+
+        std::size_t max_resident_nodes_count() {
+            return 0zu;
+        }
+
+        auto resident_nodes() {
+            return std::views::empty<N>;
+        }
+
+        auto outputs_to_residents(const N& node) {
+            return std::views::empty<E>;
+        }
+
+        auto inputs_from_residents(const N& node) {
+            return std::views::empty<E>;
+        }
     };
 }
 #endif //OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_EXTENDED_GAP_ALIGNMENT_GRAPH_H

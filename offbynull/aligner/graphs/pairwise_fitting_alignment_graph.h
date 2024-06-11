@@ -544,6 +544,72 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
                 _down_node_cnt, _right_node_cnt
             );
         }
+
+        std::size_t max_slice_nodes_count() {
+            return g.max_slice_nodes_count();
+        }
+
+        auto slice_nodes(INDEX n_down) {
+            return g.slice_nodes(n_down);
+        }
+
+        N first_node_in_slice(INDEX n_down) {
+            return g.first_node_in_slice(n_down);
+        }
+
+        N last_node_in_slice(INDEX n_down) {
+            return g.last_node_in_slice(n_down);
+        }
+
+        N next_node_in_slice(const N& node, INDEX n_down) {
+            return g.next_node_in_slice(node, n_down);
+        }
+
+        N prev_node_in_slice(const N& node, INDEX n_down) {
+            return g.prev_node_in_slice(node, n_down);
+        }
+
+        std::size_t max_resident_nodes_count() {
+            return 2zu;
+        }
+
+        auto resident_nodes() {
+            return std::array<N, 2u> { g.get_root_node(), g.get_leaf_node() };
+        }
+
+        auto outputs_to_residents(const N& node) {
+            using CONTAINER = static_vector_typer<E, 2zu, error_check>::type;
+            CONTAINER ret {};
+            const N& leaf_node { get_leaf_node() };
+            const auto& [leaf_n_down, leaf_n_right] { leaf_node };
+            const auto& [n_down, n_right] { node };
+            if (n_down < leaf_n_down && n_right == leaf_n_right) {
+                ret.push_back(E { edge_type::FREE_RIDE, { node, leaf_node } });
+            }
+            if ((n_down + 1u == leaf_n_down && n_right + 1u == leaf_n_right)
+                    || (n_down == leaf_n_down && n_right + 1u == leaf_n_right)
+                    || (n_down + 1u == leaf_n_down && n_right == leaf_n_right)) {
+                ret.push_back(E { edge_type::NORMAL, { node, leaf_node } });
+            }
+            return ret;
+        }
+
+        auto inputs_from_residents(const N& node) {
+            using CONTAINER = static_vector_typer<E, 2zu, error_check>::type;
+            CONTAINER ret {};
+            const N& root_node { get_root_node() };
+            const auto& [root_n_down, root_n_right] { root_node };
+            const auto& [n_down, n_right] { node };
+            if (n_down > root_n_down && n_right == root_n_right) {
+                ret.push_back(E { edge_type::FREE_RIDE, { root_node, node } });
+            }
+            if ((n_down - 1u == root_n_down && n_right - 1u == root_n_right)
+                    || (n_down - 1u == root_n_down && n_right == root_n_right)
+                    || (n_down == root_n_down && n_right - 1u == root_n_right)) {
+                ret.push_back(E { edge_type::NORMAL, { root_node, node } });
+            }
+            return ret;
+        }
     };
 }
 #endif //OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_FITTING_ALIGNMENT_GRAPH_H
