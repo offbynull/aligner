@@ -485,16 +485,11 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             }
         }
 
-        static auto edge_to_elements(
-            const E& edge,
-            const auto& v,  // random access container
-            const auto& w   // random access container
+        auto edge_to_element_offsets(
+            const E& edge
         ) {
-            using V_ELEM = std::remove_reference_t<decltype(v[0])>;
-            using W_ELEM = std::remove_reference_t<decltype(w[0])>;
-            using OPT_V_ELEM_REF = std::optional<std::reference_wrapper<const V_ELEM>>;
-            using OPT_W_ELEM_REF = std::optional<std::reference_wrapper<const W_ELEM>>;
-            using RET = std::optional<std::pair<OPT_V_ELEM_REF, OPT_W_ELEM_REF>>;
+            using OPT_INDEX = std::optional<INDEX>;
+            using RET = std::optional<std::pair<OPT_INDEX, OPT_INDEX>>;
 
             if (edge.type == edge_type::FREE_RIDE) {
                 return RET { std::nullopt };  // Returning nullopt directly means a conversion to RET happens behind the scene, and that makes the concept check fail.
@@ -503,31 +498,25 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             const auto& [n1_down, n1_right] {n1};
             const auto& [n2_down, n2_right] {n2};
             if (n1_down + 1u == n2_down && n1_right + 1u == n2_right) {
-                if constexpr (error_check) {
-                    if (n1_down >= v.size() or n1_right >= w.size()) {
-                        throw std::runtime_error("Out of bounds");
-                    }
-                }
-                return RET { { { v[n1_down] }, { w[n1_right] } } };
+                return RET { { { n1_down }, { n1_right } } };
             } else if (n1_down + 1u == n2_down && n1_right == n2_right) {
-                if constexpr (error_check) {
-                    if (n1_down >= v.size()) {
-                        throw std::runtime_error("Out of bounds");
-                    }
-                }
-                return RET { { { v[n1_down] }, std::nullopt } };
+                return RET { { { n1_down }, std::nullopt } };
             } else if (n1_down == n2_down && n1_right + 1u == n2_right) {
-                if constexpr (error_check) {
-                    if (n1_right >= w.size()) {
-                        throw std::runtime_error("Out of bounds");
-                    }
-                }
-                return RET { { std::nullopt, { w[n1_right] } } };
+                return RET { { std::nullopt, { n1_right } } };
             }
             if constexpr (error_check) {
                 throw std::runtime_error("Bad edge");
             }
             std::unreachable();
+        }
+
+        std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            return g.node_to_grid_offsets(node);
         }
 
         constexpr static INDEX node_count(
@@ -548,8 +537,8 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             );
         }
 
-        std::size_t max_slice_nodes_count() {
-            return g.max_slice_nodes_count();
+        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+            return decltype(g)::slice_nodes_capacity(_down_node_cnt, _right_node_cnt);
         }
 
         auto slice_nodes(INDEX n_down) {
@@ -572,7 +561,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return g.prev_node_in_slice(node);
         }
 
-        std::size_t max_resident_nodes_count() {
+        static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return 2zu;
         }
 

@@ -7,16 +7,16 @@
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 
-namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
+namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_parwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
 
     template<
         readable_sliceable_parwise_alignment_graph GRAPH
     >
-    class pairwise_global_alignment_graph {
+    class reversed_sliceable_pairwise_alignment_graph {
     public:
-        using INDEX = typename GRAPH::INDEX_;
+        using INDEX = typename GRAPH::INDEX;
         using N = typename GRAPH::N;
         using E = typename GRAPH::E;
         using ED = typename GRAPH::ED;
@@ -29,7 +29,7 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         const INDEX down_node_cnt;
         const INDEX right_node_cnt;
 
-        pairwise_global_alignment_graph(GRAPH& _g)
+        reversed_sliceable_pairwise_alignment_graph(GRAPH& _g)
         : g{_g}
         , down_node_cnt{_g.down_node_cnt}
         , right_node_cnt{_g.right_node_cnt} {}
@@ -154,15 +154,26 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             > weight_lookup,
             std::function<void(ED&, WEIGHT weight)> weight_setter
         ) {
-            g.assign_weights(v, w, weight_lookup, weight_setter);
+            // TODO: This is wrong. You need to change this to assign weights by offset...
+            //       assign_weights(down_offset, down_value, right_offset, right_value). This way, you can easily
+            //       implement this method. The implementation below is WRONG.
+            g.assign_weights(
+                v | std::views::reverse,
+                w | std::views::reverse,
+                weight_lookup,
+                weight_setter
+            );
         }
 
-        static auto edge_to_elements(
+        auto edge_to_element_offsets(
             const E& edge,
-            const auto& v,  // random access container
-            const auto& w   // random access container
         ) {
-            return GRAPH::edge_to_elements(edge, v, w);
+            return g.edge_to_element_offsets(edge);
+        }
+
+        std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
+            const auto& [n_down, n_right] { g.node_to_grid_offsets(node) };
+            return { down_node_cnt - n_down - 1u, right_node_cnt - n_right - 1u };
         }
 
         constexpr static INDEX node_count(
@@ -179,8 +190,8 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             return GRAPH::longest_path_edge_count(_down_node_cnt, _right_node_cnt);
         }
 
-        std::size_t max_slice_nodes_count() {
-            return g.max_slice_nodes_count();
+        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+            return GRAPH::slice_nodes_capacity(_down_node_cnt, _right_node_cnt);
         }
 
         auto slice_nodes(INDEX n_down) {
@@ -203,8 +214,8 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             return g.next_node_in_slice(node);
         }
 
-        std::size_t max_resident_nodes_count() {
-            return g.max_resident_nodes_count();
+        static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+            return GRAPH::resident_nodes_capacity(_down_node_cnt, _right_node_cnt);
         }
 
         auto resident_nodes() {

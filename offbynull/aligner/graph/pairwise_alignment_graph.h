@@ -35,15 +35,15 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
         }
         && requires(
             G g,
-            typename G::E e,
-            std::vector<int> v,  // This tests against vector, but it's intended to work with any random access range
-            std::vector<int> w   // This tests against vector, but it's intended to work with any random access range
+            typename G::N node,
+            typename G::E edge
         ) {
-            { G::edge_to_elements(e, v, w) } -> std::same_as<
+            { g.node_to_grid_offsets(node) } -> std::same_as<std::pair<typename G::INDEX, typename G::INDEX>>;
+            { g.edge_to_element_offsets(g.edge) } -> std::same_as<
                 std::optional<
                     std::pair<
-                        std::optional<std::reference_wrapper<const std::decay_t<decltype(v[0u])>>>,
-                        std::optional<std::reference_wrapper<const std::decay_t<decltype(w[0u])>>>
+                        std::optional<typename G::INDEX>,
+                        std::optional<typename G::INDEX>
                     >
                 >
             >;

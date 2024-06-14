@@ -569,46 +569,28 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             }
         }
 
-        static auto edge_to_elements(
-            const E& edge,
-            const auto& v,  // random access container
-            const auto& w   // random access container
+        auto edge_to_element_offsets(
+            const E& edge
         ) {
-            using ELEM = std::decay_t<decltype(v[0])>;
-            using OPT_ELEM_REF = std::optional<std::reference_wrapper<const ELEM>>;
-            using RET = std::optional<std::pair<OPT_ELEM_REF, OPT_ELEM_REF>>;
+            using OPT_INDEX = std::optional<INDEX>;
+            using RET = std::optional<std::pair<OPT_INDEX, OPT_INDEX>>;
 
             const auto& [n1, n2] { edge };
             const auto& [n1_layer, n1_down, n1_right] { n1 };
             const auto& [n2_layer, n2_down, n2_right] { n2 };
             if (n1_layer == layer::DIAGONAL && n2_layer == layer::DIAGONAL) {  // match
                 if (n1_down + 1u == n2_down && n1_right + 1u == n2_right) {
-                    if constexpr (error_check) {
-                        if (n1_down >= v.size() or n1_right >= w.size()) {
-                            throw std::runtime_error("Out of bounds");
-                        }
-                    }
-                    return RET { { { v[n1_down] }, { w[n1_right] } } };
+                    return RET { { { n1_down }, { n1_right } } };
                 }
             } else if ((n1_layer == layer::DOWN && n2_layer == layer::DOWN)  // extended indel
                 || (n1_layer == layer::DIAGONAL && n2_layer == layer::DOWN)) {  // indel
                 if (n1_down + 1u == n2_down && n1_right == n2_right) {
-                    if constexpr (error_check) {
-                        if (n1_down >= v.size()) {
-                            throw std::runtime_error("Out of bounds");
-                        }
-                    }
-                    return RET { { { v[n1_down] }, std::nullopt } };
+                    return RET { { { n1_down }, std::nullopt } };
                 }
             } else if ((n1_layer == layer::RIGHT && n2_layer == layer::RIGHT)  // extended indel
                 || (n1_layer == layer::DIAGONAL && n2_layer == layer::RIGHT)) {  // indel
                 if (n1_down == n2_down && n1_right + 1u == n2_right) {
-                    if constexpr (error_check) {
-                        if (n1_right >= w.size()) {
-                            throw std::runtime_error("Out of bounds");
-                        }
-                    }
-                    return RET { { std::nullopt, { w[n1_right] } } };
+                    return RET { { std::nullopt, { n1_right } } };
                 }
             } else if ((n1_layer == layer::DOWN && n2_layer == layer::DIAGONAL)  // freeride
                 || (n1_layer == layer::RIGHT && n2_layer == layer::DIAGONAL)) {  // freeride
@@ -618,6 +600,15 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 throw std::runtime_error("Bad edge");
             }
             std::unreachable();
+        }
+
+        std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
+            if constexpr (error_check) {
+                if (!has_node(node)) {
+                    throw std::runtime_error {"Node doesn't exist"};
+                }
+            }
+            return { std::get<1>(node), std::get<2>(node) };
         }
 
         constexpr static INDEX node_count(
@@ -638,8 +629,8 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             return (_right_node_cnt - 1u) * 2u + (_down_node_cnt - 1u) * 2u;
         }
 
-        std::size_t max_slice_nodes_count() {
-            return 1zu + 3zu * (right_node_cnt - 1zu);
+        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+            return 1zu + 3zu * (_right_node_cnt - 1zu);
         }
 
         auto slice_nodes(INDEX n_down) {
@@ -733,7 +724,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             return prev_node;
         }
 
-        std::size_t max_resident_nodes_count() {
+        static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return 0zu;
         }
 

@@ -410,8 +410,12 @@ namespace offbynull::aligner::graphs::grid_graph {
             return (_right_node_cnt - 1u) + (_down_node_cnt - 1u);
         }
 
-        std::size_t max_slice_nodes_count() {
-            return right_node_cnt;
+        std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
+            return node;
+        }
+
+        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+            return _right_node_cnt;
         }
 
         auto slice_nodes(INDEX n_down) {
@@ -465,7 +469,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return prev_node;
         }
 
-        std::size_t max_resident_nodes_count() {
+        static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return 0zu;
         }
 

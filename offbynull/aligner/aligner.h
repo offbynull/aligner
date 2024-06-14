@@ -68,9 +68,20 @@ namespace offbynull::aligner::aligner {
         };
         return std::make_pair(
             std::move(path)
-                | std::views::transform([&](const auto& edge) { return graph.edge_to_elements(edge, v, w); })
-                | std::views::filter([](const auto& elem_pair) { return elem_pair.has_value(); })
-                | std::views::transform([](const auto& elem_pair) { return *elem_pair; }),
+                | std::views::transform([&](const auto& edge) { return { graph.edge_to_element_offsets(edge) }; })
+                | std::views::filter([](const auto& edge_idxes) { return edge_idxes.has_value(); })
+                | std::views::transform([&](const auto& edge_idxes) {
+                    const auto& [v_idx, w_idx] { *edge_idxes };
+                    if (v_idx.has_element() && w_idx.has_element()) {
+                        return std::make_pair(v[v_idx], w[w_idx]);
+                    } else if (v_idx.has_element()) {
+                        return std::make_pair(v[v_idx], std::nullopt);
+                    } else if (w_idx.has_element()) {
+                        return std::make_pair(std::nullopt, w[w_idx]);
+                    } else {
+                        return std::make_pair(std::nullopt, std::nullopt);
+                    }
+                }),
             weight
         );
     }
@@ -315,7 +326,7 @@ namespace offbynull::aligner::aligner {
         };
         return std::make_pair(
             std::move(path)
-                | std::views::transform([&](const auto& edge) { return graph.edge_to_elements(edge, v, w); })
+                | std::views::transform([&](const auto& edge) { return graph.edge_to_element_offsets(edge, v, w); })
                 | std::views::filter([](const auto& elem_pair) { return elem_pair.has_value(); })
                 | std::views::transform([](const auto& elem_pair) { return *elem_pair; }),
             weight

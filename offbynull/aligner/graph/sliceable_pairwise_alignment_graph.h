@@ -19,17 +19,16 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
         && requires(
             G g,
             typename G::N node,
+            typename G::INDEX n_right,
             typename G::INDEX n_down
         ) {
-            // TODO: rename max_slice_nodes_count() to slice_nodes_capacity_count()
-            // TODO: rename max_resident_nodes_count() to resident_nodes_capacity_count()
-            { g.max_slice_nodes_count() } -> std::same_as<std::size_t>;
+            { G::slice_nodes_capacity(n_down, n_right) } -> std::same_as<std::size_t>;
             { g.slice_nodes(n_down) } -> range_of_one_of<typename G::N, const typename G::N&>;
             { g.first_node_in_slice(n_down) } -> one_of<typename G::N, const typename G::N&>;  // first node to walk to
             { g.last_node_in_slice(n_down) } -> one_of<typename G::N, const typename G::N&>;  // last node to walk to
             { g.next_node_in_slice(node) } -> one_of<typename G::N, const typename G::N&>;  // next node to walk to
             { g.prev_node_in_slice(node) } -> one_of<typename G::N, const typename G::N&>;  // prev node to walk to
-            { g.max_resident_nodes_count() } -> std::same_as<std::size_t>;
+            { G::resident_nodes_capacity(n_down, n_right) } -> std::same_as<std::size_t>;
             { g.resident_nodes() } -> range_of_one_of<typename G::N, const typename G::N&>;
             { g.outputs_to_residents(node) } -> range_of_one_of<typename G::E, const typename G::E&>;  // children in slice
             { g.inputs_from_residents(node) } -> range_of_one_of<typename G::E, const typename G::E&>;  // children in slice
