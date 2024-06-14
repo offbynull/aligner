@@ -8,6 +8,14 @@
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 
+MAKE THIS INTO TWO VARIANTS: prefix_slicable_pairwise_alignment_graph AND suffix_slicable_pairwise_alignment_graph -- THEN WRITE slice_backtrack;
+MAKE THIS INTO TWO VARIANTS: prefix_slicable_pairwise_alignment_graph AND suffix_slicable_pairwise_alignment_graph -- THEN WRITE slice_backtrack;
+MAKE THIS INTO TWO VARIANTS: prefix_slicable_pairwise_alignment_graph AND suffix_slicable_pairwise_alignment_graph -- THEN WRITE slice_backtrack;
+MAKE THIS INTO TWO VARIANTS: prefix_slicable_pairwise_alignment_graph AND suffix_slicable_pairwise_alignment_graph -- THEN WRITE slice_backtrack;
+MAKE THIS INTO TWO VARIANTS: prefix_slicable_pairwise_alignment_graph AND suffix_slicable_pairwise_alignment_graph -- THEN WRITE slice_backtrack;
+MAKE THIS INTO TWO VARIANTS: prefix_slicable_pairwise_alignment_graph AND suffix_slicable_pairwise_alignment_graph -- THEN WRITE slice_backtrack;
+MAKE THIS INTO TWO VARIANTS: prefix_slicable_pairwise_alignment_graph AND suffix_slicable_pairwise_alignment_graph -- THEN WRITE slice_backtrack;
+MAKE THIS INTO TWO VARIANTS: prefix_slicable_pairwise_alignment_graph AND suffix_slicable_pairwise_alignment_graph -- THEN WRITE slice_backtrack;
 namespace offbynull::aligner::graphs::sub_sliceable_pairwise_alignment_graph {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_parwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
@@ -280,25 +288,8 @@ namespace offbynull::aligner::graphs::sub_sliceable_pairwise_alignment_graph {
             > weight_lookup,
             std::function<void(ED&, WEIGHT weight)> weight_setter
         ) {
-            // TODO: This is wrong. You need to change this to assign weights by offset...
-            //       assign_weights(down_offset, down_value, right_offset, right_value). This way, you can easily
-            //       implement this method. The implementation below is WRONG.
-            auto v_span {
-                v
-                    | std::views::drop(down_node_start_idx)
-                    | std::views::take(down_node_stop_idx - down_node_start_idx + 1zu)
-            };
-            auto w_span {
-                w
-                    | std::views::drop(right_node_start_idx)
-                    | std::views::take(right_node_stop_idx - right_node_start_idx + 1zu)
-            };
-            g.assign_weights(
-                v_span,
-                w_span,
-                weight_lookup,
-                weight_setter
-            );
+            // TODO: Make a concept that doesn't contain this func and use that instead for the code that requires this class (sliced walking)
+            throw std::runtime_error("Unsupported");
         }
 
         auto edge_to_element_offsets(
@@ -321,7 +312,7 @@ namespace offbynull::aligner::graphs::sub_sliceable_pairwise_alignment_graph {
             return GRAPH::longest_path_edge_count(_down_node_cnt, _right_node_cnt);
         }
 
-        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) { {
+        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return GRAPH::slice_nodes_capacity(_down_node_cnt, _right_node_cnt);
         }
 

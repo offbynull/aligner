@@ -154,21 +154,25 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
             > weight_lookup,
             std::function<void(ED&, WEIGHT weight)> weight_setter
         ) {
-            // TODO: This is wrong. You need to change this to assign weights by offset...
-            //       assign_weights(down_offset, down_value, right_offset, right_value). This way, you can easily
-            //       implement this method. The implementation below is WRONG.
-            g.assign_weights(
-                v | std::views::reverse,
-                w | std::views::reverse,
-                weight_lookup,
-                weight_setter
-            );
+            // TODO: Make a concept that doesn't contain this func and use that instead for the code that requires this class (sliced walking)
+            throw std::runtime_error("Unsupported");
         }
 
-        auto edge_to_element_offsets(
-            const E& edge,
+        std::optional<std::pair<std::optional<INDEX>, std::optional<INDEX>>> edge_to_element_offsets(
+            const E& edge
         ) {
-            return g.edge_to_element_offsets(edge);
+            auto offset { g.edge_to_element_offsets(edge) };
+            if (!offset.has_element()) {
+                return std::nullopt;
+            }
+            auto [v_idx, w_idx] { offset };
+            if (v_idx.has_element()) {
+                *v_idx = g.down_node_cnt - *v_idx - 1u;
+            }
+            if (w_idx.has_element()) {
+                *w_idx = g.right_node_cnt - *w_idx - 1u;
+            }
+            return offset;
         }
 
         std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
