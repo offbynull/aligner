@@ -68,19 +68,23 @@ namespace offbynull::aligner::aligner {
         };
         return std::make_pair(
             std::move(path)
-                | std::views::transform([&](const auto& edge) { return { graph.edge_to_element_offsets(edge) }; })
+                | std::views::transform([&](const auto& edge) { return graph.edge_to_element_offsets(edge); })
                 | std::views::filter([](const auto& edge_idxes) { return edge_idxes.has_value(); })
                 | std::views::transform([&](const auto& edge_idxes) {
+                    using V_TYPE = std::optional<std::decay_t<decltype(v[0zu])>>; // removes refs - this copies v's elem
+                    using W_TYPE = std::optional<std::decay_t<decltype(w[0zu])>>; // removes refs - this copies v's elem
                     const auto& [v_idx, w_idx] { *edge_idxes };
-                    if (v_idx.has_element() && w_idx.has_element()) {
-                        return std::make_pair(v[v_idx], w[w_idx]);
-                    } else if (v_idx.has_element()) {
-                        return std::make_pair(v[v_idx], std::nullopt);
-                    } else if (w_idx.has_element()) {
-                        return std::make_pair(std::nullopt, w[w_idx]);
-                    } else {
-                        return std::make_pair(std::nullopt, std::nullopt);
+                    if (v_idx.has_value() && w_idx.has_value()) {
+                        return std::pair<V_TYPE, W_TYPE> { { v[*v_idx] }, { w[*w_idx] } };
+                    } else if (v_idx.has_value()) {
+                        return std::pair<V_TYPE, W_TYPE> { { v[*v_idx] }, { std::nullopt } };
+                    } else if (w_idx.has_value()) {
+                        return std::pair<V_TYPE, W_TYPE> { { std::nullopt }, { w[*w_idx] } };
                     }
+                    if constexpr (error_check) {
+                        throw std::runtime_error("Bad edge");
+                    }
+                    std::unreachable();
                 }),
             weight
         );

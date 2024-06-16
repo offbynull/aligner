@@ -41,14 +41,6 @@ namespace offbynull::aligner::graph::graph {
                 std::tuple<typename G::E, typename G::N, typename G::N, typename G::ED&>,
                 std::tuple<const typename G::E&, const typename G::N&, const typename G::N&, typename G::ED&>
             >;
-            { g.get_output_full(n) } -> one_of<
-                std::tuple<typename G::E, typename G::N, typename G::N, typename G::ED&>,
-                std::tuple<const typename G::E&, const typename G::N&, const typename G::N&, typename G::ED&>
-            >;
-            { g.get_input_full(n) } -> one_of<
-                std::tuple<typename G::E, typename G::N, typename G::N, typename G::ED&>,
-                std::tuple<const typename G::E&, const typename G::N&, const typename G::N&, typename G::ED&>
-            >;
             { g.get_outputs(n) } -> range_of_one_of<typename G::E, const typename G::E&>;
             { g.get_inputs(n) } -> range_of_one_of<typename G::E, const typename G::E&>;
             { g.has_outputs(n) } -> std::same_as<bool>;

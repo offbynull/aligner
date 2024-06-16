@@ -309,8 +309,9 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             );
         }
 
-        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
-            return g.slice_nodes_capacity(_down_node_cnt, _right_node_cnt);
+        constexpr static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+            using G = std::decay_t<decltype(g)>;
+            return G::slice_nodes_capacity(_down_node_cnt, _right_node_cnt);
         }
 
         auto slice_nodes(INDEX n_down) {
@@ -345,8 +346,9 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             return g.prev_node_in_slice(node);
         }
 
-        static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
-            return g.resident_nodes_capacity(_down_node_cnt, _right_node_cnt);
+        constexpr static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+            using G = std::decay_t<decltype(g)>;
+            return G::resident_nodes_capacity(_down_node_cnt, _right_node_cnt);
         }
 
         auto resident_nodes() {

@@ -125,9 +125,9 @@ namespace offbynull::aligner::backtrack::sliced_walker {
         )
         : graph{graph_}
         , get_edge_weight_func{get_edge_weight_func_}
-        , resident_slots{resident_slot_container_creator.create_empty(graph.resident_nodes_capacity())}
-        , lower_slots{slice_slot_container_creator.create_empty(graph.slice_nodes_capacity())}
-        , upper_slots{slice_slot_container_creator.create_empty(graph.slice_nodes_capacity())}
+        , resident_slots{resident_slot_container_creator.create_empty()}
+        , lower_slots{slice_slot_container_creator.create_empty()}
+        , upper_slots{slice_slot_container_creator.create_empty()}
         , n_down{0u}
         , active_slot_ptr{nullptr}
         , next_slot_ptr{nullptr} {
@@ -293,9 +293,9 @@ namespace offbynull::aligner::backtrack::sliced_walker {
         )
         : graph{graph_}
         , get_edge_weight_func{get_edge_weight_func_}
-        , resident_slots{resident_slot_container_creator.create_empty(graph.resident_nodes_capacity())}
-        , upper_slots{slice_slot_container_creator.create_empty(graph.slice_nodes_capacity())}
-        , lower_slots{slice_slot_container_creator.create_empty(graph.slice_nodes_capacity())}
+        , resident_slots{resident_slot_container_creator.create_empty()}
+        , upper_slots{slice_slot_container_creator.create_empty()}
+        , lower_slots{slice_slot_container_creator.create_empty()}
         , n_down{graph.down_node_cnt - 1u}
         , active_slot_ptr{nullptr}
         , prev_slot_ptr{nullptr} {

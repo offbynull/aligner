@@ -23,7 +23,7 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
             typename G::E edge
         ) {
             { g.node_to_grid_offsets(node) } -> std::same_as<std::pair<typename G::INDEX, typename G::INDEX>>;
-            { g.edge_to_element_offsets(g.edge) } -> std::same_as<
+            { g.edge_to_element_offsets(edge) } -> std::same_as<
                 std::optional<
                     std::pair<
                         std::optional<typename G::INDEX>,

@@ -354,7 +354,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return node;
         }
 
-        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+        constexpr static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return _right_node_cnt;
         }
 
@@ -421,7 +421,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return prev_node;
         }
 
-        static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+        constexpr static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return 0zu;
         }
 

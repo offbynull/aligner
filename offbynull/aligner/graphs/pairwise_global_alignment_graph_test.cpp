@@ -342,16 +342,17 @@ namespace {
         };
 
         auto x = [&](auto&& g) {
-            using N = typename std::remove_reference_t<decltype(g)>::N;
-            using E = typename std::remove_reference_t<decltype(g)>::E;
+            using G = std::decay_t<decltype(g)>;
+            using N = typename G::N;
+            using E = typename G::E;
 
-            EXPECT_EQ(decltype(g)::slice_nodes_capacity(g.down_node_cnt, g.right_node_cnt), 3zu);
+            EXPECT_EQ(G::slice_nodes_capacity(g.down_node_cnt, g.right_node_cnt), 3zu);
             EXPECT_EQ(g.first_node_in_slice(0u), (N { 0u, 0u }));
             EXPECT_EQ(g.last_node_in_slice(0u), (N { 0u, 2u }));
             EXPECT_EQ(g.first_node_in_slice(1u), (N { 1u, 0u }));
             EXPECT_EQ(g.last_node_in_slice(1u), (N {  1u, 2u }));
 
-            EXPECT_EQ(decltype(g)::resident_nodes_capacity(g.down_node_cnt, g.right_node_cnt), 0zu);
+            EXPECT_EQ(G::resident_nodes_capacity(g.down_node_cnt, g.right_node_cnt), 0zu);
             EXPECT_EQ(g.resident_nodes().size(), 0zu);
 
             EXPECT_EQ(g.next_node_in_slice(N { 0u, 0u }), (N { 0u, 1u }));

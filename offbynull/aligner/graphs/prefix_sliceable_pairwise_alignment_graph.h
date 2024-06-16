@@ -252,7 +252,7 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
             return GRAPH::longest_path_edge_count(_down_node_cnt, _right_node_cnt);
         }
 
-        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+        constexpr static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return GRAPH::slice_nodes_capacity(_down_node_cnt, _right_node_cnt);
         }
 
@@ -310,7 +310,7 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
             return prev_node;
         }
 
-        static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+        constexpr static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return GRAPH::resident_nodes_capacity(_down_node_cnt, _right_node_cnt);
         }
 

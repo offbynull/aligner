@@ -477,7 +477,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             );
         }
 
-        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+        constexpr static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return decltype(g)::slice_nodes_capacity(_down_node_cnt, _right_node_cnt);
         }
 
@@ -513,7 +513,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return g.prev_node_in_slice(node);
         }
 
-        static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+        constexpr static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return 2zu;
         }
 

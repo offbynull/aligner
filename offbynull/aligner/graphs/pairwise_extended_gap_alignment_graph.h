@@ -569,7 +569,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             return (_right_node_cnt - 1u) * 2u + (_down_node_cnt - 1u) * 2u;
         }
 
-        static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+        constexpr static std::size_t slice_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return 1zu + 3zu * (_right_node_cnt - 1zu);
         }
 
@@ -678,7 +678,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             return prev_node;
         }
 
-        static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
+        constexpr static std::size_t resident_nodes_capacity(INDEX _down_node_cnt, INDEX _right_node_cnt) {
             return 0zu;
         }
 
