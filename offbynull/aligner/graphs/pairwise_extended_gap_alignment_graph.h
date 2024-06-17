@@ -101,7 +101,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            auto [grid_down, grid_right] { node };
+            const auto& [grid_down, grid_right] { node };
             if (node.type == layer::DIAGONAL) {
                 this->slots[to_raw_idx(grid_down, grid_right)].diagonal_nd = std::forward<ND>(data);
             } else if (node.type == layer::DOWN) {
@@ -117,7 +117,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            auto [grid_down, grid_right] = node;
+            const auto& [grid_down, grid_right] { node };
             if (node.type == layer::DIAGONAL) {
                 return this->slots[to_raw_idx(grid_down, grid_right)].diagonal_nd;
             } else if (node.type == layer::DOWN) {
@@ -134,8 +134,8 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            const auto& [n1_layer, n1_grid_down, n1_grid_right] = edge.first;
-            auto [n2_layer, n2_grid_down, n2_grid_right] = edge.second;
+            const auto& [n1_layer, n1_grid_down, n1_grid_right] { edge.first };
+            const auto& [n2_layer, n2_grid_down, n2_grid_right] { edge.second };
             if (n1_layer == layer::DIAGONAL && n2_layer == layer::DIAGONAL) {  // match
                 this->slots[to_raw_idx(n1_grid_down, n1_grid_right)].to_next_diagonal_ed = std::forward<ED>(data);
             } else if (n1_layer == layer::DOWN && n2_layer == layer::DOWN) {  // gap
@@ -159,8 +159,8 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            const auto& [n1_layer, n1_grid_down, n1_grid_right] = edge.first;
-            auto [n2_layer, n2_grid_down, n2_grid_right] = edge.second;
+            const auto& [n1_layer, n1_grid_down, n1_grid_right] { edge.first };
+            const auto& [n2_layer, n2_grid_down, n2_grid_right] { edge.second };
             if (n1_layer == layer::DIAGONAL && n2_layer == layer::DIAGONAL) {  // match
                 return this->slots[to_raw_idx(n1_grid_down, n1_grid_right)].to_next_diagonal_ed;
             } else if (n1_layer == layer::DOWN && n2_layer == layer::DOWN) {  // gap
@@ -360,7 +360,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             }
             return std::move(ret)
                 | std::views::transform([](const auto& edge_full) noexcept {
-                    const auto& [e, n1, n2, ed_ptr] = edge_full;
+                    const auto& [e, n1, n2, ed_ptr] { edge_full };
                     return std::tuple<E, N, N, ED&>(e, n1, n2, *ed_ptr);
                 });
         }
@@ -402,7 +402,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             }
             return std::move(ret)
                 | std::views::transform([](const auto& edge_full) noexcept {
-                    const auto& [e, n1, n2, ed_ptr] = edge_full;
+                    const auto& [e, n1, n2, ed_ptr] { edge_full };
                     return std::tuple<E, N, N, ED&>(e, n1, n2, *ed_ptr);
                 });
         }

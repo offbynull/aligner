@@ -99,8 +99,8 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            auto [n1_grid_down, n1_grid_right] = edge.first;
-            auto [n2_grid_down, n2_grid_right] = edge.second;
+            const auto& [n1_grid_down, n1_grid_right] { edge.first };
+            const auto& [n2_grid_down, n2_grid_right] { edge.second };
             if (n1_grid_down == n2_grid_down && n1_grid_right + 1u == n2_grid_right) {
                 indel_ed = std::forward<ED>(data);
             } else if (n1_grid_down + 1u == n2_grid_down && n1_grid_right == n2_grid_right) {
@@ -116,8 +116,8 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error("Edge doesn't exist");
                 }
             }
-            auto [n1_grid_down, n1_grid_right] = edge.first;
-            auto [n2_grid_down, n2_grid_right] = edge.second;
+            const auto& [n1_grid_down, n1_grid_right] { edge.first };
+            const auto& [n2_grid_down, n2_grid_right] { edge.second };
             if (n1_grid_down == n2_grid_down && n1_grid_right + 1u == n2_grid_right) {
                 return indel_ed;
             } else if (n1_grid_down + 1u == n2_grid_down && n1_grid_right == n2_grid_right) {
@@ -199,13 +199,13 @@ namespace offbynull::aligner::graphs::grid_graph {
         }
 
         bool has_node(const N& node) {
-            auto [n1_grid_down, n1_grid_right] = node;
+            const auto& [n1_grid_down, n1_grid_right] { node };
             return n1_grid_down < grid_down_cnt && n1_grid_down >= 0u && n1_grid_right < grid_right_cnt && n1_grid_right >= 0u;
         }
 
         bool has_edge(const E& edge) {
-            auto [n1_grid_down, n1_grid_right] = edge.first;
-            auto [n2_grid_down, n2_grid_right] = edge.second;
+            const auto& [n1_grid_down, n1_grid_right] { edge.first };
+            const auto& [n2_grid_down, n2_grid_right] { edge.second };
             return (n1_grid_down == n2_grid_down && n1_grid_right + 1u == n2_grid_right && n2_grid_right < grid_right_cnt)
                 || (n1_grid_down + 1u == n2_grid_down && n1_grid_right == n2_grid_right && n2_grid_down < grid_down_cnt)
                 || (n1_grid_down + 1u == n2_grid_down && n1_grid_right + 1u == n2_grid_right && n2_grid_down < grid_down_cnt && n2_grid_right < grid_right_cnt);

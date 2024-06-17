@@ -37,12 +37,14 @@ namespace {
         g.update_edge_data({ {0u, 0u}, {0u, 1u} }, -1.0); // this updates ALL indel edges
         g.update_edge_data({ {0u, 0u}, {1u, 1u} }, 3.0);
         backtracker<decltype(g), std::uint8_t, ED> _backtracker{};
-        auto [path, weight] = _backtracker.find_max_path(
-            g,
-            [&g](const E& edge) { return g.get_edge_data(edge); }
-        );
+        const auto& [path, weight] {
+            _backtracker.find_max_path(
+                g,
+                [&g](const E& edge) { return g.get_edge_data(edge); }
+            )
+        };
         for (const E& e : path) {
-            const auto& [n1, n2] = e;
+            const auto& [n1, n2] { e };
             std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
         }
         std::cout << std::endl;
@@ -83,12 +85,14 @@ namespace {
         g.update_edge_data({ {0u, 0u}, {0u, 1u} }, 1.1);
         g.update_edge_data({ {1u, 1u}, {1u, 2u} }, 1.4);
         backtracker<decltype(g), std::size_t, ED> _backtracker{};
-        auto [path, weight] = _backtracker.find_max_path(
-            g,
-            [&g](const E& edge) { return g.get_edge_data(edge); }
-        );
+        const auto& [path, weight] {
+            _backtracker.find_max_path(
+                g,
+                [&g](const E& edge) { return g.get_edge_data(edge); }
+            )
+        };
         for (const E& e : path) {
-            const auto& [n1, n2] = e;
+            const auto& [n1, n2] { e };
             std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
         }
         std::cout << std::endl;

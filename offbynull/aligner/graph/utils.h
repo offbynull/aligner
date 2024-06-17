@@ -13,7 +13,7 @@ namespace offbynull::aligner::graph::utils {
         for (const auto& node : g.get_nodes()) {
             out += std::format("node {}: {}\n", node, g.get_node_data(node));
             for (const auto& edge : g.get_outputs(node)) {
-                auto [from_node, to_node, edge_data] = g.get_edge(edge);
+                const auto& [from_node, to_node, edge_data] { g.get_edge(edge) };
                 out += std::format("  edge {} pointing to node {}: {}\n", edge, to_node, edge_data);
             }
         }

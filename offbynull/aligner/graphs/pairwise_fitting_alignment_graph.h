@@ -122,7 +122,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
                 }
             }
             if (edge.type == edge_type::FREE_RIDE) {
-                auto [n1, n2] = edge.inner_edge;
+                const auto& [n1, n2] { edge.inner_edge };
                 return std::tuple<N, N, ED&> {n1, n2, freeride_ed};
             } else {
                 return g.get_edge(edge.inner_edge);
