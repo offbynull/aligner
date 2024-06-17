@@ -30,6 +30,17 @@ namespace offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph 
 
     private:
         reversed_sliceable_pairwise_alignment_graph<
+            GRAPH,
+            error_check
+        > inner_inner_g;
+        prefix_sliceable_pairwise_alignment_graph<
+            reversed_sliceable_pairwise_alignment_graph<
+                GRAPH,
+                error_check
+            >,
+            error_check
+        > inner_g;
+        reversed_sliceable_pairwise_alignment_graph<
             prefix_sliceable_pairwise_alignment_graph<
                 reversed_sliceable_pairwise_alignment_graph<
                     GRAPH,
@@ -47,10 +58,11 @@ namespace offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph 
         suffix_sliceable_pairwise_alignment_graph(
             GRAPH& _g,
             INDEX _down_node_cnt,
-            INDEX _right_node_cnt,
-            N root_node
+            INDEX _right_node_cnt
         )
-        : g{ { { { _g }, root_node } } }
+        : inner_inner_g{ _g }
+        , inner_g { inner_inner_g, _down_node_cnt, _right_node_cnt }
+        , g { inner_g }
         , down_node_cnt{_down_node_cnt}
         , right_node_cnt{_right_node_cnt} {}
 
@@ -148,6 +160,10 @@ namespace offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph 
 
         auto edge_to_element_offsets(const E& edge) {
             return g.edge_to_element_offsets(edge);
+        }
+
+        std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
+            return g.node_to_grid_offsets(node);
         }
 
         constexpr static INDEX node_count(

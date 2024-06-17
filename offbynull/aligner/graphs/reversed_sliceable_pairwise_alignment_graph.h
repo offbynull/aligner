@@ -131,14 +131,14 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
             const E& edge
         ) {
             auto offset { g.edge_to_element_offsets(edge) };
-            if (!offset.has_element()) {
+            if (!offset.has_value()) {
                 return std::nullopt;
             }
-            auto [v_idx, w_idx] { offset };
-            if (v_idx.has_element()) {
+            auto [v_idx, w_idx] { *offset };
+            if (v_idx.has_value()) {
                 *v_idx = g.down_node_cnt - *v_idx - 1u;
             }
-            if (w_idx.has_element()) {
+            if (w_idx.has_value()) {
                 *w_idx = g.right_node_cnt - *w_idx - 1u;
             }
             return offset;
