@@ -1127,9 +1127,9 @@ namespace {
 
             EXPECT_EQ(G::slice_nodes_capacity(g.down_node_cnt, g.right_node_cnt), 7zu);
             EXPECT_EQ(g.first_node_in_slice(0u), (N { layer::DIAGONAL, 0u, 0u }));
-            EXPECT_EQ(g.last_node_in_slice(0u), (N { layer::DIAGONAL, 0u, 2u }));
+            EXPECT_EQ(g.last_node_in_slice(0u), (N { layer::DOWN, 0u, 2u }));
             EXPECT_EQ(g.first_node_in_slice(1u), (N { layer::DIAGONAL, 1u, 0u }));
-            EXPECT_EQ(g.last_node_in_slice(1u), (N { layer::DIAGONAL, 1u, 2u }));
+            EXPECT_EQ(g.last_node_in_slice(1u), (N { layer::DOWN, 1u, 2u }));
 
             EXPECT_EQ(G::resident_nodes_capacity(g.down_node_cnt, g.right_node_cnt), 0zu);
             EXPECT_EQ(g.resident_nodes().size(), 0zu);

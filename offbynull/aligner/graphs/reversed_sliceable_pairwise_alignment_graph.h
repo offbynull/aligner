@@ -179,19 +179,25 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
         }
 
         N first_node_in_slice(INDEX n_down) {
-            return g.last_node_in_slice(n_down);
+            return g.last_node_in_slice(down_node_cnt - n_down - 1u);
         }
 
-        N first_node_in_slice(INDEX n_down, INDEX override_right_node_cnt) {
-            return g.last_node_in_slice(n_down, override_right_node_cnt);
+        N first_node_in_slice(INDEX n_down, INDEX n_right) {
+            return g.last_node_in_slice(
+                down_node_cnt - n_down - 1u,
+                right_node_cnt - n_right - 1u
+            );
         }
 
         N last_node_in_slice(INDEX n_down) {
-            return g.first_node_in_slice(n_down);
+            return g.first_node_in_slice(down_node_cnt - n_down - 1u);
         }
 
-        N last_node_in_slice(INDEX n_down, INDEX override_right_node_cnt) {
-            return g.first_node_in_slice(n_down, override_right_node_cnt);
+        N last_node_in_slice(INDEX n_down, INDEX n_right) {
+            return g.first_node_in_slice(
+                down_node_cnt - n_down - 1u,
+                right_node_cnt - n_right - 1u
+            );
         }
 
         N next_node_in_slice(const N& node) {

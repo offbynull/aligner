@@ -196,16 +196,16 @@ namespace offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph 
             return g.first_node_in_slice(n_down);
         }
 
-        N first_node_in_slice(INDEX n_down, INDEX override_right_node_cnt) {
-            return g.first_node_in_slice(n_down, override_right_node_cnt);
+        N first_node_in_slice(INDEX n_down, INDEX n_right) {
+            return g.first_node_in_slice(n_down, n_right);
         }
 
         N last_node_in_slice(INDEX n_down) {
             return g.last_node_in_slice(n_down);
         }
 
-        N last_node_in_slice(INDEX n_down, INDEX override_right_node_cnt) {
-            return g.last_node_in_slice(n_down, override_right_node_cnt);
+        N last_node_in_slice(INDEX n_down, INDEX n_right) {
+            return g.last_node_in_slice(n_down, n_right);
         }
 
         N next_node_in_slice(const N& node) {
