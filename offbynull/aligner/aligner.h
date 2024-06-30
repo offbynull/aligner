@@ -57,9 +57,9 @@ namespace offbynull::aligner::aligner {
         using N = typename G::N;
         using E = typename G::E;
         using COUNT = std::size_t;
-        using SLOT_ALLOCATOR=vector_container_creator<slot<N, E, COUNT, WEIGHT>, error_check>;
-        using PATH_ALLOCATOR=vector_container_creator<E, error_check>;
-        backtracker<G, COUNT, WEIGHT, SLOT_ALLOCATOR, PATH_ALLOCATOR> backtracker_ {};
+        using SLOT_CONTAINER_CREATOR=vector_container_creator<slot<N, E, COUNT, WEIGHT>, error_check>;
+        using PATH_CONTAINER_CREATOR=vector_container_creator<E, error_check>;
+        backtracker<G, COUNT, WEIGHT, SLOT_CONTAINER_CREATOR, PATH_CONTAINER_CREATOR> backtracker_ {};
         using E = typename G::E;
         auto [path, weight] {
             backtracker_.find_max_path(
@@ -319,9 +319,9 @@ namespace offbynull::aligner::aligner {
         using N = typename G::N;
         using E = typename G::E;
         using COUNT = std::size_t;
-        using SLOT_ALLOCATOR=array_container_creator<slot<N, E, COUNT, WEIGHT>, G::node_count(v_node_cnt, w_node_cnt), error_check>;
-        using PATH_ALLOCATOR=static_vector_container_creator<E, G::longest_path_edge_count(v_node_cnt, w_node_cnt), error_check>;
-        backtracker<G, COUNT, WEIGHT, SLOT_ALLOCATOR, PATH_ALLOCATOR> backtracker_ {};
+        using SLOT_CONTAINER_CREATOR=array_container_creator<slot<N, E, COUNT, WEIGHT>, G::node_count(v_node_cnt, w_node_cnt), error_check>;
+        using PATH_CONTAINER_CREATOR=static_vector_container_creator<E, G::longest_path_edge_count(v_node_cnt, w_node_cnt), error_check>;
+        backtracker<G, COUNT, WEIGHT, SLOT_CONTAINER_CREATOR, PATH_CONTAINER_CREATOR> backtracker_ {};
         using E = typename G::E;
         auto [path, weight] {
             backtracker_.find_max_path(

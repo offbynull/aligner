@@ -28,8 +28,8 @@ namespace offbynull::aligner::backtrack::backtrack {
         readable_graph G,
         widenable_to_size_t COUNT,
         weight WEIGHT,
-        container_creator SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, COUNT, WEIGHT>>,
-        container_creator PATH_ALLOCATOR=vector_container_creator<typename G::E>,
+        container_creator SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, COUNT, WEIGHT>>,
+        container_creator PATH_CONTAINER_CREATOR=vector_container_creator<typename G::E>,
         bool error_check = true
     >
     requires requires(typename G::N n)
@@ -40,7 +40,7 @@ namespace offbynull::aligner::backtrack::backtrack {
     public:
         using N = typename G::N;
         using E = typename G::E;
-        using slot_container_t = slot_container<N, E, COUNT, WEIGHT, SLOT_ALLOCATOR, error_check>;
+        using slot_container_t = slot_container<N, E, COUNT, WEIGHT, SLOT_CONTAINER_CREATOR, error_check>;
 
         slot_container_t populate_weights_and_backtrack_pointers(
             G& g,
@@ -150,7 +150,7 @@ namespace offbynull::aligner::backtrack::backtrack {
                 G& g,
                 slot_container_t& slots,
                 const N& end_node,
-                PATH_ALLOCATOR path_container_creator = {}
+                PATH_CONTAINER_CREATOR path_container_creator = {}
         ) {
             auto next_node { end_node };
             auto path { path_container_creator.create_empty(std::nullopt) };

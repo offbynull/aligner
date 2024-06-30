@@ -33,8 +33,8 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
     template<
         readable_sliceable_parwise_alignment_graph G,
         weight WEIGHT,
-        container_creator SLICE_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
-        container_creator RESIDENT_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
+        container_creator SLICE_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
+        container_creator RESIDENT_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
         bool error_check = true
     >
     requires requires(typename G::N n)
@@ -51,8 +51,8 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
 
         G& whole_graph;
         std::function<WEIGHT(const E&)> edge_weight_getter;
-        SLICE_SLOT_ALLOCATOR slice_slot_container_creator;
-        RESIDENT_SLOT_ALLOCATOR resident_slot_container_creator;
+        SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator;
+        RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator;
         middle_sliceable_pairwise_alignment_graph<
             G,
             error_check
@@ -65,8 +65,8 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
         sliced_walker<
             decltype(prefix_graph),
             WEIGHT,
-            SLICE_SLOT_ALLOCATOR,
-            RESIDENT_SLOT_ALLOCATOR,
+            SLICE_SLOT_CONTAINER_CREATOR,
+            RESIDENT_SLOT_CONTAINER_CREATOR,
             error_check
         > forward_walker;
         suffix_sliceable_pairwise_alignment_graph<
@@ -79,8 +79,8 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
         sliced_walker<
             decltype(reversed_suffix_graph),
             WEIGHT,
-            SLICE_SLOT_ALLOCATOR,
-            RESIDENT_SLOT_ALLOCATOR,
+            SLICE_SLOT_CONTAINER_CREATOR,
+            RESIDENT_SLOT_CONTAINER_CREATOR,
             error_check
         > backward_walker;
 
@@ -88,8 +88,8 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
         sliced_backtracker(
             G& g,
             std::function<WEIGHT(const E&)> get_edge_weight_func,
-            SLICE_SLOT_ALLOCATOR slice_slot_container_creator = {},
-            RESIDENT_SLOT_ALLOCATOR resident_slot_container_creator = {}
+            SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
+            RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {}
         )
         : sliced_backtracker(
             g,
@@ -109,8 +109,8 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
             INDEX grid_down_cnt,
             INDEX grid_right_cnt,
             std::function<WEIGHT(const E&)> get_edge_weight_func,
-            SLICE_SLOT_ALLOCATOR slice_slot_container_creator = {},
-            RESIDENT_SLOT_ALLOCATOR resident_slot_container_creator = {}
+            SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
+            RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {}
         )
         : whole_graph { g }
         , edge_weight_getter { get_edge_weight_func }
@@ -154,8 +154,8 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
             sliced_walker<
                 decltype(sub_graph),
                 WEIGHT,
-                SLICE_SLOT_ALLOCATOR,
-                RESIDENT_SLOT_ALLOCATOR,
+                SLICE_SLOT_CONTAINER_CREATOR,
+                RESIDENT_SLOT_CONTAINER_CREATOR,
                 error_check
             > forward_walker {
                 sub_graph,
@@ -236,8 +236,8 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
                 sliced_backtracker<
                     G,
                     WEIGHT,
-                    SLICE_SLOT_ALLOCATOR,
-                    RESIDENT_SLOT_ALLOCATOR,
+                    SLICE_SLOT_CONTAINER_CREATOR,
+                    RESIDENT_SLOT_CONTAINER_CREATOR,
                     error_check
                 > upper_half_backtracker {
                     whole_graph,
@@ -256,8 +256,8 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
                 sliced_backtracker<
                     G,
                     WEIGHT,
-                    SLICE_SLOT_ALLOCATOR,
-                    RESIDENT_SLOT_ALLOCATOR,
+                    SLICE_SLOT_CONTAINER_CREATOR,
+                    RESIDENT_SLOT_CONTAINER_CREATOR,
                     error_check
                 > lower_half_backtracker {
                     whole_graph,

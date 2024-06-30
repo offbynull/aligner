@@ -59,12 +59,12 @@ namespace offbynull::aligner::backtrack::slot_container {
         typename E,
         widenable_to_size_t COUNT,
         weight WEIGHT,
-        container_creator ALLOCATOR=vector_container_creator<slot<N, E, COUNT, WEIGHT>>,
+        container_creator CONTAINER_CREATOR=vector_container_creator<slot<N, E, COUNT, WEIGHT>>,
         bool error_check=true
     >
     class slot_container {
     private:
-        decltype(std::declval<ALLOCATOR>().create_empty(std::nullopt)) slots;
+        decltype(std::declval<CONTAINER_CREATOR>().create_empty(std::nullopt)) slots;
     public:
         // Concepts for params have been commented out because THEY FAIL when you pass in a std::views::common(...)'s
         // iterator. Apparently the iterator doesn't contain ::value_type? Or the iterator that's passed in isn't
@@ -76,7 +76,7 @@ namespace offbynull::aligner::backtrack::slot_container {
         slot_container(
             /*input_iterator_of_type<slot<N, E, COUNT, WEIGHT>>*/ auto begin,
             /*std::sentinel_for<decltype(begin)>*/ auto end,
-            ALLOCATOR container_creator = {}
+            CONTAINER_CREATOR container_creator = {}
         )
         : slots(container_creator.create_copy(begin, end)) {
             std::ranges::sort(

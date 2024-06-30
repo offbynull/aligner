@@ -53,8 +53,8 @@ namespace offbynull::aligner::backtrack::sliced_walker {
     template<
         readable_sliceable_parwise_alignment_graph G,
         weight WEIGHT,
-        container_creator SLICE_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
-        container_creator RESIDENT_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
+        container_creator SLICE_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
+        container_creator RESIDENT_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
         bool error_check = true
     >
     requires requires(typename G::N n)
@@ -68,8 +68,8 @@ namespace offbynull::aligner::backtrack::sliced_walker {
         using ND = typename G::ND;
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
-        using SLICE_SLOT_CONTAINER=decltype(std::declval<SLICE_SLOT_ALLOCATOR>().create_empty(0zu));
-        using RESIDENT_SLOT_CONTAINER=decltype(std::declval<RESIDENT_SLOT_ALLOCATOR>().create_empty(0zu));
+        using SLICE_SLOT_CONTAINER=decltype(std::declval<SLICE_SLOT_CONTAINER_CREATOR>().create_empty(0zu));
+        using RESIDENT_SLOT_CONTAINER=decltype(std::declval<RESIDENT_SLOT_CONTAINER_CREATOR>().create_empty(0zu));
         G& graph;
         std::function<WEIGHT(const E&)> get_edge_weight_func;
         RESIDENT_SLOT_CONTAINER resident_slots;
@@ -123,8 +123,8 @@ namespace offbynull::aligner::backtrack::sliced_walker {
         sliced_walker(
             G& graph_,
             std::function<WEIGHT(const E&)> get_edge_weight_func_,
-            SLICE_SLOT_ALLOCATOR slice_slot_container_creator = {},
-            RESIDENT_SLOT_ALLOCATOR resident_slot_container_creator = {}
+            SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
+            RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {}
         )
         : graph{graph_}
         , get_edge_weight_func{get_edge_weight_func_}

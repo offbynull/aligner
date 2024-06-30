@@ -10,16 +10,16 @@ namespace offbynull::aligner::backtrack::ready_queue {
     using offbynull::helpers::container_creators::vector_container_creator;
 
     template<
-        container_creator ALLOCATOR=vector_container_creator<std::size_t>,
+        container_creator CONTAINER_CREATOR=vector_container_creator<std::size_t>,
         bool error_check=true
     >
     class ready_queue {
     private:
-        decltype(std::declval<ALLOCATOR>().create_empty(std::nullopt)) queue;
+        decltype(std::declval<CONTAINER_CREATOR>().create_empty(std::nullopt)) queue;
 
     public:
         ready_queue(
-            ALLOCATOR container_creator = {}
+            CONTAINER_CREATOR container_creator = {}
         ) : queue{container_creator.create_empty(std::nullopt)} {
             if constexpr (error_check) {
                 if (!queue.empty()) {
