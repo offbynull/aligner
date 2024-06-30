@@ -1,5 +1,5 @@
-#ifndef OFFBYNULL_ALIGNER_BACKTRACK_BACKTRACK_H
-#define OFFBYNULL_ALIGNER_BACKTRACK_BACKTRACK_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_BACKTRACKER_H
+#define OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_BACKTRACKER_H
 
 #include <cstddef>
 #include <functional>
@@ -7,18 +7,18 @@
 #include <algorithm>
 #include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
-#include "offbynull/aligner/backtrack/ready_queue.h"
-#include "offbynull/aligner/backtrack/slot_container.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container.h"
 #include "offbynull/aligner/graph/graph.h"
 #include "offbynull/helpers/container_creators.h"
 #include "offbynull/concepts.h"
 
-namespace offbynull::aligner::backtrack::backtrack {
+namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
     using offbynull::aligner::graph::graph::readable_graph;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrack::slot_container::slot_container;
-    using offbynull::aligner::backtrack::slot_container::slot;
-    using offbynull::aligner::backtrack::ready_queue::ready_queue;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot;
+    using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue;
     using offbynull::helpers::container_creators::container_creator;
     using offbynull::helpers::container_creators::vector_container_creator;
     using offbynull::concepts::range_of_type;
@@ -198,4 +198,4 @@ namespace offbynull::aligner::backtrack::backtrack {
     };
 }
 
-#endif //OFFBYNULL_ALIGNER_BACKTRACK_BACKTRACK_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_BACKTRACKER_H

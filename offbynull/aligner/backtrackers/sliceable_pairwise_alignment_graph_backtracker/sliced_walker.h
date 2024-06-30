@@ -1,20 +1,17 @@
-#ifndef OFFBYNULL_ALIGNER_BACKTRACK_SLICED_WALKER_H
-#define OFFBYNULL_ALIGNER_BACKTRACK_SLICED_WALKER_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICED_WALKER_H
+#define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICED_WALKER_H
 
 #include <functional>
 #include <ranges>
 #include <algorithm>
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/helpers/container_creators.h"
-#include "offbynull/aligner/backtrack/ready_queue.h"
-#include "offbynull/aligner/backtrack/slot_container.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/concepts.h"
 
-namespace offbynull::aligner::backtrack::sliced_walker {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_parwise_alignment_graph;
+namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker {
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrack::ready_queue::ready_queue;
     using offbynull::helpers::container_creators::container_creator;
     using offbynull::helpers::container_creators::vector_container_creator;
     using offbynull::concepts::range_of_type;
@@ -51,7 +48,7 @@ namespace offbynull::aligner::backtrack::sliced_walker {
     };
 
     template<
-        readable_sliceable_parwise_alignment_graph G,
+        readable_sliceable_pairwise_alignment_graph G,
         weight WEIGHT,
         container_creator SLICE_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
         container_creator RESIDENT_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
@@ -230,4 +227,4 @@ namespace offbynull::aligner::backtrack::sliced_walker {
     };
 }
 
-#endif //OFFBYNULL_ALIGNER_BACKTRACK_SLICED_WALKER_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICED_WALKER_H

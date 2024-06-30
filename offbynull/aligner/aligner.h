@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <type_traits>
 #include "offbynull/aligner/concepts.h"
-#include "offbynull/aligner/backtrack/backtrack.h"
+#include "offbynull/aligner/backtrackers/backtrack.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/pairwise_global_alignment_graph.h"
 #include "offbynull/aligner/graphs/pairwise_local_alignment_graph.h"
@@ -20,7 +20,7 @@ namespace offbynull::aligner::aligner {
     using offbynull::aligner::backtrack::backtrack::backtracker;
     using offbynull::aligner::backtrack::slot_container::slot;
     using offbynull::aligner::graph::graph::readable_graph;
-    using offbynull::aligner::graph::pairwise_alignment_graph::readable_parwise_alignment_graph;
+    using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
     using offbynull::aligner::graph::grid_container_creator::grid_container_creator;
     using offbynull::aligner::graph::grid_container_creators::vector_grid_container_creator;
     using offbynull::aligner::graph::grid_container_creators::array_grid_container_creator;
@@ -46,7 +46,7 @@ namespace offbynull::aligner::aligner {
         bool error_check
     >
     auto align_heap(
-        readable_parwise_alignment_graph auto& graph,
+        readable_pairwise_alignment_graph auto& graph,
         std::ranges::random_access_range auto&& v,
         std::ranges::random_access_range auto&& w
     ) {
@@ -301,7 +301,7 @@ namespace offbynull::aligner::aligner {
         bool error_check
     >
     auto align_stack(
-        readable_parwise_alignment_graph auto& graph,
+        readable_pairwise_alignment_graph auto& graph,
         std::ranges::random_access_range auto&& v,
         std::ranges::random_access_range auto&& w
     ) {

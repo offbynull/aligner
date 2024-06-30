@@ -1,13 +1,14 @@
 #include "offbynull/aligner/graph/graph.h"
 #include "offbynull/aligner/graphs/pairwise_local_alignment_graph.h"
 #include "offbynull/aligner/graphs/pairwise_global_alignment_graph.h"
-#include "offbynull/aligner/backtrack/sliced_backtrack.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_walker.h"
 #include "gtest/gtest.h"
 #include <stdfloat>
 
 namespace {
-    using offbynull::aligner::backtrack::sliced_backtrack::sliced_backtracker;
-    using offbynull::aligner::backtrack::sliced_walker::slot;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker::slot;
     using offbynull::aligner::graphs::pairwise_global_alignment_graph::pairwise_global_alignment_graph;
     using offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph;
 
@@ -45,7 +46,7 @@ namespace {
         using E = typename decltype(g)::E;
 
         // walk
-        sliced_backtracker<decltype(g), std::float64_t> backtracker{
+        backtracker<decltype(g), std::float64_t> backtracker{
             g,
             [&g](const E& edge) { return g.get_edge_data(edge); }
         };
@@ -94,7 +95,7 @@ namespace {
         using E = typename decltype(g)::E;
 
         // walk
-        sliced_backtracker<decltype(g), std::float64_t> backtracker{
+        backtracker<decltype(g), std::float64_t> backtracker{
             g,
             [&g](const E& edge) { return g.get_edge_data(edge); }
         };

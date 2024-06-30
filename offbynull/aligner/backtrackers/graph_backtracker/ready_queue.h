@@ -1,11 +1,11 @@
-#ifndef OFFBYNULL_ALIGNER_BACKTRACK_READY_QUEUE_H
-#define OFFBYNULL_ALIGNER_BACKTRACK_READY_QUEUE_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_READY_QUEUE_H
+#define OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_READY_QUEUE_H
 
 #include <cstddef>
 #include <stdexcept>
 #include "offbynull/helpers/container_creators.h"
 
-namespace offbynull::aligner::backtrack::ready_queue {
+namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue {
     using offbynull::helpers::container_creators::container_creator;
     using offbynull::helpers::container_creators::vector_container_creator;
 
@@ -43,4 +43,4 @@ namespace offbynull::aligner::backtrack::ready_queue {
         }
     };
 }
-#endif //OFFBYNULL_ALIGNER_BACKTRACK_READY_QUEUE_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_READY_QUEUE_H

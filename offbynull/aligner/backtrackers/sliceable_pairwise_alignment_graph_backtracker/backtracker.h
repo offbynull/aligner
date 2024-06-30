@@ -1,12 +1,12 @@
-#ifndef OFFBYNULL_ALIGNER_BACKTRACK_SLICED_BACKTRACK_H
-#define OFFBYNULL_ALIGNER_BACKTRACK_SLICED_BACKTRACK_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_BACKTRACKER_H
+#define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_BACKTRACKER_H
 
 #include <functional>
 #include <ranges>
 #include <algorithm>
 #include <iostream>
 
-#include "offbynull/aligner/backtrack/sliced_walker.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_walker.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
@@ -16,11 +16,11 @@
 #include "offbynull/aligner/graphs/reversed_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/concepts.h"
 
-namespace offbynull::aligner::backtrack::sliced_backtrack {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_parwise_alignment_graph;
+namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker {
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrack::sliced_walker::sliced_walker;
-    using offbynull::aligner::backtrack::sliced_walker::slot;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker::sliced_walker;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker::slot;
     using offbynull::helpers::container_creators::container_creator;
     using offbynull::helpers::container_creators::vector_container_creator;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
@@ -31,7 +31,7 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
     using offbynull::concepts::widenable_to_size_t;
 
     template<
-        readable_sliceable_parwise_alignment_graph G,
+        readable_sliceable_pairwise_alignment_graph G,
         weight WEIGHT,
         container_creator SLICE_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
         container_creator RESIDENT_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
@@ -41,7 +41,7 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
     {
         {n < n} -> std::same_as<bool>;
     }
-    class sliced_backtracker {
+    class backtracker {
     private:
         using N = typename G::N;
         using E = typename G::E;
@@ -85,13 +85,13 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
         > backward_walker;
 
     public:
-        sliced_backtracker(
+        backtracker(
             G& g,
             std::function<WEIGHT(const E&)> get_edge_weight_func,
             SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
             RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {}
         )
-        : sliced_backtracker(
+        : backtracker(
             g,
             0u,
             0u,
@@ -102,7 +102,7 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
             resident_slot_container_creator
         ) {}
 
-        sliced_backtracker(
+        backtracker(
             G& g,
             INDEX grid_down_offset,
             INDEX grid_right_offset,
@@ -218,7 +218,7 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
             const auto& [max_weight, max_node] { *max_it };
 
             // Recurse
-            const auto& [cut_down_offset, cut_right_offset] { sub_graph.node_to_grid_offsets(max_node) };
+            const auto& [cut_down_offset, cut_right_offset, _] { sub_graph.node_to_grid_offsets(max_node) };
             std::cout
                     << "down bounds: ["
                     << sub_graph.grid_down_offset << "," << sub_graph.grid_down_offset + sub_graph.grid_down_cnt - 1u << "]"
@@ -233,7 +233,7 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
                 return max_node;
             }
             {
-                sliced_backtracker<
+                backtracker<
                     G,
                     WEIGHT,
                     SLICE_SLOT_CONTAINER_CREATOR,
@@ -253,7 +253,7 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
                 upper_half_backtracker.walk();
             }
             {
-                sliced_backtracker<
+                backtracker<
                     G,
                     WEIGHT,
                     SLICE_SLOT_CONTAINER_CREATOR,
@@ -278,4 +278,4 @@ namespace offbynull::aligner::backtrack::sliced_backtrack {
     };
 }
 
-#endif //OFFBYNULL_ALIGNER_BACKTRACK_SLICED_BACKTRACK_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_BACKTRACKER_H

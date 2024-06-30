@@ -1,14 +1,14 @@
 #include "offbynull/aligner/graph/graph.h"
 #include "offbynull/aligner/graphs/pairwise_local_alignment_graph.h"
 #include "offbynull/aligner/graphs/pairwise_global_alignment_graph.h"
-#include "offbynull/aligner/backtrack/sliced_walker.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_walker.h"
 #include "gtest/gtest.h"
 #include <format>
 #include <stdfloat>
 
 namespace {
-    using offbynull::aligner::backtrack::sliced_walker::sliced_walker;
-    using offbynull::aligner::backtrack::sliced_walker::slot;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker::sliced_walker;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker::slot;
     using offbynull::aligner::graphs::pairwise_global_alignment_graph::pairwise_global_alignment_graph;
     using offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph;
 

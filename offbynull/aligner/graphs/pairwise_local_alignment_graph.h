@@ -5,10 +5,10 @@
 #include <ranges>
 #include <tuple>
 #include <stdexcept>
-#include <format>
 #include <utility>
 #include <functional>
 #include <stdfloat>
+#include "offbynull/aligner/graph/utils.h"
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
@@ -24,6 +24,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::helpers::concat_view::concat_view;
     using offbynull::helpers::cartesian_product_2d_view::cartesian_product_2d_view;
     using offbynull::utils::static_vector_typer;
+    using offbynull::aligner::graph::utils::generic_slicable_pairwise_alignment_graph_limits;
 
     enum class edge_type : uint8_t {
         FREE_RIDE,
@@ -430,7 +431,14 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             std::unreachable();
         }
 
-        std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
+        constexpr static std::size_t max_grid_depth(
+            INDEX _grid_down_cnt,
+            INDEX _grid_right_cnt
+        ) {
+            return decltype(g)::max_grid_depth(_grid_down_cnt, _grid_right_cnt);;
+        }
+
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -439,22 +447,18 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return g.node_to_grid_offsets(node);
         }
 
-        constexpr static INDEX node_count(
+        constexpr static auto limits(
             INDEX _grid_down_cnt,
             INDEX _grid_right_cnt
         ) {
-            return decltype(g)::node_count(_grid_down_cnt, _grid_right_cnt);
-        }
-
-        constexpr static INDEX longest_path_edge_count(
-            INDEX _grid_down_cnt,
-            INDEX _grid_right_cnt
-        ) {
-            return decltype(g)::longest_path_edge_count(_grid_down_cnt, _grid_right_cnt);
-        }
-
-        constexpr static std::size_t slice_nodes_capacity(INDEX _grid_down_cnt, INDEX _grid_right_cnt) {
-            return decltype(g)::slice_nodes_capacity(_grid_down_cnt, _grid_right_cnt);
+            auto raw { decltype(g)::limits(_grid_down_cnt, _grid_right_cnt) };
+            return generic_slicable_pairwise_alignment_graph_limits {
+                _grid_down_cnt * _grid_right_cnt,
+                1zu,
+                (_grid_right_cnt - 1u) + (_grid_down_cnt - 1u),
+                _grid_right_cnt,
+                2zu
+            };
         }
 
         auto slice_nodes(INDEX grid_down) {
@@ -487,10 +491,6 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
 
         N slice_prev_node(const N& node) {
             return g.slice_prev_node(node);
-        }
-
-        constexpr static std::size_t resident_nodes_capacity(INDEX _grid_down_cnt, INDEX _grid_right_cnt) {
-            return 2zu;
         }
 
         auto resident_nodes() {

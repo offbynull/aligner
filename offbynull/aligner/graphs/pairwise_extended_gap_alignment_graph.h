@@ -12,6 +12,7 @@
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
 #include "offbynull/helpers/concat_view.h"
+#include "offbynull/aligner/graph/utils.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
@@ -20,6 +21,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::helpers::concat_view::concat_view;
     using offbynull::utils::static_vector_typer;
     using offbynull::helpers::forward_range_join_view::forward_range_join_view;
+    using offbynull::aligner::graph::utils::generic_slicable_pairwise_alignment_graph_limits;
 
     using empty_type = std::tuple<>;
 
@@ -473,36 +475,30 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             std::unreachable();
         }
 
-        std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
-            if constexpr (error_check) {
-                if (!has_node(node)) {
-                    throw std::runtime_error {"Node doesn't exist"};
-                }
-            }
-            return { std::get<1>(node), std::get<2>(node) };
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) {
+            const auto& [layer, down_offset, right_offset] { node };
+            return { down_offset, right_offset, static_cast<std::size_t>(layer) };
         }
 
-        constexpr static INDEX node_count(
+        constexpr static auto limits(
             INDEX _grid_down_cnt,
             INDEX _grid_right_cnt
         ) {
-            INDEX node_cnt {};
-            node_cnt += _grid_down_cnt * _grid_right_cnt; // Middle layer
-            node_cnt += (_grid_down_cnt - 1u) * _grid_right_cnt; // Down gap layer
-            node_cnt += _grid_down_cnt * (_grid_right_cnt - 1u); // Right gap layer
-            return node_cnt;
-        }
-
-        constexpr static INDEX longest_path_edge_count(
-            INDEX _grid_down_cnt,
-            INDEX _grid_right_cnt
-        ) {
-            return (_grid_right_cnt - 1u) * 2u + (_grid_down_cnt - 1u) * 2u;
-        }
-
-        constexpr static std::size_t slice_nodes_capacity(INDEX _grid_down_cnt, INDEX _grid_right_cnt) {
-            // THIS IS NOT SUPPOSED TO BE THE CAPACITY AT EACH SLICE, this is supposed to be the max capacity across all slices, meaning the implementation below is correct.
-            return 1zu + 3zu * (_grid_right_cnt - 1zu);
+            std::size_t max_node_cnt {};
+            max_node_cnt += _grid_down_cnt * _grid_right_cnt; // Middle layer
+            max_node_cnt += (_grid_down_cnt - 1u) * _grid_right_cnt; // Down gap layer
+            max_node_cnt += _grid_down_cnt * (_grid_right_cnt - 1u); // Right gap layer
+            std::size_t max_node_depth { 3zu };
+            std::size_t max_path_edge_cnt { (_grid_right_cnt - 1zu) * 2zu + (_grid_down_cnt - 1zu) * 2zu };
+            std::size_t max_slice_nodes_cnt { 1zu + 3zu * (_grid_right_cnt - 1zu) }; // THIS IS NOT SUPPOSED TO BE THE CAPACITY AT EACH SLICE, this is supposed to be the max capacity across all slices, meaning the implementation below is correct.
+            std::size_t max_resident_nodes_cnt { 0zu };
+            return generic_slicable_pairwise_alignment_graph_limits {
+                max_node_cnt,
+                max_node_depth,
+                max_path_edge_cnt,
+                max_slice_nodes_cnt,
+                max_resident_nodes_cnt
+            };
         }
 
         auto slice_nodes(INDEX grid_down) {
@@ -618,10 +614,6 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 }
             }
             return prev_node;
-        }
-
-        constexpr static std::size_t resident_nodes_capacity(INDEX _grid_down_cnt, INDEX _grid_right_cnt) {
-            return 0zu;
         }
 
         auto resident_nodes() {

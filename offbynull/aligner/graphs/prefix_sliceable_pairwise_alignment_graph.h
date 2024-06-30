@@ -6,11 +6,11 @@
 #include "offbynull/aligner/concepts.h"
 
 namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_parwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
 
     template<
-        readable_sliceable_parwise_alignment_graph GRAPH,
+        readable_sliceable_pairwise_alignment_graph GRAPH,
         bool error_check=true
     >
     class prefix_sliceable_pairwise_alignment_graph {
@@ -25,8 +25,8 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         GRAPH& g;
 
         bool node_out_of_bound(const N& node) {
-            const auto& [down_offset, right_offset] { g.node_to_grid_offsets(node) };
-            return down_offset >= grid_down_cnt || (right_offset >= grid_right_cnt);
+            const auto& [down_offset, right_offset, _] { g.node_to_grid_offsets(node) };
+            return down_offset >= grid_down_cnt || right_offset >= grid_right_cnt;
         }
 
         bool edge_out_of_bound(const E& edge) {
@@ -227,26 +227,15 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
             return g.edge_to_element_offsets(edge);
         }
 
-        std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) {
             return g.node_to_grid_offsets(node);
         }
 
-        constexpr static INDEX node_count(
+        constexpr static auto limits(
             INDEX _grid_down_cnt,
             INDEX _grid_right_cnt
         ) {
-            return GRAPH::node_count(_grid_down_cnt, _grid_right_cnt);
-        }
-
-        constexpr static INDEX longest_path_edge_count(
-            INDEX _grid_down_cnt,
-            INDEX _grid_right_cnt
-        ) {
-            return GRAPH::longest_path_edge_count(_grid_down_cnt, _grid_right_cnt);
-        }
-
-        constexpr static std::size_t slice_nodes_capacity(INDEX _grid_down_cnt, INDEX _grid_right_cnt) {
-            return GRAPH::slice_nodes_capacity(_grid_down_cnt, _grid_right_cnt);
+            return GRAPH::limits(_grid_down_cnt, _grid_right_cnt);;
         }
 
         auto slice_nodes(INDEX grid_down) {
@@ -278,7 +267,7 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         N slice_next_node(const N& node) {
             N next_node { g.slice_next_node(node) };
             if constexpr (error_check) {
-                const auto& [grid_down, grid_right] { node_to_grid_offsets(node) };
+                const auto& [grid_down, grid_right, _] { node_to_grid_offsets(node) };
                 if (grid_down >= grid_down_cnt) {
                     throw std::runtime_error("Node too far down");
                 }
@@ -292,7 +281,7 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         N slice_prev_node(const N& node) {
             N prev_node { g.slice_prev_node(node) };
             if constexpr (error_check) {
-                const auto& [grid_down, grid_right] { node_to_grid_offsets(node) };
+                const auto& [grid_down, grid_right, _] { node_to_grid_offsets(node) };
                 if (grid_down >= grid_down_cnt) {
                     throw std::runtime_error("Node too far down");
                 }
@@ -301,10 +290,6 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
                 }
             }
             return prev_node;
-        }
-
-        constexpr static std::size_t resident_nodes_capacity(INDEX _grid_down_cnt, INDEX _grid_right_cnt) {
-            return GRAPH::resident_nodes_capacity(_grid_down_cnt, _grid_right_cnt);
         }
 
         auto resident_nodes() {

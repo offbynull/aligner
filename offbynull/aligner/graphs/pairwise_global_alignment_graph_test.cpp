@@ -31,7 +31,7 @@ namespace {
     TEST(PairwiseGlobalAlignmentGraphTest, ConceptCheck) {
         using G = pairwise_global_alignment_graph<std::string, std::string>;
         static_assert(offbynull::aligner::graph::graph::readable_graph<G>);
-        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_parwise_alignment_graph<G>);
+        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph<G>);
     }
 
     TEST(PairwiseGlobalAlignmentGraphTest, ListNodes) {
@@ -344,13 +344,13 @@ namespace {
         using N = typename G::N;
         using E = typename G::E;
 
-        EXPECT_EQ(G::slice_nodes_capacity(g.grid_down_cnt, g.grid_right_cnt), 3zu);
+        EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_slice_nodes_cnt, 3zu);
         EXPECT_EQ(g.slice_first_node(0zu), (N { 0zu, 0zu }));
         EXPECT_EQ(g.slice_last_node(0zu), (N { 0zu, 2zu }));
         EXPECT_EQ(g.slice_first_node(1zu), (N { 1zu, 0zu }));
         EXPECT_EQ(g.slice_last_node(1zu), (N {  1zu, 2zu }));
 
-        EXPECT_EQ(G::resident_nodes_capacity(g.grid_down_cnt, g.grid_right_cnt), 0zu);
+        EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_resident_nodes_cnt, 0zu);
         EXPECT_EQ(g.resident_nodes().size(), 0zu);
 
         EXPECT_EQ(g.slice_next_node(N { 0zu, 0zu }), (N { 0zu, 1zu }));

@@ -69,7 +69,7 @@ namespace {
     TEST(MiddlePairwiseAlignmentGraphTest, ConceptCheck) {
         using G = decltype(graph_bundle{"abc", "acc", 1zu, 1zu, 2zu, 2zu}.middle_g);
         static_assert(offbynull::aligner::graph::graph::readable_graph<G>);
-        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_parwise_alignment_graph<G>);
+        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph<G>);
     }
 
     TEST(MiddlePairwiseAlignmentGraphTest, ListNodes) {
@@ -276,13 +276,13 @@ namespace {
         using N = typename G::N;
         using E = typename G::E;
 
-        EXPECT_EQ(G::slice_nodes_capacity(g.grid_down_cnt, g.grid_right_cnt), 2zu);
+        EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_slice_nodes_cnt, 2zu);
         EXPECT_EQ(g.slice_first_node(0zu), (N { 1zu, 1zu }));
         EXPECT_EQ(g.slice_last_node(0zu), (N { 1zu, 2zu }));
         EXPECT_EQ(g.slice_first_node(1zu), (N { 2zu, 1zu }));
         EXPECT_EQ(g.slice_last_node(1zu), (N { 2zu, 2zu }));
 
-        EXPECT_EQ(G::resident_nodes_capacity(g.grid_down_cnt, g.grid_right_cnt), 2zu); // directly proxied from backing graph
+        EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_resident_nodes_cnt, 2zu); // directly proxied from backing graph
         auto resident_nodes { g.resident_nodes() };
         EXPECT_EQ(std::distance(resident_nodes.begin(), resident_nodes.end()), 0zu);
         auto resident_nodes_it { resident_nodes.begin() };

@@ -13,16 +13,34 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::graph::graph::readable_graph;
 
+    template <typename L>
+    concept readable_pairwise_alignment_graph_limits =
+        requires(L l) {
+            { l.max_grid_node_cnt } -> std::same_as<const std::size_t&>;
+            { l.max_grid_node_depth } -> std::same_as<const std::size_t&>;
+            { l.max_path_edge_cnt } -> std::same_as<const std::size_t&>;
+        };
+
     template <typename G>
-    concept readable_parwise_alignment_graph =
+    concept readable_pairwise_alignment_graph =
         readable_graph<G>
         && widenable_to_size_t<typename G::INDEX>
         && requires(
             G g,
             typename G::N node,
-            typename G::E edge
+            typename G::E edge,
+            typename G::INDEX indexer
         ) {
-            { g.node_to_grid_offsets(node) } -> std::same_as<std::pair<typename G::INDEX, typename G::INDEX>>;
+            { g.grid_down_cnt } -> std::same_as<const typename G::INDEX&>;
+            { g.grid_right_cnt } -> std::same_as<const typename G::INDEX&>;
+            { G::limits(indexer, indexer) } -> readable_pairwise_alignment_graph_limits;
+            { g.node_to_grid_offsets(node) } -> std::same_as<
+                std::tuple<
+                    typename G::INDEX,
+                    typename G::INDEX,
+                    std::size_t
+                >
+            >;
             { g.edge_to_element_offsets(edge) } -> std::same_as<
                 std::optional<
                     std::pair<
@@ -31,15 +49,6 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
                     >
                 >
             >;
-        }
-        && requires(
-            G g,
-            typename G::INDEX indexer
-        ) {
-            { g.grid_down_cnt } -> std::same_as<const typename G::INDEX&>;
-            { g.grid_right_cnt } -> std::same_as<const typename G::INDEX&>;
-            { G::node_count(indexer, indexer) } -> std::same_as<typename G::INDEX>;
-            { G::longest_path_edge_count(indexer, indexer) } -> std::same_as<typename G::INDEX>;
         };
 }
 

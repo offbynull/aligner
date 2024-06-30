@@ -1,12 +1,12 @@
-#ifndef OFFBYNULL_ALIGNER_BACKTRACK_SLOT_CONTAINER_H
-#define OFFBYNULL_ALIGNER_BACKTRACK_SLOT_CONTAINER_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_H
+#define OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_H
 
 #include <cstddef>
 #include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
 
-namespace offbynull::aligner::backtrack::slot_container {
+namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
     using offbynull::aligner::concepts::weight;
     using offbynull::helpers::container_creators::container_creator;
     using offbynull::helpers::container_creators::vector_container_creator;
@@ -124,4 +124,4 @@ namespace offbynull::aligner::backtrack::slot_container {
     };
 }
 
-#endif //OFFBYNULL_ALIGNER_BACKTRACK_SLOT_CONTAINER_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_H

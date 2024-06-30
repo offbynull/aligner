@@ -65,7 +65,7 @@ namespace {
     TEST(ReversedPairwiseAlignmentGraphTest, ConceptCheck) {
         using G = decltype(graph_bundle{"a", "ac"}.reversed_g);
         static_assert(offbynull::aligner::graph::graph::readable_graph<G>);
-        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_parwise_alignment_graph<G>);
+        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph<G>);
     }
 
     TEST(ReversedPairwiseAlignmentGraphTest, ListNodes) {
@@ -338,7 +338,7 @@ namespace {
         using N = typename G::N;
         using E = typename G::E;
 
-        EXPECT_EQ(G::slice_nodes_capacity(g.grid_down_cnt, g.grid_right_cnt), 3zu);
+        EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_slice_nodes_cnt, 3zu);
         EXPECT_EQ(g.slice_first_node(0zu), (N { 1zu, 2zu }));
         EXPECT_EQ(g.slice_first_node(0zu, 0zu), (N { 1zu, 2zu }));
         EXPECT_EQ(g.slice_first_node(0zu, 1zu), (N { 1zu, 1zu }));
@@ -350,7 +350,7 @@ namespace {
         EXPECT_EQ(g.slice_first_node(1zu), (N { 0zu, 2zu }));
         EXPECT_EQ(g.slice_last_node(1zu), (N { 0zu, 0zu }));
 
-        EXPECT_EQ(G::resident_nodes_capacity(g.grid_down_cnt, g.grid_right_cnt), 2zu);
+        EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_resident_nodes_cnt, 2zu);
         EXPECT_EQ(g.resident_nodes().size(), 2zu);
         EXPECT_EQ(g.resident_nodes()[0], (N { 0zu, 0zu }));
         EXPECT_EQ(g.resident_nodes()[1], (N { 1zu, 2zu }));

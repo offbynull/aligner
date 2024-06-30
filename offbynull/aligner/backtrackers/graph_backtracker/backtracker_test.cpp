@@ -1,14 +1,14 @@
 #include "offbynull/aligner/graph/graph.h"
 #include "offbynull/aligner/graphs/pairwise_global_alignment_graph.h"
 #include "offbynull/aligner/graphs/directed_graph.h"
-#include "offbynull/aligner/backtrack/backtrack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtracker.h"
 #include "gtest/gtest.h"
 #include <iostream>
 #include <format>
 #include <cstddef>
 
 namespace {
-    using offbynull::aligner::backtrack::backtrack::backtracker;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtracker::backtracker;
     using offbynull::aligner::graphs::pairwise_global_alignment_graph::pairwise_global_alignment_graph;
 
     TEST(BacktrackTest, FindMaxPathOnGridGraph) {

@@ -7,9 +7,11 @@
 #include <stdexcept>
 #include <utility>
 #include <stdfloat>
+
 #include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 #include "offbynull/aligner/concepts.h"
+#include "offbynull/aligner/graph/utils.h"
 #include "offbynull/helpers/forward_range_join_view.h"
 
 namespace offbynull::aligner::graphs::grid_graph {
@@ -18,6 +20,7 @@ namespace offbynull::aligner::graphs::grid_graph {
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::static_vector_typer;
     using offbynull::helpers::forward_range_join_view::forward_range_join_view;
+    using offbynull::aligner::graph::utils::generic_slicable_pairwise_alignment_graph_limits;
 
     using empty_type = std::tuple<>;
 
@@ -338,22 +341,22 @@ namespace offbynull::aligner::graphs::grid_graph {
             return static_cast<std::size_t>(dist);
         }
 
-        constexpr static INDEX node_count(
+        constexpr static auto limits(
             INDEX _grid_down_cnt,
             INDEX _grid_right_cnt
         ) {
-            return _grid_down_cnt * _grid_right_cnt;
+            return generic_slicable_pairwise_alignment_graph_limits {
+                _grid_down_cnt * _grid_right_cnt,
+                1zu,
+                (_grid_right_cnt - 1u) + (_grid_down_cnt - 1u),
+                _grid_right_cnt,
+                0zu
+            };
         }
 
-        constexpr static INDEX longest_path_edge_count(
-            INDEX _grid_down_cnt,
-            INDEX _grid_right_cnt
-        ) {
-            return (_grid_right_cnt - 1u) + (_grid_down_cnt - 1u);
-        }
-
-        std::pair<INDEX, INDEX> node_to_grid_offsets(const N& node) {
-            return node;
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) {
+            const auto& [down_offset, right_offset] { node };
+            return { down_offset, right_offset, 0zu };
         }
 
         constexpr static std::size_t slice_nodes_capacity(INDEX _grid_down_cnt, INDEX _grid_right_cnt) {
@@ -421,10 +424,6 @@ namespace offbynull::aligner::graphs::grid_graph {
                 }
             }
             return prev_node;
-        }
-
-        constexpr static std::size_t resident_nodes_capacity(INDEX _grid_down_cnt, INDEX _grid_right_cnt) {
-            return 0zu;
         }
 
         auto resident_nodes() {
