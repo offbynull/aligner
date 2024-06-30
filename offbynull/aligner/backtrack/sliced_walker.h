@@ -5,48 +5,47 @@
 #include <ranges>
 #include <algorithm>
 #include "offbynull/aligner/concepts.h"
-#include "offbynull/aligner/backtrack/container_creator.h"
-#include "offbynull/aligner/backtrack/container_creators.h"
+#include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/backtrack/ready_queue.h"
 #include "offbynull/aligner/backtrack/slot_container.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/concepts.h"
-#include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrack::sliced_walker {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_parwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::backtrack::ready_queue::ready_queue;
-    using offbynull::aligner::backtrack::container_creator::container_creator;
-    using offbynull::aligner::backtrack::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::container_creator;
+    using offbynull::helpers::container_creators::vector_container_creator;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::utils::max_element;
 
-    template<typename N, weight WEIGHT>
+    template<typename N, typename E, weight WEIGHT>
     struct slot {
         N node;
+        E backtracking_edge;
         WEIGHT backtracking_weight;
 
-        slot(N node_, WEIGHT backtracking_weight_)
+        slot(N node_, E backtracking_edge_, WEIGHT backtracking_weight_)
         : node{node_}
+        , backtracking_edge{backtracking_edge_}
         , backtracking_weight{backtracking_weight_} {}
 
         slot(N node_)
-        : slot{node_, {}} {}
+        : slot{node_, {}, {}} {}
     };
 
-    template<typename N, weight WEIGHT>
+    template<typename N, typename E, weight WEIGHT>
     struct slots_comparator {
-        bool operator()(const slot<N, WEIGHT>& lhs, const slot<N, WEIGHT>& rhs) const noexcept {
+        bool operator()(const slot<N, E, WEIGHT>& lhs, const slot<N, E, WEIGHT>& rhs) const noexcept {
             return lhs.node < rhs.node;
         }
 
-        bool operator()(const slot<N, WEIGHT>& lhs, const N& rhs) const noexcept {
+        bool operator()(const slot<N, E, WEIGHT>& lhs, const N& rhs) const noexcept {
             return lhs.node < rhs;
         }
 
-        bool operator()(const N& lhs, const slot<N, WEIGHT>& rhs) const noexcept {
+        bool operator()(const N& lhs, const slot<N, E, WEIGHT>& rhs) const noexcept {
             return lhs < rhs.node;
         }
     };
@@ -54,8 +53,8 @@ namespace offbynull::aligner::backtrack::sliced_walker {
     template<
         readable_sliceable_parwise_alignment_graph G,
         weight WEIGHT,
-        container_creator SLICE_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, WEIGHT>>,
-        container_creator RESIDENT_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, WEIGHT>>,
+        container_creator SLICE_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
+        container_creator RESIDENT_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
         bool error_check = true
     >
     requires requires(typename G::N n)
@@ -77,11 +76,11 @@ namespace offbynull::aligner::backtrack::sliced_walker {
         SLICE_SLOT_CONTAINER lower_slots;
         SLICE_SLOT_CONTAINER upper_slots;
         INDEX grid_down;
-        slot<N, WEIGHT>* active_slot_ptr;
-        slot<N, WEIGHT>* next_slot_ptr;
+        slot<N, E, WEIGHT>* active_slot_ptr;
+        slot<N, E, WEIGHT>* next_slot_ptr;
 
-        static std::optional<std::reference_wrapper<slot<N, WEIGHT>>> find_within_slots(auto& slots, const auto& node) {
-            auto it { std::lower_bound(slots.begin(), slots.end(), node, slots_comparator<N, WEIGHT>{}) };
+        static std::optional<std::reference_wrapper<slot<N, E, WEIGHT>>> find_within_slots(auto& slots, const auto& node) {
+            auto it { std::lower_bound(slots.begin(), slots.end(), node, slots_comparator<N, E, WEIGHT>{}) };
             if (it != slots.end() && (*it).node == node) {
                 return { *it };
             }
@@ -92,8 +91,8 @@ namespace offbynull::aligner::backtrack::sliced_walker {
             return find_within_slots(resident_slots, node).has_value();
         }
 
-        slot<N, WEIGHT>& find_slot(const N& node) {
-            using FOUND_SLOT_REF = std::optional<std::reference_wrapper<slot<N, WEIGHT>>>;
+        slot<N, E, WEIGHT>& find_slot(const N& node) {
+            using FOUND_SLOT_REF = std::optional<std::reference_wrapper<slot<N, E, WEIGHT>>>;
             FOUND_SLOT_REF found_resident_slot_ref { find_within_slots(resident_slots, node) };
             FOUND_SLOT_REF found_prev_slot_ref { find_within_slots(lower_slots, node) };
             FOUND_SLOT_REF found_next_slot_ref { find_within_slots(upper_slots, node) };
@@ -112,7 +111,7 @@ namespace offbynull::aligner::backtrack::sliced_walker {
                     throw std::runtime_error("Node not found");
                 }
             }
-            slot<N, WEIGHT>& found_slot {
+            slot<N, E, WEIGHT>& found_slot {
                 (
                     *(found_slot_range.begin())
                 ).get()
@@ -137,14 +136,14 @@ namespace offbynull::aligner::backtrack::sliced_walker {
         , next_slot_ptr{nullptr} {
             auto&& _resident_slots { graph.resident_nodes() };
             std::ranges::copy(_resident_slots.cbegin(), _resident_slots.cend(), std::back_inserter(resident_slots));
-            std::ranges::sort(resident_slots.begin(), resident_slots.end(), slots_comparator<N, WEIGHT>{});
+            std::ranges::sort(resident_slots.begin(), resident_slots.end(), slots_comparator<N, E, WEIGHT>{});
             auto&& _upper_slots { graph.slice_nodes(0u) };
             std::ranges::copy(_upper_slots.cbegin(), _upper_slots.cend(), std::back_inserter(upper_slots));
-            std::ranges::sort(upper_slots.begin(), upper_slots.end(), slots_comparator<N, WEIGHT>{});
+            std::ranges::sort(upper_slots.begin(), upper_slots.end(), slots_comparator<N, E, WEIGHT>{});
             next_slot_ptr = &find_slot(graph.get_root_node());
         }
 
-        slot<N, WEIGHT> active_slot() {
+        slot<N, E, WEIGHT> active_slot() {
             return *this->active_slot_ptr;
         }
 
@@ -167,16 +166,14 @@ namespace offbynull::aligner::backtrack::sliced_walker {
                             [&](const auto& edge) noexcept -> std::pair<E, WEIGHT> {
                                 const N& n_from { graph.get_edge_from(edge) };
                                 const WEIGHT& edge_weight { get_edge_weight_func(edge) };
-                                slot<N, WEIGHT>& n_from_slot { find_slot(n_from) };
+                                slot<N, E, WEIGHT>& n_from_slot { find_slot(n_from) };
                                 return { edge, n_from_slot.backtracking_weight + edge_weight };
                             }
                         )
                     )
                 };
                 auto found {
-                    // Can't use std::max_element / std::ranges::max_element because it requires a forward iterator
-                    // Ensure range is a common_view (begin() and end() are of same type)
-                    max_element(
+                    std::ranges::max_element(
                         incoming_accumulated.begin(),
                         incoming_accumulated.end(),
                         [](const std::pair<E, WEIGHT>& a, const std::pair<E, WEIGHT>& b) noexcept {
@@ -185,7 +182,7 @@ namespace offbynull::aligner::backtrack::sliced_walker {
                     )
                 };
                 if (found != incoming_accumulated.end()) {  // if no incoming nodes found, it's a root node
-                    // active_slot.backtracking_edge = (*found).first;
+                    active_slot_ptr->backtracking_edge = (*found).first;
                     active_slot_ptr->backtracking_weight = (*found).second;
                 }
             }
@@ -193,7 +190,7 @@ namespace offbynull::aligner::backtrack::sliced_walker {
             // Update resident node weights
             for (const E& edge : graph.outputs_to_residents(active_slot_ptr->node)) {
                 const N& resident_node { graph.get_edge_to(edge) };
-                std::optional<std::reference_wrapper<slot<N, WEIGHT>>> resident_slot_maybe {
+                std::optional<std::reference_wrapper<slot<N, E, WEIGHT>>> resident_slot_maybe {
                     find_within_slots(resident_slots, resident_node)
                 };
                 if constexpr (error_check) {
@@ -201,7 +198,7 @@ namespace offbynull::aligner::backtrack::sliced_walker {
                         throw std::runtime_error("This should never happen");
                     }
                 }
-                slot<N, WEIGHT>& resident_slot { (*resident_slot_maybe).get() };
+                slot<N, E, WEIGHT>& resident_slot { (*resident_slot_maybe).get() };
                 const WEIGHT& edge_weight { get_edge_weight_func(edge) };
                 const WEIGHT& new_weight { active_slot_ptr->backtracking_weight + edge_weight };
                 if (new_weight > resident_slot.backtracking_weight) {
@@ -223,7 +220,7 @@ namespace offbynull::aligner::backtrack::sliced_walker {
                 auto&& _upper_slots { graph.slice_nodes(grid_down) };
                 upper_slots.clear();
                 std::ranges::copy(_upper_slots.begin(), _upper_slots.end(), std::back_inserter(upper_slots));
-                std::ranges::sort(upper_slots.begin(), upper_slots.end(), slots_comparator<N, WEIGHT>{});
+                std::ranges::sort(upper_slots.begin(), upper_slots.end(), slots_comparator<N, E, WEIGHT>{});
                 next_slot_ptr = &find_slot(graph.slice_first_node(grid_down));
                 active_slot_ptr = &find_slot(graph.slice_last_node(grid_down - 1u)); // need to update this because slots entries have moved around
             }

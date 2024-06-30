@@ -11,6 +11,7 @@
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
+#include "offbynull/helpers/concat_view.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
@@ -18,7 +19,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::empty_type;
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::utils::concat_view;
+    using offbynull::helpers::concat_view::concat_view;
     using offbynull::utils::static_vector_typer;
 
     enum class edge_type : uint8_t {
@@ -189,13 +190,12 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
                     return E { edge_type::NORMAL, p };
                 })
             };
-            // This should be using std::views::conat, but it wasn't included in this version of the C++ standard
-            // library. The concat implementation below lacks several features (e.g. doesn't support the pipe operator)
-            // and forcefully returns copies (concat_view::iterator::value_type ==
-            // concat_view::iterator::reference_type).
             return concat_view {
                 std::move(real_range),
-                concat_view { from_src_range, to_sink_range }
+                concat_view {
+                    std::move(from_src_range),
+                    std::move(to_sink_range)
+                }
             };
         }
 

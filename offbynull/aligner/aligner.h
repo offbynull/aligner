@@ -12,6 +12,7 @@
 #include "offbynull/aligner/graphs/pairwise_local_alignment_graph.h"
 #include "offbynull/aligner/graphs/pairwise_fitting_alignment_graph.h"
 #include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
+#include "offbynull/helpers/container_creators.h"
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::aligner {
@@ -30,9 +31,9 @@ namespace offbynull::aligner::aligner {
     template<typename ND, typename ED>
     using extended_gap_slot = offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph::slot<ND, ED>;
     using offbynull::aligner::backtrack::container_creator::container_creator;
-    using offbynull::aligner::backtrack::container_creators::vector_container_creator;
-    using offbynull::aligner::backtrack::container_creators::array_container_creator;
-    using offbynull::aligner::backtrack::container_creators::static_vector_container_creator;
+    using offbynull::helpers::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::array_container_creator;
+    using offbynull::helpers::container_creators::static_vector_container_creator;
     using offbynull::concepts::widenable_to_size_t;
 
     template<typename T>

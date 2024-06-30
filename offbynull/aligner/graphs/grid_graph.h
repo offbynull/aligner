@@ -10,12 +10,14 @@
 #include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 #include "offbynull/aligner/concepts.h"
+#include "offbynull/helpers/forward_range_join_view.h"
 
 namespace offbynull::aligner::graphs::grid_graph {
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::static_vector_typer;
+    using offbynull::helpers::forward_range_join_view::forward_range_join_view;
 
     using empty_type = std::tuple<>;
 
@@ -183,7 +185,7 @@ namespace offbynull::aligner::graphs::grid_graph {
         }
 
         auto get_edges() {
-            return
+            return forward_range_join_view {
                 std::views::cartesian_product(
                     std::views::iota(0u, grid_down_cnt),
                     std::views::iota(0u, grid_right_cnt)
@@ -192,7 +194,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                     N node { std::get<0>(p), std::get<1>(p) };
                     return this->get_outputs(node);
                 })
-                | std::views::join;
+            };
         }
 
         bool has_node(const N& node) {

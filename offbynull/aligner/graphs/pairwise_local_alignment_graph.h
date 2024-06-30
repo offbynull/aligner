@@ -12,6 +12,8 @@
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
+#include "offbynull/helpers/concat_view.h"
+#include "offbynull/helpers/cartesian_product_2d_view.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
@@ -19,8 +21,8 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::empty_type;
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::utils::concat_view;
-    using offbynull::utils::pair_counter_view;
+    using offbynull::helpers::concat_view::concat_view;
+    using offbynull::helpers::cartesian_product_2d_view::cartesian_product_2d_view;
     using offbynull::utils::static_vector_typer;
 
     enum class edge_type : uint8_t {
@@ -205,7 +207,10 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             // concat_view::iterator::reference_type).
             return concat_view {
                 std::move(real_range),
-                concat_view { from_src_range, to_sink_range }
+                concat_view {
+                    std::move(from_src_range),
+                    std::move(to_sink_range)
+                }
             };
         }
 
@@ -266,7 +271,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             };
             bool has_freeride_from_root { node == get_root_node() };
             auto freeride_set_2 {
-                pair_counter_view {
+                cartesian_product_2d_view {
                     grid_down_cnt,
                     grid_right_cnt
                 }
@@ -302,7 +307,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             };
             bool has_freeride_to_leaf { node == get_leaf_node() };
             auto freeride_set_1 {
-                pair_counter_view {
+                cartesian_product_2d_view {
                     grid_down_cnt,
                     grid_right_cnt
                 }

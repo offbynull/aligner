@@ -8,36 +8,33 @@
 
 #include "offbynull/aligner/backtrack/sliced_walker.h"
 #include "offbynull/aligner/concepts.h"
-#include "offbynull/aligner/backtrack/container_creator.h"
-#include "offbynull/aligner/backtrack/container_creators.h"
+#include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/suffix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/middle_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/reversed_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/concepts.h"
-#include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrack::sliced_backtrack {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_parwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::backtrack::sliced_walker::sliced_walker;
     using offbynull::aligner::backtrack::sliced_walker::slot;
-    using offbynull::aligner::backtrack::container_creator::container_creator;
-    using offbynull::aligner::backtrack::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::container_creator;
+    using offbynull::helpers::container_creators::vector_container_creator;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::utils::max_element;
 
     template<
         readable_sliceable_parwise_alignment_graph G,
         weight WEIGHT,
-        container_creator SLICE_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, WEIGHT>>,
-        container_creator RESIDENT_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, WEIGHT>>,
+        container_creator SLICE_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
+        container_creator RESIDENT_SLOT_ALLOCATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
         bool error_check = true
     >
     requires requires(typename G::N n)

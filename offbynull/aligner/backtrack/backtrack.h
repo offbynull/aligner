@@ -7,13 +7,11 @@
 #include <algorithm>
 #include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
-#include "offbynull/aligner/backtrack/container_creator.h"
-#include "offbynull/aligner/backtrack/container_creators.h"
 #include "offbynull/aligner/backtrack/ready_queue.h"
 #include "offbynull/aligner/backtrack/slot_container.h"
 #include "offbynull/aligner/graph/graph.h"
+#include "offbynull/helpers/container_creators.h"
 #include "offbynull/concepts.h"
-#include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrack::backtrack {
     using offbynull::aligner::graph::graph::readable_graph;
@@ -21,11 +19,10 @@ namespace offbynull::aligner::backtrack::backtrack {
     using offbynull::aligner::backtrack::slot_container::slot_container;
     using offbynull::aligner::backtrack::slot_container::slot;
     using offbynull::aligner::backtrack::ready_queue::ready_queue;
-    using offbynull::aligner::backtrack::container_creator::container_creator;
-    using offbynull::aligner::backtrack::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::container_creator;
+    using offbynull::helpers::container_creators::vector_container_creator;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::utils::max_element;
 
     template<
         readable_graph G,
@@ -115,9 +112,8 @@ namespace offbynull::aligner::backtrack::backtrack {
                     )
                 };
                 auto found {
-                    // Can't use std::max_element / std::ranges::max_element because it requires a forward iterator
                     // Ensure range is a common_view (begin() and end() are of same type)
-                    max_element(
+                    std::ranges::max_element(
                         incoming_accumulated.begin(),
                         incoming_accumulated.end(),
                         [](const std::pair<E, WEIGHT>& a, const std::pair<E, WEIGHT>& b) noexcept {

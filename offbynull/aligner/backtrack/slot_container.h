@@ -2,16 +2,14 @@
 #define OFFBYNULL_ALIGNER_BACKTRACK_SLOT_CONTAINER_H
 
 #include <cstddef>
-#include <iterator>
-#include "offbynull/aligner/backtrack/container_creator.h"
-#include "offbynull/aligner/backtrack/container_creators.h"
+#include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::backtrack::slot_container {
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrack::container_creator::container_creator;
-    using offbynull::aligner::backtrack::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::container_creator;
+    using offbynull::helpers::container_creators::vector_container_creator;
     using offbynull::concepts::input_iterator_of_type;
     using offbynull::concepts::widenable_to_size_t;
 

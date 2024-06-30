@@ -8,15 +8,18 @@
 #include <utility>
 #include <functional>
 #include <stdfloat>
+#include "offbynull/helpers/forward_range_join_view.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
+#include "offbynull/helpers/concat_view.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::utils::concat_view;
+    using offbynull::helpers::concat_view::concat_view;
     using offbynull::utils::static_vector_typer;
+    using offbynull::helpers::forward_range_join_view::forward_range_join_view;
 
     using empty_type = std::tuple<>;
 
@@ -248,37 +251,40 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
 
         auto get_edges() {
             auto diagonal_layer_edges {
-                std::views::cartesian_product(
-                    std::views::iota(0u, grid_down_cnt),
-                    std::views::iota(0u, grid_right_cnt)
-                )
-                | std::views::transform([&](const auto & p) noexcept {
-                    const auto &[grid_down, grid_right] { p };
-                    return this->get_outputs(N { layer::DIAGONAL, grid_down, grid_right });
-                })
-                | std::views::join
+                forward_range_join_view {
+                    std::views::cartesian_product(
+                        std::views::iota(0u, grid_down_cnt),
+                        std::views::iota(0u, grid_right_cnt)
+                    )
+                    | std::views::transform([&](const auto & p) noexcept {
+                        const auto &[grid_down, grid_right] { p };
+                        return this->get_outputs(N { layer::DIAGONAL, grid_down, grid_right });
+                    })
+                    }
             };
             auto down_layer_edges {
-                std::views::cartesian_product(
-                    std::views::iota(1u, grid_down_cnt),
-                    std::views::iota(0u, grid_right_cnt)
-                )
-                | std::views::transform([&](const auto & p) noexcept {
-                    const auto &[grid_down, grid_right] { p };
-                    return this->get_outputs(N { layer::DOWN, grid_down, grid_right });
-                })
-                | std::views::join
+                forward_range_join_view {
+                    std::views::cartesian_product(
+                        std::views::iota(1u, grid_down_cnt),
+                        std::views::iota(0u, grid_right_cnt)
+                    )
+                    | std::views::transform([&](const auto & p) noexcept {
+                        const auto &[grid_down, grid_right] { p };
+                        return this->get_outputs(N { layer::DOWN, grid_down, grid_right });
+                    })
+                }
             };
             auto right_layer_edges {
-                std::views::cartesian_product(
-                    std::views::iota(0u, grid_down_cnt),
-                    std::views::iota(1u, grid_right_cnt)
-                )
-                | std::views::transform([&](const auto & p) noexcept {
-                    const auto &[grid_down, grid_right] { p };
-                    return this->get_outputs(N { layer::RIGHT, grid_down, grid_right });
-                })
-                | std::views::join
+                forward_range_join_view {
+                    std::views::cartesian_product(
+                        std::views::iota(0u, grid_down_cnt),
+                        std::views::iota(1u, grid_right_cnt)
+                    )
+                    | std::views::transform([&](const auto & p) noexcept {
+                        const auto &[grid_down, grid_right] { p };
+                        return this->get_outputs(N { layer::RIGHT, grid_down, grid_right });
+                    })
+                }
             };
             return concat_view(
                 std::move(diagonal_layer_edges),
@@ -500,7 +506,8 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         }
 
         auto slice_nodes(INDEX grid_down) {
-            return std::views::iota(1u, grid_right_cnt)
+            return forward_range_join_view {
+                std::views::iota(1u, grid_right_cnt)
                 | std::views::transform(
                     [grid_down](const auto& grid_right) {
                         using CONTAINER = typename static_vector_typer<N, 3zu, error_check>::type;
@@ -517,7 +524,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                         return ret;
                     }
                 )
-                | std::views::join;
+            };
         }
 
         auto slice_nodes(INDEX grid_down, INDEX override_grid_right_cnt) {

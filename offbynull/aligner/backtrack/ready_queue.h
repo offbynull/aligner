@@ -3,12 +3,11 @@
 
 #include <cstddef>
 #include <stdexcept>
-#include "offbynull/aligner/backtrack/container_creator.h"
-#include "offbynull/aligner/backtrack/container_creators.h"
+#include "offbynull/helpers/container_creators.h"
 
 namespace offbynull::aligner::backtrack::ready_queue {
-    using offbynull::aligner::backtrack::container_creator::container_creator;
-    using offbynull::aligner::backtrack::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::container_creator;
+    using offbynull::helpers::container_creators::vector_container_creator;
 
     template<
         container_creator ALLOCATOR=vector_container_creator<std::size_t>,
