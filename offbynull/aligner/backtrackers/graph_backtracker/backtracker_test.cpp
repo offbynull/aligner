@@ -11,7 +11,7 @@ namespace {
     using offbynull::aligner::backtrackers::graph_backtracker::backtracker::backtracker;
     using offbynull::aligner::graphs::pairwise_global_alignment_graph::pairwise_global_alignment_graph;
 
-    TEST(BacktrackTest, FindMaxPathOnGridGraph) {
+    TEST(GraphBacktrackTest, FindMaxPathOnGridGraph) {
         auto match_lookup {
             [](
                 const auto& edge,
@@ -68,7 +68,7 @@ namespace {
         EXPECT_EQ(weight, 1.0);
     }
 
-    TEST(BacktrackTest, FindMaxPathOnDirectedGraph) {
+    TEST(GraphBacktrackTest, FindMaxPathOnDirectedGraph) {
         using N = std::pair<unsigned int, unsigned int>;
         using E = std::pair<N, N>;
         using ND = std::tuple<std::optional<std::float64_t>, std::optional<E>>;
