@@ -10,6 +10,7 @@
 
 namespace offbynull::helpers::container_creators {
     using offbynull::concepts::random_access_range_of_type;
+    using offbynull::utils::static_vector_typer;
 
     // You can use unimplemented types as requires params -- the compiler will check to see if it has the same traits
     template<typename T>
@@ -31,7 +32,9 @@ namespace offbynull::helpers::container_creators {
             { t.create_copy(it, it) } -> random_access_range_of_type<typename T::ELEM>;
         };
 
-    using offbynull::utils::static_vector_typer;
+    template <typename T, typename ELEM>
+    concept container_creator_of_type =
+        container_creator<T> && std::is_same_v<typename T::ELEM, ELEM>;
 
     template<typename ELEM_, bool error_check = true>
     class vector_container_creator {

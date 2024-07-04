@@ -20,9 +20,66 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot;
     using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue;
     using offbynull::helpers::container_creators::container_creator;
+    using offbynull::helpers::container_creators::container_creator_of_type;
     using offbynull::helpers::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::static_vector_container_creator;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
+
+    template<
+        typename T,
+        typename G,
+        typename COUNT,
+        typename WEIGHT
+    >
+    concept containers =
+        readable_graph<G>
+        && widenable_to_size_t<COUNT>
+        && weight<WEIGHT>
+        && container_creator_of_type<typename T::SLOT_CONTAINER_CREATOR, slot<typename G::N, typename G::E, COUNT, WEIGHT>>
+        && container_creator_of_type<typename T::PATH_CONTAINER_CREATOR, typename G::E>;
+
+    template<
+        readable_graph G,
+        widenable_to_size_t COUNT,
+        weight WEIGHT,
+        bool error_check = true
+    >
+    struct heap_containers {
+        using N = typename G::N;
+        using E = typename G::E;
+        using SLOT_CONTAINER_CREATOR=vector_container_creator<slot<N, E, COUNT, WEIGHT>, error_check>;
+        using PATH_CONTAINER_CREATOR=vector_container_creator<E, error_check>;
+    };
+
+    template<
+        readable_graph G,
+        widenable_to_size_t COUNT,
+        weight WEIGHT,
+        std::size_t grid_down_cnt,
+        std::size_t grid_right_cnt,
+        bool error_check = true
+    >
+    struct stack_containers {
+        using N = typename G::N;
+        using E = typename G::E;
+        using SLOT_CONTAINER_CREATOR=static_vector_container_creator<
+            slot<N, E, COUNT, WEIGHT>,
+            G::limits(
+                grid_down_cnt,
+                grid_right_cnt
+            ).max_slice_nodes_cnt,
+            error_check
+        >;
+        using PATH_CONTAINER_CREATOR=static_vector_container_creator<
+            E,
+            G::limits(
+                grid_down_cnt,
+                grid_right_cnt
+            ).max_path_edge_cnt,
+            error_check
+        >;
+    };
 
     template<
         readable_graph G,

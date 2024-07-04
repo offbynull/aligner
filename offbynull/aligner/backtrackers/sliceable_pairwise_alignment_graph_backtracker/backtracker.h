@@ -25,7 +25,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::element;
     using offbynull::helpers::container_creators::container_creator;
+    using offbynull::helpers::container_creators::container_creator_of_type;
     using offbynull::helpers::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::static_vector_container_creator;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
@@ -34,16 +36,83 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::widenable_to_size_t;
 
     template<
+        typename T,
+        typename G,
+        typename WEIGHT
+    >
+    concept containers =
+        readable_sliceable_pairwise_alignment_graph<G>
+        && weight<WEIGHT>
+        && container_creator_of_type<typename T::SLICE_SLOT_CONTAINER_CREATOR, slot<typename G::N, typename G::E, WEIGHT>>
+        && container_creator_of_type<typename T::RESIDENT_SLOT_CONTAINER_CREATOR, slot<typename G::N, typename G::E, WEIGHT>>
+        && container_creator_of_type<typename T::ELEMENT_CONTAINER_CREATOR, element<typename G::E>>
+        && container_creator_of_type<typename T::PATH_CONTAINER_CREATOR, typename G::E>;
+
+    template<
         readable_sliceable_pairwise_alignment_graph G,
         weight WEIGHT,
-        container_creator SLICE_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
-        container_creator RESIDENT_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<typename G::N, typename G::E, WEIGHT>>,
-        container_creator PATH_ELEMENT_CONTAINER_CREATOR=vector_container_creator<element<typename G::E>>,
-        container_creator PATH_CONTAINER_CREATOR=vector_container_creator<typename G::E>,
         bool error_check = true
     >
-    requires requires(typename G::N n)
-    {
+    struct heap_containers {
+        using N = typename G::N;
+        using E = typename G::E;
+        using SLICE_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<N, E, WEIGHT>, error_check>;
+        using RESIDENT_SLOT_CONTAINER_CREATOR=vector_container_creator<slot<N, E, WEIGHT>, error_check>;
+        using ELEMENT_CONTAINER_CREATOR=vector_container_creator<element<E>, error_check>;
+        using PATH_CONTAINER_CREATOR=vector_container_creator<E, error_check>;
+    };
+
+    template<
+        readable_sliceable_pairwise_alignment_graph G,
+        weight WEIGHT,
+        std::size_t grid_down_cnt,
+        std::size_t grid_right_cnt,
+        bool error_check = true
+    >
+    struct stack_containers {
+        using N = typename G::N;
+        using E = typename G::E;
+        using SLICE_SLOT_CONTAINER_CREATOR=static_vector_container_creator<
+            slot<N, E, WEIGHT>,
+            G::limits(
+                grid_down_cnt,
+                grid_right_cnt
+            ).max_slice_nodes_cnt,
+            error_check
+        >;
+        using RESIDENT_SLOT_CONTAINER_CREATOR=static_vector_container_creator<
+            slot<N, E, WEIGHT>,
+            G::limits(
+                grid_down_cnt,
+                grid_right_cnt
+            ).max_resident_nodes_cnt,
+            error_check
+        >;
+        using ELEMENT_CONTAINER_CREATOR=static_vector_container_creator<
+            element<E>,
+            G::limits(
+                grid_down_cnt,
+                grid_right_cnt
+            ).max_path_edge_cnt,
+            error_check
+        >;
+        using PATH_CONTAINER_CREATOR=static_vector_container_creator<
+            E,
+            G::limits(
+                grid_down_cnt,
+                grid_right_cnt
+            ).max_path_edge_cnt,
+            error_check
+        >;
+    };
+
+    template<
+        readable_sliceable_pairwise_alignment_graph G,
+        weight WEIGHT,
+        containers<G, WEIGHT> CONTAINER_CREATORS = heap_containers<G, WEIGHT, true>,
+        bool error_check = true
+    >
+    requires requires(typename G::N n) {
         {n < n} -> std::same_as<bool>;
     }
     class backtracker {
@@ -53,6 +122,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ND = typename G::ND;
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
+
+        using SLICE_SLOT_CONTAINER_CREATOR = typename CONTAINER_CREATORS::SLICE_SLOT_CONTAINER_CREATOR;
+        using RESIDENT_SLOT_CONTAINER_CREATOR = typename CONTAINER_CREATORS::RESIDENT_SLOT_CONTAINER_CREATOR;
+        using ELEMENT_CONTAINER_CREATOR = typename CONTAINER_CREATORS::ELEMENT_CONTAINER_CREATOR;
+        using PATH_CONTAINER_CREATOR = typename CONTAINER_CREATORS::PATH_CONTAINER_CREATOR;
 
         G& whole_graph;
         std::function<WEIGHT(const E&)> edge_weight_getter;
@@ -163,7 +237,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 G& graph,
                 std::function<WEIGHT(const E&)> get_edge_weight_func
         ) {
-            path_container<G, PATH_ELEMENT_CONTAINER_CREATOR, error_check> path_container_ {
+            path_container<G, ELEMENT_CONTAINER_CREATOR, error_check> path_container_ {
                 G::limits(
                     graph.grid_down_cnt,
                     graph.grid_right_cnt
@@ -189,7 +263,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         };
 
         WEIGHT walk(
-            path_container<G, PATH_ELEMENT_CONTAINER_CREATOR>& path_container_,
+            path_container<G, ELEMENT_CONTAINER_CREATOR>& path_container_,
             element<E>* parent_element,
             walk_direction dir
         ) {
@@ -307,10 +381,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 backtracker<
                     G,
                     WEIGHT,
-                    SLICE_SLOT_CONTAINER_CREATOR,
-                    RESIDENT_SLOT_CONTAINER_CREATOR,
-                    PATH_ELEMENT_CONTAINER_CREATOR,
-                    PATH_CONTAINER_CREATOR,
+                    CONTAINER_CREATORS,
                     error_check
                 > upper_half_backtracker {
                     whole_graph,
@@ -333,10 +404,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 backtracker<
                     G,
                     WEIGHT,
-                    SLICE_SLOT_CONTAINER_CREATOR,
-                    RESIDENT_SLOT_CONTAINER_CREATOR,
-                    PATH_ELEMENT_CONTAINER_CREATOR,
-                    PATH_CONTAINER_CREATOR,
+                    CONTAINER_CREATORS,
                     error_check
                 > lower_half_backtracker {
                     whole_graph,

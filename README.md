@@ -1,75 +1,9 @@
 TODO:
 * There's a huge influx of "container_creator" type parameters -- find a better way to package this up?
-* ~~Fix include guards to be full path, not just filename~~
-* ~~Change all occurrences of size_t to std::size_t~~
-* ~~Use std::unreachable() any place with known unreachable?~~
-* ~~Remove underscores from template parameters because they're causing warnings.~~
-* ~~Add function for stack 8x8, 16x16, etc..~~
-* ~~Change references of input_iterator to forward_iterator~~
-  * ~~When you change this, you may be able to swap out some of your custom implementations of stuff (in utils.h) to standard stl funcs~~
-
-* ~~UPDATE ALIGNMENT GRAPHS SO YOU PASS THE SEQUENCES DIRECTLY TO GRAPH~~
-
-  ```c++
-    using empty_type = std::tuple<>;
-
-    template<
-        std::ranges::random_access_range DOWN_SEQ,
-        std::ranges::random_access_range RIGHT_SEQ,
-        widenable_to_size_t INDEX_ = unsigned int,
-        weight WEIGHT = std::float64_t,
-        bool error_check = true
-    >
-    class pairwise_global_alignment_graph {
-    public:
-        using INDEX = INDEX_;
-        using N = std::pair<INDEX, INDEX>;
-        using E = std::pair<N, N>;
-        using ND = empty_type;
-        using ED = WEIGHT;  // Differs from backing grid_graph because these values are derived at time of access
-
-    private:
-        grid_graph<
-            empty_type,
-            empty_type,
-            INDEX,
-            vector_grid_container_creator<empty_type, INDEX_, false>,
-            vector_grid_container_creator<empty_type, INDEX_, false>,
-            error_check
-        > g;
-        const DOWN_SEQ& down_seq;
-        const RIGHT_SEQ& right_seq;
-        std::function<
-            WEIGHT(
-                INDEX,
-                const std::optional<std::reference_wrapper<const std::decay_t<decltype(down_seq[0u])>>>&,
-                INDEX,
-                const std::optional<std::reference_wrapper<const std::decay_t<decltype(right_seq[0u])>>>&
-            )
-        > match_lookup;
-        std::function<
-            WEIGHT(
-                INDEX,
-                INDEX
-            )
-        > indel_lookup;
-
-    public:
-        const INDEX grid_down_cnt;
-        const INDEX grid_right_cnt;
-
-        pairwise_global_alignment_graph(
-            const DOWN_SEQ& _down_seq,
-            const RIGHT_SEQ& _right_seq,
-            decltype(match_lookup) _match_lookup,
-            decltype(indel_lookup) _indel_lookup
-        )
-        : g{_down_seq.size(), _right_seq.size(), {}, {}, {}}
-        , down_seq{_down_seq}
-        , right_seq{_right_seq}
-        , grid_down_cnt{_down_seq.size()}
-        , grid_right_cnt{_right_seq.size()} {}
-  ```
+* sequence implementations for the following (see seqeunce concept)
+  * mmap'd file data
+  * decompressing compressed bytes -- when a location is accessed, decompress that chunk and hold it in cache
+  * sliding window over existing view
 
 * Update get_in_degree() / get_out_degree() functions to calculate directly
 * Add concept checks to autos
