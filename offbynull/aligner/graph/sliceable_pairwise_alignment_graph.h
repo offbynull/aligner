@@ -8,8 +8,6 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
     using offbynull::concepts::one_of;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::range_of_one_of;
-    using offbynull::concepts::input_iterator_of_type;
-    using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph_limits;

@@ -17,6 +17,7 @@
 namespace offbynull::aligner::graphs::grid_graph {
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::concepts::weight;
+    using offbynull::aligner::concepts::sequence;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::static_vector_typer;
     using offbynull::helpers::forward_range_join_view::forward_range_join_view;
@@ -25,8 +26,8 @@ namespace offbynull::aligner::graphs::grid_graph {
     using empty_type = std::tuple<>;
 
     template<
-        std::ranges::random_access_range DOWN_SEQ,
-        std::ranges::random_access_range RIGHT_SEQ,
+        sequence DOWN_SEQ,
+        sequence RIGHT_SEQ,
         widenable_to_size_t INDEX_ = std::size_t,
         weight WEIGHT = std::float64_t,
         bool error_check = true

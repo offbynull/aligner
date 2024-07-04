@@ -17,6 +17,7 @@
 
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::aligner::concepts::weight;
+    using offbynull::aligner::concepts::sequence;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::helpers::concat_view::concat_view;
     using offbynull::utils::static_vector_typer;
@@ -32,8 +33,8 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     };
 
     template<
-        std::ranges::random_access_range DOWN_SEQ,
-        std::ranges::random_access_range RIGHT_SEQ,
+        sequence DOWN_SEQ,
+        sequence RIGHT_SEQ,
         widenable_to_size_t INDEX_ = std::size_t,
         weight WEIGHT = std::float64_t,
         bool error_check = true
@@ -506,7 +507,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 std::views::iota(1u, grid_right_cnt)
                 | std::views::transform(
                     [grid_down](const auto& grid_right) {
-                        using CONTAINER = typename static_vector_typer<N, 3zu, error_check>::type;
+                        using CONTAINER = static_vector_typer<N, 3zu, error_check>::type;
                         CONTAINER ret {};
                         if (grid_down == 0u) {
                             ret.push_back(N { layer::DIAGONAL, grid_down, grid_right });

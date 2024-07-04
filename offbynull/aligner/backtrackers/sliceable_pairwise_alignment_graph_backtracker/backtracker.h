@@ -163,7 +163,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 G& graph,
                 std::function<WEIGHT(const E&)> get_edge_weight_func
         ) {
-            path_container<N, E, PATH_ELEMENT_CONTAINER_CREATOR, error_check> path_container_ {
+            path_container<G, PATH_ELEMENT_CONTAINER_CREATOR, error_check> path_container_ {
                 G::limits(
                     graph.grid_down_cnt,
                     graph.grid_right_cnt
@@ -188,7 +188,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             INITIALIZE
         };
 
-        WEIGHT walk(path_container<N, E>& path_container_, element<E>* parent_element, walk_direction dir) {
+        WEIGHT walk(
+            path_container<G, PATH_ELEMENT_CONTAINER_CREATOR>& path_container_,
+            element<E>* parent_element,
+            walk_direction dir
+        ) {
             ED max_weight;
             N max_node;
             E max_edge;

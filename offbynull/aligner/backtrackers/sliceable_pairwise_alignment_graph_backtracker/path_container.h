@@ -29,96 +29,96 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         bool operator==(const element &) const = default;
     };
 
-    template<typename E>
-    class iterator {
+    template<readable_sliceable_pairwise_alignment_graph GRAPH>
+    class backward_walker_iterator {
     private:
+        using N = typename GRAPH::N;
+        using E = typename GRAPH::E;
+
         element<E>* current;
-        element<E>* tail;
+        GRAPH* g;
 
     public:
         using difference_type = std::ptrdiff_t;
-        using value_type = element<E>;
+        using value_type = E;
         using pointer = value_type*;
         using reference = value_type&;
-        using iterator_category = std::bidirectional_iterator_tag;
+        using iterator_category = std::forward_iterator_tag;
 
-        iterator()
-        : current{}
-        , tail{} {}
+        backward_walker_iterator()
+        : g {}
+        , current {} {}
 
-        iterator(element<E>* head, element<E>* tail)
-        : current{ head }
-        , tail{ tail } {}
+        backward_walker_iterator(GRAPH& g_, element<E>* tail)
+        : g { &g_ }
+        , current { tail } {}
 
         reference operator*() const {
-            return *current;
+            return current->backtracking_edge;
         }
 
-        iterator& operator++() {
-            current = current->next;
-            return *this;
-        }
-
-        iterator operator++(int) {
-            iterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
-
-        iterator& operator--() {
-            if (current == nullptr) {
-                current = tail;
-            } else {
+        backward_walker_iterator& operator++() {
+            const N& next_edge_src { g->get_edge_from(current->backtracking_edge) };
+            while (true) {
                 current = current->prev;
+                const N& prev_edge_dst { g->get_edge_to(current->backtracking_edge) };
+                if (next_edge_src == prev_edge_dst) {
+                    break;
+                }
+                if (current == nullptr) {
+                    break;
+                }
             }
             return *this;
         }
 
-        iterator operator--(int) {
-            iterator tmp = *this;
-            --(*this);
+        backward_walker_iterator operator++(int) {
+            backward_walker_iterator tmp = *this;
+            ++(*this);
             return tmp;
         }
 
-        bool operator==(const iterator& other) const {
+        bool operator==(const backward_walker_iterator& other) const {
             return current == other.current;
         }
     };
 
-    template<typename E>
-    struct internal_range {
+    template<readable_sliceable_pairwise_alignment_graph GRAPH>
+    struct backward_walker_range {
     private:
+        using E = typename GRAPH::E;
+
+        GRAPH& g;
         element<E>* head;
         element<E>* tail;
 
     public:
-        internal_range(
+        backward_walker_range(
+            GRAPH& g_,
             element<E>* head_,
             element<E>* tail_
         )
-        : head{ head_ }
-        , tail{ tail_} {}
+        : g{ g_ }
+        , head{ head_ }
+        , tail{ tail_ } {}
 
-        iterator<E> begin() {
-            return iterator<E>{ head, tail };
+        backward_walker_iterator<GRAPH> begin() {
+            return backward_walker_iterator<GRAPH>{ g, tail };
         }
 
-        iterator<E> end() {
-            return iterator<E>{ nullptr, tail };
+        backward_walker_iterator<GRAPH> end() {
+            return backward_walker_iterator<GRAPH>{ g, nullptr };
         }
     };
 
-    static_assert(std::ranges::bidirectional_range<internal_range<int>>);
-    static_assert(std::ranges::viewable_range<internal_range<int>>);
-
     template<
-        typename N,
-        typename E,
-        container_creator ELEMENT_CONTAINER_CREATOR=vector_container_creator<element<E>>,
+        readable_sliceable_pairwise_alignment_graph GRAPH,
+        container_creator ELEMENT_CONTAINER_CREATOR=vector_container_creator<element<typename GRAPH::E>>,
         bool error_check=true
     >
     class path_container {
     private:
+        using E = typename GRAPH::E;
         using ELEMENT_CONTAINER=decltype(std::declval<ELEMENT_CONTAINER_CREATOR>().create_empty(0zu));
 
     public:
@@ -205,36 +205,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return suffix_entry;
         }
 
-        internal_range<E> to_range() {
-            return { head, tail };
-        }
-
-        template<readable_sliceable_pairwise_alignment_graph GRAPH>
-        std::ranges::range auto walk_path_backward(GRAPH& g) {
-            N sink_node { g.get_edge_to(tail->backtracking_edge) };
-            return
-                internal_range{ head, tail }
-                | std::views::reverse
-                | std::views::transform([current = tail](const auto&) mutable {
-                    element<E>* ret { current };
-                    current = ret->prev;
-                    return ret;
-                })
-                | std::views::take_while([](element<E>* e) { return e != nullptr; })
-                | std::views::transform([&g, expected_dst = sink_node](element<E>* e) mutable {
-                    if (g.get_edge_to(e->backtracking_edge) == expected_dst) {
-                        expected_dst = g.get_edge_to(e->backtracking_edge);
-                        return std::optional<E> { e->backtracking_edge };
-                    } else {
-                        return std::optional<E> { std::nullopt };
-                    }
-                })
-                | std::views::filter([](const std::optional<E>& backtracking_edge) {
-                    return backtracking_edge.has_value();
-                })
-                | std::views::transform([](const std::optional<E>& backtracking_edge) {
-                    return *backtracking_edge;
-                });
+        std::ranges::forward_range auto walk_path_backward(GRAPH& g) {
+            return backward_walker_range<GRAPH> { g, head, tail };
         }
     };
 }

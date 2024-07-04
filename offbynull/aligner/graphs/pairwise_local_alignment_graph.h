@@ -20,6 +20,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
     using offbynull::aligner::graphs::grid_graph::empty_type;
     using offbynull::aligner::concepts::weight;
+    using offbynull::aligner::concepts::sequence;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::helpers::concat_view::concat_view;
     using offbynull::helpers::cartesian_product_2d_view::cartesian_product_2d_view;
@@ -42,8 +43,8 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     };
 
     template<
-        std::ranges::random_access_range DOWN_SEQ,
-        std::ranges::random_access_range RIGHT_SEQ,
+        sequence DOWN_SEQ,
+        sequence RIGHT_SEQ,
         widenable_to_size_t INDEX_ = std::size_t,
         weight WEIGHT = std::float64_t,
         bool error_check = true
