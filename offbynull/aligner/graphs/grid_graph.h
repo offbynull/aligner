@@ -11,13 +11,14 @@
 #include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 #include "offbynull/aligner/concepts.h"
+#include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/aligner/graph/utils.h"
 #include "offbynull/helpers/forward_range_join_view.h"
 
 namespace offbynull::aligner::graphs::grid_graph {
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::concepts::sequence;
+    using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::utils::static_vector_typer;
     using offbynull::helpers::forward_range_join_view::forward_range_join_view;

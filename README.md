@@ -8,15 +8,15 @@ TODO:
     done in sliceable_pairwise_alignment_graph_backtracker/slot_container.h -- You need to update this so that you both
     have sorting AND depth positioning, and switch between them using a compile-time flag.
 * sequence implementations for the following (see seqeunce concept)
-  * wrapper that pads out with dummy (or truncates) to a certain size 
-  * mmap'd file data
+  * ~~wrapper that pads out with dummy (or truncates) to a certain size~~ 
+  * ~~mmap'd file data~~
+  * ~~sliding window over existing view~~
   * decompressing compressed bytes -- when a location is accessed, decompress that chunk and hold it in cache
-  * sliding window over existing view
 
 * Update get_in_degree() / get_out_degree() functions to calculate directly
 * Add concept checks to autos
-* Add random access container wrapper that mmap (it's in boost)
-* Add random access container wrapper that decompresses as you read
+* ~~Add random access container wrapper that mmap (it's in boost)~~
+* ~~Add random access container wrapper that decompresses as you read~~
 * ~~Add divide-and-conquer aligner interface methods and algorithm~~
 
 * Integer promotion rules hit when you use types smaller than int:

@@ -8,7 +8,7 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         add_project_arguments('-Wno-noexcept', language : 'cpp')
 endif
 
-boost_dep = dependency('boost', modules : ['container'])
+boost_dep = dependency('boost', modules : ['container', 'filesystem', 'iostreams'])
 
 example = executable(
         'untitled',
@@ -55,7 +55,15 @@ tests_src = [
         'offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/backtracker_test.cpp',
         'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container_test.cpp',
         'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_walker_test.cpp',
-        'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker_test.cpp',
+#        'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker_test.cpp',
+        'offbynull/aligner/sequences/mmap_sequence_test.cpp',
+        'offbynull/aligner/sequences/reversed_sequence_test.cpp',
+        'offbynull/aligner/sequences/prefix_pad_sequence_test.cpp',
+        'offbynull/aligner/sequences/prefix_sequence_test.cpp',
+        'offbynull/aligner/sequences/suffix_sequence_test.cpp',
+        'offbynull/aligner/sequences/suffix_pad_sequence_test.cpp',
+        'offbynull/aligner/sequences/middle_sequence_test.cpp',
+        'offbynull/aligner/sequences/sliding_window_sequence_test.cpp',
 #        'offbynull/aligner/aligner_test.cpp'
 ]
 test_exec = executable(

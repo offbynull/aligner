@@ -10,6 +10,7 @@
 #include <stdfloat>
 #include "offbynull/helpers/forward_range_join_view.h"
 #include "offbynull/aligner/concepts.h"
+#include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/concepts.h"
 #include "offbynull/helpers/concat_view.h"
 #include "offbynull/aligner/graph/utils.h"
@@ -17,7 +18,7 @@
 
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::concepts::sequence;
+    using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::helpers::concat_view::concat_view;
     using offbynull::utils::static_vector_typer;

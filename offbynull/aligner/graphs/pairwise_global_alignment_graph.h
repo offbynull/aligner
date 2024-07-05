@@ -11,13 +11,14 @@
 #include <stdfloat>
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/concepts.h"
+#include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/aligner/concepts.h"
 
 namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
     using offbynull::aligner::graphs::grid_graph::empty_type;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::concepts::sequence;
+    using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::widenable_to_size_t;
 
     template<
