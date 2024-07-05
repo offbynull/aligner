@@ -22,11 +22,11 @@ namespace offbynull::aligner::sequences::middle_sequence {
         : inner_seq { seq_, offset + cnt }
         , seq { inner_seq, cnt } {}
 
-        decltype(seq[0zu]) operator[](std::size_t index) const {
+        decltype(seq[0zu]) operator[](std::size_t index) {
             return seq[index];
         }
 
-        std::size_t size() const {
+        std::size_t size() {
             return seq.size();
         }
     };

@@ -1,0 +1,24 @@
+#include "offbynull/aligner/sequence/sequence.h"
+#include "offbynull/aligner/sequences/iota_sequence.h"
+#include "offbynull/aligner/sequences/zip_sequence.h"
+#include "gtest/gtest.h"
+#include <cstddef>
+
+namespace {
+    using offbynull::aligner::sequence::sequence::sequence;
+    using offbynull::aligner::sequences::iota_sequence::iota_sequence;
+    using offbynull::aligner::sequences::zip_sequence::zip_sequence;
+
+    TEST(ZipSequenceTest, SanityTest) {
+        iota_sequence<unsigned int> seq1 { 10u, 15u };
+        iota_sequence<unsigned int> seq2 { 20u, 24u };
+        iota_sequence<unsigned int> seq3 { 30u, 36u };
+        zip_sequence seq { seq1, seq2, seq3 };
+        static_assert(sequence<decltype(seq)>);
+        EXPECT_EQ(seq[0], std::make_tuple(10, 20, 30));
+        EXPECT_EQ(seq[1], std::make_tuple(11, 21, 31));
+        EXPECT_EQ(seq[2], std::make_tuple(12, 22, 32));
+        EXPECT_EQ(seq[3], std::make_tuple(13, 23, 33));
+        EXPECT_EQ(seq.size(), 4zu);
+    }
+}

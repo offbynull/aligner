@@ -30,7 +30,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
             }
         }
 
-        std::array<INNER_ELEM, WINDOW_LENGTH> operator[](std::size_t index) const {
+        std::array<INNER_ELEM, WINDOW_LENGTH> operator[](std::size_t index) {
             std::array<INNER_ELEM, WINDOW_LENGTH> ret { };
             for (std::size_t i { 0zu }; i < WINDOW_LENGTH; i++) {
                 ret[i] = seq[index + i];
@@ -38,7 +38,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
             return ret;
         }
 
-        std::size_t size() const {
+        std::size_t size() {
             return seq.size() - WINDOW_LENGTH + 1zu;
         }
     };
@@ -87,7 +87,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
             return ret;
         }
 
-        std::size_t size() const {
+        std::size_t size() {
             return seq.size() - window_length + 1zu;
         }
     };

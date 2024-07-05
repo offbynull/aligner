@@ -36,7 +36,7 @@ namespace offbynull::aligner::sequences::suffix_pad_sequence {
             return seq[index];
         }
 
-        std::size_t size() const {
+        std::size_t size() {
             return seq.size() + pad_count;
         }
     };

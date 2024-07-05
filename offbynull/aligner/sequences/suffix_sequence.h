@@ -24,11 +24,11 @@ namespace offbynull::aligner::sequences::suffix_sequence {
         , inner_seq { inner_inner_seq, suffix_size_ }
         , seq { inner_seq } {}
 
-        decltype(seq[0zu]) operator[](std::size_t index) const {
+        decltype(seq[0zu]) operator[](std::size_t index) {
             return seq[index];
         }
 
-        std::size_t size() const {
+        std::size_t size() {
             return seq.size();
         }
     };

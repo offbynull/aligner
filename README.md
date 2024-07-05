@@ -11,6 +11,10 @@ TODO:
   * ~~wrapper that pads out with dummy (or truncates) to a certain size~~ 
   * ~~mmap'd file data~~
   * ~~sliding window over existing view~~
+  * ~~zip sequence~~
+  * ~~chunk sequence~~
+  * ~~iota sequence (integer order of an array, you specify start offset and size)~~
+  * ~~transform sequence (transform index to object based on lambda)~~
   * decompressing compressed bytes -- when a location is accessed, decompress that chunk and hold it in cache
 
 * Update get_in_degree() / get_out_degree() functions to calculate directly

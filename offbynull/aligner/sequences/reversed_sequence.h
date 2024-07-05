@@ -16,11 +16,11 @@ namespace offbynull::aligner::sequences::reversed_sequence {
         reversed_sequence(SEQ& seq_)
         : seq { seq_ } { }
 
-        decltype(seq[0zu]) operator[](std::size_t index) const {
+        decltype(seq[0zu]) operator[](std::size_t index) {
             return seq[seq.size() - index - 1zu];
         }
 
-        std::size_t size() const {
+        std::size_t size() {
             return seq.size();
         }
     };

@@ -29,14 +29,14 @@ namespace offbynull::aligner::sequences::prefix_pad_sequence {
         , pad_value { pad_value_ }
         , pad_count { pad_count_ } {}
 
-        SEQ_ELEM_RET_TYPE operator[](std::size_t index) {
+        auto operator[](std::size_t index) {
             if (index < pad_count) {
                 return pad_value;
             }
             return seq[index - pad_count];
         }
 
-        std::size_t size() const {
+        std::size_t size() {
             return seq.size() + pad_count;
         }
     };

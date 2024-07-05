@@ -41,13 +41,13 @@ namespace offbynull::aligner::sequences::mmap_sequence {
             }
         }
 
-        ELEM operator[](std::size_t index) const {
+        ELEM operator[](std::size_t index) {
             const char* ptr { file.data() };
             ptr += index * bytes_per_elem;
             return transformer(ptr);
         }
 
-        std::size_t size() const {
+        std::size_t size() {
             return file.size() / bytes_per_elem;
         }
 

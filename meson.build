@@ -57,6 +57,8 @@ tests_src = [
         'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_walker_test.cpp',
 #        'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker_test.cpp',
         'offbynull/aligner/sequences/mmap_sequence_test.cpp',
+        'offbynull/aligner/sequences/iota_sequence_test.cpp',
+        'offbynull/aligner/sequences/transform_sequence_test.cpp',
         'offbynull/aligner/sequences/reversed_sequence_test.cpp',
         'offbynull/aligner/sequences/prefix_pad_sequence_test.cpp',
         'offbynull/aligner/sequences/prefix_sequence_test.cpp',
@@ -64,6 +66,8 @@ tests_src = [
         'offbynull/aligner/sequences/suffix_pad_sequence_test.cpp',
         'offbynull/aligner/sequences/middle_sequence_test.cpp',
         'offbynull/aligner/sequences/sliding_window_sequence_test.cpp',
+        'offbynull/aligner/sequences/chunked_sequence_test.cpp',
+        'offbynull/aligner/sequences/zip_sequence_test.cpp',
 #        'offbynull/aligner/aligner_test.cpp'
 ]
 test_exec = executable(

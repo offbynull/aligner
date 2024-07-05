@@ -41,7 +41,7 @@ namespace offbynull::helpers::container_creators {
     public:
         using ELEM = ELEM_;
 
-        std::vector<ELEM> create_empty(std::optional<std::size_t> capacity) {
+        std::vector<ELEM> create_empty(std::optional<std::size_t> capacity) const {
             std::vector<ELEM> ret {};
             if (capacity.has_value()) {
                 ret.reserve(capacity.value());
@@ -49,11 +49,11 @@ namespace offbynull::helpers::container_creators {
             return ret;
         }
 
-        std::vector<ELEM> create_objects(std::size_t cnt) {
+        std::vector<ELEM> create_objects(std::size_t cnt) const {
             return std::vector<ELEM>(cnt);
         }
 
-        std::vector<ELEM> create_copy(auto begin, auto end) {
+        std::vector<ELEM> create_copy(auto begin, auto end) const {
             return std::vector<ELEM>(begin, end);
         }
     };
@@ -64,13 +64,13 @@ namespace offbynull::helpers::container_creators {
     public:
         using ELEM = ELEM_;
 
-        std::array<ELEM, size> create_empty(std::optional<std::size_t> capacity) {
+        std::array<ELEM, size> create_empty(std::optional<std::size_t> capacity) const {
             static_assert(size != 0zu, "If calling this function, size must be non-zero");
             std::array<ELEM, size> ret{};
             return ret;
         }
 
-        std::array<ELEM, size> create_objects(std::size_t cnt) {
+        std::array<ELEM, size> create_objects(std::size_t cnt) const {
             if constexpr (error_check) {
                 if (cnt != size) {
                     throw std::runtime_error("Unexpected number of elements");
@@ -79,7 +79,7 @@ namespace offbynull::helpers::container_creators {
             return std::array<ELEM, size>{};
         }
 
-        std::array<ELEM, size> create_copy(auto& begin, auto& end) {
+        std::array<ELEM, size> create_copy(auto& begin, auto& end) const {
             std::array<ELEM, size> ret;
             if constexpr (error_check) {
                 auto it { begin };
@@ -106,11 +106,11 @@ namespace offbynull::helpers::container_creators {
     public:
         using ELEM = ELEM_;
 
-        static_vector_typer<ELEM, max_size, error_check>::type create_empty(std::optional<std::size_t> capacity) {
+        static_vector_typer<ELEM, max_size, error_check>::type create_empty(std::optional<std::size_t> capacity) const {
             return typename static_vector_typer<ELEM, max_size, error_check>::type {};
         }
 
-        static_vector_typer<ELEM, max_size, error_check>::type create_objects(std::size_t cnt) {
+        static_vector_typer<ELEM, max_size, error_check>::type create_objects(std::size_t cnt) const {
             if constexpr (error_check) {
                 if (cnt > max_size) {
                     throw std::runtime_error("Too many elements");
@@ -119,7 +119,7 @@ namespace offbynull::helpers::container_creators {
             return typename static_vector_typer<ELEM, max_size, error_check>::type(cnt);
         }
 
-        static_vector_typer<ELEM, max_size, error_check>::type create_copy(auto& begin, auto& end) {
+        static_vector_typer<ELEM, max_size, error_check>::type create_copy(auto& begin, auto& end) const {
             if constexpr (error_check) {
                 auto cnt { end - begin };
                 if (cnt > max_size) {
@@ -138,15 +138,15 @@ namespace offbynull::helpers::container_creators {
     public:
         using ELEM = ELEM_;
 
-        boost::container::small_vector<ELEM, max_stack_size> create_empty(std::optional<std::size_t> capacity) {
+        boost::container::small_vector<ELEM, max_stack_size> create_empty(std::optional<std::size_t> capacity) const {
             return boost::container::small_vector<ELEM, max_stack_size> {};
         }
 
-        boost::container::small_vector<ELEM, max_stack_size> create_objects(std::size_t cnt) {
+        boost::container::small_vector<ELEM, max_stack_size> create_objects(std::size_t cnt) const {
             return boost::container::small_vector<ELEM, max_stack_size>(cnt);
         }
 
-        boost::container::small_vector<ELEM, max_stack_size> create_copy(auto& begin, auto& end) {
+        boost::container::small_vector<ELEM, max_stack_size> create_copy(auto& begin, auto& end) const {
             return boost::container::small_vector<ELEM, max_stack_size>(begin, end);
         }
     };
