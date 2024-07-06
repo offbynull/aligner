@@ -43,14 +43,10 @@ namespace {
         };
 
         using E = decltype(g)::E;
-        using ED = decltype(g)::ED;
 
-        backtracker<decltype(g), std::uint8_t, ED> _backtracker{};
+        backtracker<decltype(g), std::uint8_t> _backtracker{};
         const auto& [path, weight] {
-            _backtracker.find_max_path(
-                g,
-                [&g](const E& edge) { return g.get_edge_data(edge); }
-            )
+            _backtracker.find_max_path(g)
         };
         for (const E& e : path) {
             const auto& [n1, n2] { e };

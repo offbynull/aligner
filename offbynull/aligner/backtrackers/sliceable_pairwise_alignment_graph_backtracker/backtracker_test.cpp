@@ -45,14 +45,10 @@ namespace {
         using E = typename decltype(g)::E;
 
         // walk
-        backtracker<decltype(g), std::float64_t> _backtracker{
-            g,
-            [&g](const E& edge) { return g.get_edge_data(edge); }
-        };
+        backtracker<decltype(g), std::float64_t> _backtracker{ g };
         const auto& [path, weight] {
             _backtracker.find_max_path(
-                g,
-                [&g](const E& edge) { return g.get_edge_data(edge); }
+                g
             )
         };
         for (const E& e : path) {

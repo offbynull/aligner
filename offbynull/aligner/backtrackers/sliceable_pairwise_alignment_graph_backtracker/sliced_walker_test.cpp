@@ -49,10 +49,7 @@ namespace {
         using E = typename decltype(g)::E;
 
         // walk
-        sliced_walker<decltype(g), std::float64_t> walker{
-            g,
-            [&g](const E& edge) { return g.get_edge_data(edge); }
-        };
+        sliced_walker<decltype(g)> walker{ g };
         EXPECT_FALSE(walker.next());
         EXPECT_FALSE(walker.next());
         EXPECT_FALSE(walker.next());
@@ -139,10 +136,7 @@ namespace {
         using E = typename decltype(g)::E;
 
         // walk
-        sliced_walker<decltype(g), std::float64_t> walker{
-            g,
-            [&g](const E& edge) { return g.get_edge_data(edge); }
-        };
+        sliced_walker<decltype(g)> walker{ g };
         EXPECT_FALSE(walker.next());
         EXPECT_FALSE(walker.next());
         EXPECT_FALSE(walker.next());

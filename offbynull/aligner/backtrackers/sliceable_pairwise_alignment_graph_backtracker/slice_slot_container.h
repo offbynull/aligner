@@ -17,8 +17,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         readable_sliceable_pairwise_alignment_graph G,
-        weight WEIGHT,
-        container_creator CONTAINER_CREATOR=vector_container_creator<slot<typename G::E, WEIGHT>>,
+        container_creator CONTAINER_CREATOR=vector_container_creator<slot<typename G::E, typename G::ED>>,
         bool error_check = true
     >
     class slice_slot_container {
@@ -49,7 +48,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         }
         , grid_down {} {}
 
-        std::optional<std::reference_wrapper<slot<E, WEIGHT>>> find(const N& node) {
+        std::optional<std::reference_wrapper<slot<E, ED>>> find(const N& node) {
             const auto& [down_offset, right_offset, depth] { graph.node_to_grid_offsets(node) };
             if (grid_down != down_offset) {
                 return { std::nullopt };

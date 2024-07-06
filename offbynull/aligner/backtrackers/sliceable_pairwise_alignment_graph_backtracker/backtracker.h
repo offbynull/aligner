@@ -62,7 +62,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using PATH_CONTAINER_CREATOR = typename CONTAINER_CREATOR_PACK::PATH_CONTAINER_CREATOR;
 
         G& whole_graph;
-        std::function<WEIGHT(const E&)> edge_weight_getter;
         SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator;
         RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator;
         PATH_CONTAINER_CREATOR path_container_creator;
@@ -86,7 +85,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     public:
         backtracker(
             G& g,
-            std::function<WEIGHT(const E&)> get_edge_weight_func,
             SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
             RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {},
             PATH_CONTAINER_CREATOR path_container_creator = {}
@@ -97,7 +95,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             0u,
             g.grid_down_cnt,
             g.grid_right_cnt,
-            get_edge_weight_func,
             slice_slot_container_creator,
             resident_slot_container_creator,
             path_container_creator
@@ -109,13 +106,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             INDEX grid_right_offset,
             INDEX grid_down_cnt,
             INDEX grid_right_cnt,
-            std::function<WEIGHT(const E&)> get_edge_weight_func,
             SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
             RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {},
             PATH_CONTAINER_CREATOR path_container_creator = {}
         )
         : whole_graph { g }
-        , edge_weight_getter { get_edge_weight_func }
         , slice_slot_container_creator { slice_slot_container_creator }
         , resident_slot_container_creator { resident_slot_container_creator }
         , path_container_creator { path_container_creator }
@@ -142,8 +137,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         } {}
 
         auto find_max_path(
-                G& graph,
-                std::function<WEIGHT(const E&)> get_edge_weight_func
+            G& graph
         ) {
             path_container<G, ELEMENT_CONTAINER_CREATOR, error_check> path_container_ {
                 G::limits(
@@ -181,13 +175,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             {
                 sliced_walker<
                     decltype(prefix_graph),
-                    WEIGHT,
                     SLICE_SLOT_CONTAINER_CREATOR,
                     RESIDENT_SLOT_CONTAINER_CREATOR,
                     error_check
                 > forward_walker {
                     prefix_graph,
-                    edge_weight_getter,
                     slice_slot_container_creator,
                     resident_slot_container_creator
                 };
@@ -196,13 +188,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 }
                 sliced_walker<
                     decltype(reversed_suffix_graph),
-                    WEIGHT,
                     SLICE_SLOT_CONTAINER_CREATOR,
                     RESIDENT_SLOT_CONTAINER_CREATOR,
                     error_check
                 > backward_walker {
                     reversed_suffix_graph,
-                    edge_weight_getter,
                     slice_slot_container_creator,
                     resident_slot_container_creator
                 };
@@ -210,40 +200,27 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     // do nothing
                 }
 
-                auto combined {
-                    std::views::zip(
-                        forward_walker.active_slots(),
-                        backward_walker.active_slots()
-                    )
-                    | std::views::transform(
-                        [](const auto &slot_pair) {
-                            const auto& [f_slot, b_slot] { slot_pair };
-                            if constexpr (error_check) {
-                                if (f_slot.node != b_slot.node) {
-                                    throw std::runtime_error { "Node mismatch" };
-                                }
-                            }
-                            return std::tuple<WEIGHT, N, E> {
-                                f_slot.backtracking_weight + b_slot.backtracking_weight,
-                                f_slot.node,
-                                f_slot.backtracking_edge
-                            };
-                        }
-                    )
+                N first_node { sub_graph.slice_first_node(mid_down_offset) };
+                const auto& first_forward_slot { forward_walker.find(first_node) };
+                const auto& first_backward_slot { backward_walker.find(first_node) };
+                std::tuple<WEIGHT, N, E> max {
+                    first_forward_slot.backtracking_weight + first_backward_slot.backtracking_weight,
+                    first_node,
+                    first_forward_slot.backtracking_edge
                 };
-                auto max_it {
-                    std::ranges::max_element(
-                        combined.begin(),
-                        combined.end(),
-                        [](const auto& a, const auto& b) { return std::get<0>(a) < std::get<0>(b); }
-                    )
-                };
-                if constexpr (error_check) {
-                    if (max_it == combined.end()) {
-                        throw std::runtime_error("No maximum?");
+                for (const N& node : sub_graph.slice_nodes(mid_down_offset)) {
+                    const auto forward_slot { forward_walker.find(node) };
+                    const auto backward_slot { backward_walker.find(node) };
+                    std::tuple<WEIGHT, N, E> next {
+                        forward_slot.backtracking_weight + backward_slot.backtracking_weight,
+                        node,
+                        forward_slot.backtracking_edge
+                    };
+                    if (std::get<0>(next) > std::get<0>(max)) {
+                        max = next;
                     }
                 }
-                const auto& [max_weight_, max_node_, max_edge_] { *max_it };
+                const auto& [max_weight_, max_node_, max_edge_] { max };
                 max_weight = max_weight_;
                 max_node = max_node_;
                 max_edge = max_edge_;
@@ -297,7 +274,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     sub_graph.grid_right_offset,
                     cut_down_offset + 1u,
                     cut_right_offset + 1u,
-                    edge_weight_getter,
                     slice_slot_container_creator,
                     resident_slot_container_creator
                 };
@@ -320,7 +296,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     sub_graph.grid_right_offset + cut_right_offset,
                     sub_graph.grid_down_cnt - cut_down_offset,
                     sub_graph.grid_right_cnt - cut_right_offset,
-                    edge_weight_getter,
                     slice_slot_container_creator,
                     resident_slot_container_creator
                 };

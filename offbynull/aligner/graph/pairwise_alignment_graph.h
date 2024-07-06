@@ -6,11 +6,13 @@
 #include <functional>
 #include "offbynull/concepts.h"
 #include "offbynull/aligner/graph/graph.h"
+#include "offbynull/aligner/concepts.h"
 
 namespace offbynull::aligner::graph::pairwise_alignment_graph {
     using offbynull::concepts::one_of;
     using offbynull::concepts::range_of_one_of;
     using offbynull::concepts::widenable_to_size_t;
+    using offbynull::aligner::concepts::weight;
     using offbynull::aligner::graph::graph::readable_graph;
 
     template <typename L>
@@ -25,6 +27,7 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
     concept readable_pairwise_alignment_graph =
         readable_graph<G>
         && widenable_to_size_t<typename G::INDEX>
+        && weight<typename G::ED>
         && requires(
             G g,
             typename G::N node,

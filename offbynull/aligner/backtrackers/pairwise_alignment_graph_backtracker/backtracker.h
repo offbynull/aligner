@@ -35,8 +35,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     template<
         readable_pairwise_alignment_graph G,
         widenable_to_size_t COUNT,
-        weight WEIGHT,
-        container_creator_pack<G, COUNT, WEIGHT> CONTAINER_CREATOR_PACK=heap_container_creator_pack<G, COUNT, WEIGHT, true>,
+        container_creator_pack<G, COUNT> CONTAINER_CREATOR_PACK=heap_container_creator_pack<G, COUNT, true>,
         bool error_check = true
     >
     requires backtrackable_node<typename G::N> &&
@@ -45,16 +44,16 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     public:
         using N = typename G::N;
         using E = typename G::E;
+        using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
         using SLOT_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::SLOT_CONTAINER_CREATOR;
         using PATH_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::PATH_CONTAINER_CREATOR;
 
-        using slot_container_t = slot_container<N, E, INDEX, COUNT, WEIGHT, SLOT_CONTAINER_CREATOR, error_check>;
+        using slot_container_t = slot_container<N, E, INDEX, COUNT, ED, SLOT_CONTAINER_CREATOR, error_check>;
 
         slot_container_t populate_weights_and_backtrack_pointers(
-            G& g,
-            std::function<WEIGHT(const E&)> get_edge_weight_func
+            G& g
         ) {
             // Create "slots" list
             // -------------------
@@ -64,7 +63,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             auto slots_lazy {
                 std::views::common(
                     g.get_nodes()
-                    | std::views::transform([&](const auto& n) -> slot<N, E, COUNT, WEIGHT> {
+                    | std::views::transform([&](const auto& n) -> slot<N, E, COUNT, ED> {
                         std::size_t in_degree { g.get_in_degree(n) };
                         COUNT in_degree_narrowed { static_cast<COUNT>(in_degree) };
                         if constexpr (error_check) {
@@ -122,10 +121,10 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                     std::views::common(
                         g.get_inputs(current_slot.node)
                         | std::views::transform(
-                            [&](const auto& edge) noexcept -> std::pair<E, WEIGHT> {
+                            [&](const auto& edge) noexcept -> std::pair<E, ED> {
                                 const auto& src_node { g.get_edge_from(edge) };
-                                const slot<N, E, COUNT, WEIGHT>& src_node_slot { slots.find_ref(src_node) };
-                                const auto& edge_weight { get_edge_weight_func(edge) };
+                                const slot<N, E, COUNT, ED>& src_node_slot { slots.find_ref(src_node) };
+                                const auto& edge_weight { g.get_edge_data(edge) };
                                 return { edge, src_node_slot.backtracking_weight + edge_weight };
                             }
                         )
@@ -136,7 +135,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                     std::ranges::max_element(
                         incoming_accumulated.begin(),
                         incoming_accumulated.end(),
-                        [](const std::pair<E, WEIGHT>& a, const std::pair<E, WEIGHT>& b) noexcept {
+                        [](const std::pair<E, ED>& a, const std::pair<E, ED>& b) noexcept {
                             return a.second < b.second;
                         }
                     )
@@ -169,10 +168,9 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         range_of_type<E> auto backtrack(
                 G& g,
                 slot_container_t& slots,
-                const N& end_node,
                 PATH_CONTAINER_CREATOR path_container_creator = {}
         ) {
-            auto next_node { end_node };
+            auto next_node { g.get_leaf_node() };
             auto path { path_container_creator.create_empty(std::nullopt) };
             while (true) {
                 auto node { next_node };
@@ -190,30 +188,13 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         }
 
         auto find_max_path(
-                G& graph,
-                const N& end_node,
-                std::function<WEIGHT(const E&)> get_edge_weight_func
+                G& graph
         ) {
-            auto slots {
-                populate_weights_and_backtrack_pointers(
-                    graph,
-                    get_edge_weight_func
-                )
-            };
-            const auto& path { backtrack(graph, slots, end_node) };
-            const auto& weight { slots.find_ref(end_node).backtracking_weight };
+            auto slots { populate_weights_and_backtrack_pointers(graph) };
+            const auto& path { backtrack(graph, slots) };
+            const auto& leaf_node { graph.get_leaf_node() };
+            const auto& weight { slots.find_ref(leaf_node).backtracking_weight };
             return std::make_pair(path, weight);
-        }
-
-        auto find_max_path(
-                G& graph,
-                std::function<WEIGHT(const E&)> get_edge_weight_func
-        ) {
-            return find_max_path(
-                graph,
-                graph.get_leaf_node(),
-                get_edge_weight_func
-            );
         }
     };
 }

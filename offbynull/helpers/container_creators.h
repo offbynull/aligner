@@ -50,11 +50,11 @@ namespace offbynull::helpers::container_creators {
             return std::vector<ELEM>(cnt);
         }
 
-        std::vector<ELEM> create_copy(const std::ranges::range auto& range) const {
+        std::vector<ELEM> create_copy(std::ranges::range auto&& range) const {
             return create_copy(range.begin(), range.end());
         }
 
-        std::vector<ELEM> create_copy(auto begin, auto end) const {
+        std::vector<ELEM> create_copy(auto&& begin, auto&& end) const {
             return std::vector<ELEM>(begin, end);
         }
     };
@@ -80,11 +80,11 @@ namespace offbynull::helpers::container_creators {
             return std::array<ELEM, size>{};
         }
 
-        std::array<ELEM, size> create_copy(const std::ranges::range auto& range) const {
+        std::array<ELEM, size> create_copy(std::ranges::range auto&& range) const {
             return create_copy(range.begin(), range.end());
         }
 
-        std::array<ELEM, size> create_copy(auto& begin, auto& end) const {
+        std::array<ELEM, size> create_copy(auto&& begin, auto&& end) const {
             std::array<ELEM, size> ret;
             if constexpr (error_check) {
                 auto it { begin };
@@ -124,11 +124,11 @@ namespace offbynull::helpers::container_creators {
             return typename static_vector_typer<ELEM, max_size, error_check>::type(cnt);
         }
 
-        static_vector_typer<ELEM, max_size, error_check>::type create_copy(const std::ranges::range auto& range) const {
+        static_vector_typer<ELEM, max_size, error_check>::type create_copy(std::ranges::range auto&& range) const {
             return create_copy(range.begin(), range.end());
         }
 
-        static_vector_typer<ELEM, max_size, error_check>::type create_copy(auto& begin, auto& end) const {
+        static_vector_typer<ELEM, max_size, error_check>::type create_copy(auto&& begin, auto&& end) const {
             if constexpr (error_check) {
                 auto cnt { end - begin };
                 if (cnt > max_size) {
@@ -155,11 +155,11 @@ namespace offbynull::helpers::container_creators {
             return boost::container::small_vector<ELEM, max_stack_size>(cnt);
         }
 
-        boost::container::small_vector<ELEM, max_stack_size> create_copy(const std::ranges::range auto& range) const {
+        boost::container::small_vector<ELEM, max_stack_size> create_copy(std::ranges::range auto&& range) const {
             return create_copy(range.begin(), range.end());
         }
 
-        boost::container::small_vector<ELEM, max_stack_size> create_copy(auto& begin, auto& end) const {
+        boost::container::small_vector<ELEM, max_stack_size> create_copy(auto&& begin, auto&& end) const {
             return boost::container::small_vector<ELEM, max_stack_size>(begin, end);
         }
     };

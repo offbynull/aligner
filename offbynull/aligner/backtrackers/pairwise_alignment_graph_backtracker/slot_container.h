@@ -16,12 +16,12 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
 
-    template<typename N, typename E, widenable_to_size_t COUNT, weight WEIGHT>
+    template<typename N, typename E, widenable_to_size_t COUNT, weight ED>
     struct slot {
         N node;
         COUNT unwalked_parent_cnt;
         E backtracking_edge;
-        WEIGHT backtracking_weight;
+        ED backtracking_weight;
 
         slot(N node_, COUNT unwalked_parent_cnt_)
         : node{node_}

@@ -48,12 +48,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         readable_sliceable_pairwise_alignment_graph G,
-        weight WEIGHT,
         container_creator CONTAINER_CREATOR=vector_container_creator<
             node_searchable_slot<
                 typename G::N,
                 typename G::E,
-                WEIGHT
+                typename G::ED
             >
         >,
         bool error_check = true
@@ -78,23 +77,23 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             container_creator.create_copy(
                 graph_.resident_nodes()
                 | std::views::transform([](const N& node) {
-                    return node_searchable_slot<N, E, WEIGHT> {
+                    return node_searchable_slot<N, E, ED> {
                         node,
                         {}
                     };
                 })
             )
         } {
-            std::ranges::sort(slots.begin(), slots.end(), node_searchable_slot_comparator<N, E, WEIGHT>{});
+            std::ranges::sort(slots.begin(), slots.end(), node_searchable_slot_comparator<N, E, ED>{});
         }
 
-        std::optional<std::reference_wrapper<slot<E, WEIGHT>>> find(const N& node) {
+        std::optional<std::reference_wrapper<slot<E, ED>>> find(const N& node) {
             auto it {
                 std::lower_bound(
                     slots.begin(),
                     slots.end(),
                     node,
-                    node_searchable_slot_comparator<N, E, WEIGHT>{}
+                    node_searchable_slot_comparator<N, E, ED>{}
                 )
             };
             if (it != slots.end() && (*it).node == node) {
