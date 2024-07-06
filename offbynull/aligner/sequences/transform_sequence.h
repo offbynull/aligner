@@ -11,19 +11,19 @@ namespace offbynull::aligner::sequences::transform_sequence {
     template <typename ELEM>
     class transform_sequence {
     private:
-        std::size_t size_;
-        std::function<ELEM(std::size_t)> transformer;
+        const std::size_t size_;
+        const std::function<ELEM(std::size_t)> transformer;
 
     public:
         transform_sequence(std::size_t size__, std::function<ELEM(std::size_t)> transformer_)
         : size_ { size__ }
         , transformer { transformer_ } {}
 
-        ELEM operator[](std::size_t index) {
+        ELEM operator[](std::size_t index) const {
             return transformer(index);
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return size_;
         }
     };

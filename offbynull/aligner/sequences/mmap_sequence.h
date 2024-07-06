@@ -15,8 +15,8 @@ namespace offbynull::aligner::sequences::mmap_sequence {
     class mmap_sequence {
     private:
         mapped_file_source file;
-        std::function<ELEM(const char*)> transformer;
-        std::size_t bytes_per_elem;
+        const std::function<ELEM(const char*)> transformer;
+        const std::size_t bytes_per_elem;
 
     public:
         mmap_sequence(const std::string& path)
@@ -41,13 +41,13 @@ namespace offbynull::aligner::sequences::mmap_sequence {
             }
         }
 
-        ELEM operator[](std::size_t index) {
+        ELEM operator[](std::size_t index) const {
             const char* ptr { file.data() };
             ptr += index * bytes_per_elem;
             return transformer(ptr);
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return file.size() / bytes_per_elem;
         }
 

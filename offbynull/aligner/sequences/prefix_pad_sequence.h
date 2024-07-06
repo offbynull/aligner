@@ -15,9 +15,9 @@ namespace offbynull::aligner::sequences::prefix_pad_sequence {
         using SEQ_ELEM_RET_TYPE = decltype(std::declval<SEQ>()[0zu]);
         using SEQ_ELEM = std::remove_reference_t<SEQ_ELEM_RET_TYPE>;
 
-        SEQ& seq;
-        SEQ_ELEM pad_value;
-        std::size_t pad_count;
+        const SEQ& seq;
+        const SEQ_ELEM pad_value;
+        const std::size_t pad_count;
 
     public:
         prefix_pad_sequence(
@@ -29,14 +29,14 @@ namespace offbynull::aligner::sequences::prefix_pad_sequence {
         , pad_value { pad_value_ }
         , pad_count { pad_count_ } {}
 
-        auto operator[](std::size_t index) {
+        SEQ_ELEM operator[](std::size_t index) const {
             if (index < pad_count) {
                 return pad_value;
             }
             return seq[index - pad_count];
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return seq.size() + pad_count;
         }
     };

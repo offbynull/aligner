@@ -12,8 +12,8 @@ namespace offbynull::aligner::sequences::iota_sequence {
     template<widenable_to_size_t I, bool error_check = true>
     class iota_sequence {
     private:
-        I offset;
-        I bound;
+        const I offset;
+        const I bound;
 
     public:
         iota_sequence(I offset_)
@@ -29,11 +29,11 @@ namespace offbynull::aligner::sequences::iota_sequence {
             }
         }
 
-        I operator[](std::size_t index) {
+        I operator[](std::size_t index) const {
             return static_cast<I>(index + offset);
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return bound - offset;
         }
     };

@@ -51,15 +51,15 @@ namespace offbynull::aligner::sequences::zip_sequence {
     template<sequence... SEQUENCES>
     class zip_sequence {
     private:
-        std::tuple<SEQUENCES&...> seqs;
-        std::size_t size_;
+        const std::tuple<const SEQUENCES&...> seqs;
+        const std::size_t size_;
 
     public:
-        zip_sequence(SEQUENCES&&... seqs_)
+        zip_sequence(const SEQUENCES&&... seqs_)
         : seqs { std::forward_as_tuple(seqs_...) }
         , size_ { min_size(std::numeric_limits<std::size_t>::max(), seqs_...) } {}
 
-        auto operator[](std::size_t index) {
+        auto operator[](std::size_t index) const {
             auto params {
                 std::tuple_cat(
                     std::make_tuple(index),
@@ -72,13 +72,16 @@ namespace offbynull::aligner::sequences::zip_sequence {
             return ret;
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return size_;
         }
     };
 
     template<sequence... SEQUENCES>
     zip_sequence(SEQUENCES&&... seqs_) -> zip_sequence<SEQUENCES...>;
+
+    template<sequence... SEQUENCES>
+    zip_sequence(const SEQUENCES&&... seqs_) -> zip_sequence<SEQUENCES...>;
 }
 
 #endif //OFFBYNULL_ALIGNER_SEQUENCES_ZIP_SEQUENCE_H

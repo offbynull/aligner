@@ -16,15 +16,15 @@ namespace offbynull::aligner::sequences::chunked_sequence {
     template<sequence SEQ, std::size_t CHUNK_LENGTH, bool error_check = true>
     class compiletime_chunked_sequence {
     private:
-        SEQ& seq;
+        const SEQ& seq;
 
         using INNER_ELEM = std::decay_t<decltype(seq[0zu])>;
 
     public:
-        compiletime_chunked_sequence(SEQ& seq_)
+        compiletime_chunked_sequence(const SEQ& seq_)
         : seq { seq_ } {}
 
-        std::array<INNER_ELEM, CHUNK_LENGTH> operator[](std::size_t index) {
+        std::array<INNER_ELEM, CHUNK_LENGTH> operator[](std::size_t index) const {
             std::size_t offset { index * CHUNK_LENGTH };
             std::array<INNER_ELEM, CHUNK_LENGTH> ret { };
             for (std::size_t i { 0zu }; i < CHUNK_LENGTH; i++) {
@@ -33,7 +33,7 @@ namespace offbynull::aligner::sequences::chunked_sequence {
             return ret;
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return seq.size() / CHUNK_LENGTH;
         }
     };
@@ -51,10 +51,9 @@ namespace offbynull::aligner::sequences::chunked_sequence {
     >
     class runtime_chunked_sequence {
     private:
-        SEQ& seq;
+        const SEQ& seq;
         const std::size_t chunk_length;
-        CONTAINER_CREATOR container_creator;
-
+        const CONTAINER_CREATOR container_creator;
 
         using INNER_ELEM = std::decay_t<decltype(seq[0zu])>;
 
@@ -68,7 +67,7 @@ namespace offbynull::aligner::sequences::chunked_sequence {
         , chunk_length { chunk_length_ }
         , container_creator { container_creator_ } {}
 
-        auto operator[](std::size_t index) {
+        auto operator[](std::size_t index) const {
             std::size_t offset { index * chunk_length };
             auto ret { container_creator.create_objects({ chunk_length }) };
             for (std::size_t i { 0zu }; i < chunk_length; i++) {
@@ -77,7 +76,7 @@ namespace offbynull::aligner::sequences::chunked_sequence {
             return ret;
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return seq.size() / chunk_length;
         }
     };

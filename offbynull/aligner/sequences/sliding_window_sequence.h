@@ -16,12 +16,12 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
     template<sequence SEQ, std::size_t WINDOW_LENGTH, bool error_check = true>
     class compiletime_sliding_window_sequence {
     private:
-        SEQ& seq;
+        const SEQ& seq;
 
         using INNER_ELEM = std::decay_t<decltype(seq[0zu])>;
 
     public:
-        compiletime_sliding_window_sequence(SEQ& seq_)
+        compiletime_sliding_window_sequence(const SEQ& seq_)
         : seq { seq_ } {
             if constexpr (error_check) {
                 if (seq.size() < WINDOW_LENGTH) {
@@ -30,7 +30,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
             }
         }
 
-        std::array<INNER_ELEM, WINDOW_LENGTH> operator[](std::size_t index) {
+        std::array<INNER_ELEM, WINDOW_LENGTH> operator[](std::size_t index) const {
             std::array<INNER_ELEM, WINDOW_LENGTH> ret { };
             for (std::size_t i { 0zu }; i < WINDOW_LENGTH; i++) {
                 ret[i] = seq[index + i];
@@ -38,7 +38,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
             return ret;
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return seq.size() - WINDOW_LENGTH + 1zu;
         }
     };
@@ -56,16 +56,16 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
     >
     class runtime_sliding_window_sequence {
     private:
-        SEQ& seq;
+        const SEQ& seq;
         const std::size_t window_length;
-        CONTAINER_CREATOR container_creator;
+        const CONTAINER_CREATOR container_creator;
 
 
         using INNER_ELEM = std::decay_t<decltype(seq[0zu])>;
 
     public:
         runtime_sliding_window_sequence(
-            SEQ& seq_,
+            const SEQ& seq_,
             std::size_t window_length_,
             CONTAINER_CREATOR container_creator_ = {}
         )
@@ -79,7 +79,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
             }
         }
 
-        auto operator[](std::size_t index) {
+        auto operator[](std::size_t index) const {
             auto ret { container_creator.create_objects({ window_length }) };
             for (std::size_t i { 0zu }; i < window_length; i++) {
                 ret[i] = seq[index + i];
@@ -87,7 +87,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
             return ret;
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return seq.size() - window_length + 1zu;
         }
     };

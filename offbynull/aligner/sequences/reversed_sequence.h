@@ -10,17 +10,17 @@ namespace offbynull::aligner::sequences::reversed_sequence {
     template<sequence SEQ, bool error_check = true>
     class reversed_sequence {
     private:
-        SEQ& seq;
+        const SEQ& seq;
 
     public:
-        reversed_sequence(SEQ& seq_)
+        reversed_sequence(const SEQ& seq_)
         : seq { seq_ } { }
 
-        decltype(seq[0zu]) operator[](std::size_t index) {
+        decltype(seq[0zu]) operator[](std::size_t index) const {
             return seq[seq.size() - index - 1zu];
         }
 
-        std::size_t size() {
+        std::size_t size() const {
             return seq.size();
         }
     };
