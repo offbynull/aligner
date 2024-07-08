@@ -41,8 +41,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         readable_sliceable_pairwise_alignment_graph G,
-        weight WEIGHT,
-        container_creator_pack<G, WEIGHT> CONTAINER_CREATOR_PACK = heap_container_creator_pack<G, WEIGHT, true>,
+        container_creator_pack<G, typename G::ED> CONTAINER_CREATOR_PACK = heap_container_creator_pack<G, typename G::ED, true>,
         bool error_check = true
     >
     requires backtrackable_node<typename G::N> &&
@@ -130,13 +129,28 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         auto find_max_path(
             G& graph
         ) {
+            // Do initial forward walk on full graph to get the expected weight at sink
+            sliced_walker<
+                decltype(sub_graph),
+                SLICE_SLOT_CONTAINER_CREATOR,
+                RESIDENT_SLOT_CONTAINER_CREATOR,
+                error_check
+            > forward_walker {
+                sub_graph,
+                slice_slot_container_creator,
+                resident_slot_container_creator
+            };
+            while (!forward_walker.next()) {}
+            const N& leaf_node { sub_graph.get_leaf_node() };
+            const ED& final_weight { forward_walker.find(leaf_node).backtracking_weight };
+
             path_container<G, ELEMENT_CONTAINER_CREATOR, error_check> path_container_ {
                 G::limits(
                     graph.grid_down_cnt,
                     graph.grid_right_cnt
                 ).max_path_edge_cnt
             };
-            WEIGHT weight { walk(path_container_, nullptr, walk_direction::INITIALIZE) };
+            ED weight { walk(path_container_, nullptr, walk_direction::INITIALIZE, 0.0, final_weight) };
 
             auto path { path_container_creator.create_empty(std::nullopt) };
             for (E backtracking_edge : path_container_.walk_path_backward(graph)) {
@@ -155,10 +169,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             INITIALIZE
         };
 
-        WEIGHT walk(
+        ED walk(
             path_container<G, ELEMENT_CONTAINER_CREATOR>& path_container_,
             element<E>* parent_element,
-            walk_direction dir
+            walk_direction dir,
+            ED initial_weight,
+            ED expected_weight
         ) {
             const auto& [root_down_offset, root_right_offset, root_depth] { whole_graph.node_to_grid_offsets(sub_graph.get_root_node()) };
             const auto& [leaf_down_offset, leaf_right_offset, leaf_depth] { whole_graph.node_to_grid_offsets(sub_graph.get_leaf_node()) };
@@ -177,11 +193,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 return 0.0;
             }
             ED max_weight;
-            N max_node;
+            ED max_weight_upper_half;
+            ED max_weight_lower_half;
             E max_edge;
             {
-                auto x { prefix_graph.slice_first_node(0u)};
-                auto y { prefix_graph.slice_last_node(0u)};
                 sliced_walker<
                     decltype(prefix_graph),
                     SLICE_SLOT_CONTAINER_CREATOR,
@@ -192,9 +207,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     slice_slot_container_creator,
                     resident_slot_container_creator
                 };
-                while (!forward_walker.next()) {
-                    // do nothing
-                }
+                while (!forward_walker.next()) {}
+
                 sliced_walker<
                     decltype(reversed_suffix_graph),
                     SLICE_SLOT_CONTAINER_CREATOR,
@@ -205,15 +219,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     slice_slot_container_creator,
                     resident_slot_container_creator
                 };
-                while (!backward_walker.next()) {
-                    // do nothing
-                }
+                while (!backward_walker.next()) {}
 
                 N first_node { sub_graph.slice_first_node(mid_down_offset) };
                 const auto& first_forward_slot { forward_walker.find(first_node) };
                 const auto& first_backward_slot { backward_walker.find(first_node) };
-                std::tuple<WEIGHT, N, E> max {
+                std::tuple<ED, ED, ED, N, E> max {
                     first_forward_slot.backtracking_weight + first_backward_slot.backtracking_weight,
+                    first_forward_slot.backtracking_weight,
+                    first_backward_slot.backtracking_weight,
                     first_node,
                     first_backward_slot.backtracking_edge // don't use first_forward_slot's backtracking_edge because it'll be unset for first
                                                           // backward_forward_slot's backtracking edge fomat is the same as first_forward_slot's backtracking_edge -- you can break it using sub_graph
@@ -221,8 +235,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 for (const N& node : sub_graph.slice_nodes(mid_down_offset)) {
                     const auto forward_slot { forward_walker.find(node) };
                     const auto backward_slot { backward_walker.find(node) };
-                    std::tuple<WEIGHT, N, E> next {
+                    std::tuple<ED, ED, ED, N, E> next {
                         forward_slot.backtracking_weight + backward_slot.backtracking_weight,
+                        forward_slot.backtracking_weight,
+                        backward_slot.backtracking_weight,
                         node,
                         forward_slot.backtracking_edge
                     };
@@ -230,20 +246,23 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                         max = next;
                     }
                 }
-                const auto& [max_weight_, max_node_, max_edge_] { max };
+                const auto& [max_weight_, max_weight_upper_half_, max_weight_lower_half_, max_node_, max_edge_] { max };
                 max_weight = max_weight_;
-                max_node = max_node_;
+                max_weight_upper_half = max_weight_upper_half_;
+                max_weight_lower_half = max_weight_lower_half_ - sub_graph.get_edge_data(max_edge_);
                 max_edge = max_edge_;
             }  // Everything above wrapped in its own scope so that walkers (and their associated containers) are destroyed
+            max_weight += initial_weight;
+            max_weight_upper_half += initial_weight;
+            max_weight_lower_half += initial_weight;
 
-            const auto& [cut_down_offset, cut_right_offset, cut_depth] { whole_graph.node_to_grid_offsets(max_node) };
+            const auto& [n1, n2] { max_edge.inner_edge };
+            const auto& [n1_down, n1_right] { n1 };
+            const auto& [n2_down, n2_right] { n2 };
             std::cout
                     << indent_str
-                    << "found: [" << cut_down_offset << "," << cut_right_offset << "]"
-                    << std::endl;
-            if (cut_down_offset == 0u && cut_right_offset == 0u) {
-                return max_weight;
-            }
+                    << "found: " << n1_down << 'x' << n1_right << "->" << n2_down << 'x' << n2_right
+                    << " weight: " << max_weight << std::endl;
 
             // Add
             element<E>* current_element { nullptr };
@@ -279,7 +298,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 upper_half_backtracker.walk(
                     path_container_,
                     current_element,
-                    walk_direction::PREFIX
+                    walk_direction::PREFIX,
+                    max_weight_lower_half,
+                    expected_weight
                 );
             } // Everything above wrapped in its own scope so that backtracker (and its associated containers) are destroyed
             {
@@ -295,7 +316,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 lower_half_backtracker.walk(
                     path_container_,
                     current_element,
-                    walk_direction::SUFFIX
+                    walk_direction::SUFFIX,
+                    max_weight_upper_half,
+                    expected_weight
                 );
             } // Everything above wrapped in its own scope so that backtracker (and its associated containers) are destroyed
 
