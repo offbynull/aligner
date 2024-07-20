@@ -6,7 +6,7 @@
 #include <iostream>
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/container_creator_packs.h"
-#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_walker.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/forward_walker.h"
 #include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
@@ -20,7 +20,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::container_creator_packs::heap_container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker::sliced_walker;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker;
     using offbynull::helpers::container_creators::container_creator;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
@@ -85,19 +85,19 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 suffix_graph
             };
 
-            sliced_walker<
+            forward_walker<
                 decltype(prefix_graph),
                 SLICE_SLOT_CONTAINER_CREATOR,
                 RESIDENT_SLOT_CONTAINER_CREATOR,
                 error_check
-            > forward_walker {
+            > forward_walker_ {
                 prefix_graph,
                 slice_slot_container_creator,
                 resident_slot_container_creator
             };
-            while (!forward_walker.next()) {}
+            while (!forward_walker_.next()) {}
 
-            sliced_walker<
+            forward_walker<
                 decltype(reversed_suffix_graph),
                 SLICE_SLOT_CONTAINER_CREATOR,
                 RESIDENT_SLOT_CONTAINER_CREATOR,
@@ -109,7 +109,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             };
             while (!backward_walker.next()) {}
 
-            const auto& forward_slot { forward_walker.find(node) };
+            const auto& forward_slot { forward_walker_.find(node) };
             const auto& backward_slot { backward_walker.find(node) };
             ED weight { forward_slot.backtracking_weight + backward_slot.backtracking_weight };
             std::optional<E> forward_edge { std::nullopt };

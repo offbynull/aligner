@@ -1,5 +1,5 @@
-#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICED_WALKER_H
-#define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICED_WALKER_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_FORWARD_WALKER_H
+#define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_FORWARD_WALKER_H
 
 #include <functional>
 #include <ranges>
@@ -12,7 +12,7 @@
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_slot_container.h"
 #include "offbynull/concepts.h"
 
-namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker {
+namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container::slice_slot_container;
@@ -103,7 +103,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         >,
         bool error_check = true
     >
-    class sliced_walker {
+    class forward_walker {
     private:
         using N = typename G::N;
         using E = typename G::E;
@@ -117,7 +117,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         slice_entry<N, E, ED> next_slice_entry;
 
     public:
-        sliced_walker(
+        forward_walker(
             G& graph_,
             SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
             RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {}
@@ -235,4 +235,4 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     };
 }
 
-#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICED_WALKER_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_FORWARD_WALKER_H

@@ -7,7 +7,7 @@
 #include "path_container.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/container_creator_packs.h"
-#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_walker.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/forward_walker.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
@@ -24,8 +24,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::container_creator_packs::heap_container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker::sliced_walker;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_walker::slot;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::slot;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::element;
     using offbynull::helpers::container_creators::container_creator;
@@ -130,7 +130,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             G& graph
         ) {
             // Do initial forward walk on full graph to get the expected weight at sink
-            sliced_walker<
+            forward_walker<
                 decltype(sub_graph),
                 SLICE_SLOT_CONTAINER_CREATOR,
                 RESIDENT_SLOT_CONTAINER_CREATOR,
@@ -197,7 +197,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             ED max_weight_lower_half;
             E max_edge;
             {
-                sliced_walker<
+                forward_walker<
                     decltype(prefix_graph),
                     SLICE_SLOT_CONTAINER_CREATOR,
                     RESIDENT_SLOT_CONTAINER_CREATOR,
@@ -209,7 +209,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 };
                 while (!forward_walker.next()) {}
 
-                sliced_walker<
+                forward_walker<
                     decltype(reversed_suffix_graph),
                     SLICE_SLOT_CONTAINER_CREATOR,
                     RESIDENT_SLOT_CONTAINER_CREATOR,
