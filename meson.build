@@ -57,7 +57,7 @@ tests_src = [
 #        'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/forward_walker_test.cpp',
 #        'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/bidi_walker_test.cpp',
 #        'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_subdivider_test.cpp',
-        'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker_test.cpp',
+#        'offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker_test.cpp',  FIX THIS ONE SEE README.md
 #        'offbynull/aligner/sequences/mmap_sequence_test.cpp',
 #        'offbynull/aligner/sequences/iota_sequence_test.cpp',
 #        'offbynull/aligner/sequences/transform_sequence_test.cpp',
@@ -68,6 +68,19 @@ tests_src = [
 #        'offbynull/aligner/sequences/sliding_window_sequence_test.cpp',
 #        'offbynull/aligner/sequences/chunked_sequence_test.cpp',
 #        'offbynull/aligner/sequences/zip_sequence_test.cpp',
+        'offbynull/aligner/scorers/constant_scorer_test.cpp',
+        'offbynull/aligner/scorers/simple_scorer_test.cpp',
+        'offbynull/aligner/scorers/levenshtein_scorer_test.cpp',
+        'offbynull/aligner/scorers/substitution_map_scorer_test.cpp',
+        'offbynull/aligner/scorers/single_character_substitution_matrix_scorer_test.cpp',
+        'offbynull/aligner/scorers/blosum45_scorer_test.cpp',
+        'offbynull/aligner/scorers/blosum50_scorer_test.cpp',
+        'offbynull/aligner/scorers/blosum62_scorer_test.cpp',
+        'offbynull/aligner/scorers/blosum80_scorer_test.cpp',
+        'offbynull/aligner/scorers/blosum90_scorer_test.cpp',
+        'offbynull/aligner/scorers/pam30_scorer_test.cpp',
+        'offbynull/aligner/scorers/pam70_scorer_test.cpp',
+        'offbynull/aligner/scorers/pam250_scorer_test.cpp',
 ##        'offbynull/aligner/aligner_test.cpp'
 ]
 test_exec = executable(

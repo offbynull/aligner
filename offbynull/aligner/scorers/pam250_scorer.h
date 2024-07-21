@@ -1,0 +1,65 @@
+#ifndef OFFBYNULL_ALIGNER_SCORERS_PAM250_SCORER_H
+#define OFFBYNULL_ALIGNER_SCORERS_PAM250_SCORER_H
+
+#include <concepts>
+#include <optional>
+#include <map>
+#include "offbynull/aligner/scorer/scorer.h"
+#include "offbynull/aligner/scorers/single_character_substitution_matrix_scorer.h"
+#include "offbynull/aligner/concepts.h"
+
+namespace offbynull::aligner::scorers::pam250_scorer {
+    using offbynull::aligner::concepts::weight;
+    using offbynull::aligner::scorer::scorer::scorer;
+    using offbynull::aligner::scorers::single_character_substitution_matrix_scorer::single_character_substitution_matrix_scorer;
+
+    constexpr char text_table[] {
+        R"(
+   A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  J  Z  X  *
+A  2 -2  0  0 -2  0  0  1 -1 -1 -2 -1 -1 -3  1  1  1 -6 -3  0  0 -1  0 -1 -8
+R -2  6  0 -1 -4  1 -1 -3  2 -2 -3  3  0 -4  0  0 -1  2 -4 -2 -1 -3  0 -1 -8
+N  0  0  2  2 -4  1  1  0  2 -2 -3  1 -2 -3  0  1  0 -4 -2 -2  2 -3  1 -1 -8
+D  0 -1  2  4 -5  2  3  1  1 -2 -4  0 -3 -6 -1  0  0 -7 -4 -2  3 -3  3 -1 -8
+C -2 -4 -4 -5 12 -5 -5 -3 -3 -2 -6 -5 -5 -4 -3  0 -2 -8  0 -2 -4 -5 -5 -1 -8
+Q  0  1  1  2 -5  4  2 -1  3 -2 -2  1 -1 -5  0 -1 -1 -5 -4 -2  1 -2  3 -1 -8
+E  0 -1  1  3 -5  2  4  0  1 -2 -3  0 -2 -5 -1  0  0 -7 -4 -2  3 -3  3 -1 -8
+G  1 -3  0  1 -3 -1  0  5 -2 -3 -4 -2 -3 -5  0  1  0 -7 -5 -1  0 -4  0 -1 -8
+H -1  2  2  1 -3  3  1 -2  6 -2 -2  0 -2 -2  0 -1 -1 -3  0 -2  1 -2  2 -1 -8
+I -1 -2 -2 -2 -2 -2 -2 -3 -2  5  2 -2  2  1 -2 -1  0 -5 -1  4 -2  3 -2 -1 -8
+L -2 -3 -3 -4 -6 -2 -3 -4 -2  2  6 -3  4  2 -3 -3 -2 -2 -1  2 -3  5 -3 -1 -8
+K -1  3  1  0 -5  1  0 -2  0 -2 -3  5  0 -5 -1  0  0 -3 -4 -2  1 -3  0 -1 -8
+M -1  0 -2 -3 -5 -1 -2 -3 -2  2  4  0  6  0 -2 -2 -1 -4 -2  2 -2  3 -2 -1 -8
+F -3 -4 -3 -6 -4 -5 -5 -5 -2  1  2 -5  0  9 -5 -3 -3  0  7 -1 -4  2 -5 -1 -8
+P  1  0  0 -1 -3  0 -1  0  0 -2 -3 -1 -2 -5  6  1  0 -6 -5 -1 -1 -2  0 -1 -8
+S  1  0  1  0  0 -1  0  1 -1 -1 -3  0 -2 -3  1  2  1 -2 -3 -1  0 -2  0 -1 -8
+T  1 -1  0  0 -2 -1  0  0 -1  0 -2  0 -1 -3  0  1  3 -5 -3  0  0 -1 -1 -1 -8
+W -6  2 -4 -7 -8 -5 -7 -7 -3 -5 -2 -3 -4  0 -6 -2 -5 17  0 -6 -5 -3 -6 -1 -8
+Y -3 -4 -2 -4  0 -4 -4 -5  0 -1 -1 -4 -2  7 -5 -3 -3  0 10 -2 -3 -1 -4 -1 -8
+V  0 -2 -2 -2 -2 -2 -2 -1 -2  4  2 -2  2 -1 -1 -1  0 -6 -2  4 -2  2 -2 -1 -8
+B  0 -1  2  3 -4  1  3  0  1 -2 -3  1 -2 -4 -1  0  0 -5 -3 -2  3 -3  2 -1 -8
+J -1 -3 -3 -3 -5 -2 -3 -4 -2  3  5 -3  3  2 -2 -2 -1 -3 -1  2 -3  5 -2 -1 -8
+Z  0  0  1  3 -5  3  3  0  2 -2 -3  0 -2 -5  0  0 -1 -6 -4 -2  2 -2  3 -1 -8
+X -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -8
+* -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8 -8  1
+        )"
+    };
+
+    template<weight WEIGHT>
+    class pam250_scorer : public single_character_substitution_matrix_scorer<WEIGHT, 25zu> {
+    public:
+        pam250_scorer()
+        : single_character_substitution_matrix_scorer<WEIGHT, 25zu> { text_table } {}
+    };
+
+    static_assert(
+        scorer<
+            pam250_scorer<float>,
+            std::pair<int, int>,
+            char,
+            char,
+            float
+        >
+    );
+}
+
+#endif //OFFBYNULL_ALIGNER_SCORERS_PAM250_SCORER_H

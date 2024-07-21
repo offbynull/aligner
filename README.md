@@ -16,6 +16,17 @@ TODO:
   * decompressing compressed bytes -- when a location is accessed, decompress that chunk and hold it in cache
 * const correct graph implementations
 
+* scorer implementations
+  * ~~constant scorer~~
+  * ~~match/mismatch scorer~~
+  * ~~Levenshtein scorer~~
+  * ~~ascii substitution matrix scorer~~
+  * ~~pam/blosum scorer~~
+  * qwerty-keyboard scorer
+  * quality-based scorer that modifies score based on quality score?
+
+* FIX EXTENDEDGAP slice_nodes() function to not use forward_range_join_view
+  * make adapater that create forward_range / forward_backward_range based on callbacks (e.g. next(value) func and prev(value) func)
 
 * Update get_in_degree() / get_out_degree() functions to calculate directly
 * Add concept checks to autos

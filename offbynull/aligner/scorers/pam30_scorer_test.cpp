@@ -1,0 +1,23 @@
+#include "offbynull/aligner/scorers/pam30_scorer.h"
+#include "gtest/gtest.h"
+#include <format>
+#include <stdfloat>
+
+namespace {
+    using offbynull::aligner::scorers::pam30_scorer::pam30_scorer;
+
+    TEST(Pam30ScorerTest, SanityTest) {
+        pam30_scorer<int> scorer {};
+        char a_ { 'A' };
+        char c_ { 'C' };
+        EXPECT_EQ(6, (scorer(std::tuple<>{}, { { a_ } }, { { a_ } })));
+        EXPECT_EQ(-6, (scorer(std::tuple<>{}, { { a_ } }, { { c_ } })));
+        EXPECT_EQ(-17, (scorer(std::tuple<>{}, { { a_ } }, { std::nullopt })));
+        EXPECT_EQ(10, (scorer(std::tuple<>{}, { { c_ } }, { { c_ } })));
+        EXPECT_EQ(-6, (scorer(std::tuple<>{}, { { c_ } }, { { a_ } })));
+        EXPECT_EQ(-17, (scorer(std::tuple<>{}, { { c_ } }, { std::nullopt })));;
+        EXPECT_EQ(-17, (scorer(std::tuple<>{}, { std::nullopt }, { { a_ } })));
+        EXPECT_EQ(-17, (scorer(std::tuple<>{}, { std::nullopt }, { { c_ } })));
+        EXPECT_EQ(1, (scorer(std::tuple<>{}, { std::nullopt }, { std::nullopt })));
+    }
+}

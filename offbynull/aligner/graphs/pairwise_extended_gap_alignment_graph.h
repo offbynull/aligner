@@ -27,7 +27,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
 
     using empty_type = std::tuple<>;
 
-    enum class layer : uint8_t {
+    enum class layer : std::uint8_t {
         DOWN,
         RIGHT,
         DIAGONAL  // Make sure this is last, because, while in the same grid offset, this is the layer that the other two feed into. Algorithms expect this.
@@ -508,6 +508,12 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         }
 
         auto slice_nodes(INDEX grid_down, INDEX override_grid_right_cnt) {
+            REPALCE THIS WITH IOTA, AND THEN CALCULATE N BASED ON BY TRANSFORMING THE NUMBER THAT IOTA IS AT?;
+            REPALCE THIS WITH IOTA, AND THEN CALCULATE N BASED ON BY TRANSFORMING THE NUMBER THAT IOTA IS AT?;
+            REPALCE THIS WITH IOTA, AND THEN CALCULATE N BASED ON BY TRANSFORMING THE NUMBER THAT IOTA IS AT?;
+            REPALCE THIS WITH IOTA, AND THEN CALCULATE N BASED ON BY TRANSFORMING THE NUMBER THAT IOTA IS AT?;
+            REPALCE THIS WITH IOTA, AND THEN CALCULATE N BASED ON BY TRANSFORMING THE NUMBER THAT IOTA IS AT?;
+            REPALCE THIS WITH IOTA, AND THEN CALCULATE N BASED ON BY TRANSFORMING THE NUMBER THAT IOTA IS AT?;
             return forward_range_join_view {
                 std::views::iota(1u, override_grid_right_cnt)
                 | std::views::transform(

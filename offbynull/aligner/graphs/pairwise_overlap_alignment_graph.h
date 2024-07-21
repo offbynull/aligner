@@ -26,7 +26,7 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
     using offbynull::utils::static_vector_typer;
     using offbynull::aligner::graph::utils::generic_slicable_pairwise_alignment_graph_limits;
 
-    enum class edge_type : uint8_t {
+    enum class edge_type : std::uint8_t {
         FREE_RIDE,
         NORMAL
     };
