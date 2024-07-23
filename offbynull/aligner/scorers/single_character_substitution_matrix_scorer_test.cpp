@@ -7,14 +7,13 @@ namespace {
     using offbynull::aligner::scorers::single_character_substitution_matrix_scorer::single_character_substitution_matrix_scorer;
 
     TEST(SingleCharacterSubstitutionMatrixScorerTest, SanityTest) {
-        single_character_substitution_matrix_scorer<int, 5zu> scorer {
+        single_character_substitution_matrix_scorer<int, 4zu> scorer {
             R"(
-    A   T   C   G   *
-A   6  -7  -4  -3  -6
-T  -7   8  -6 -10  -8
-C  -4  -6   8   2 -11
-G  -3 -10   2   8 -14
-*  -6  -8 -11 -14  10
+    A   T   C   G
+A   6  -7  -4  -3
+T  -7   8  -6 -10
+C  -4  -6   8   2
+G  -3 -10   2   8
             )"
         };
         char a_ { 'A' };
@@ -23,8 +22,6 @@ G  -3 -10   2   8 -14
         char g_ { 'G' };
         EXPECT_EQ(6, (scorer(std::tuple<>{}, { { a_ } }, { { a_ } })));
         EXPECT_EQ(-4, (scorer(std::tuple<>{}, { { a_ } }, { { c_ } })));
-        EXPECT_EQ(-14, (scorer(std::tuple<>{}, { { g_ } }, { std::nullopt })));
-        EXPECT_EQ(-8, (scorer(std::tuple<>{}, { std::nullopt }, { { t_ } })));
-        EXPECT_EQ(10, (scorer(std::tuple<>{}, { std::nullopt }, { std::nullopt })));
+        EXPECT_EQ(-10, (scorer(std::tuple<>{}, { { g_ } }, { { t_ } })));
     }
 }

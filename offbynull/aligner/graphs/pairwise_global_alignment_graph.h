@@ -39,7 +39,7 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         using ED = WEIGHT;  // Differs from backing grid_graph because these values are derived at time of access
 
     private:
-        grid_graph<
+        const grid_graph<
             DOWN_SEQ,
             RIGHT_SEQ,
             INDEX,
@@ -54,112 +54,112 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         pairwise_global_alignment_graph(
             const DOWN_SEQ& _down_seq,
             const RIGHT_SEQ& _right_seq,
-            std::function<
+            const std::function<
                 WEIGHT(
                     const E&,
                     const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
                     const std::optional<std::reference_wrapper<const RIGHT_ELEM>>
                 )
-            > _match_lookup,
-            std::function<
+            > _substitution_lookup,
+            const std::function<
                 WEIGHT(
                     const E&,
                     const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
                     const std::optional<std::reference_wrapper<const RIGHT_ELEM>>
                 )
-            > _indel_lookup
+            > _gap_lookup
         )
-        : g{_down_seq, _right_seq, _match_lookup, _indel_lookup}
+        : g{_down_seq, _right_seq, _substitution_lookup, _gap_lookup}
         , grid_down_cnt{g.grid_down_cnt}
         , grid_right_cnt{g.grid_right_cnt} {}
 
-        ND get_node_data(const N& node) {
+        ND get_node_data(const N& node) const {
             return g.get_node_data(node);
         }
 
-        ED get_edge_data(const E& edge) {
+        ED get_edge_data(const E& edge) const {
             return g.get_edge_data(edge);
         }
 
-        N get_edge_from(const E& edge) {
+        N get_edge_from(const E& edge) const {
             return g.get_edge_from(edge);
         }
 
-        N get_edge_to(const E& edge) {
+        N get_edge_to(const E& edge) const {
             return g.get_edge_to(edge);
         }
 
-        std::tuple<N, N, ED> get_edge(const E& edge) {
+        std::tuple<N, N, ED> get_edge(const E& edge) const {
             return g.get_edge(edge);
         }
 
-        auto get_root_nodes() {
+        auto get_root_nodes() const {
             return g.get_root_nodes();
         }
 
-        N get_root_node() {
+        N get_root_node() const {
             return g.get_root_node();
         }
 
-        auto get_leaf_nodes() {
+        auto get_leaf_nodes() const {
             return g.get_leaf_nodes();
         }
 
-        N get_leaf_node() {
+        N get_leaf_node() const {
             return g.get_leaf_node();
         }
 
-        auto get_nodes() {
+        auto get_nodes() const {
             return g.get_nodes();
         }
 
-        auto get_edges() {
+        auto get_edges() const {
             return g.get_edges();
         }
 
-        bool has_node(const N& node) {
+        bool has_node(const N& node) const {
             return g.has_node(node);
         }
 
-        bool has_edge(const E& edge) {
+        bool has_edge(const E& edge) const {
             return g.has_edge(edge);
         }
 
-        auto get_outputs_full(const N& node) {
+        auto get_outputs_full(const N& node) const {
             return g.get_outputs_full(node);
         }
 
-        auto get_inputs_full(const N& node) {
+        auto get_inputs_full(const N& node) const {
             return g.get_inputs_full(node);
         }
 
-        auto get_outputs(const N& node) {
+        auto get_outputs(const N& node) const {
             return g.get_outputs(node);
         }
 
-        auto get_inputs(const N& node) {
+        auto get_inputs(const N& node) const {
             return g.get_inputs(node);
         }
 
-        bool has_outputs(const N& node) {
+        bool has_outputs(const N& node) const {
             return g.has_outputs(node);
         }
 
-        bool has_inputs(const N& node) {
+        bool has_inputs(const N& node) const {
             return g.has_inputs(node);
         }
 
-        std::size_t get_out_degree(const N& node) {
+        std::size_t get_out_degree(const N& node) const {
             return g.get_out_degree(node);
         }
 
-        std::size_t get_in_degree(const N& node) {
+        std::size_t get_in_degree(const N& node) const {
             return g.get_in_degree(node);
         }
 
         auto edge_to_element_offsets(
             const E& edge
-        ) {
+        ) const {
             using OPT_INDEX = std::optional<INDEX>;
             using RET = std::optional<std::pair<OPT_INDEX, OPT_INDEX>>;
 
@@ -186,51 +186,51 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
             return decltype(g)::limits(_grid_down_cnt, _grid_right_cnt);;
         }
 
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) {
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) const {
             return g.node_to_grid_offsets(node);
         }
 
-        auto slice_nodes(INDEX grid_down) {
+        auto slice_nodes(INDEX grid_down) const {
             return g.slice_nodes(grid_down);
         }
 
-        auto slice_nodes(INDEX grid_down, INDEX grid_right_cnt_) {
+        auto slice_nodes(INDEX grid_down, INDEX grid_right_cnt_) const {
             return g.slice_nodes(grid_down, grid_right_cnt_);
         }
 
-        N slice_first_node(INDEX grid_down) {
+        N slice_first_node(INDEX grid_down) const {
             return g.slice_first_node(grid_down);
         }
 
-        N slice_first_node(INDEX grid_down, INDEX grid_right_cnt_) {
+        N slice_first_node(INDEX grid_down, INDEX grid_right_cnt_) const {
             return g.slice_first_node(grid_down, grid_right_cnt_);
         }
 
-        N slice_last_node(INDEX grid_down) {
+        N slice_last_node(INDEX grid_down) const {
             return g.slice_last_node(grid_down);
         }
 
-        N slice_last_node(INDEX grid_down, INDEX grid_right_cnt_) {
+        N slice_last_node(INDEX grid_down, INDEX grid_right_cnt_) const {
             return g.slice_last_node(grid_down, grid_right_cnt_);
         }
 
-        N slice_next_node(const N& node) {
+        N slice_next_node(const N& node) const {
             return g.slice_next_node(node);
         }
 
-        N slice_prev_node(const N& node) {
+        N slice_prev_node(const N& node) const {
             return g.slice_prev_node(node);
         }
 
-        auto resident_nodes() {
+        auto resident_nodes() const {
             return g.resident_nodes();
         }
 
-        auto outputs_to_residents(const N& node) {
+        auto outputs_to_residents(const N& node) const {
             return g.outputs_to_residents(node);
         }
 
-        auto inputs_from_residents(const N& node) {
+        auto inputs_from_residents(const N& node) const {
             return g.inputs_from_residents(node);
         }
     };

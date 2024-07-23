@@ -5,33 +5,63 @@
 #include <array>
 #include <algorithm>
 #include <sstream>
+#include <limits>
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/concepts.h"
+#include "offbynull/utils.h"
 
 namespace offbynull::aligner::scorers::single_character_substitution_matrix_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
+    using offbynull::utils::type_displayer;
 
     template<weight WEIGHT, std::size_t ALPHABET_SIZE, bool error_check = true>
     class single_character_substitution_matrix_scorer {
     private:
         static_assert(ALPHABET_SIZE <= 255zu, "Alphabet greater than 255 symbols");
 
-        const std::array<char, ALPHABET_SIZE> alphabet;
-        const std::array<WEIGHT, ALPHABET_SIZE * ALPHABET_SIZE> weights;
-        const char char_for_missing;
+        static auto trim_whitespace(const auto& text) {
+            auto leading_trimmed {
+                text
+                | std::views::drop_while([](auto ch) { return ch == ' ' || ch == '\t' || ch == '\n'; })
+            };
+            auto trailing_trimmed {
+                text
+                | std::views::reverse
+                | std::views::drop_while([](auto ch) { return ch == ' ' || ch == '\t' || ch == '\n'; })
+                | std::views::reverse
+            };
+            const char& start_char_ref { *trailing_trimmed.begin() };
+            const char* start_char_ptr { &start_char_ref }; // can't use line.begin() directly because line is an iterator object, not a pointer -- need to first grab the object from the iterator (which is a ref into a element in text) then get the pointer to it
+            return std::string_view { start_char_ptr, std::ranges::distance(trailing_trimmed) };
+        }
 
-        static std::string_view trim_whitespace(const std::string_view& text) {
-            auto start {
-                std::find_if_not(text.begin(), text.end(), [](auto ch) { return ch == ' ' || ch == '\n'; })
+        static auto split_lines_and_words(const auto& text) {
+            auto text_normalized_ends {
+                text
+                | std::views::filter([](const auto& ch) { return ch != '\r'; })
             };
-            auto end {
-                std::find_if_not(text.rbegin(), text.rend(), [](auto ch) { return ch == ' ' || ch == '\n'; }).base()
-            };
-            if (start < end) {
-                return std::string_view(&*start, std::distance(start, end));
-            }
-            return std::string_view {};
+            return
+                std::views::split(text_normalized_ends, '\n')
+                | std::views::transform([](const auto& line) {
+                    static_assert(std::is_same_v<decltype(*line.begin()), const char&>); // ensure you're getting back a REFERENCE to the original data when you access
+                    const char& start_char_ref { *line.begin() };
+                    const char* start_char_ptr { &start_char_ref }; // can't use line.begin() directly because line is an iterator object, not a pointer -- need to first grab the object from the iterator (which is a ref into a element in text) then get the pointer to it
+                    return std::string_view { start_char_ptr, std::ranges::distance(line) };
+                })
+                | std::views::transform([](const std::string_view& line) {
+                    return trim_whitespace(line);  // trim whitespace from line
+                })
+                | std::views::filter([](const std::string_view& line) {
+                    return line.begin() != line.end();  // remove if empty line
+                })
+                | std::views::transform([](const std::string_view& line) {
+                    return
+                        std::views::split(line, ' ')
+                        | std::ranges::views::filter([](const auto& s) {
+                            return s.begin() != s.end();
+                        });
+                });
         }
 
         static char extract_symbol(const auto& element_view) {
@@ -52,56 +82,26 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
         }
 
         static std::array<char, ALPHABET_SIZE> extract_sorted_alphabet(const std::string_view& text) {
-            // trim leading/trailing whitespace
-            std::string_view text_trimmed { trim_whitespace(text) };
             // split test line-by-line
-            auto lines { std::views::split(text_trimmed, '\n') };
+            auto lines { split_lines_and_words(text) };
             auto lines_it { lines.begin() };
             // pull out header and split on space
-            auto header_line { *lines_it };
-            auto header_line_split {
-                std::views::split(header_line, ' ')
-                | std::ranges::views::filter([](const auto& s) {
-                    return s.begin() != s.end();
-                })
-            };
+            auto header_words { *lines_it };
             // set alphabet
             if constexpr (error_check) {
-                auto size { std::ranges::distance(header_line_split) };
+                auto size { std::ranges::distance(header_words) };
                 if (size != ALPHABET_SIZE) {
                     throw std::runtime_error("Unexpected number of characters");
                 }
             }
             std::array<char, ALPHABET_SIZE> ret {};
-            auto header_line_split_it { header_line_split.begin() };
+            auto header_words_it { header_words.begin() };
             for (std::size_t i { 0zu }; i < ALPHABET_SIZE; i++) {
-                ret[i] = extract_symbol(*header_line_split_it);
-                ++header_line_split_it;
+                ret[i] = extract_symbol(*header_words_it);
+                ++header_words_it;
             }
             std::ranges::sort(ret.begin(), ret.end());
             return ret;
-        }
-
-        static char extract_last_char_in_header(const std::string_view& text) {
-            // trim leading/trailing whitespace
-            std::string_view text_trimmed { trim_whitespace(text) };
-            // split test line-by-line
-            auto lines { std::views::split(text_trimmed, '\n') };
-            auto lines_it { lines.begin() };
-            // pull out header and split on space
-            auto header_line { *lines_it };
-            auto header_line_split {
-                std::views::split(header_line, ' ')
-                | std::ranges::views::filter([](const auto& s) {
-                    return s.begin() != s.end();
-                })
-            };
-            // walk to last -- assume last char is the char_for_missing char
-            char char_for_missing_char {};
-            for (auto col_view : header_line_split) {
-                char_for_missing_char = extract_symbol(col_view);
-            }
-            return char_for_missing_char;
         }
 
         static std::size_t to_weights_idx(
@@ -128,46 +128,32 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
 
         static std::array<WEIGHT, ALPHABET_SIZE * ALPHABET_SIZE> extract_sorted_weights(const std::string_view& text) {
             const std::array<char, ALPHABET_SIZE> sorted_alphabet { std::move(extract_sorted_alphabet(text)) };
-            // trim leading/trailing whitespace
-            std::string_view text_trimmed { trim_whitespace(text) };
             // split test line-by-line
-            auto lines { std::views::split(text_trimmed, '\n') };
+            auto lines { split_lines_and_words(text) };
             auto lines_it { lines.begin() };
             // pull out header and split on space
-            auto header_line { *lines_it };
-            auto header_line_split {
-                std::views::split(header_line, ' ')
-                | std::ranges::views::filter([](const auto& s) {
-                    return s.begin() != s.end();
-                })
-            };
+            auto header_words { *lines_it };
             ++lines_it;
             // pull out rows
             std::array<WEIGHT, ALPHABET_SIZE * ALPHABET_SIZE> ret {};
             while (lines_it != lines.end()) {
-                auto row_line { *lines_it };
+                auto row_words { *lines_it };
                 ++lines_it;
                 // split row
-                auto row_line_split {
-                    std::views::split(row_line, ' ')
-                    | std::ranges::views::filter([](const auto& s) {
-                        return s.begin() != s.end();
-                    })
-                };
-                auto row_line_split_it { row_line_split.begin() };
+                auto row_words_it { row_words.begin() };
                 // pull right value
-                auto down_elem_view { *row_line_split_it };
+                auto down_elem_view { *row_words_it };
                 char down_elem { extract_symbol(down_elem_view) };
-                ++row_line_split_it;
-                auto header_line_split_it { header_line_split.begin() };
-                while (header_line_split_it != header_line_split.end()) {
+                ++row_words_it;
+                auto header_words_split_it { header_words.begin() };
+                while (header_words_split_it != header_words.end()) {
                     // pull down value
-                    auto right_elem_view { *header_line_split_it };
+                    auto right_elem_view { *header_words_split_it };
                     char right_elem { extract_symbol(right_elem_view) };
-                    ++header_line_split_it;
+                    ++header_words_split_it;
                     // pull weight
-                    auto weight_str { *row_line_split_it };
-                    ++row_line_split_it;
+                    auto weight_str { *row_words_it };
+                    ++row_words_it;
                     WEIGHT weight {};
                     bool convert_success { std::istringstream { weight_str.data() } >> weight };
                     if constexpr (error_check) {
@@ -183,31 +169,37 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             return ret;
         }
 
+        const std::array<char, ALPHABET_SIZE> alphabet;
+        const std::array<WEIGHT, ALPHABET_SIZE * ALPHABET_SIZE> weights;
+
     public:
         single_character_substitution_matrix_scorer(
             const std::string_view& text_table
         )
         : alphabet { std::move(extract_sorted_alphabet(text_table)) }
-        , weights { std::move(extract_sorted_weights(text_table)) }
-        , char_for_missing { extract_last_char_in_header(text_table) } {}
+        , weights { std::move(extract_sorted_weights(text_table)) } {}
 
         single_character_substitution_matrix_scorer(
             const std::string_view& text_table,
             const char
         )
         : alphabet { std::move(extract_sorted_alphabet(text_table)) }
-        , weights { std::move(extract_sorted_weights(text_table)) }
-        , char_for_missing { extract_last_char_in_header(text_table) } {}
+        , weights { std::move(extract_sorted_weights(text_table)) } {}
 
         WEIGHT operator()(
             const auto& edge,
             const std::optional<std::reference_wrapper<const char>> down_elem,
             const std::optional<std::reference_wrapper<const char>> right_elem
         ) const {
-            char down_elem_ch { down_elem.has_value() ? (*down_elem).get() : char_for_missing };
-            char right_elem_ch { right_elem.has_value() ? (*right_elem).get() : char_for_missing };
-            std::size_t weights_idx { to_weights_idx(alphabet, down_elem_ch, right_elem_ch) };
-            return weights[weights_idx];
+            if (down_elem.has_value() && right_elem.has_value()) {
+                std::size_t weights_idx { to_weights_idx(alphabet, down_elem.value().get(), right_elem.value().get()) };
+                return weights[weights_idx];
+            }
+            if constexpr (std::numeric_limits<WEIGHT>::has_quiet_NaN) {
+                return std::numeric_limits<WEIGHT>::quiet_NaN();
+            } else {
+                return std::numeric_limits<WEIGHT>::max();
+            }
         }
     };
 

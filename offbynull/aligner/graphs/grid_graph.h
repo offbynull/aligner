@@ -46,22 +46,22 @@ namespace offbynull::aligner::graphs::grid_graph {
     private:
         const DOWN_SEQ& down_seq;
         const RIGHT_SEQ& right_seq;
-        std::function<
+        const std::function<
             WEIGHT(
                 const E&,
                 const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
                 const std::optional<std::reference_wrapper<const RIGHT_ELEM>>
             )
-        > match_lookup;
-        std::function<
+        > substitution_lookup;
+        const std::function<
             WEIGHT(
                 const E&,
                 const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
                 const std::optional<std::reference_wrapper<const RIGHT_ELEM>>
             )
-        > indel_lookup;
+        > gap_lookup;
 
-        auto construct_full_edge(N n1, N n2) {
+        auto construct_full_edge(N n1, N n2) const {
             return std::tuple<E, N, N, ED> {
                 E { n1, n2 },
                 n1,
@@ -72,7 +72,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             };
         }
 
-        std::size_t to_raw_idx(INDEX down_idx, INDEX right_idx) {
+        std::size_t to_raw_idx(INDEX down_idx, INDEX right_idx) const {
             std::size_t down_idx_widened { down_idx };
             std::size_t right_idx_widened { right_idx };
             return (down_idx_widened * grid_right_cnt) + right_idx_widened;
@@ -85,29 +85,29 @@ namespace offbynull::aligner::graphs::grid_graph {
         grid_graph(
             const DOWN_SEQ& _down_seq,
             const RIGHT_SEQ& _right_seq,
-            std::function<
+            const std::function<
                 WEIGHT(
                     const E&,
                     const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
                     const std::optional<std::reference_wrapper<const RIGHT_ELEM>>
                 )
-            > _match_lookup,
-            std::function<
+            > _substitution_lookup,
+            const std::function<
                 WEIGHT(
                     const E&,
                     const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
                     const std::optional<std::reference_wrapper<const RIGHT_ELEM>>
                 )
-            > _indel_lookup
+            > _gap_lookup
         )
         : down_seq{_down_seq}
         , right_seq{_right_seq}
-        , match_lookup{_match_lookup}
-        , indel_lookup{_indel_lookup}
+        , substitution_lookup{_substitution_lookup}
+        , gap_lookup{_gap_lookup}
         , grid_down_cnt{_down_seq.size() + 1zu}
         , grid_right_cnt{_right_seq.size() + 1zu} {}
 
-        ND get_node_data(const N& node) {
+        ND get_node_data(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -116,7 +116,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return {};
         }
 
-        ED get_edge_data(const E& edge) {
+        ED get_edge_data(const E& edge) const  {
             if constexpr (error_check) {
                 if (!has_edge(edge)) {
                     throw std::runtime_error("Edge doesn't exist");
@@ -125,19 +125,19 @@ namespace offbynull::aligner::graphs::grid_graph {
             const auto& [n1_grid_down, n1_grid_right] { edge.first };
             const auto& [n2_grid_down, n2_grid_right] { edge.second };
             if (n1_grid_down == n2_grid_down && n1_grid_right + 1u == n2_grid_right) {
-                return indel_lookup(
+                return gap_lookup(
                     edge,
                     { std::nullopt },
                     { { right_seq[n1_grid_right] } }
                 );
             } else if (n1_grid_down + 1u == n2_grid_down && n1_grid_right == n2_grid_right) {
-                return indel_lookup(
+                return gap_lookup(
                     edge,
                     { { down_seq[n1_grid_down] } },
                     { std::nullopt }
                 );
             } else if (n1_grid_down + 1u == n2_grid_down && n1_grid_right + 1u == n2_grid_right) {
-                return match_lookup(
+                return substitution_lookup(
                     edge,
                     { { down_seq[n1_grid_down] } },
                     { { right_seq[n1_grid_right] } }
@@ -149,7 +149,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             std::unreachable();
         }
 
-        N get_edge_from(const E& edge) {
+        N get_edge_from(const E& edge) const {
             if constexpr (error_check) {
                 if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
@@ -158,7 +158,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return edge.first;
         }
 
-        N get_edge_to(const E& edge) {
+        N get_edge_to(const E& edge) const {
             if constexpr (error_check) {
                 if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
@@ -167,7 +167,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return edge.second;
         }
 
-        std::tuple<N, N, ED> get_edge(const E& edge) {
+        std::tuple<N, N, ED> get_edge(const E& edge) const {
             if constexpr (error_check) {
                 if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
@@ -176,23 +176,23 @@ namespace offbynull::aligner::graphs::grid_graph {
             return std::tuple<N, N, ED> {this->get_edge_from(edge), this->get_edge_to(edge), this->get_edge_data(edge)};
         }
 
-        auto get_root_nodes() {
+        auto get_root_nodes() const {
             return std::ranges::single_view { N { 0u, 0u } };
         }
 
-        N get_root_node() {
+        N get_root_node() const {
             return N { 0u, 0u };
         }
 
-        auto get_leaf_nodes() {
+        auto get_leaf_nodes() const {
             return std::ranges::single_view { N { grid_down_cnt - 1u, grid_right_cnt - 1u } };
         }
 
-        N get_leaf_node() {
+        N get_leaf_node() const {
             return N { grid_down_cnt - 1u, grid_right_cnt - 1u };
         }
 
-        auto get_nodes() {
+        auto get_nodes() const {
             return
                 std::views::cartesian_product(
                     std::views::iota(0u, grid_down_cnt),
@@ -203,7 +203,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 });
         }
 
-        auto get_edges() {
+        auto get_edges() const {
             return forward_range_join_view {
                 std::views::cartesian_product(
                     std::views::iota(0u, grid_down_cnt),
@@ -216,12 +216,12 @@ namespace offbynull::aligner::graphs::grid_graph {
             };
         }
 
-        bool has_node(const N& node) {
+        bool has_node(const N& node) const {
             const auto& [n1_grid_down, n1_grid_right] { node };
             return n1_grid_down < grid_down_cnt && n1_grid_down >= 0u && n1_grid_right < grid_right_cnt && n1_grid_right >= 0u;
         }
 
-        bool has_edge(const E& edge) {
+        bool has_edge(const E& edge) const {
             const auto& [n1_grid_down, n1_grid_right] { edge.first };
             const auto& [n2_grid_down, n2_grid_right] { edge.second };
             return (n1_grid_down == n2_grid_down && n1_grid_right + 1u == n2_grid_right && n2_grid_right < grid_right_cnt)
@@ -229,7 +229,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 || (n1_grid_down + 1u == n2_grid_down && n1_grid_right + 1u == n2_grid_right && n2_grid_down < grid_down_cnt && n2_grid_right < grid_right_cnt);
         }
 
-        auto get_outputs_full(const N& node) {
+        auto get_outputs_full(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -266,7 +266,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 });
         }
 
-        auto get_inputs_full(const N& node) {
+        auto get_inputs_full(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -297,7 +297,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 });
         }
 
-        auto get_outputs(const N& node) {
+        auto get_outputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -307,7 +307,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 | std::views::transform([](const auto& v) -> E { return std::get<0>(v); });
         }
 
-        auto get_inputs(const N& node) {
+        auto get_inputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -317,7 +317,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 | std::views::transform([](const auto& v) -> E { return std::get<0>(v); });
         }
 
-        bool has_outputs(const N& node) {
+        bool has_outputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -326,7 +326,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return this->get_out_degree(node) > 0zu;
         }
 
-        bool has_inputs(const N& node) {
+        bool has_inputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -335,7 +335,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return this->get_in_degree(node) > 0zu;
         }
 
-        std::size_t get_out_degree(const N& node) {
+        std::size_t get_out_degree(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -346,7 +346,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return static_cast<std::size_t>(dist);
         }
 
-        std::size_t get_in_degree(const N& node) {
+        std::size_t get_in_degree(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -370,29 +370,25 @@ namespace offbynull::aligner::graphs::grid_graph {
             };
         }
 
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) {
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) const {
             const auto& [down_offset, right_offset] { node };
             return { down_offset, right_offset, 0zu };
         }
 
-        constexpr static std::size_t slice_nodes_capacity(INDEX _grid_down_cnt, INDEX _grid_right_cnt) {
-            return _grid_right_cnt;
-        }
-
-        auto slice_nodes(INDEX grid_down) {
+        auto slice_nodes(INDEX grid_down) const {
             return slice_nodes(grid_down, grid_right_cnt);
         }
 
-        auto slice_nodes(INDEX grid_down, INDEX grid_right_cnt_) {
+        auto slice_nodes(INDEX grid_down, INDEX grid_right_cnt_) const {
             return std::views::iota(0u, grid_right_cnt_)
                 | std::views::transform([grid_down](const auto& grid_right) { return N { grid_down, grid_right }; });
         }
 
-        N slice_first_node(INDEX grid_down) {
+        N slice_first_node(INDEX grid_down) const {
             return slice_first_node(grid_down, 0u);
         }
 
-        N slice_first_node(INDEX grid_down, INDEX grid_right) {
+        N slice_first_node(INDEX grid_down, INDEX grid_right) const {
             N first_node { grid_down, grid_right };
             if constexpr (error_check) {
                 if (std::get<0>(first_node) >= grid_down_cnt) {
@@ -402,11 +398,11 @@ namespace offbynull::aligner::graphs::grid_graph {
             return first_node;
         }
 
-        N slice_last_node(INDEX grid_down) {
+        N slice_last_node(INDEX grid_down) const {
             return slice_last_node(grid_down, grid_right_cnt - 1u);
         }
 
-        N slice_last_node(INDEX grid_down, INDEX grid_right) {
+        N slice_last_node(INDEX grid_down, INDEX grid_right) const {
             N last_node { grid_down, grid_right };
             if constexpr (error_check) {
                 if (std::get<0>(last_node) >= grid_down_cnt) {
@@ -416,7 +412,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return last_node;
         }
 
-        N slice_next_node(const N& node) {
+        N slice_next_node(const N& node) const {
             N next_node { std::get<0>(node), std::get<1>(node) + 1u};
             if constexpr (error_check) {
                 if (std::get<0>(next_node) >= grid_down_cnt) {
@@ -429,7 +425,7 @@ namespace offbynull::aligner::graphs::grid_graph {
             return next_node;
         }
 
-        N slice_prev_node(const N& node) {
+        N slice_prev_node(const N& node) const {
             N prev_node { std::get<0>(node), std::get<1>(node) - 1u};
             if constexpr (error_check) {
                 if (std::get<0>(prev_node) >= grid_down_cnt) {
@@ -442,15 +438,15 @@ namespace offbynull::aligner::graphs::grid_graph {
             return prev_node;
         }
 
-        auto resident_nodes() {
+        auto resident_nodes() const {
             return std::views::empty<N>;
         }
 
-        auto outputs_to_residents(const N& node) {
+        auto outputs_to_residents(const N& node) const {
             return std::views::empty<E>;
         }
 
-        auto inputs_from_residents(const N& node) {
+        auto inputs_from_residents(const N& node) const {
             return std::views::empty<E>;
         }
     };

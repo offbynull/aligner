@@ -61,14 +61,14 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         using ED = WEIGHT;  // Differs from backing grid_graph because these values are derived at time of access
 
     private:
-        grid_graph<
+        const grid_graph<
             DOWN_SEQ,
             RIGHT_SEQ,
             INDEX,
             WEIGHT,
             error_check
         > g;
-        std::function<
+        const std::function<
             WEIGHT(
                 const E&,
                 const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
@@ -83,21 +83,21 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         pairwise_local_alignment_graph(
             const DOWN_SEQ& _down_seq,
             const RIGHT_SEQ& _right_seq,
-            std::function<
+            const std::function<
                 WEIGHT(
                     const E&,
                     const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
                     const std::optional<std::reference_wrapper<const RIGHT_ELEM>>
                 )
-            > _match_lookup,
-            std::function<
+            > _substitution_lookup,
+            const std::function<
                 WEIGHT(
                     const E&,
                     const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
                     const std::optional<std::reference_wrapper<const RIGHT_ELEM>>
                 )
-            > _indel_lookup,
-            std::function<
+            > _gap_lookup,
+            const std::function<
                 WEIGHT(
                     const E&,
                     const std::optional<std::reference_wrapper<const DOWN_ELEM>>,
@@ -108,23 +108,23 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         : g{
             _down_seq,
             _right_seq,
-            [_match_lookup](
+            [_substitution_lookup](
                 const typename decltype(g)::E& edge,
                 const std::optional<std::reference_wrapper<const DOWN_ELEM>> down_elem,
                 const std::optional<std::reference_wrapper<const RIGHT_ELEM>> right_elem
             ) {
-               return _match_lookup(
+               return _substitution_lookup(
                    {edge_type::NORMAL, edge},
                    down_elem,
                    right_elem
                 );
             },
-            [_indel_lookup] (
+            [_gap_lookup] (
                 const typename decltype(g)::E& edge,
                 const std::optional<std::reference_wrapper<const DOWN_ELEM>> down_elem,
                 const std::optional<std::reference_wrapper<const RIGHT_ELEM>> right_elem
             ) {
-                return _indel_lookup(
+                return _gap_lookup(
                     {edge_type::NORMAL, edge},
                     down_elem,
                     right_elem
@@ -135,23 +135,23 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         , grid_down_cnt{g.grid_down_cnt}
         , grid_right_cnt{g.grid_right_cnt} {}
 
-        ND get_node_data(const N& node) {
+        ND get_node_data(const N& node) const {
             return g.get_node_data(node);
         }
 
-        ED get_edge_data(const E& edge) {
+        ED get_edge_data(const E& edge) const {
             return std::get<2>(get_edge(edge));
         }
 
-        N get_edge_from(const E& edge) {
+        N get_edge_from(const E& edge) const {
             return std::get<0>(get_edge(edge));
         }
 
-        N get_edge_to(const E& edge) {
+        N get_edge_to(const E& edge) const {
             return std::get<1>(get_edge(edge));
         }
 
-        std::tuple<N, N, ED> get_edge(const E& edge) {
+        std::tuple<N, N, ED> get_edge(const E& edge) const {
             if constexpr (error_check) {
                 if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
@@ -165,27 +165,27 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             }
         }
 
-        auto get_root_nodes() {
+        auto get_root_nodes() const {
             return g.get_root_nodes();
         }
 
-        N get_root_node() {
+        N get_root_node() const {
             return g.get_root_node();
         }
 
-        auto get_leaf_nodes() {
+        auto get_leaf_nodes() const {
             return g.get_leaf_nodes();
         }
 
-        N get_leaf_node() {
+        N get_leaf_node() const {
             return g.get_leaf_node();
         }
 
-        auto get_nodes() {
+        auto get_nodes() const {
             return g.get_nodes();
         }
 
-        auto get_edges() {
+        auto get_edges() const {
             auto from_src_range {
                 std::views::cartesian_product(
                     std::views::iota(0u, g.grid_down_cnt),
@@ -229,11 +229,11 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             };
         }
 
-        bool has_node(const N& node) {
+        bool has_node(const N& node) const {
             return g.has_node(node);
         }
 
-        bool has_edge(const E& edge) {
+        bool has_edge(const E& edge) const {
             if (edge.type == edge_type::NORMAL) {
                 return g.has_edge(edge.inner_edge);
             } else {
@@ -262,7 +262,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             }
         }
 
-        auto get_outputs_full(const N& node) {
+        auto get_outputs_full(const N& node) const {
             auto standard_outputs {
                 g.get_outputs_full(node)
                 | std::views::transform([this](const auto& raw_full_edge) noexcept {
@@ -310,7 +310,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             };
         }
 
-        auto get_inputs_full(const N& node) {
+        auto get_inputs_full(const N& node) const {
             auto standard_inputs {
                 g.get_inputs_full(node)
                 | std::views::transform([this](const auto& raw_full_edge) {
@@ -358,7 +358,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             };
         }
 
-        auto get_outputs(const N& node) {
+        auto get_outputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -368,7 +368,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                 | std::views::transform([this](auto v) -> E { return std::get<0>(v); });
         }
 
-        auto get_inputs(const N& node) {
+        auto get_inputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -378,7 +378,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                 | std::views::transform([this](auto v) -> E { return std::get<0>(v); });
         }
 
-        bool has_outputs(const N& node) {
+        bool has_outputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -388,7 +388,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return outputs.begin() != outputs.end();
         }
 
-        bool has_inputs(const N& node) {
+        bool has_inputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -398,7 +398,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return inputs.begin() != inputs.end();
         }
 
-        std::size_t get_out_degree(const N& node) {
+        std::size_t get_out_degree(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -409,7 +409,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return static_cast<std::size_t>(dist);
         }
 
-        std::size_t get_in_degree(const N& node) {
+        std::size_t get_in_degree(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -422,7 +422,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
 
         auto edge_to_element_offsets(
             const E& edge
-        ) {
+        ) const {
             using OPT_INDEX = std::optional<INDEX>;
             using RET = std::optional<std::pair<OPT_INDEX, OPT_INDEX>>;
 
@@ -452,7 +452,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return decltype(g)::max_grid_depth(_grid_down_cnt, _grid_right_cnt);;
         }
 
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) {
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -475,43 +475,43 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             };
         }
 
-        auto slice_nodes(INDEX grid_down) {
+        auto slice_nodes(INDEX grid_down) const {
             return g.slice_nodes(grid_down);
         }
 
-        auto slice_nodes(INDEX grid_down, INDEX grid_right_cnt_) {
+        auto slice_nodes(INDEX grid_down, INDEX grid_right_cnt_) const {
             return g.slice_nodes(grid_down, grid_right_cnt_);
         }
 
-        N slice_first_node(INDEX grid_down) {
+        N slice_first_node(INDEX grid_down) const {
             return g.slice_first_node(grid_down);
         }
 
-        N slice_first_node(INDEX grid_down, INDEX grid_right_cnt_) {
+        N slice_first_node(INDEX grid_down, INDEX grid_right_cnt_) const {
             return g.slice_first_node(grid_down, grid_right_cnt_);
         }
 
-        N slice_last_node(INDEX grid_down) {
+        N slice_last_node(INDEX grid_down) const {
             return g.slice_last_node(grid_down);
         }
 
-        N slice_last_node(INDEX grid_down, INDEX grid_right_cnt_) {
+        N slice_last_node(INDEX grid_down, INDEX grid_right_cnt_) const {
             return g.slice_last_node(grid_down, grid_right_cnt_);
         }
 
-        N slice_next_node(const N& node) {
+        N slice_next_node(const N& node) const {
             return g.slice_next_node(node);
         }
 
-        N slice_prev_node(const N& node) {
+        N slice_prev_node(const N& node) const {
             return g.slice_prev_node(node);
         }
 
-        auto resident_nodes() {
+        auto resident_nodes() const {
             return std::array<N, 2u> { g.get_root_node(), g.get_leaf_node() };
         }
 
-        auto outputs_to_residents(const N& node) {
+        auto outputs_to_residents(const N& node) const {
             using CONTAINER = static_vector_typer<E, 2zu, error_check>::type;
             CONTAINER ret {};
             const N& leaf_node { get_leaf_node() };
@@ -528,7 +528,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return ret;
         }
 
-        auto inputs_from_residents(const N& node) {
+        auto inputs_from_residents(const N& node) const {
             using CONTAINER = static_vector_typer<E, 2zu, error_check>::type;
             CONTAINER ret {};
             const N& root_node { get_root_node() };

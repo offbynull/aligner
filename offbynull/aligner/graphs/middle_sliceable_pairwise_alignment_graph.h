@@ -26,11 +26,11 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
         using ND = typename G::ND;
 
     private:
-        prefix_sliceable_pairwise_alignment_graph<
+        const prefix_sliceable_pairwise_alignment_graph<
             G,
             error_check
         > inner_g;
-        suffix_sliceable_pairwise_alignment_graph<
+        const suffix_sliceable_pairwise_alignment_graph<
             prefix_sliceable_pairwise_alignment_graph<
                 G,
                 error_check
@@ -43,7 +43,7 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
         const INDEX grid_right_cnt;
 
         middle_sliceable_pairwise_alignment_graph(
-            G& g_,
+            const G& g_,
             const N& new_root_node_,
             const N& new_leaf_node_
         )
@@ -67,11 +67,11 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
         }
 
         static middle_sliceable_pairwise_alignment_graph<G, error_check> create_using_offsets(
-            G& g,
-            INDEX down_offset_1,
-            INDEX right_offset_1,
-            INDEX down_offset_2,
-            INDEX right_offset_2
+            const G& g,
+            const INDEX down_offset_1,
+            const INDEX right_offset_1,
+            const INDEX down_offset_2,
+            const INDEX right_offset_2
         ) {
             if constexpr (error_check) {
                 if (down_offset_1 > down_offset_2 || right_offset_1 > right_offset_2) {
@@ -87,95 +87,95 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
             };
         }
 
-        ND get_node_data(const N& node) {
+        ND get_node_data(const N& node) const {
             return g.get_node_data(node);
         }
 
-        ED get_edge_data(const E& edge) {
+        ED get_edge_data(const E& edge) const {
             return g.get_edge_data(edge);
         }
 
-        N get_edge_from(const E& edge) {
+        N get_edge_from(const E& edge) const {
             return g.get_edge_from(edge);
         }
 
-        N get_edge_to(const E& edge) {
+        N get_edge_to(const E& edge) const {
             return g.get_edge_to(edge);
         }
 
-        std::tuple<N, N, ED> get_edge(const E& edge) {
+        std::tuple<N, N, ED> get_edge(const E& edge) const {
             return g.get_edge(edge);
         }
 
-        auto get_root_nodes() {
+        auto get_root_nodes() const {
             return g.get_root_nodes();
         }
 
-        N get_root_node() {
+        N get_root_node() const {
             return g.get_root_node();
         }
 
-        auto get_leaf_nodes() {
+        auto get_leaf_nodes() const {
             return g.get_leaf_nodes();
         }
 
-        N get_leaf_node() {
+        N get_leaf_node() const {
             return g.get_leaf_node();
         }
 
-        auto get_nodes() {
+        auto get_nodes() const {
             return g.get_nodes();
         }
 
-        auto get_edges() {
+        auto get_edges() const {
             return g.get_edges();
         }
 
-        bool has_node(const N& node) {
+        bool has_node(const N& node) const {
             return g.has_node(node);
         }
 
-        bool has_edge(const E& edge) {
+        bool has_edge(const E& edge) const {
             return g.has_edge(edge);
         }
 
-        auto get_outputs_full(const N& node) {
+        auto get_outputs_full(const N& node) const {
             return g.get_outputs_full(node);
         }
 
-        auto get_inputs_full(const N& node) {
+        auto get_inputs_full(const N& node) const {
             return g.get_inputs_full(node);
         }
 
-        auto get_outputs(const N& node) {
+        auto get_outputs(const N& node) const {
             return g.get_outputs(node);
         }
 
-        auto get_inputs(const N& node) {
+        auto get_inputs(const N& node) const {
             return g.get_inputs(node);
         }
 
-        bool has_outputs(const N& node) {
+        bool has_outputs(const N& node) const {
             return g.has_outputs(node);
         }
 
-        bool has_inputs(const N& node) {
+        bool has_inputs(const N& node) const {
             return g.has_inputs(node);
         }
 
-        std::size_t get_out_degree(const N& node) {
+        std::size_t get_out_degree(const N& node) const {
             return g.get_out_degree(node);
         }
 
-        std::size_t get_in_degree(const N& node) {
+        std::size_t get_in_degree(const N& node) const {
             return g.get_in_degree(node);
         }
 
-        std::optional<std::pair<std::optional<INDEX>, std::optional<INDEX>>> edge_to_element_offsets(const E& edge) {
+        std::optional<std::pair<std::optional<INDEX>, std::optional<INDEX>>> edge_to_element_offsets(const E& edge) const {
             return g.edge_to_element_offsets(edge);
         }
 
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) {
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) const {
             return g.node_to_grid_offsets(node);
         }
 
@@ -186,47 +186,47 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
             return G::limits(_grid_down_cnt, _grid_right_cnt);;
         }
 
-        auto slice_nodes(INDEX grid_down) {
+        auto slice_nodes(INDEX grid_down) const {
             return g.slice_nodes(grid_down);
         }
 
-        auto slice_nodes(INDEX grid_down, INDEX override_grid_right_cnt) {
+        auto slice_nodes(INDEX grid_down, INDEX override_grid_right_cnt) const {
             return g.slice_nodes(grid_down, override_grid_right_cnt);
         }
 
-        N slice_first_node(INDEX grid_down) {
+        N slice_first_node(INDEX grid_down) const {
             return g.slice_first_node(grid_down);
         }
 
-        N slice_first_node(INDEX grid_down, INDEX grid_right) {
+        N slice_first_node(INDEX grid_down, INDEX grid_right) const {
             return g.slice_first_node(grid_down, grid_right);
         }
 
-        N slice_last_node(INDEX grid_down) {
+        N slice_last_node(INDEX grid_down) const {
             return g.slice_last_node(grid_down);
         }
 
-        N slice_last_node(INDEX grid_down, INDEX grid_right) {
+        N slice_last_node(INDEX grid_down, INDEX grid_right) const {
             return g.slice_last_node(grid_down, grid_right);
         }
 
-        N slice_next_node(const N& node) {
+        N slice_next_node(const N& node) const {
             return g.slice_next_node(node);
         }
 
-        N slice_prev_node(const N& node) {
+        N slice_prev_node(const N& node) const {
             return g.slice_prev_node(node);
         }
 
-        auto resident_nodes() {
+        auto resident_nodes() const {
             return g.resident_nodes();
         }
 
-        auto outputs_to_residents(const N& node) {
+        auto outputs_to_residents(const N& node) const {
             return g.outputs_to_residents(node);
         }
 
-        auto inputs_from_residents(const N& node) {
+        auto inputs_from_residents(const N& node) const {
             return g.inputs_from_residents(node);
         }
     };

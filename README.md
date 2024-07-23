@@ -14,7 +14,7 @@ TODO:
   * ~~iota sequence (integer order of an array, you specify start offset and size)~~
   * ~~transform sequence (transform index to object based on lambda)~~
   * decompressing compressed bytes -- when a location is accessed, decompress that chunk and hold it in cache
-* const correct graph implementations
+* ~~const correct graph implementations~~
 
 * scorer implementations
   * ~~constant scorer~~
@@ -23,10 +23,12 @@ TODO:
   * ~~ascii substitution matrix scorer~~
   * ~~pam/blosum scorer~~
   * qwerty-keyboard scorer
-  * quality-based scorer that modifies score based on quality score?
+  * ~~FIX single_character_substitution_matrix_scorer.h -- LAST CHAR IS NOT INDEL SCORE~~
 
 * FIX EXTENDEDGAP slice_nodes() function to not use forward_range_join_view
   * make adapater that create forward_range / forward_backward_range based on callbacks (e.g. next(value) func and prev(value) func)
+
+* sliceable_pairwise_alignment_graph_backtracker - some use of std::vector -- move creation of types in container_pack_creators
 
 * Update get_in_degree() / get_out_degree() functions to calculate directly
 * Add concept checks to autos

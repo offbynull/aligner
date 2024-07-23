@@ -49,9 +49,9 @@ namespace offbynull::aligner::graphs::directed_graph {
                     throw std::runtime_error {"Node already exists"};
                 }
             }
-            this->node_outbound[node] = {};
-            this->node_inbound[node] = {};
-            this->node_data[node] = std::forward<ND>(data);
+            this->node_outbound.insert({node, {}});
+            this->node_inbound.insert({node, {}});
+            this->node_data.insert({node, std::forward<ND>(data)});
         }
 
         void delete_node(const N& node) {
@@ -60,18 +60,18 @@ namespace offbynull::aligner::graphs::directed_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            std::set<E> outbound_copy = this->node_outbound[node]; // done to prevent concurrent modification problems
+            std::set<E> outbound_copy = this->node_outbound.at(node); // done to prevent concurrent modification problems
             for (const auto& edge_id : outbound_copy) {
-                auto& [from_node, to_node, _] = this->edges[edge_id];
-                del_set(this->node_outbound[from_node], edge_id);
-                del_set(this->node_inbound[to_node], edge_id);
+                auto& [from_node, to_node, _] = this->edges.at(edge_id);
+                del_set(this->node_outbound.at(from_node), edge_id);
+                del_set(this->node_inbound.at(to_node), edge_id);
                 del_map_key(this->edges, edge_id);
             }
-            std::set<E> inbound_copy = this->node_inbound[node]; // done to prevent concurrent modification problems
+            std::set<E> inbound_copy = this->node_inbound.at(node); // done to prevent concurrent modification problems
             for (const auto& edge_id : inbound_copy) {
-                auto& [from_node, to_node, _] = this->edges[edge_id];
-                del_set(this->node_outbound[from_node], edge_id);
-                del_set(this->node_inbound[to_node], edge_id);
+                auto& [from_node, to_node, _] = this->edges.at(edge_id);
+                del_set(this->node_outbound.at(from_node), edge_id);
+                del_set(this->node_inbound.at(to_node), edge_id);
                 del_map_key(this->edges, edge_id);
             }
             del_map_key(this->node_inbound, node);
@@ -85,19 +85,27 @@ namespace offbynull::aligner::graphs::directed_graph {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            this->node_data[node] = std::forward<ND>(data);
+            this->node_data.at(node) = std::forward<ND>(data);
         }
 
-        const ND& get_node_data(const N& node) {
+        const ND& get_node_data(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->node_data[node];
+            return this->node_data.at(node);
         }
 
-        void insert_node_between_edge(const N& new_node, ND&& new_node_data, const E& existing_edge, const E& from_edge, ED&& from_edge_data, const E& to_edge, ED&& to_edge_data) {
+        void insert_node_between_edge(
+            const N& new_node,
+            ND&& new_node_data,
+            const E& existing_edge,
+            const E& from_edge,
+            ED&& from_edge_data,
+            const E& to_edge,
+            ED&& to_edge_data
+        ) {
             if constexpr (error_check) {
                 if (has_node(new_node)) {
                     throw std::runtime_error {"Node already exists"};
@@ -131,9 +139,9 @@ namespace offbynull::aligner::graphs::directed_graph {
                     throw std::runtime_error {"Edge already exists"};
                 }
             }
-            this->edges[edge] = std::tuple<N, N, ED> {from_node, to_node, std::forward<ED>(data)};
-            this->node_inbound[to_node].insert(edge);
-            this->node_outbound[from_node].insert(edge);
+            this->edges.insert({edge, std::tuple<N, N, ED> {from_node, to_node, std::forward<ED>(data)}});
+            this->node_inbound.at(to_node).insert(edge);
+            this->node_outbound.at(from_node).insert(edge);
         }
 
         void delete_edge(const E& edge, bool remove_from_if_isolated = false, bool remove_to_if_isolated = false) {
@@ -142,7 +150,7 @@ namespace offbynull::aligner::graphs::directed_graph {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            auto& [from_node, to_node, _] = this->edges[edge];
+            auto& [from_node, to_node, _] { this->edges.at(edge) };
             // if constexpr (error_check) {
             //     if (!has_node(from_node)) {
             //         throw std::runtime_error {"This should never happen"};
@@ -151,23 +159,23 @@ namespace offbynull::aligner::graphs::directed_graph {
             //         throw std::runtime_error {"This should never happen"};
             //     }
             // }
-            del_set(this->node_outbound[from_node], edge);
-            del_set(this->node_inbound[to_node], edge);
+            del_set(this->node_outbound.at(from_node), edge);
+            del_set(this->node_inbound.at(to_node), edge);
             // from and to may be the same -- if they are, and you"ve removed the from, make sure you don"t try to remove to
             // because form and to are the same... you can"t remove the same node twice
             bool dealing_with_same_node = (from_node == to_node);
             bool removed_from = false;
             //bool removed_to = false;
             if (remove_from_if_isolated
-                    && this->node_inbound[from_node].size() == 0
-                    && this->node_outbound[from_node].size() == 0) {
+                    && this->node_inbound.at(from_node).size() == 0
+                    && this->node_outbound.at(from_node).size() == 0) {
                 this->delete_node(from_node);
                 removed_from = true;
             }
             if (remove_to_if_isolated
                     && (not dealing_with_same_node or (dealing_with_same_node and not removed_from))
-                    && this->node_inbound[to_node].size() == 0
-                    && this->node_outbound[to_node].size() == 0) {
+                    && this->node_inbound.at(to_node).size() == 0
+                    && this->node_outbound.at(to_node).size() == 0) {
                 this->delete_node(to_node);
                 //removed_to = true;
             }
@@ -180,52 +188,52 @@ namespace offbynull::aligner::graphs::directed_graph {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            std::get<2>(this->edges[edge]) = std::forward<ED>(data);
+            std::get<2>(this->edges.at(edge)) = std::forward<ED>(data);
         }
 
-        const ED& get_edge_data(const E& edge) {
+        const ED& get_edge_data(const E& edge) const {
             if constexpr (error_check) {
                 if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            return std::get<2>(this->edges[edge]);
+            return std::get<2>(this->edges.at(edge));
         }
 
-        const N& get_edge_from(const E& edge) {
+        const N& get_edge_from(const E& edge) const {
             if constexpr (error_check) {
                 if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            return std::get<0>(this->edges[edge]);
+            return std::get<0>(this->edges.at(edge));
         }
 
-        const N& get_edge_to(const E& edge) {
+        const N& get_edge_to(const E& edge) const {
             if constexpr (error_check) {
                 if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            return std::get<1>(this->edges[edge]);
+            return std::get<1>(this->edges.at(edge));
         }
 
-        std::tuple<const N&, const N&, const ED&> get_edge(const E& edge) {
+        std::tuple<const N&, const N&, const ED&> get_edge(const E& edge) const {
             if constexpr (error_check) {
                 if (!has_edge(edge)) {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            auto& ref = edges[edge];
+            auto& ref = edges.at(edge);
             return std::tuple<const N&, const N&, const ED&> {std::get<0>(ref), std::get<1>(ref), std::get<2>(ref)};
         }
 
-        auto get_root_nodes() {
+        auto get_root_nodes() const {
             auto ret { this->get_nodes() | std::views::filter([&](const auto& n) noexcept { return !has_inputs(n); }) };
             return ret;
         }
 
-        const N& get_root_node() {
+        const N& get_root_node() const {
             auto range = this->get_root_nodes();
             auto it = range.begin();
             const N& ret = *it;
@@ -236,12 +244,12 @@ namespace offbynull::aligner::graphs::directed_graph {
             return ret;
         }
 
-        auto get_leaf_nodes() {
+        auto get_leaf_nodes() const {
             auto ret { this->get_nodes() | std::views::filter([&](const auto& n) noexcept { return !has_outputs(n); }) };
             return ret;
         }
 
-        const N& get_leaf_node() {
+        const N& get_leaf_node() const {
             auto range = this->get_leaf_nodes();
             auto it = range.begin();
             const N& ret = *it;
@@ -252,65 +260,67 @@ namespace offbynull::aligner::graphs::directed_graph {
             return ret;
         }
 
-        auto get_nodes() {
+        auto get_nodes() const {
             return this->node_outbound | std::views::transform([](const auto& p) noexcept -> const N& { return p.first; });
         }
 
-        auto get_edges() {
+        auto get_edges() const {
             return this->edges | std::views::transform([](auto& p) noexcept -> const E& { return p.first; });
         }
 
-        bool has_node(const N& node) {
+        bool has_node(const N& node) const {
             return this->node_outbound.contains(node);
         }
 
-        bool has_edge(const E& edge) {
+        bool has_edge(const E& edge) const {
             return this->edges.contains(edge);
         }
 
-        auto get_outputs_full(const N& node) {
+        auto get_outputs_full(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->node_outbound[node] | std::views::transform([this](auto& e) noexcept {
-                const auto& [from_node, to_node, edge_data] = this->get_edge(e);
+            return this->node_outbound.at(node) | std::views::transform([this](auto& e) noexcept {
+                const auto& [from_node, to_node, edge_data] { this->get_edge(e) };
                 return std::tuple<const E&, const N&, const N&, const ED&> {e, from_node, to_node, edge_data};
             });
         }
 
-        auto get_inputs_full(const N& node) {
+        auto get_inputs_full(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->node_inbound[node] | std::views::transform([this](auto& e) noexcept {
-                const auto& [from_node, to_node, edge_data] = this->get_edge(e);
+            return this->node_inbound.at(node) | std::views::transform([this](auto& e) noexcept {
+                const auto& [from_node, to_node, edge_data] { this->get_edge(e) };
                 return std::tuple<const E&, const N&, const N&, const ED&> {e, from_node, to_node, edge_data};
             });
         }
 
-        auto get_outputs(const N& node) {
+        auto get_outputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->node_outbound[node] | std::views::transform([this](auto& e) noexcept -> const E& { return e; });
+            return this->node_outbound.at(node)
+                | std::views::transform([this](auto& e) noexcept -> const E& { return e; });
         }
 
-        auto get_inputs(const N& node) {
+        auto get_inputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->node_inbound[node] | std::views::transform([this](auto& e) noexcept -> const E& { return e; });
+            return this->node_inbound.at(node)
+                | std::views::transform([this](auto& e) noexcept -> const E& { return e; });
         }
 
-        bool has_outputs(const N& node) {
+        bool has_outputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -319,7 +329,7 @@ namespace offbynull::aligner::graphs::directed_graph {
             return this->get_outputs(node).size() > 0zu;
         }
 
-        bool has_inputs(const N& node) {
+        bool has_inputs(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
@@ -328,22 +338,22 @@ namespace offbynull::aligner::graphs::directed_graph {
             return this->get_inputs(node).size() > 0zu;
         }
 
-        std::size_t get_out_degree(const N& node) {
+        std::size_t get_out_degree(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->node_outbound[node].size();
+            return this->node_outbound.at(node).size();
         }
 
-        std::size_t get_in_degree(const N& node) {
+        std::size_t get_in_degree(const N& node) const {
             if constexpr (error_check) {
                 if (!has_node(node)) {
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return this->node_inbound[node].size();
+            return this->node_inbound.at(node).size();
         }
     };
 
