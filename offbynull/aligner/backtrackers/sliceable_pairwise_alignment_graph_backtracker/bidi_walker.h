@@ -89,14 +89,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 std::get<0>(g.node_to_grid_offsets(node))
             };
 
-            prefix_sliceable_pairwise_alignment_graph<G, error_check> prefix_graph {
-                g,
-                g.slice_last_node(mid_down_offset)
-            };
-            suffix_sliceable_pairwise_alignment_graph<G, error_check> suffix_graph {
-                g,
-                g.slice_first_node(mid_down_offset)
-            };
+            N last_node { *(--g.slice_nodes(mid_down_offset).end()) };
+            prefix_sliceable_pairwise_alignment_graph<G, error_check> prefix_graph { g, last_node };
+            N first_node { *g.slice_nodes(mid_down_offset).begin() };
+            suffix_sliceable_pairwise_alignment_graph<G, error_check> suffix_graph { g, first_node};
             reversed_sliceable_pairwise_alignment_graph<decltype(suffix_graph), error_check> reversed_suffix_graph {
                 suffix_graph
             };

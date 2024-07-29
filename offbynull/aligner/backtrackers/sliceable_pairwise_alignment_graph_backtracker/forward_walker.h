@@ -113,8 +113,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         G& graph;
         resident_slot_container<G, RESIDENT_SLOT_CONTAINER_CREATOR, error_check> resident_slots;
         slice_slot_container_pair<G, SLICE_SLOT_CONTAINER_CREATOR, error_check> slice_slots;
-        slice_entry<N, E, ED> current_slice_entry;
-        slice_entry<N, E, ED> next_slice_entry;
+        decltype(graph.slice_nodes(0u)) slice;
+        decltype(slice.begin()) slice_it;
+        slice_entry<N, E, ED> slice_entry_;
 
     public:
         forward_walker(
@@ -125,12 +126,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         : graph{graph_}
         , resident_slots{graph, resident_slot_container_creator}
         , slice_slots{graph, slice_slot_container_creator}
-        , current_slice_entry{}
-        , next_slice_entry{}  {
+        , slice{graph.slice_nodes(0u)}
+        , slice_it{slice.begin()}
+        , slice_entry_{}  {
             auto&& _resident_slots { graph.resident_nodes() };
-            // previous_slots.reset(0u);  // Should be implicit
-            next_slice_entry.node = graph.slice_first_node(0u);
-            next_slice_entry.slot_ptr = &find(next_slice_entry.node); // should be equivalent to graph.get_root_node()
+            slice_entry_.node = *slice_it;
+            slice_entry_.slot_ptr = &find(slice_entry_.node); // should be equivalent to graph.get_root_node()
         }
 
         slot<E, ED>& find(const N& node) {
@@ -149,17 +150,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         }
 
         bool next() {
-            if (next_slice_entry.slot_ptr == nullptr) {
+            if (slice_entry_.slot_ptr == nullptr) {
                 return true;
             }
-            current_slice_entry.node = next_slice_entry.node;
-            current_slice_entry.slot_ptr = next_slice_entry.slot_ptr;
             // Compute only if node is not a resident. A resident node's backtracking weight + backtracking edge should
             // be computed as its inputs are walked over one-by-one by this function (see block below this one).
-            if (!resident_slots.find(current_slice_entry.node).has_value()) {
+            if (!resident_slots.find(slice_entry_.node).has_value()) {
                 auto incoming_accumulated {
                     std::views::common(
-                        graph.get_inputs(current_slice_entry.node)
+                        graph.get_inputs(slice_entry_.node)
                         | std::views::transform(
                             [&](const auto& edge) noexcept -> std::pair<E, ED> {
                                 const N& n_from { graph.get_edge_from(edge) };
@@ -180,13 +179,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     )
                 };
                 if (found != incoming_accumulated.end()) {  // if no incoming nodes found, it's a root node
-                    current_slice_entry.slot_ptr->backtracking_edge = (*found).first;
-                    current_slice_entry.slot_ptr->backtracking_weight = (*found).second;
+                    slice_entry_.slot_ptr->backtracking_edge = (*found).first;
+                    slice_entry_.slot_ptr->backtracking_weight = (*found).second;
                 }
             }
 
             // Update resident node weights
-            for (const E& edge : graph.outputs_to_residents(current_slice_entry.node)) {
+            for (const E& edge : graph.outputs_to_residents(slice_entry_.node)) {
                 const N& resident_node { graph.get_edge_to(edge) };
                 std::optional<std::reference_wrapper<resident_slot<E, ED>>> resident_slot_maybe {
                     resident_slots.find(resident_node)
@@ -203,7 +202,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     resident_slot_.slot_.backtracking_weight = edge_weight;
                     resident_slot_.initialized = true;
                 } else {
-                    const ED& new_weight { current_slice_entry.slot_ptr->backtracking_weight + edge_weight };
+                    const ED& new_weight { slice_entry_.slot_ptr->backtracking_weight + edge_weight };
                     if (new_weight > resident_slot_.slot_.backtracking_weight) {
                         resident_slot_.slot_.backtracking_edge = edge;
                         resident_slot_.slot_.backtracking_weight = new_weight;
@@ -212,22 +211,20 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             }
 
             // Move to next node / next slice
-            bool at_last_node_in_slice {
-                current_slice_entry.node == graph.slice_last_node(slice_slots.grid_down_offset)
-            };
-            if (!at_last_node_in_slice) {
-                next_slice_entry.node = graph.slice_next_node(current_slice_entry.node);
-                next_slice_entry.slot_ptr = &find(next_slice_entry.node);
+            ++slice_it;
+            if (slice_it != slice.end()) {
+                slice_entry_.node = *slice_it;
+                slice_entry_.slot_ptr = &find(slice_entry_.node);
             } else {
                 if (slice_slots.grid_down_offset == graph.grid_down_cnt - 1u) {
-                    next_slice_entry.slot_ptr = nullptr;
+                    slice_entry_.slot_ptr = nullptr;
                     return true;
                 }
                 slice_slots.move_down();
-                next_slice_entry.node = graph.slice_first_node(slice_slots.grid_down_offset);
-                next_slice_entry.slot_ptr = &find(next_slice_entry.node);
-                current_slice_entry.node = graph.slice_last_node(slice_slots.grid_down_offset - 1u); // need to update this because slots entries have moved around
-                current_slice_entry.slot_ptr = &find(current_slice_entry.node);
+                slice = graph.slice_nodes(slice_slots.grid_down_offset);
+                slice_it = slice.begin();
+                slice_entry_.node = *slice_it;
+                slice_entry_.slot_ptr = &find(slice_entry_.node);
             }
 
             return false;

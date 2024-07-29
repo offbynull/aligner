@@ -40,10 +40,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         : graph{graph_}
         , slots{
             container_creator.create_objects(
-                G::limits(
-                    graph_.grid_down_cnt,
-                    graph_.grid_right_cnt
-                ).max_slice_nodes_cnt
+                graph_.grid_right_cnt * G::limits(graph_.grid_down_cnt, graph_.grid_right_cnt).max_grid_node_depth
             )
         }
         , grid_down {} {}

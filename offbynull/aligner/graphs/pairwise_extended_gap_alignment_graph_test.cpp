@@ -1081,40 +1081,29 @@ namespace {
         using N = typename G::N;
         using E = typename G::E;
 
-        EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_slice_nodes_cnt, 7zu);
-        EXPECT_EQ(g.slice_first_node(0zu), (N { layer::DIAGONAL, 0zu, 0zu }));
-        EXPECT_EQ(g.slice_last_node(0zu), (N { layer::DOWN, 0zu, 2zu }));
-        EXPECT_EQ(g.slice_first_node(1zu), (N { layer::DIAGONAL, 1zu, 0zu }));
-        EXPECT_EQ(g.slice_last_node(1zu), (N { layer::DOWN, 1zu, 2zu }));
-
-        EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_resident_nodes_cnt, 0zu);
-        EXPECT_EQ(g.resident_nodes().size(), 0zu);
-
-        EXPECT_EQ(g.slice_next_node(N { layer::DIAGONAL, 0zu, 0zu }), (N { layer::DOWN, 0zu, 1zu })); // grid_down=0
-        EXPECT_EQ(g.slice_next_node(N { layer::DOWN, 0zu, 1zu }), (N { layer::RIGHT, 0zu, 1zu }));
-        EXPECT_EQ(g.slice_next_node(N { layer::RIGHT, 0zu, 1zu }), (N { layer::DIAGONAL, 0zu, 1zu }));
-        EXPECT_EQ(g.slice_next_node(N { layer::DIAGONAL, 0zu, 1zu }), (N { layer::DOWN, 0zu, 2zu }));
-        EXPECT_EQ(g.slice_next_node(N { layer::DOWN, 0zu, 2zu }), (N { layer::RIGHT, 0zu, 2zu }));
-        EXPECT_EQ(g.slice_next_node(N { layer::RIGHT, 0zu, 2zu }), (N { layer::DIAGONAL, 0zu, 2zu }));
-        EXPECT_EQ(g.slice_next_node(N { layer::DIAGONAL, 1zu, 0zu }), (N { layer::DOWN, 1zu, 1zu })); // grid_down=1
-        EXPECT_EQ(g.slice_next_node(N { layer::DOWN, 1zu, 1zu }), (N { layer::RIGHT, 1zu, 1zu }));
-        EXPECT_EQ(g.slice_next_node(N { layer::RIGHT, 1zu, 1zu }), (N { layer::DIAGONAL, 1zu, 1zu }));
-        EXPECT_EQ(g.slice_next_node(N { layer::DIAGONAL, 1zu, 1zu }), (N { layer::DOWN, 1zu, 2zu }));
-        EXPECT_EQ(g.slice_next_node(N { layer::DOWN, 1zu, 2zu }), (N { layer::RIGHT, 1zu, 2zu }));
-        EXPECT_EQ(g.slice_next_node(N { layer::RIGHT, 1zu, 2zu }), (N { layer::DIAGONAL, 1zu, 2zu }));
-
-        EXPECT_EQ(g.slice_prev_node(N { layer::DIAGONAL, 1zu, 2zu }), (N { layer::RIGHT, 1zu, 2zu })); // grid_down=1
-        EXPECT_EQ(g.slice_prev_node(N { layer::RIGHT, 1zu, 2zu }), (N { layer::DOWN, 1zu, 2zu }));
-        EXPECT_EQ(g.slice_prev_node(N { layer::DOWN, 1zu, 2zu }), (N { layer::DIAGONAL, 1zu, 1zu }));
-        EXPECT_EQ(g.slice_prev_node(N { layer::DIAGONAL, 1zu, 1zu }), (N { layer::RIGHT, 1zu, 1zu }));
-        EXPECT_EQ(g.slice_prev_node(N { layer::RIGHT, 1zu, 1zu }), (N { layer::DOWN, 1zu, 1zu }));
-        EXPECT_EQ(g.slice_prev_node(N { layer::DOWN, 1zu, 1zu }), (N { layer::DIAGONAL, 1zu, 0zu }));
-        EXPECT_EQ(g.slice_prev_node(N { layer::DIAGONAL, 0zu, 2zu }), (N { layer::RIGHT, 0zu, 2zu })); // grid_down=1
-        EXPECT_EQ(g.slice_prev_node(N { layer::RIGHT, 0zu, 2zu }), (N { layer::DOWN, 0zu, 2zu }));
-        EXPECT_EQ(g.slice_prev_node(N { layer::DOWN, 0zu, 2zu }), (N { layer::DIAGONAL, 0zu, 1zu }));
-        EXPECT_EQ(g.slice_prev_node(N { layer::DIAGONAL, 0zu, 1zu }), (N { layer::RIGHT, 0zu, 1zu }));
-        EXPECT_EQ(g.slice_prev_node(N { layer::RIGHT, 0zu, 1zu }), (N { layer::DOWN, 0zu, 1zu }));
-        EXPECT_EQ(g.slice_prev_node(N { layer::DOWN, 0zu, 1zu }), (N { layer::DIAGONAL, 0zu, 0zu }));
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(0u))),
+            (std::vector<N> {
+                N { layer::DIAGONAL, 0zu, 0zu },
+                N { layer::RIGHT, 0zu, 1zu },
+                N { layer::DIAGONAL, 0zu, 1zu },
+                N { layer::RIGHT, 0zu, 2zu },
+                N { layer::DIAGONAL, 0zu, 2zu }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(1u))),
+            (std::vector<N> {
+                N { layer::DOWN, 1zu, 0zu },
+                N { layer::DIAGONAL, 1zu, 0zu },
+                N { layer::DOWN, 1zu, 1zu },
+                N { layer::RIGHT, 1zu, 1zu },
+                N { layer::DIAGONAL, 1zu, 1zu },
+                N { layer::DOWN, 1zu, 2zu },
+                N { layer::RIGHT, 1zu, 2zu },
+                N { layer::DIAGONAL, 1zu, 2zu }
+            })
+        );
 
         EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DIAGONAL, 0zu, 0zu })), (std::vector<E> {}));
         EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DOWN, 0zu, 1zu })), (std::vector<E> {}));
@@ -1143,5 +1132,137 @@ namespace {
         EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DOWN, 1zu, 2zu })), (std::vector<E> {}));
         EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::RIGHT, 1zu, 2zu })), (std::vector<E> {}));
         EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DIAGONAL, 1zu, 2zu })), (std::vector<E> {}));
+    }
+
+    TEST(PairwiseExtendedGapAlignmentGraphTest, SlicedWalkPartial) {
+        auto to_vector {
+            [](auto &&r) {
+                auto it { r.begin() };
+                std::vector<std::decay_t<decltype(*it)>> ret {};
+                while (it != r.end()) {
+                    ret.push_back(*it);
+                    ++it;
+                }
+                return ret;
+            }
+        };
+
+        std::string seq1 { "accd" };
+        std::string seq2 { "accd" };
+        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+            seq1,
+            seq2,
+            substitution_scorer,
+            initial_gap_scorer,
+            extended_gap_scorer,
+            freeride_scorer
+        };
+
+        using G = std::decay_t<decltype(g)>;
+        using N = typename G::N;
+
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(0u, N { layer::DIAGONAL, 0zu, 0zu }, N { layer::DIAGONAL, 4zu, 4zu }))),
+            (std::vector<N> {
+                N { layer::DIAGONAL, 0zu, 0zu },
+                N { layer::RIGHT, 0zu, 1zu },
+                N { layer::DIAGONAL, 0zu, 1zu },
+                N { layer::RIGHT, 0zu, 2zu },
+                N { layer::DIAGONAL, 0zu, 2zu },
+                N { layer::RIGHT, 0zu, 3zu },
+                N { layer::DIAGONAL, 0zu, 3zu },
+                N { layer::RIGHT, 0zu, 4zu },
+                N { layer::DIAGONAL, 0zu, 4zu },
+            })
+        );
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(4u, N { layer::DIAGONAL, 0zu, 0zu }, N { layer::DIAGONAL, 4zu, 4zu }))),
+            (std::vector<N> {
+                N { layer::DOWN, 4zu, 0zu },
+                N { layer::DIAGONAL, 4zu, 0zu },
+                N { layer::DOWN, 4zu, 1zu },
+                N { layer::RIGHT, 4zu, 1zu },
+                N { layer::DIAGONAL, 4zu, 1zu },
+                N { layer::DOWN, 4zu, 2zu },
+                N { layer::RIGHT, 4zu, 2zu },
+                N { layer::DIAGONAL, 4zu, 2zu },
+                N { layer::DOWN, 4zu, 3zu },
+                N { layer::RIGHT, 4zu, 3zu },
+                N { layer::DIAGONAL, 4zu, 3zu },
+                N { layer::DOWN, 4zu, 4zu },
+                N { layer::RIGHT, 4zu, 4zu },
+                N { layer::DIAGONAL, 4zu, 4zu }
+            })
+        );
+
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(1u, N { layer::DIAGONAL, 1zu, 1zu }, N { layer::RIGHT, 4zu, 4zu }))),
+            (std::vector<N> {
+                // N { layer::DOWN, 1zu, 1zu },
+                // N { layer::RIGHT, 1zu, 1zu },
+                N { layer::DIAGONAL, 1zu, 1zu },
+                N { layer::DOWN, 1zu, 2zu },
+                N { layer::RIGHT, 1zu, 2zu },
+                N { layer::DIAGONAL, 1zu, 2zu },
+                N { layer::DOWN, 1zu, 3zu },
+                N { layer::RIGHT, 1zu, 3zu },
+                N { layer::DIAGONAL, 1zu, 3zu },
+                N { layer::DOWN, 1zu, 4zu },
+                N { layer::RIGHT, 1zu, 4zu },
+                N { layer::DIAGONAL, 1zu, 4zu }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(2u, N { layer::DIAGONAL, 1zu, 1zu }, N { layer::RIGHT, 4zu, 4zu }))),
+            (std::vector<N> {
+                N { layer::DOWN, 2zu, 1zu },
+                N { layer::RIGHT, 2zu, 1zu },
+                N { layer::DIAGONAL, 2zu, 1zu },
+                N { layer::DOWN, 2zu, 2zu },
+                N { layer::RIGHT, 2zu, 2zu },
+                N { layer::DIAGONAL, 2zu, 2zu },
+                N { layer::DOWN, 2zu, 3zu },
+                N { layer::RIGHT, 2zu, 3zu },
+                N { layer::DIAGONAL, 2zu, 3zu },
+                N { layer::DOWN, 2zu, 4zu },
+                N { layer::RIGHT, 2zu, 4zu },
+                N { layer::DIAGONAL, 2zu, 4zu }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(4u, N { layer::DIAGONAL, 1zu, 1zu }, N { layer::RIGHT, 4zu, 4zu }))),
+            (std::vector<N> {
+                N { layer::DOWN, 4zu, 1zu },
+                N { layer::RIGHT, 4zu, 1zu },
+                N { layer::DIAGONAL, 4zu, 1zu },
+                N { layer::DOWN, 4zu, 2zu },
+                N { layer::RIGHT, 4zu, 2zu },
+                N { layer::DIAGONAL, 4zu, 2zu },
+                N { layer::DOWN, 4zu, 3zu },
+                N { layer::RIGHT, 4zu, 3zu },
+                N { layer::DIAGONAL, 4zu, 3zu },
+                N { layer::DOWN, 4zu, 4zu },
+                N { layer::RIGHT, 4zu, 4zu },
+                // N { layer::DIAGONAL, 4zu, 4zu },
+            })
+        );
+
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(1u, N { layer::DIAGONAL, 1zu, 1zu }, N { layer::RIGHT, 1zu, 4zu }))),
+            (std::vector<N> {
+                // N { layer::DOWN, 1zu, 1zu },
+                // N { layer::RIGHT, 1zu, 1zu },
+                N { layer::DIAGONAL, 1zu, 1zu },
+                N { layer::DOWN, 1zu, 2zu },
+                N { layer::RIGHT, 1zu, 2zu },
+                N { layer::DIAGONAL, 1zu, 2zu },
+                N { layer::DOWN, 1zu, 3zu },
+                N { layer::RIGHT, 1zu, 3zu },
+                N { layer::DIAGONAL, 1zu, 3zu },
+                N { layer::DOWN, 1zu, 4zu },
+                N { layer::RIGHT, 1zu, 4zu },
+                // N { layer::DIAGONAL, 1zu, 4zu }
+            })
+        );
     }
 }

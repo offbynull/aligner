@@ -58,34 +58,22 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using E = typename G::E;
         using SLICE_SLOT_CONTAINER_CREATOR=static_vector_container_creator<
             slot<E, WEIGHT>,
-            G::limits(
-                grid_down_cnt,
-                grid_right_cnt
-            ).max_slice_nodes_cnt,
+            grid_right_cnt * G::limits(grid_down_cnt, grid_right_cnt).max_grid_node_depth,
             error_check
         >;
         using RESIDENT_SLOT_CONTAINER_CREATOR=static_vector_container_creator<
             node_searchable_slot<N, E, WEIGHT>,
-            G::limits(
-                grid_down_cnt,
-                grid_right_cnt
-            ).max_resident_nodes_cnt,
+            G::limits(grid_down_cnt, grid_right_cnt).max_resident_nodes_cnt,
             error_check
         >;
         using ELEMENT_CONTAINER_CREATOR=static_vector_container_creator<
             element<E>,
-            G::limits(
-                grid_down_cnt,
-                grid_right_cnt
-            ).max_path_edge_cnt,
+            G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt,
             error_check
         >;
         using PATH_CONTAINER_CREATOR=static_vector_container_creator<
             E,
-            G::limits(
-                grid_down_cnt,
-                grid_right_cnt
-            ).max_path_edge_cnt,
+            G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt,
             error_check
         >;
     };

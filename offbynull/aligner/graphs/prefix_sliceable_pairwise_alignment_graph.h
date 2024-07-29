@@ -265,57 +265,11 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         }
 
         auto slice_nodes(INDEX grid_down) const {
-            return g.slice_nodes(grid_down)
-                | std::views::take(grid_right_cnt);
+            return g.slice_nodes(grid_down, g.get_root_node(), new_leaf_node);
         }
 
-        auto slice_nodes(INDEX grid_down, INDEX override_grid_right_cnt) const {
-            return slice_nodes(grid_down)
-                | std::views::take(override_grid_right_cnt);
-        }
-
-        N slice_first_node(INDEX grid_down) const {
-            return g.slice_first_node(grid_down);
-        }
-
-        N slice_first_node(INDEX grid_down, INDEX grid_right) const {
-            return g.slice_first_node(grid_down, grid_right);
-        }
-
-        N slice_last_node(INDEX grid_down) const {
-            return g.slice_last_node(grid_down, grid_right_cnt - 1u);
-        }
-
-        N slice_last_node(INDEX grid_down, INDEX grid_right) const {
-            return g.slice_last_node(grid_down, grid_right);
-        }
-
-        N slice_next_node(const N& node) const {
-            N next_node { g.slice_next_node(node) };
-            if constexpr (error_check) {
-                const auto& [grid_down, grid_right, _] { node_to_grid_offsets(node) };
-                if (grid_down >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
-                }
-                if (grid_right >= grid_right_cnt) {
-                    throw std::runtime_error("Node too far right");
-                }
-            }
-            return next_node;
-        }
-
-        N slice_prev_node(const N& node) const {
-            N prev_node { g.slice_prev_node(node) };
-            if constexpr (error_check) {
-                const auto& [grid_down, grid_right, _] { node_to_grid_offsets(node) };
-                if (grid_down >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
-                }
-                if (grid_right >= grid_right_cnt) {
-                    throw std::runtime_error("Node too far right");
-                }
-            }
-            return prev_node;
+        auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
+            return g.slice_nodes(grid_down, root_node, leaf_node);
         }
 
         auto resident_nodes() const {

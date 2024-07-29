@@ -325,11 +325,22 @@ namespace {
         using N = typename G::N;
         using E = typename G::E;
 
-        EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_slice_nodes_cnt, 3zu);
-        EXPECT_EQ(g.slice_first_node(0zu), (N { 5zu, 5zu }));
-        EXPECT_EQ(g.slice_last_node(0zu), (N { 5zu, 7zu }));
-        EXPECT_EQ(g.slice_first_node(1zu), (N { 6zu, 5zu }));
-        EXPECT_EQ(g.slice_last_node(1zu), (N {  6zu, 7zu }));
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(0u))),
+            (std::vector<N> {
+                N { 5zu, 5zu },
+                N { 5zu, 6zu },
+                N { 5zu, 7zu }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(1u))),
+            (std::vector<N> {
+                N { 6zu, 5zu },
+                N { 6zu, 6zu },
+                N { 6zu, 7zu }
+            })
+        );
 
         EXPECT_EQ(G::limits(g.grid_down_cnt, g.grid_right_cnt).max_resident_nodes_cnt, 2zu); // directly proxied from backing graph
         auto resident_nodes { g.resident_nodes() };
@@ -338,16 +349,6 @@ namespace {
         EXPECT_EQ(*resident_nodes_it, (N { 6zu, 7zu }));
         ++resident_nodes_it;
         EXPECT_EQ(resident_nodes_it, resident_nodes.end());
-
-        EXPECT_EQ(g.slice_next_node(N { 5zu, 5zu }), (N { 5zu, 6zu }));
-        EXPECT_EQ(g.slice_next_node(N { 5zu, 6zu }), (N { 5zu, 7zu }));
-        EXPECT_EQ(g.slice_next_node(N { 6zu, 5zu }), (N { 6zu, 6zu }));
-        EXPECT_EQ(g.slice_next_node(N { 6zu, 6zu }), (N { 6zu, 7zu }));
-
-        EXPECT_EQ(g.slice_prev_node(N { 5zu, 6zu }), (N { 5zu, 5zu }));
-        EXPECT_EQ(g.slice_prev_node(N { 5zu, 7zu }), (N { 5zu, 6zu }));
-        EXPECT_EQ(g.slice_prev_node(N { 6zu, 6zu }), (N { 6zu, 5zu }));
-        EXPECT_EQ(g.slice_prev_node(N { 6zu, 7zu }), (N { 6zu, 6zu }));
 
         EXPECT_EQ(
             to_vector(g.outputs_to_residents(N { 5zu, 5zu })),

@@ -16,7 +16,6 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
     concept readable_sliceable_pairwise_alignment_graph_limits =
         readable_pairwise_alignment_graph_limits<L>
         && requires(L l) {
-            { l.max_slice_nodes_cnt } -> std::same_as<const std::size_t&>;
             { l.max_resident_nodes_cnt } -> std::same_as<const std::size_t&>;
         };
 
@@ -32,13 +31,7 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
         ) {
             { G::limits(grid_down, grid_right) } -> readable_sliceable_pairwise_alignment_graph_limits;
             { g.slice_nodes(grid_down) } -> range_of_one_of<typename G::N, const typename G::N&>;
-            { g.slice_nodes(grid_down, override_grid_right_cnt) } -> range_of_one_of<typename G::N, const typename G::N&>;
-            { g.slice_first_node(grid_down) } -> one_of<typename G::N, const typename G::N&>;  // first node to walk to
-            { g.slice_first_node(grid_down, grid_right) } -> one_of<typename G::N, const typename G::N&>;  // first node to walk to
-            { g.slice_last_node(grid_down) } -> one_of<typename G::N, const typename G::N&>;  // last node to walk to
-            { g.slice_last_node(grid_down, grid_right) } -> one_of<typename G::N, const typename G::N&>;  // last node to walk to
-            { g.slice_next_node(node) } -> one_of<typename G::N, const typename G::N&>;  // next node to walk to
-            { g.slice_prev_node(node) } -> one_of<typename G::N, const typename G::N&>;  // prev node to walk to
+            { g.slice_nodes(grid_down, node, node) } -> range_of_one_of<typename G::N, const typename G::N&>;
             { g.resident_nodes() } -> range_of_one_of<typename G::N, const typename G::N&>;
             { g.outputs_to_residents(node) } -> range_of_one_of<typename G::E, const typename G::E&>;  // children in slice
             { g.inputs_from_residents(node) } -> range_of_one_of<typename G::E, const typename G::E&>;  // children in slice

@@ -156,44 +156,11 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
         }
 
         auto slice_nodes(INDEX grid_down) const {
-            return g.slice_nodes(grid_down_cnt - grid_down - 1u)
-                | std::views::reverse;
+            return g.slice_nodes(grid_down_cnt - grid_down - 1u) | std::views::reverse;
         }
 
-        auto slice_nodes(INDEX grid_down, INDEX override_grid_right_cnt) const {
-            return g.slice_nodes(grid_down_cnt - grid_down - 1u)
-                | std::views::reverse
-                | std::views::take(override_grid_right_cnt);
-        }
-
-        N slice_first_node(INDEX grid_down) const {
-            return g.slice_last_node(grid_down_cnt - grid_down - 1u);
-        }
-
-        N slice_first_node(INDEX grid_down, INDEX grid_right) const {
-            return g.slice_last_node(
-                grid_down_cnt - grid_down - 1u,
-                grid_right_cnt - grid_right - 1u
-            );
-        }
-
-        N slice_last_node(INDEX grid_down) const {
-            return g.slice_first_node(grid_down_cnt - grid_down - 1u);
-        }
-
-        N slice_last_node(INDEX grid_down, INDEX grid_right) const {
-            return g.slice_first_node(
-                grid_down_cnt - grid_down - 1u,
-                grid_right_cnt - grid_right - 1u
-            );
-        }
-
-        N slice_next_node(const N& node) const {
-            return g.slice_prev_node(node);
-        }
-
-        N slice_prev_node(const N& node) const {
-            return g.slice_next_node(node);
+        auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
+            return g.slice_nodes(grid_down_cnt - grid_down - 1u, leaf_node, root_node) | std::views::reverse;
         }
 
         auto resident_nodes() const {

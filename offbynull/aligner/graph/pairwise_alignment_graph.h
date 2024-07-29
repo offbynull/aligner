@@ -18,7 +18,6 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
     template <typename L>
     concept readable_pairwise_alignment_graph_limits =
         requires(L l) {
-            { l.max_grid_node_cnt } -> std::same_as<const std::size_t&>;
             { l.max_grid_node_depth } -> std::same_as<const std::size_t&>;
             { l.max_path_edge_cnt } -> std::same_as<const std::size_t&>;
         };

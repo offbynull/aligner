@@ -15,6 +15,7 @@
 #include "offbynull/helpers/concat_view.h"
 #include "offbynull/aligner/graph/utils.h"
 #include "offbynull/utils.h"
+#include "offbynull/helpers/simple_value_bidirectional_view.h"
 
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::aligner::concepts::weight;
@@ -23,6 +24,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::helpers::concat_view::concat_view;
     using offbynull::utils::static_vector_typer;
     using offbynull::aligner::graph::utils::generic_slicable_pairwise_alignment_graph_limits;
+    using offbynull::helpers::simple_value_bidirectional_view::simple_value_bidirectional_view;
 
     using empty_type = std::tuple<>;
 
@@ -552,133 +554,144 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             INDEX _grid_down_cnt,
             INDEX _grid_right_cnt
         ) {
-            std::size_t max_node_cnt {};
-            max_node_cnt += _grid_down_cnt * _grid_right_cnt; // Middle layer
-            max_node_cnt += (_grid_down_cnt - 1u) * _grid_right_cnt; // Down gap layer
-            max_node_cnt += _grid_down_cnt * (_grid_right_cnt - 1u); // Right gap layer
             std::size_t max_node_depth { 3zu };
             std::size_t max_path_edge_cnt { (_grid_right_cnt - 1zu) * 2zu + (_grid_down_cnt - 1zu) * 2zu };
-            std::size_t max_slice_nodes_cnt { 1zu + 3zu * (_grid_right_cnt - 1zu) }; // THIS IS NOT SUPPOSED TO BE THE CAPACITY AT EACH SLICE, this is supposed to be the max capacity across all slices, meaning the implementation below is correct.
             std::size_t max_resident_nodes_cnt { 0zu };
             return generic_slicable_pairwise_alignment_graph_limits {
-                max_node_cnt,
                 max_node_depth,
                 max_path_edge_cnt,
-                max_slice_nodes_cnt,
                 max_resident_nodes_cnt
             };
         }
 
-        auto slice_nodes(INDEX grid_down) const {
-            return slice_nodes(grid_down, grid_right_cnt);
-        }
-
-        std::ranges::bidirectional_range auto slice_nodes(INDEX grid_down, INDEX override_grid_right_cnt) const {
-            return
-                std::views::cartesian_product(
-                    std::views::iota(1u, override_grid_right_cnt),
-                    std::array<layer, 3zu> { layer::DIAGONAL, layer::RIGHT, layer::DOWN }
-                )
-                | std::views::filter(
-                    [grid_down](const auto& tuple) {
-                        const auto& [grid_right, layer] { tuple };
-                        return layer == layer::DIAGONAL
-                            || (grid_down != 0u && grid_right != 0u && (layer == layer::DOWN || layer == layer::RIGHT));
-                    }
-                )
-                | std::views::transform(
-                    [grid_down](const auto& tuple) {
-                        const auto& [grid_right, layer] { tuple };
-                        return N { layer::DIAGONAL, grid_down, grid_right };
-                    }
-                );
-        }
-
-        N slice_first_node(INDEX grid_down) const {
-            return slice_first_node(grid_down, 0u);
-        }
-
-        N slice_first_node(INDEX grid_down, INDEX grid_right) const {
-            N first_node;
-            if (grid_down == 0u) {
-                first_node = { layer::DIAGONAL, grid_down, grid_right };
-            } else {
-                if (grid_right == 0u) {
-                    first_node = { layer::DIAGONAL, grid_down, grid_right };
-                } else {
-                    first_node = { layer::DOWN, grid_down, grid_right };
-                }
-            }
-            if constexpr (error_check) {
-                if (std::get<1>(first_node) >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
-                }
-            }
-            return first_node;
-        }
-
-        N slice_last_node(INDEX grid_down) const {
-            return slice_last_node(grid_down, grid_right_cnt - 1u);
-        }
-
-        N slice_last_node(INDEX grid_down, INDEX grid_right) const {
-            N last_node { layer::DOWN, grid_down, grid_right };
-            if constexpr (error_check) {
-                if (std::get<1>(last_node) >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
-                }
-            }
-            return last_node;
-        }
-
-        N slice_next_node(const N& node) const {
-            const auto& [_layer, grid_down, grid_right] { node };
+    private:
+        static N slice_next_node_(const N& node) {
+            const auto& [layer_, grid_down, grid_right] { node };
             N next_node;
-            if (_layer == layer::DOWN) {
-                next_node = N { layer::RIGHT, grid_down, grid_right };
-            } else if (_layer == layer::RIGHT) {
-                next_node = N { layer::DIAGONAL, grid_down, grid_right };
-            } else if (_layer == layer::DIAGONAL) {
-                next_node = N { layer::DOWN, grid_down, grid_right + 1u };
+            if (grid_down == 0u && grid_right == 0u && layer_ == layer::DIAGONAL) {
+                next_node = { layer::RIGHT, grid_down, grid_right + 1u };
+            } else if (grid_down == 0u && layer_ == layer::RIGHT) {
+                next_node = { layer::DIAGONAL, grid_down, grid_right };
+            } else if (grid_down == 0u && layer_ == layer::DIAGONAL) {
+                next_node = { layer::RIGHT, grid_down, grid_right + 1u };
+            } else if (grid_right == 0u && layer_ == layer::DOWN) {
+                next_node = { layer::DIAGONAL, grid_down, grid_right };
+            } else if (grid_right == 0u && layer_ == layer::DIAGONAL) {
+                next_node = { layer::DOWN, grid_down, grid_right + 1u };
+            } else if (layer_ == layer::DOWN) {
+                next_node = { layer::RIGHT, grid_down, grid_right };
+            } else if (layer_ == layer::RIGHT) {
+                next_node = { layer::DIAGONAL, grid_down, grid_right };
+            } else if (layer_ == layer::DIAGONAL) {
+                next_node = { layer::DOWN, grid_down, grid_right + 1u };
             } else {
-                if (error_check) {
+                if constexpr (error_check) {
                     throw std::runtime_error("This should never happen");
-                }
-            }
-            if constexpr (error_check) {
-                if (std::get<1>(next_node) >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
-                }
-                if (std::get<2>(next_node) >= grid_right_cnt) {
-                    throw std::runtime_error("Node too far right");
                 }
             }
             return next_node;
         }
 
-        N slice_prev_node(const N& node) const {
-            const auto& [_layer, grid_down, grid_right] { node };
+        static N slice_prev_node_(const N& node) {
+            const auto& [layer_, grid_down, grid_right] { node };
             N prev_node;
-            if (_layer == layer::DIAGONAL) {
-                prev_node = N { layer::RIGHT, grid_down, grid_right };
-            } else if (_layer == layer::RIGHT) {
-                prev_node = N { layer::DOWN, grid_down, grid_right };
-            } else if (_layer == layer::DOWN) {
-                prev_node = N { layer::DIAGONAL, grid_down, grid_right - 1u };
+            if (grid_down == 0u && grid_right == 1u && layer_ == layer::RIGHT) {
+                prev_node = { layer::DIAGONAL, grid_down, grid_right - 1u };
+            } else if (grid_down == 0u && layer_ == layer::DIAGONAL) {
+                prev_node = { layer::RIGHT, grid_down, grid_right };
+            } else if (grid_down == 0u && layer_ == layer::RIGHT) {
+                prev_node = { layer::DIAGONAL, grid_down, grid_right - 1u };
+            } else if (grid_right == 0u && layer_ == layer::DIAGONAL) {
+                prev_node = { layer::DOWN, grid_down, grid_right };
+            } else if (grid_right == 0u && layer_ == layer::DOWN) {
+                prev_node = { layer::DIAGONAL, grid_down, grid_right - 1u };
+            } else if (layer_ == layer::DOWN) {
+                prev_node = { layer::DIAGONAL, grid_down, grid_right - 1u };
+            } else if (layer_ == layer::RIGHT) {
+                prev_node = { layer::DOWN, grid_down, grid_right };
+            } else if (layer_ == layer::DIAGONAL) {
+                prev_node = { layer::RIGHT, grid_down, grid_right };
             } else {
-                if (error_check) {
+                if constexpr (error_check) {
                     throw std::runtime_error("This should never happen");
                 }
             }
+            return prev_node;
+        }
+
+    public:
+        auto slice_nodes(INDEX grid_down) const {
+            return slice_nodes(grid_down, get_root_node(), get_leaf_node());
+        }
+
+        auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
             if constexpr (error_check) {
-                if (std::get<1>(prev_node) >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
+                if (!has_node(root_node) || !has_node(leaf_node)) {
+                    throw std::runtime_error("Bad node");
                 }
-                if (std::get<2>(prev_node) >= grid_right_cnt) {
-                    throw std::runtime_error("Node too far right");
+                if (!(std::get<1>(root_node) <= std::get<1>(leaf_node))) {
+                    throw std::runtime_error("Bad node");
+                }
+                if (!(std::get<2>(root_node) <= std::get<2>(leaf_node))) {
+                    throw std::runtime_error("Bad node");
+                }
+                // if single node in graph, make sure depth order is satisifed same: DOWN RIGHT DIAGONAL
+                if (
+                    (std::get<1>(root_node) == std::get<1>(leaf_node))
+                    && (std::get<2>(root_node) == std::get<2>(leaf_node))
+                    && !(std::get<0>(root_node) <= std::get<0>(leaf_node))
+                ) {
+                    throw std::runtime_error("Bad node");
+                }
+                if (!(grid_down >= std::get<1>(root_node) && grid_down <= std::get<1>(leaf_node))) {
+                    throw std::runtime_error("Bad node");
                 }
             }
-            return prev_node;
+
+            // order of nodes:
+            //    d   Rd   Rd
+            //   Dd  DRd  DRd
+            //   Dd  DRd  DRd
+            const auto& [root_layer, root_down, root_right] { root_node };
+            N begin_node;
+            {
+                bool walking_first_row { grid_down == root_down };
+                if (walking_first_row) {
+                    begin_node = root_node;
+                } else {
+                    if (grid_down == 0u && root_right == 0u) {
+                        begin_node = { layer::DIAGONAL, grid_down, root_right };
+                    } else {
+                        begin_node = { layer::DOWN, grid_down, root_right };
+                    }
+                }
+            }
+
+            const auto& [leaf_layer, leaf_down, leaf_right] { leaf_node };
+            N end_node;
+            {
+                bool walking_last_row { grid_down == leaf_down };
+                if (walking_last_row) {
+                    end_node = leaf_node;
+                } else {
+                    end_node = { layer::DIAGONAL, grid_down, leaf_right };
+                }
+                end_node = slice_next_node_(end_node);  // +1, because iterator.end() should be 1 past the last element
+            }
+
+            struct state {
+                N value_;
+
+                void to_prev() { value_ = slice_prev_node_(value_); }
+                void to_next() { value_ = slice_next_node_(value_); }
+                N value() const { return value_; }
+
+                bool operator==(const state& other) const = default;
+            };
+            return simple_value_bidirectional_view<state> {
+                state { begin_node },
+                state { end_node }
+            };
         }
 
         auto resident_nodes() const {

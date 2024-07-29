@@ -135,13 +135,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 leaf_node
             };
             INDEX mid_down_offset { (sub_graph.grid_down_cnt - 1u) / 2u };
+            N last_node { *(--sub_graph.slice_nodes(mid_down_offset).end()) };
             prefix_sliceable_pairwise_alignment_graph<decltype(sub_graph), error_check> prefix_graph {
                 sub_graph,
-                sub_graph.slice_last_node(mid_down_offset)
+                last_node
             };
+            N first_node { *sub_graph.slice_nodes(mid_down_offset).begin() };
             suffix_sliceable_pairwise_alignment_graph<decltype(sub_graph), error_check> suffix_graph {
                 sub_graph,
-                sub_graph.slice_first_node(mid_down_offset)
+                first_node
             };
             reversed_sliceable_pairwise_alignment_graph<decltype(suffix_graph)> reversed_suffix_graph {
                 suffix_graph
@@ -154,11 +156,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             for (auto i { 0 }; i < indent; i++) {
                 indent_str += ' ';
             }
-            // std::cout
-            //         << indent_str
-            //         << "root: [" << root_down_offset << "," << root_right_offset << "]"
-            //         << " leaf: [" << leaf_down_offset << "," << leaf_right_offset << "]"
-            //         << std::endl;
+            std::cout
+                    << indent_str
+                    << "root: [" << root_down_offset << "," << root_right_offset << ',' << root_depth << "]"
+                    << " leaf: [" << leaf_down_offset << "," << leaf_right_offset << ',' << leaf_depth << "]"
+                    << std::endl;
 
             if (sub_graph.grid_down_cnt == 1u && sub_graph.grid_right_cnt == 1u) {
                 return 0.0;
@@ -190,7 +192,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 };
                 while (!backward_walker.next()) {}
 
-                N first_node { sub_graph.slice_first_node(mid_down_offset) };
                 const auto& first_forward_slot { forward_walker_.find(first_node) };
                 const auto& first_backward_slot { backward_walker.find(first_node) };
                 std::tuple<ED, N, E> max {
@@ -216,14 +217,14 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 max_edge = max_edge_;
             }  // Everything above wrapped in its own scope so that walkers (and their associated containers) are destroyed
 
-            // const auto& n1 { whole_graph.get_edge_from(max_edge) };
-            // const auto& n2 { whole_graph.get_edge_to(max_edge) };
-            // const auto& [n1_down, n1_right] { n1 };
-            // const auto& [n2_down, n2_right] { n2 };
-            // std::cout
-            //         << indent_str
-            //         << "found: " << n1_down << 'x' << n1_right << "->" << n2_down << 'x' << n2_right
-            //         << " weight: " << max_weight << std::endl;
+            const auto& n1 { whole_graph.get_edge_from(max_edge) };
+            const auto& n2 { whole_graph.get_edge_to(max_edge) };
+            const auto& [n1_down, n1_right, n1_depth] { whole_graph.node_to_grid_offsets(n1) };
+            const auto& [n2_down, n2_right, n2_depth] { whole_graph.node_to_grid_offsets(n2) };
+            std::cout
+                    << indent_str
+                    << "found: " << n1_down << 'x' << n1_right << 'x' << n1_depth << "->" << n2_down << 'x' << n2_right << 'x' << n2_depth
+                    << " weight: " << max_weight << std::endl;
 
             // Add
             element<E>* current_element { nullptr };
@@ -248,7 +249,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             indent++;
 
             const N& new_leaf_node { whole_graph.get_edge_from(max_edge) };
-            // std::cout << indent_str << " topleft" << std::endl;
+            std::cout << indent_str << " topleft" << std::endl;
             subdivide(
                 path_container_,
                 current_element,
@@ -258,7 +259,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             );
 
             const N& new_root_node { whole_graph.get_edge_to(max_edge) };
-            // std::cout << indent_str << " bottomright" << std::endl;
+            std::cout << indent_str << " bottomright" << std::endl;
             subdivide(
                 path_container_,
                 current_element,

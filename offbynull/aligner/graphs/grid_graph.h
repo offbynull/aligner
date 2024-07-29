@@ -366,10 +366,8 @@ namespace offbynull::aligner::graphs::grid_graph {
             INDEX _grid_right_cnt
         ) {
             return generic_slicable_pairwise_alignment_graph_limits {
-                _grid_down_cnt * _grid_right_cnt,
                 1zu,
                 (_grid_right_cnt - 1u) + (_grid_down_cnt - 1u),
-                _grid_right_cnt,
                 0zu
             };
         }
@@ -380,66 +378,23 @@ namespace offbynull::aligner::graphs::grid_graph {
         }
 
         auto slice_nodes(INDEX grid_down) const {
-            return slice_nodes(grid_down, grid_right_cnt);
+            return slice_nodes(grid_down, get_root_node(), get_leaf_node());
         }
 
-        auto slice_nodes(INDEX grid_down, INDEX grid_right_cnt_) const {
-            return std::views::iota(0u, grid_right_cnt_)
+        auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
+            if constexpr (error_check) {
+                if (!has_node(root_node) || !has_node(leaf_node)) {
+                    throw std::runtime_error("Bad node");
+                }
+                if (!(root_node <= leaf_node)) {
+                    throw std::runtime_error("Bad node");
+                }
+                if (!(grid_down >= std::get<0>(root_node) && grid_down <= std::get<0>(leaf_node))) {
+                    throw std::runtime_error("Bad node");
+                }
+            }
+            return std::views::iota(std::get<1>(root_node), std::get<1>(leaf_node) + 1u)
                 | std::views::transform([grid_down](const auto& grid_right) { return N { grid_down, grid_right }; });
-        }
-
-        N slice_first_node(INDEX grid_down) const {
-            return slice_first_node(grid_down, 0u);
-        }
-
-        N slice_first_node(INDEX grid_down, INDEX grid_right) const {
-            N first_node { grid_down, grid_right };
-            if constexpr (error_check) {
-                if (std::get<0>(first_node) >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
-                }
-            }
-            return first_node;
-        }
-
-        N slice_last_node(INDEX grid_down) const {
-            return slice_last_node(grid_down, grid_right_cnt - 1u);
-        }
-
-        N slice_last_node(INDEX grid_down, INDEX grid_right) const {
-            N last_node { grid_down, grid_right };
-            if constexpr (error_check) {
-                if (std::get<0>(last_node) >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
-                }
-            }
-            return last_node;
-        }
-
-        N slice_next_node(const N& node) const {
-            N next_node { std::get<0>(node), std::get<1>(node) + 1u};
-            if constexpr (error_check) {
-                if (std::get<0>(next_node) >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
-                }
-                if (std::get<1>(next_node) >= grid_right_cnt) {
-                    throw std::runtime_error("Node too far right");
-                }
-            }
-            return next_node;
-        }
-
-        N slice_prev_node(const N& node) const {
-            N prev_node { std::get<0>(node), std::get<1>(node) - 1u};
-            if constexpr (error_check) {
-                if (std::get<0>(prev_node) >= grid_down_cnt) {
-                    throw std::runtime_error("Node too far down");
-                }
-                if (std::get<1>(prev_node) >= grid_right_cnt) {
-                    throw std::runtime_error("Node too far right");
-                }
-            }
-            return prev_node;
         }
 
         auto resident_nodes() const {

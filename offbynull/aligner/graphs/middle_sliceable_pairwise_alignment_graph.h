@@ -190,32 +190,8 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
             return g.slice_nodes(grid_down);
         }
 
-        auto slice_nodes(INDEX grid_down, INDEX override_grid_right_cnt) const {
-            return g.slice_nodes(grid_down, override_grid_right_cnt);
-        }
-
-        N slice_first_node(INDEX grid_down) const {
-            return g.slice_first_node(grid_down);
-        }
-
-        N slice_first_node(INDEX grid_down, INDEX grid_right) const {
-            return g.slice_first_node(grid_down, grid_right);
-        }
-
-        N slice_last_node(INDEX grid_down) const {
-            return g.slice_last_node(grid_down);
-        }
-
-        N slice_last_node(INDEX grid_down, INDEX grid_right) const {
-            return g.slice_last_node(grid_down, grid_right);
-        }
-
-        N slice_next_node(const N& node) const {
-            return g.slice_next_node(node);
-        }
-
-        N slice_prev_node(const N& node) const {
-            return g.slice_prev_node(node);
+        auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
+            return g.slice_nodes(grid_down, root_node, leaf_node);
         }
 
         auto resident_nodes() const {

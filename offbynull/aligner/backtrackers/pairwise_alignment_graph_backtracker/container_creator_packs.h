@@ -51,18 +51,12 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         using ED = typename G::ED;
         using SLOT_CONTAINER_CREATOR=static_vector_container_creator<
             slot<N, E, COUNT, ED>,
-            G::limits(
-                grid_down_cnt,
-                grid_right_cnt
-            ).max_slice_nodes_cnt,
+            grid_down_cnt * grid_right_cnt * G::limits(grid_down_cnt, grid_right_cnt).max_grid_node_depth,
             error_check
         >;
         using PATH_CONTAINER_CREATOR=static_vector_container_creator<
             E,
-            G::limits(
-                grid_down_cnt,
-                grid_right_cnt
-            ).max_path_edge_cnt,
+            G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt,
             error_check
         >;
     };

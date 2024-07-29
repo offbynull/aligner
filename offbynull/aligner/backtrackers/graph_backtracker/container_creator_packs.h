@@ -17,7 +17,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::container_creator
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot;
     using offbynull::helpers::container_creators::container_creator_of_type;
     using offbynull::helpers::container_creators::vector_container_creator;
-    using offbynull::helpers::container_creators::static_vector_container_creator;
+    using offbynull::helpers::container_creators::small_vector_container_creator;
     using offbynull::concepts::widenable_to_size_t;
 
     template<
@@ -52,25 +52,21 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::container_creator
         weight WEIGHT,
         std::size_t grid_down_cnt,
         std::size_t grid_right_cnt,
+        std::size_t slot_container_heap_escape_size = 100zu,
+        std::size_t path_container_heap_escape_size = 10zu,
         bool error_check = true
     >
     struct stack_container_creator_pack {
         using N = typename G::N;
         using E = typename G::E;
-        using SLOT_CONTAINER_CREATOR=static_vector_container_creator<
+        using SLOT_CONTAINER_CREATOR=small_vector_container_creator<
             slot<N, E, COUNT, WEIGHT>,
-            G::limits(
-                grid_down_cnt,
-                grid_right_cnt
-            ).max_slice_nodes_cnt,
+            slot_container_heap_escape_size,
             error_check
         >;
-        using PATH_CONTAINER_CREATOR=static_vector_container_creator<
+        using PATH_CONTAINER_CREATOR=small_vector_container_creator<
             E,
-            G::limits(
-                grid_down_cnt,
-                grid_right_cnt
-            ).max_path_edge_cnt,
+            path_container_heap_escape_size,
             error_check
         >;
     };

@@ -21,23 +21,17 @@ namespace offbynull::aligner::graph::utils {
     }
 
     struct generic_slicable_pairwise_alignment_graph_limits {
-        const std::size_t max_grid_node_cnt;
         const std::size_t max_grid_node_depth;
         const std::size_t max_path_edge_cnt;
-        const std::size_t max_slice_nodes_cnt;
         const std::size_t max_resident_nodes_cnt;
 
         constexpr generic_slicable_pairwise_alignment_graph_limits(
-            std::size_t max_grid_node_cnt_,
             std::size_t max_grid_node_depth_,
             std::size_t max_path_edge_cnt_,
-            std::size_t max_slice_nodes_cnt_,
             std::size_t max_resident_nodes_cnt_
         )
-        : max_grid_node_cnt{ max_grid_node_cnt_ }
-        , max_grid_node_depth{ max_grid_node_depth_ }
+        : max_grid_node_depth{ max_grid_node_depth_ }
         , max_path_edge_cnt{ max_path_edge_cnt_ }
-        , max_slice_nodes_cnt{ max_slice_nodes_cnt_ }
         , max_resident_nodes_cnt{ max_resident_nodes_cnt_ } {}
     };
 }

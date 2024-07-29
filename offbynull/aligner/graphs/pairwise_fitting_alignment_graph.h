@@ -445,10 +445,8 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
         ) {
             auto raw { decltype(g)::limits(_grid_down_cnt, _grid_right_cnt) };
             return generic_slicable_pairwise_alignment_graph_limits {
-                _grid_down_cnt * _grid_right_cnt,
                 1zu,
                 (_grid_right_cnt - 1u) + (_grid_down_cnt - 1u),
-                _grid_right_cnt,
                 2zu
             };
         }
@@ -457,32 +455,8 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
             return g.slice_nodes(grid_down);
         }
 
-        auto slice_nodes(INDEX grid_down, INDEX grid_right_cnt_) const {
-            return g.slice_nodes(grid_down, grid_right_cnt_);
-        }
-
-        N slice_first_node(INDEX grid_down) const {
-            return g.slice_first_node(grid_down);
-        }
-
-        N slice_first_node(INDEX grid_down, INDEX grid_right_cnt_) const {
-            return g.slice_first_node(grid_down, grid_right_cnt_);
-        }
-
-        N slice_last_node(INDEX grid_down) const {
-            return g.slice_last_node(grid_down);
-        }
-
-        N slice_last_node(INDEX grid_down, INDEX grid_right_cnt_) const {
-            return g.slice_last_node(grid_down, grid_right_cnt_);
-        }
-
-        N slice_next_node(const N& node) const {
-            return g.slice_next_node(node);
-        }
-
-        N slice_prev_node(const N& node) const {
-            return g.slice_prev_node(node);
+        auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
+            return g.slice_nodes(grid_down, root_node, leaf_node);
         }
 
         auto resident_nodes() const {
