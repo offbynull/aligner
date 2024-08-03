@@ -699,20 +699,6 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 if (!has_node(n1) || !has_node(n2)) {
                     throw std::runtime_error("Bad node");
                 }
-                if (!(std::get<1>(n1) <= std::get<1>(n2))) {
-                    throw std::runtime_error("Bad node");
-                }
-                if (!(std::get<2>(n1) <= std::get<2>(n2))) {
-                    throw std::runtime_error("Bad node");
-                }
-                // if single node in graph, make sure depth order is satisifed same: DOWN RIGHT DIAGONAL
-                if (
-                    (std::get<1>(n1) == std::get<1>(n2))
-                    && (std::get<2>(n1) == std::get<2>(n2))
-                    && !(std::get<0>(n1) <= std::get<0>(n2))
-                ) {
-                    throw std::runtime_error("Bad node");
-                }
             }
 
             const auto& [n1_layer, n1_down, n1_right] { n1 };
@@ -721,12 +707,12 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 return true;
             } else if (n1_down == n2_down && n1_right == n2_right) {
                 return n2_layer == layer::DIAGONAL;
-            } else if (n1_down == n2_down && n1_right < n2_right) {
-                return n1_layer == layer::RIGHT && n2_layer == layer::RIGHT
-                    || n1_layer == layer::DIAGONAL && n2_layer == layer::RIGHT;
-            } else if (n1_down < n2_down && n1_right == n2_right) {
-                return n1_layer == layer::DOWN && n2_layer == layer::DOWN
-                    || n1_layer == layer::DIAGONAL && n2_layer == layer::DOWN;
+            } else if (n1_down > n2_down || n1_right > n2_right) [[unlikely]] {
+                return false;
+            } else if (n1_right == n2_right) {
+                return n2_layer != layer::RIGHT;
+            } else if (n1_down == n2_down) {
+                return n2_layer != layer::DOWN;
             } else {
                 return true;
             }

@@ -1265,4 +1265,47 @@ namespace {
             })
         );
     }
+
+
+    bool walk(auto& g, auto current, auto expected) {
+        if (current == expected) {
+            return true;
+        }
+        for (const auto& [_, __, to_node, ___] : g.get_outputs_full(current)) {
+            if (walk(g, to_node, expected) == true) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    TEST(PairwiseExtendedGapAlignmentGraphTest, IsReachableTest) {
+        auto substitution_scorer { simple_scorer<char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
+        auto initial_gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(-1.0f64) };
+        auto extended_gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(-0.1f64) };
+        auto freeride_scorer { simple_scorer<char, char, std::float64_t>::create_freeride(0.0f64) };
+        std::string seq1 { "aaalaa" };
+        std::string seq2 { "lv" };
+        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+            seq1,
+            seq2,
+            substitution_scorer,
+            initial_gap_scorer,
+            extended_gap_scorer,
+            freeride_scorer
+        };
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        for (const N& n1 : g.get_nodes()) {
+            for (const N& n2 : g.get_nodes()) {
+                const auto& [n1_layer, n1_down, n1_right] { n1 };
+                const auto& [n2_layer, n2_down, n2_right] { n2 };
+                // std::cout << n1_down << '/' << n1_right << '/' << static_cast<int>(n1_layer) << " to " << n2_down << '/' << n2_right << '/' << static_cast<int>(n2_layer) << ' ' << std::endl;
+                bool walk_val { walk(g, n1, n2) };
+                bool is_reachable_val { g.is_reachable(n1, n2) };
+                EXPECT_EQ(is_reachable_val, walk_val);
+            }
+        }
+    }
 }

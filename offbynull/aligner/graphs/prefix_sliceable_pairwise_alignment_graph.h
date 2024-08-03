@@ -29,6 +29,10 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
             const auto& [down_offset, right_offset, _] { g.node_to_grid_offsets(node) };
             if (down_offset >= grid_down_cnt || right_offset >= grid_right_cnt) {
                 return true;
+            } else if (down_offset == grid_down_cnt - 1u || right_offset == grid_right_cnt - 1u) {
+                // In the same grid position as leaf node (but potentially at different depths). Can this node reach the
+                // leaf node? If yes, it's not out-of-bound.
+                return !g.is_reachable(node, new_leaf_node);
             }
             return false;
         }
@@ -243,7 +247,7 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         }
 
         auto slice_nodes(INDEX grid_down) const {
-            return g.slice_nodes(grid_down, g.get_root_node(), new_leaf_node);
+            return slice_nodes(grid_down, g.get_root_node(), new_leaf_node);
         }
 
         auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
@@ -252,7 +256,8 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
                     throw std::runtime_error {"Node doesn't exist"};
                 }
             }
-            return g.slice_nodes(grid_down, root_node, leaf_node);
+            return g.slice_nodes(grid_down, root_node, leaf_node)
+                | std::views::filter([&](const N& node) { return !node_out_of_bound(node); });
         }
 
         bool is_reachable(const N& n1, const N& n2) const {

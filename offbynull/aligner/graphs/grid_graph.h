@@ -402,11 +402,8 @@ namespace offbynull::aligner::graphs::grid_graph {
                 if (!has_node(n1) || !has_node(n2)) {
                     throw std::runtime_error("Bad node");
                 }
-                if (!(n1 <= n2)) {
-                    throw std::runtime_error("Bad node");
-                }
             }
-            return true;
+            return n1 <= n2;
         }
 
         auto resident_nodes() const {

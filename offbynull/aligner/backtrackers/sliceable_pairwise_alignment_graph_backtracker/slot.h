@@ -19,7 +19,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<typename E, weight WEIGHT>
     struct slot {
-        E backtracking_edge;
+        std::optional<E> backtracking_edge;
         WEIGHT backtracking_weight;
 
         slot(E backtracking_edge_, WEIGHT backtracking_weight_)
@@ -27,7 +27,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         , backtracking_weight{backtracking_weight_} {}
 
         slot()
-        : slot{{}, {}} {}
+        : backtracking_edge{std::nullopt}
+        , backtracking_weight{} {}
 
         bool operator==(const slot&) const = default;
     };

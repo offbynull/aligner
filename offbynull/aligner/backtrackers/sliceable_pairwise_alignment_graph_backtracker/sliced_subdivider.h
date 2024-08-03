@@ -127,7 +127,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             element<E>* parent_element,
             walk_direction dir,
             const N& root_node,
-            const N& leaf_node
+            const N& leaf_node,
+            const ED existing_weight_at_root = {},
+            const ED existing_weight_at_leaf = {}
         ) {
             std::string indent_str {};
             static int indent { 0 };
@@ -165,11 +167,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 suffix_graph
             };
 
-            if (sub_graph.grid_down_cnt == 1u && sub_graph.grid_right_cnt == 1u) {
+            if (root_node == leaf_node) {
                 return 0.0;
             }
-            ED max_weight;
+            ED max_path_weight;
             E max_edge;
+            ED max_edge_weight;
+            ED before_max_edge_weight;
+            ED after_max_edge_weight;
+            bool max_edge_assigned {};
             {
                 forward_walker<
                     decltype(prefix_graph),
@@ -195,29 +201,42 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 };
                 while (!backward_walker.next()) {}
 
-                const auto& first_forward_slot { forward_walker_.find(first_node) };
-                const auto& first_backward_slot { backward_walker.find(first_node) };
-                std::tuple<ED, N, E> max {
-                    first_forward_slot.backtracking_weight + first_backward_slot.backtracking_weight,
-                    first_node,
-                    first_backward_slot.backtracking_edge // don't use first_forward_slot's backtracking_edge because it'll be unset for first
-                                                          // backward_forward_slot's backtracking edge fomat is the same as first_forward_slot's backtracking_edge -- you can break it using sub_graph
-                };
-                for (const N& node : sub_graph.slice_nodes(mid_down_offset)) {
-                    const auto forward_slot { forward_walker_.find(node) };
-                    const auto backward_slot { backward_walker.find(node) };
-                    std::tuple<ED, N, E> next {
-                        forward_slot.backtracking_weight + backward_slot.backtracking_weight,
-                        node,
-                        forward_slot.backtracking_edge
-                    };
-                    if (std::get<0>(next) > std::get<0>(max)) {
-                        max = next;
+                auto mid_slice { sub_graph.slice_nodes(mid_down_offset) };
+                if constexpr (error_check) {
+                    if (mid_slice.begin() == mid_slice.end()) {
+                        throw std::runtime_error("Slice should never be empty");
                     }
                 }
-                const auto& [max_weight_, max_node_, max_edge_] { max };
-                max_weight = max_weight_;
-                max_edge = max_edge_;
+                for (const N& node : mid_slice) {
+                    bool reachable_from_root { sub_graph.is_reachable(root_node, node) };
+                    bool reachable_to_leaf { sub_graph.is_reachable(node, leaf_node) };
+                    const auto forward_slot { forward_walker_.find(node) };
+                    const auto backward_slot { backward_walker.find(node) };
+                    const auto new_potential_path_weight { existing_weight_at_root + forward_slot.backtracking_weight + backward_slot.backtracking_weight + existing_weight_at_leaf };
+                    if (!max_edge_assigned || new_potential_path_weight > max_path_weight) {
+                        if (forward_slot.backtracking_edge.has_value()) {
+                            max_edge = *forward_slot.backtracking_edge;
+                            max_edge_weight = sub_graph.get_edge_data(max_edge);
+                            before_max_edge_weight = forward_slot.backtracking_weight - max_edge_weight;
+                            after_max_edge_weight = backward_slot.backtracking_weight;
+                        } else if (backward_slot.backtracking_edge.has_value()) {
+                            max_edge = *backward_slot.backtracking_edge;
+                            max_edge_weight = sub_graph.get_edge_data(max_edge);
+                            before_max_edge_weight = forward_slot.backtracking_weight;
+                            after_max_edge_weight = backward_slot.backtracking_weight - max_edge_weight;
+                        } else {
+                            // unreachable?
+                            continue;
+                        }
+                        max_path_weight = new_potential_path_weight;
+                        max_edge_assigned = true;
+                    }
+                }
+                if constexpr (error_check) {
+                    if (!max_edge_assigned) {
+                        throw std::runtime_error("Couldn't find a reachable node");
+                    }
+                }
             }  // Everything above wrapped in its own scope so that walkers (and their associated containers) are destroyed
 
             const auto& n1 { whole_graph.get_edge_from(max_edge) };
@@ -227,7 +246,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             std::cout
                     << indent_str
                     << "found: " << n1_down << 'x' << n1_right << 'x' << n1_depth << "->" << n2_down << 'x' << n2_right << 'x' << n2_depth
-                    << " weight: " << max_weight << std::endl;
+                    << " full_weight: " << max_path_weight
+                    << " pre_weight: " << before_max_edge_weight
+                    << " edge_weight: " << max_edge_weight
+                    << " post_weight: " << after_max_edge_weight << std::endl;
 
             // Add
             element<E>* current_element { nullptr };
@@ -251,29 +273,31 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             // Recurse
             indent++;
 
-            const N& new_leaf_node { whole_graph.get_edge_from(max_edge) };
             std::cout << indent_str << " topleft" << std::endl;
             subdivide(
                 path_container_,
                 current_element,
                 walk_direction::PREFIX,
                 sub_graph.get_root_node(),
-                new_leaf_node
+                sub_graph.get_edge_from(max_edge),
+                existing_weight_at_root,
+                existing_weight_at_leaf + after_max_edge_weight + max_edge_weight
             );
 
-            const N& new_root_node { whole_graph.get_edge_to(max_edge) };
             std::cout << indent_str << " bottomright" << std::endl;
             subdivide(
                 path_container_,
                 current_element,
                 walk_direction::SUFFIX,
-                new_root_node,
-                sub_graph.get_leaf_node()
+                sub_graph.get_edge_to(max_edge),
+                sub_graph.get_leaf_node(),
+                existing_weight_at_root + before_max_edge_weight + max_edge_weight,
+                existing_weight_at_leaf
             );
 
             indent--;
 
-            return max_weight;
+            return max_path_weight;
         }
     };
 }

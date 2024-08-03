@@ -58,17 +58,18 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         }
 
         backward_walker_iterator& operator++() {
-            const N& next_edge_src { g->get_edge_from(current->backtracking_edge) };
-            while (true) {
-                current = current->prev;
-                if (current == nullptr) {
-                    break;
-                }
-                const N& prev_edge_dst { g->get_edge_to(current->backtracking_edge) };
-                if (next_edge_src == prev_edge_dst) {
-                    break;
-                }
-            }
+            current = current->prev;
+            // const N& next_edge_src { g->get_edge_from(current->backtracking_edge) };
+            // while (true) {
+            //     current = current->prev;
+            //     if (current == nullptr) {
+            //         break;
+            //     }
+            //     const N& prev_edge_dst { g->get_edge_to(current->backtracking_edge) };
+            //     if (next_edge_src == prev_edge_dst) {
+            //         break;
+            //     }
+            // }
             return *this;
         }
 

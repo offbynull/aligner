@@ -8,6 +8,7 @@
 #include "offbynull/aligner/scorers/simple_scorer.h"
 #include "gtest/gtest.h"
 #include <stdfloat>
+#include <offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/backtracker.h>
 
 namespace {
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker;
@@ -173,10 +174,10 @@ namespace {
     TEST(SliceablePairwiseAlignmentGraphBacktrackerTest, ExtendedGapTest) {
         auto substitution_scorer { simple_scorer<char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
         auto initial_gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(-1.0f64) };
-        auto extended_gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(0.1f64) };
+        auto extended_gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(-0.1f64) };
         auto freeride_scorer { simple_scorer<char, char, std::float64_t>::create_freeride(0.0f64) };
-        std::string seq1 { "aaalaaamaaanaa" };
-        std::string seq2 { "lmn" };
+        std::string seq1 { "aaalaa" };
+        std::string seq2 { "l" };
         pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
@@ -188,22 +189,36 @@ namespace {
         using N = typename decltype(g)::N;
         using E = typename decltype(g)::E;
 
-        // walk
-        backtracker<decltype(g)> backtracker_ { };
-        const auto& [path, weight] { backtracker_.find_max_path(g) };
-        for (const E& e : path) {
-            const auto& [n1, n2] { e };
-            const auto& [n1_layer, n1_down, n1_right] { n1 };
-            const auto& [n2_layer, n2_down, n2_right] { n2 };
-            std::cout << static_cast<int>(n1_layer) << '/' << n1_down << '/' << n1_right << "->" << static_cast<int>(n2_layer) << '/' << n2_down << '/' << n2_right << ' ';
+        {
+            offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker<decltype(g), std::size_t> backtracker_ { };
+            const auto& [path, weight] { backtracker_.find_max_path(g) };
+            for (const E& e : path) {
+                const auto& [n1, n2] { e };
+                const auto& [n1_layer, n1_down, n1_right] { n1 };
+                const auto& [n2_layer, n2_down, n2_right] { n2 };
+                std::cout << n1_down << '/' << n1_right << '/' << static_cast<int>(n1_layer) << "->" << n2_down << '/' << n2_right << '/' << static_cast<int>(n2_layer) << ' ';
+            }
+            std::cout << std::endl;
+            std::cout << weight << std::endl;
         }
-        std::cout << std::endl;
-        std::cout << weight << std::endl;
 
-        using offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph::layer;
-        std::vector<E> expected_path {
-            E { N {layer::DIAGONAL, 0zu, 0zu}, N {layer::DIAGONAL, 5zu, 0zu} },
-        };
-        EXPECT_EQ(expected_path, path);
+        {
+            backtracker<decltype(g)> backtracker_ { };
+            const auto& [path, weight] { backtracker_.find_max_path(g) };
+            for (const E& e : path) {
+                const auto& [n1, n2] { e };
+                const auto& [n1_layer, n1_down, n1_right] { n1 };
+                const auto& [n2_layer, n2_down, n2_right] { n2 };
+                std::cout << n1_down << '/' << n1_right << '/' << static_cast<int>(n1_layer) << "->" << n2_down << '/' << n2_right << '/' << static_cast<int>(n2_layer)<< ' ';
+            }
+            std::cout << std::endl;
+            std::cout << weight << std::endl;
+
+            using offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph::layer;
+            std::vector<E> expected_path {
+                E { N {layer::DIAGONAL, 0zu, 0zu}, N {layer::DIAGONAL, 5zu, 0zu} },
+            };
+            EXPECT_EQ(expected_path, path);
+        }
     }
 }

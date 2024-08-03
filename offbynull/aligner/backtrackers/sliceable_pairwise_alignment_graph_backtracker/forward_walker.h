@@ -179,7 +179,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     )
                 };
                 if (found != incoming_accumulated.end()) {  // if no incoming nodes found, it's a root node
-                    slice_entry_.slot_ptr->backtracking_edge = (*found).first;
+                    slice_entry_.slot_ptr->backtracking_edge = { (*found).first };
                     slice_entry_.slot_ptr->backtracking_weight = (*found).second;
                 }
             }
@@ -198,13 +198,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 resident_slot<E, ED>& resident_slot_ { (*resident_slot_maybe).get() };
                 const ED& edge_weight { graph.get_edge_data(edge) };
                 if (!resident_slot_.initialized) {
-                    resident_slot_.slot_.backtracking_edge = edge;
+                    resident_slot_.slot_.backtracking_edge = { edge };
                     resident_slot_.slot_.backtracking_weight = edge_weight;
                     resident_slot_.initialized = true;
                 } else {
                     const ED& new_weight { slice_entry_.slot_ptr->backtracking_weight + edge_weight };
                     if (new_weight > resident_slot_.slot_.backtracking_weight) {
-                        resident_slot_.slot_.backtracking_edge = edge;
+                        resident_slot_.slot_.backtracking_edge = { edge };
                         resident_slot_.slot_.backtracking_weight = new_weight;
                     }
                 }
