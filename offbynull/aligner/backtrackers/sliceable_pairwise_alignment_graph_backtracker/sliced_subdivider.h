@@ -131,11 +131,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             const ED existing_weight_at_root = {},
             const ED existing_weight_at_leaf = {}
         ) {
-            std::string indent_str {};
-            static int indent { 0 };
-            for (auto i { 0 }; i < indent; i++) {
-                indent_str += ' ';
-            }
+            // std::string indent_str {};
+            // static int indent { 0 };
+            // for (auto i { 0 }; i < indent; i++) {
+            //     indent_str += ' ';
+            // }
             middle_sliceable_pairwise_alignment_graph<G, error_check> sub_graph {
                 whole_graph,
                 root_node,
@@ -143,14 +143,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             };
             const auto& [root_down_offset, root_right_offset, root_depth] { whole_graph.node_to_grid_offsets(sub_graph.get_root_node()) };
             const auto& [leaf_down_offset, leaf_right_offset, leaf_depth] { whole_graph.node_to_grid_offsets(sub_graph.get_leaf_node()) };
-            std::cout
-                    << indent_str
-                    << "root: [" << root_down_offset << "," << root_right_offset << ',' << root_depth << "]"
-                    << " leaf: [" << leaf_down_offset << "," << leaf_right_offset << ',' << leaf_depth << "]"
-                    << std::endl;
-            if (!whole_graph.is_reachable(root_node, leaf_node)) {
-                std::cout << indent_str << "unreachable" << std::endl;
-                return 0.0;
+            // std::cout
+            //         << indent_str
+            //         << "root: [" << root_down_offset << "," << root_right_offset << ',' << root_depth << "]"
+            //         << " leaf: [" << leaf_down_offset << "," << leaf_right_offset << ',' << leaf_depth << "]"
+            //         << std::endl;
+            if constexpr (error_check) {
+                if (!whole_graph.is_reachable(root_node, leaf_node)) {
+                    throw std::runtime_error("Root doesn't reach leaf");
+                }
             }
             INDEX mid_down_offset { (sub_graph.grid_down_cnt - 1u) / 2u };
             N last_node { *(--sub_graph.slice_nodes(mid_down_offset).end()) };
@@ -239,17 +240,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 }
             }  // Everything above wrapped in its own scope so that walkers (and their associated containers) are destroyed
 
-            const auto& n1 { whole_graph.get_edge_from(max_edge) };
-            const auto& n2 { whole_graph.get_edge_to(max_edge) };
-            const auto& [n1_down, n1_right, n1_depth] { whole_graph.node_to_grid_offsets(n1) };
-            const auto& [n2_down, n2_right, n2_depth] { whole_graph.node_to_grid_offsets(n2) };
-            std::cout
-                    << indent_str
-                    << "found: " << n1_down << 'x' << n1_right << 'x' << n1_depth << "->" << n2_down << 'x' << n2_right << 'x' << n2_depth
-                    << " full_weight: " << max_path_weight
-                    << " pre_weight: " << before_max_edge_weight
-                    << " edge_weight: " << max_edge_weight
-                    << " post_weight: " << after_max_edge_weight << std::endl;
+            // const auto& n1 { whole_graph.get_edge_from(max_edge) };
+            // const auto& n2 { whole_graph.get_edge_to(max_edge) };
+            // const auto& [n1_down, n1_right, n1_depth] { whole_graph.node_to_grid_offsets(n1) };
+            // const auto& [n2_down, n2_right, n2_depth] { whole_graph.node_to_grid_offsets(n2) };
+            // std::cout
+            //         << indent_str
+            //         << "found: " << n1_down << 'x' << n1_right << 'x' << n1_depth << "->" << n2_down << 'x' << n2_right << 'x' << n2_depth
+            //         << " full_weight: " << max_path_weight
+            //         << " pre_weight: " << before_max_edge_weight
+            //         << " edge_weight: " << max_edge_weight
+            //         << " post_weight: " << after_max_edge_weight << std::endl;
 
             // Add
             element<E>* current_element { nullptr };
@@ -271,9 +272,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             }
 
             // Recurse
-            indent++;
-
-            std::cout << indent_str << " topleft" << std::endl;
+            // indent++;
+            // std::cout << indent_str << " topleft" << std::endl;
             subdivide(
                 path_container_,
                 current_element,
@@ -283,8 +283,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 existing_weight_at_root,
                 existing_weight_at_leaf + after_max_edge_weight + max_edge_weight
             );
-
-            std::cout << indent_str << " bottomright" << std::endl;
+            // std::cout << indent_str << " bottomright" << std::endl;
             subdivide(
                 path_container_,
                 current_element,
@@ -294,8 +293,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 existing_weight_at_root + before_max_edge_weight + max_edge_weight,
                 existing_weight_at_leaf
             );
-
-            indent--;
+            // indent--;
 
             return max_path_weight;
         }
