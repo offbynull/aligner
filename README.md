@@ -28,7 +28,7 @@ TODO:
 * ~~FIX EXTENDEDGAP slice_nodes() function to not use forward_range_join_view~~
   * ~~make adapater that create forward_range / forward_backward_range based on callbacks (e.g. next(value) func and prev(value) func)~~
 
-* sliceable_pairwise_alignment_graph_backtracker - some use of std::vector -- move creation of types in container_pack_creators
+* resident_segmenter - some use of std::vector -- move creation of types in container_pack_creators (SEE TODOs IN RESIDENT_SEGMENTER -- DOES IT EVEN NEED TO EXIST?)
 * sliceable_pairwise_alignment_graph_backtracker use bidiwalker instead (make sure to update bidiwalker's logic to what's in backtracker)
 * sliceable_pairwise_alignment_graph_backtracker randomized tests against pairwise_alignment_graph_backtracker
 * run profiler and optmize functions (some local alignment functions may be doing a ton of unneeded work -- e.g. get_outputs_full)

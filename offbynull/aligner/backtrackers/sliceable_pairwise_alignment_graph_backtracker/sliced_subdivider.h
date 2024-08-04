@@ -7,7 +7,7 @@
 #include "path_container.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/container_creator_packs.h"
-#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/forward_walker.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/bidi_walker.h"
 #include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
@@ -20,8 +20,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::slot;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::element;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::node_searchable_slot;
@@ -154,19 +154,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 }
             }
             INDEX mid_down_offset { (sub_graph.grid_down_cnt - 1u) / 2u };
-            N last_node { *(--sub_graph.slice_nodes(mid_down_offset).end()) };
-            prefix_sliceable_pairwise_alignment_graph<decltype(sub_graph), error_check> prefix_graph {
-                sub_graph,
-                last_node
-            };
-            N first_node { *sub_graph.slice_nodes(mid_down_offset).begin() };
-            suffix_sliceable_pairwise_alignment_graph<decltype(sub_graph), error_check> suffix_graph {
-                sub_graph,
-                first_node
-            };
-            reversed_sliceable_pairwise_alignment_graph<decltype(suffix_graph)> reversed_suffix_graph {
-                suffix_graph
-            };
 
             if (root_node == leaf_node) {
                 return 0.0;
@@ -178,29 +165,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             ED after_max_edge_weight;
             bool max_edge_assigned {};
             {
-                forward_walker<
-                    decltype(prefix_graph),
-                    SLICE_SLOT_CONTAINER_CREATOR,
-                    RESIDENT_SLOT_CONTAINER_CREATOR,
-                    error_check
-                > forward_walker_ {
-                    prefix_graph,
-                    slice_slot_container_creator,
-                    resident_slot_container_creator
-                };
-                while (!forward_walker_.next()) {}
-
-                forward_walker<
-                    decltype(reversed_suffix_graph),
-                    SLICE_SLOT_CONTAINER_CREATOR,
-                    RESIDENT_SLOT_CONTAINER_CREATOR,
-                    error_check
-                > backward_walker {
-                    reversed_suffix_graph,
-                    slice_slot_container_creator,
-                    resident_slot_container_creator
-                };
-                while (!backward_walker.next()) {}
+                using BIDI_WALKER_TYPE = bidi_walker<decltype(sub_graph), SLICE_SLOT_CONTAINER_CREATOR, RESIDENT_SLOT_CONTAINER_CREATOR, error_check>;
+                BIDI_WALKER_TYPE bidi_walker_ { BIDI_WALKER_TYPE::create_and_initialize(sub_graph, mid_down_offset) };
 
                 auto mid_slice { sub_graph.slice_nodes(mid_down_offset) };
                 if constexpr (error_check) {
@@ -209,10 +175,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     }
                 }
                 for (const N& node : mid_slice) {
-                    bool reachable_from_root { sub_graph.is_reachable(root_node, node) };
-                    bool reachable_to_leaf { sub_graph.is_reachable(node, leaf_node) };
-                    const auto forward_slot { forward_walker_.find(node) };
-                    const auto backward_slot { backward_walker.find(node) };
+                    const auto& [forward_slot, backward_slot] { bidi_walker_.find(node) };
                     const auto new_potential_path_weight { existing_weight_at_root + forward_slot.backtracking_weight + backward_slot.backtracking_weight + existing_weight_at_leaf };
                     if (!max_edge_assigned || new_potential_path_weight > max_path_weight) {
                         if (forward_slot.backtracking_edge.has_value()) {
@@ -225,9 +188,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                             max_edge_weight = sub_graph.get_edge_data(max_edge);
                             before_max_edge_weight = forward_slot.backtracking_weight;
                             after_max_edge_weight = backward_slot.backtracking_weight - max_edge_weight;
-                        } else {
-                            // unreachable?
-                            continue;
+                        } else [[unlikely]] {
+                            throw std::runtime_error("Should never happen");
                         }
                         max_path_weight = new_potential_path_weight;
                         max_edge_assigned = true;
@@ -240,10 +202,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 }
             }  // Everything above wrapped in its own scope so that walkers (and their associated containers) are destroyed
 
-            // const auto& n1 { whole_graph.get_edge_from(max_edge) };
-            // const auto& n2 { whole_graph.get_edge_to(max_edge) };
-            // const auto& [n1_down, n1_right, n1_depth] { whole_graph.node_to_grid_offsets(n1) };
-            // const auto& [n2_down, n2_right, n2_depth] { whole_graph.node_to_grid_offsets(n2) };
+            const auto& n1 { whole_graph.get_edge_from(max_edge) };
+            const auto& n2 { whole_graph.get_edge_to(max_edge) };
+            const auto& [n1_down, n1_right, n1_depth] { whole_graph.node_to_grid_offsets(n1) };
+            const auto& [n2_down, n2_right, n2_depth] { whole_graph.node_to_grid_offsets(n2) };
             // std::cout
             //         << indent_str
             //         << "found: " << n1_down << 'x' << n1_right << 'x' << n1_depth << "->" << n2_down << 'x' << n2_right << 'x' << n2_depth

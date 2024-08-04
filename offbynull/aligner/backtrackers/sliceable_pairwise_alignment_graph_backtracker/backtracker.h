@@ -7,7 +7,7 @@
 #include "path_container.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/container_creator_packs.h"
-#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/bidi_walker.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_segmenter.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_subdivider.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/helpers/container_creators.h"
@@ -21,7 +21,7 @@
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::resident_segmenter;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider::sliced_subdivider;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::container_creator_packs::container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::container_creator_packs::heap_container_creator_pack;
@@ -80,19 +80,19 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         , path_container_creator { path_container_creator } {}
 
         auto find_max_path(G& g) {
-            bidi_walker<
+            resident_segmenter<
                 G,
                 SLICE_SLOT_CONTAINER_CREATOR,
                 RESIDENT_SLOT_CONTAINER_CREATOR,
                 error_check
-            > bidi_walker_ {
+            > resident_segmenter_ {
                 g,
                 slice_slot_container_creator,
                 resident_slot_container_creator
             };
-            using hop = decltype(bidi_walker_)::hop;
-            using segment = decltype(bidi_walker_)::segment;
-            const auto& [parts, final_weight] { bidi_walker_.backtrack_segmentation_points() };
+            using hop = decltype(resident_segmenter_)::hop;
+            using segment = decltype(resident_segmenter_)::segment;
+            const auto& [parts, final_weight] { resident_segmenter_.backtrack_segmentation_points() };
             auto path { path_container_creator.create_empty(std::nullopt) };
             for (const auto& part : parts) {
                 if (const hop* hop_ptr = std::get_if<hop>(&part)) {

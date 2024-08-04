@@ -15,7 +15,7 @@ namespace {
     using offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph;
     using offbynull::aligner::scorers::simple_scorer::simple_scorer;
 
-    TEST(SlicedWalkerTest, ForwardWalkWithoutResidents) {
+    TEST(ForwardWalkerTest, ForwardWalkWithoutResidents) {
         auto substitution_scorer { simple_scorer<char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
         auto gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(-1.0f64) };
         std::string seq1 { "abc" };
@@ -33,82 +33,88 @@ namespace {
         using E = typename decltype(g)::E;
 
         // walk
-        forward_walker<decltype(g)> walker{ g };
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_EQ(walker.find(N { 0zu, 0zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 0zu, 1zu }).backtracking_weight, -1.0);
-        EXPECT_EQ(walker.find(N { 0zu, 2zu }).backtracking_weight, -2.0);
-        EXPECT_EQ(walker.find(N { 0zu, 3zu }).backtracking_weight, -3.0);
+        {
+            forward_walker<decltype(g)> walker{ forward_walker<decltype(g)>::create_and_initialize(g, 0u) };
+            EXPECT_EQ(walker.find(N { 0zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 0zu, 1zu }).backtracking_weight, -1.0);
+            EXPECT_EQ(walker.find(N { 0zu, 2zu }).backtracking_weight, -2.0);
+            EXPECT_EQ(walker.find(N { 0zu, 3zu }).backtracking_weight, -3.0);
+            EXPECT_THROW(walker.find(N { 1zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 3zu }).backtracking_weight, std::runtime_error);
+        }
 
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_EQ(walker.find(N { 1zu, 0zu }).backtracking_weight, -1.0);
-        EXPECT_EQ(walker.find(N { 1zu, 1zu }).backtracking_weight, 1.0);
-        EXPECT_EQ(walker.find(N { 1zu, 2zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 1zu, 3zu }).backtracking_weight, -1.0);
+        {
+            forward_walker<decltype(g)> walker{ forward_walker<decltype(g)>::create_and_initialize(g, 1u) };
+            EXPECT_EQ(walker.find(N { 0zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 0zu, 1zu }).backtracking_weight, -1.0);
+            EXPECT_EQ(walker.find(N { 0zu, 2zu }).backtracking_weight, -2.0);
+            EXPECT_EQ(walker.find(N { 0zu, 3zu }).backtracking_weight, -3.0);
+            EXPECT_EQ(walker.find(N { 1zu, 0zu }).backtracking_weight, -1.0);
+            EXPECT_EQ(walker.find(N { 1zu, 1zu }).backtracking_weight, 1.0);
+            EXPECT_EQ(walker.find(N { 1zu, 2zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 1zu, 3zu }).backtracking_weight, -1.0);
+            EXPECT_THROW(walker.find(N { 2zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 3zu }).backtracking_weight, std::runtime_error);
+        }
 
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_EQ(walker.find(N { 2zu, 0zu }).backtracking_weight, -2.0);
-        EXPECT_EQ(walker.find(N { 2zu, 1zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 2zu, 2zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 2zu, 3zu }).backtracking_weight, -1.0);
+        {
+            forward_walker<decltype(g)> walker{ forward_walker<decltype(g)>::create_and_initialize(g, 2u) };
+            EXPECT_THROW(walker.find(N { 0zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_EQ(walker.find(N { 1zu, 0zu }).backtracking_weight, -1.0);
+            EXPECT_EQ(walker.find(N { 1zu, 1zu }).backtracking_weight, 1.0);
+            EXPECT_EQ(walker.find(N { 1zu, 2zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 1zu, 3zu }).backtracking_weight, -1.0);
+            EXPECT_EQ(walker.find(N { 2zu, 0zu }).backtracking_weight, -2.0);
+            EXPECT_EQ(walker.find(N { 2zu, 1zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 2zu, 2zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 2zu, 3zu }).backtracking_weight, -1.0);
+            EXPECT_THROW(walker.find(N { 3zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 3zu }).backtracking_weight, std::runtime_error);
+        }
 
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_TRUE(walker.next());
-        EXPECT_EQ(walker.find(N { 3zu, 0zu }).backtracking_weight, -3.0);
-        EXPECT_EQ(walker.find(N { 3zu, 1zu }).backtracking_weight, -1.0);
-        EXPECT_EQ(walker.find(N { 3zu, 2zu }).backtracking_weight, -1.0);
-        EXPECT_EQ(walker.find(N { 3zu, 3zu }).backtracking_weight, 1.0);
-
-        EXPECT_TRUE(walker.next());
-        EXPECT_EQ(walker.find(N { 3zu, 3zu }).backtracking_weight, 1.0);
-        EXPECT_THROW(walker.find(N { 1zu, 3zu }), std::runtime_error);
+        {
+            forward_walker<decltype(g)> walker{ forward_walker<decltype(g)>::create_and_initialize(g, 3u) };
+            EXPECT_THROW(walker.find(N { 0zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_EQ(walker.find(N { 2zu, 0zu }).backtracking_weight, -2.0);
+            EXPECT_EQ(walker.find(N { 2zu, 1zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 2zu, 2zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 2zu, 3zu }).backtracking_weight, -1.0);
+            EXPECT_EQ(walker.find(N { 3zu, 0zu }).backtracking_weight, -3.0);
+            EXPECT_EQ(walker.find(N { 3zu, 1zu }).backtracking_weight, -1.0);
+            EXPECT_EQ(walker.find(N { 3zu, 2zu }).backtracking_weight, -1.0);
+            EXPECT_EQ(walker.find(N { 3zu, 3zu }).backtracking_weight, 1.0);
+        }
     }
 
-    TEST(SlicedWalkerTest, SingleSliceForwardWalkWithoutResidents) {
-        auto substitution_scorer { simple_scorer<char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
-        auto gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(-1.0f64) };
-        std::string seq1 { "" };
-        std::string seq2 { "azc" };
-        pairwise_global_alignment_graph<decltype(seq1), decltype(seq2)> g {
-            seq1,
-            seq2,
-            substitution_scorer,
-            gap_scorer
-        };
-
-        using ND = typename decltype(g)::ND;
-        using ED = typename decltype(g)::ED;
-        using N = typename decltype(g)::N;
-        using E = typename decltype(g)::E;
-
-        // walk
-        forward_walker<decltype(g)> walker{ g };
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_TRUE(walker.next());
-        EXPECT_EQ(walker.find(N { 0zu, 0zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 0zu, 1zu }).backtracking_weight, -1.0);
-        EXPECT_EQ(walker.find(N { 0zu, 2zu }).backtracking_weight, -2.0);
-        EXPECT_EQ(walker.find(N { 0zu, 3zu }).backtracking_weight, -3.0);
-
-        EXPECT_TRUE(walker.next());
-        EXPECT_EQ(walker.find(N { 0zu, 3zu }).backtracking_weight, -3.0);
-        EXPECT_THROW(walker.find(N { 1zu, 3zu }), std::runtime_error);
-    }
-
-    TEST(SlicedWalkerTest, ForwardWalkWithResidents) {
+    TEST(ForwardWalkerTest, ForwardWalkWithResidents) {
         auto substitution_scorer { simple_scorer<char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
         auto gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(-1.0f64) };
         auto freeride_scorer { simple_scorer<char, char, std::float64_t>::create_freeride(0.0f64) };
@@ -128,45 +134,80 @@ namespace {
         using E = typename decltype(g)::E;
 
         // walk
-        forward_walker<decltype(g)> walker{ g };
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_EQ(walker.find(N { 0zu, 0zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 0zu, 1zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 0zu, 2zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 0zu, 3zu }).backtracking_weight, 0.0);
+        {
+            forward_walker<decltype(g)> walker{ forward_walker<decltype(g)>::create_and_initialize(g, 0u) };
+            EXPECT_EQ(walker.find(N { 0zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 0zu, 1zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 0zu, 2zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 0zu, 3zu }).backtracking_weight, 0.0);
+            EXPECT_THROW(walker.find(N { 1zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_EQ(walker.find(N { 3zu, 3zu }).backtracking_weight, 0.0);
+        }
 
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_EQ(walker.find(N { 1zu, 0zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 1zu, 1zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 1zu, 2zu }).backtracking_weight, 1.0);
-        EXPECT_EQ(walker.find(N { 1zu, 3zu }).backtracking_weight, 0.0);
+        {
+            forward_walker<decltype(g)> walker{ forward_walker<decltype(g)>::create_and_initialize(g, 1u) };
+            EXPECT_EQ(walker.find(N { 0zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 0zu, 1zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 0zu, 2zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 0zu, 3zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 1zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 1zu, 1zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 1zu, 2zu }).backtracking_weight, 1.0);
+            EXPECT_EQ(walker.find(N { 1zu, 3zu }).backtracking_weight, 0.0);
+            EXPECT_THROW(walker.find(N { 2zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 2zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_EQ(walker.find(N { 3zu, 3zu }).backtracking_weight, 1.0);
+        }
 
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_EQ(walker.find(N { 2zu, 0zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 2zu, 1zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 2zu, 2zu }).backtracking_weight, 1.0);
-        EXPECT_EQ(walker.find(N { 2zu, 3zu }).backtracking_weight, 0.0);
+        {
+            forward_walker<decltype(g)> walker{ forward_walker<decltype(g)>::create_and_initialize(g, 2u) };
+            EXPECT_EQ(walker.find(N { 0zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_THROW(walker.find(N { 0zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_EQ(walker.find(N { 1zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 1zu, 1zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 1zu, 2zu }).backtracking_weight, 1.0);
+            EXPECT_EQ(walker.find(N { 1zu, 3zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 2zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 2zu, 1zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 2zu, 2zu }).backtracking_weight, 1.0);
+            EXPECT_EQ(walker.find(N { 2zu, 3zu }).backtracking_weight, 0.0);
+            EXPECT_THROW(walker.find(N { 3zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 3zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_EQ(walker.find(N { 3zu, 3zu }).backtracking_weight, 1.0);
+        }
 
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_FALSE(walker.next());
-        EXPECT_TRUE(walker.next());
-        EXPECT_EQ(walker.find(N { 3zu, 0zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 3zu, 1zu }).backtracking_weight, 0.0);
-        EXPECT_EQ(walker.find(N { 3zu, 2zu }).backtracking_weight, 1.0);
-        EXPECT_EQ(walker.find(N { 3zu, 3zu }).backtracking_weight, 1.0);
-
-        EXPECT_TRUE(walker.next());
-        EXPECT_EQ(walker.find(N { 3zu, 3zu }).backtracking_weight, 1.0);
-        EXPECT_THROW(walker.find(N { 1zu, 3zu }), std::runtime_error);
+        {
+            forward_walker<decltype(g)> walker{ forward_walker<decltype(g)>::create_and_initialize(g, 3u) };
+            EXPECT_EQ(walker.find(N { 0zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_THROW(walker.find(N { 0zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 0zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 0zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 1zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 2zu }).backtracking_weight, std::runtime_error);
+            EXPECT_THROW(walker.find(N { 1zu, 3zu }).backtracking_weight, std::runtime_error);
+            EXPECT_EQ(walker.find(N { 3zu, 0zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 3zu, 1zu }).backtracking_weight, 0.0);
+            EXPECT_EQ(walker.find(N { 3zu, 2zu }).backtracking_weight, 1.0);
+            EXPECT_EQ(walker.find(N { 3zu, 3zu }).backtracking_weight, 1.0);
+        }
     }
 }

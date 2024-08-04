@@ -118,20 +118,22 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         slice_entry<N, E, ED> slice_entry_;
 
     public:
-        forward_walker(
-            G& graph_,
+        static forward_walker create_and_initialize(
+            G& graph,
+            INDEX target_slice,
             SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
             RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {}
-        )
-        : graph{graph_}
-        , resident_slots{graph, resident_slot_container_creator}
-        , slice_slots{graph, slice_slot_container_creator}
-        , slice{graph.slice_nodes(0u)}
-        , slice_it{slice.begin()}
-        , slice_entry_{}  {
-            auto&& _resident_slots { graph.resident_nodes() };
-            slice_entry_.node = *slice_it;
-            slice_entry_.slot_ptr = &find(slice_entry_.node); // should be equivalent to graph.get_root_node()
+        ) {
+            if constexpr (error_check) {
+                if (target_slice >= graph.grid_down_cnt) {
+                    throw std::runtime_error("Slice too far down");
+                }
+            }
+            forward_walker ret { graph, slice_slot_container_creator, resident_slot_container_creator };
+            while (ret.slice_slots.grid_down_offset != target_slice || ret.slice_it != ret.slice.end()) {
+                ret.step_forward();
+            }
+            return ret;
         }
 
         slot<E, ED>& find(const N& node) {
@@ -149,9 +151,36 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             std::unreachable();
         }
 
-        bool next() {
-            if (slice_entry_.slot_ptr == nullptr) {
-                return true;
+    private:
+        forward_walker(
+            G& graph_,
+            SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
+            RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {}
+        )
+        : graph{graph_}
+        , resident_slots{graph, resident_slot_container_creator}
+        , slice_slots{graph, slice_slot_container_creator}
+        , slice{graph.slice_nodes(0u)}
+        , slice_it{slice.begin()}
+        , slice_entry_{}  {
+            auto&& _resident_slots { graph.resident_nodes() };
+            slice_entry_.node = *slice_it;
+            slice_entry_.slot_ptr = &find(slice_entry_.node); // should be equivalent to graph.get_root_node()
+        }
+
+        void step_forward() {
+            if (slice_it != slice.end()) {
+                slice_entry_.node = *slice_it;
+                slice_entry_.slot_ptr = &find(slice_entry_.node);
+            } else {
+                if (slice_slots.grid_down_offset == graph.grid_down_cnt - 1u) {
+                    return;
+                }
+                slice_slots.move_down();
+                slice = graph.slice_nodes(slice_slots.grid_down_offset);
+                slice_it = slice.begin();
+                slice_entry_.node = *slice_it;
+                slice_entry_.slot_ptr = &find(slice_entry_.node);
             }
             // Compute only if node is not a resident. A resident node's backtracking weight + backtracking edge should
             // be computed as its inputs are walked over one-by-one by this function (see block below this one).
@@ -210,24 +239,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 }
             }
 
-            // Move to next node / next slice
+            // Move to next node
             ++slice_it;
-            if (slice_it != slice.end()) {
-                slice_entry_.node = *slice_it;
-                slice_entry_.slot_ptr = &find(slice_entry_.node);
-            } else {
-                if (slice_slots.grid_down_offset == graph.grid_down_cnt - 1u) {
-                    slice_entry_.slot_ptr = nullptr;
-                    return true;
-                }
-                slice_slots.move_down();
-                slice = graph.slice_nodes(slice_slots.grid_down_offset);
-                slice_it = slice.begin();
-                slice_entry_.node = *slice_it;
-                slice_entry_.slot_ptr = &find(slice_entry_.node);
-            }
-
-            return false;
         }
     };
 }
