@@ -193,7 +193,7 @@ namespace {
         std::vector<E> expected_path {};
         std::float64_t expected_weight {};
         {
-            offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker<decltype(g), std::size_t> backtracker_ { };
+            offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker<true, decltype(g)> backtracker_ { };
             const auto& [path, weight] { backtracker_.find_max_path(g) };
             for (const E& e : path) {
                 const auto& [n1, n2] { e };
@@ -261,7 +261,7 @@ namespace {
         std::vector<E> expected_path {};
         std::float64_t expected_weight {};
         {
-            offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker<decltype(g), std::size_t> backtracker_ { };
+            offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker<true, decltype(g)> backtracker_ { };
             const auto& [path, weight] { backtracker_.find_max_path(g) };
             for (const E& e : path) {
                 const auto& [n1, n2] { e };
@@ -352,7 +352,7 @@ namespace {
         std::vector<E> expected_path {};
         std::float64_t expected_weight {};
         {
-            offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker<decltype(g), std::size_t> backtracker_ { };
+            offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker<true, decltype(g)> backtracker_ { };
             const auto& [path, weight] { backtracker_.find_max_path(g) };
             for (const E& e : path) {
                 const auto& [n1, n2] { e };
@@ -432,7 +432,7 @@ namespace {
             std::vector<E> expected_path {};
             std::float64_t expected_weight {};
             {
-                offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker<decltype(g), std::size_t> backtracker_ { };
+                offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker<true, decltype(g)> backtracker_ { };
                 const auto& [path, weight] { backtracker_.find_max_path(g) };
                 expected_path = path;
                 // expected_weight = weight;  // don't use weight -- instead manually tally up the weight from the edges (just to be sure)

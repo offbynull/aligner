@@ -28,9 +28,14 @@ TODO:
 * ~~FIX EXTENDEDGAP slice_nodes() function to not use forward_range_join_view~~
   * ~~make adapater that create forward_range / forward_backward_range based on callbacks (e.g. next(value) func and prev(value) func)~~
 
+* revise container_pack pattern being used across project to how it's being done in sliceable_pairwise_alignment_graph_backtracker 
 * graph node/edge types to structs instead of std::pair -- add friend functions that print out to std::out
 * error_check -> debug_mode
-* resident_segmenter - some use of std::vector -- move creation of types in container_pack_creators (SEE TODOs IN RESIDENT_SEGMENTER -- DOES IT EVEN NEED TO EXIST?)
+* container creators -- make them into static functions so you don't have to create an instance of container_creator each time you use it
+* add E_COUNT type to readable_pairwise_alignment_graph concept and graph implementations -- make use of it in slot_container.h rather than asking the user to supply it
+  E_COUNT is a type wide enough to hold the maximum number of edges from one node to another
+* max_grid_node_depth should be a parameter directly on the class, EVALUATABLE AT COMPILE_TIME
+* ~~resident_segmenter - some use of std::vector -- move creation of types in container_pack_creators (SEE TODOs IN RESIDENT_SEGMENTER -- DOES IT EVEN NEED TO EXIST?)~~
 * ~~resident_segmenter - move is_node_on_max_path/walk_to_node to static functions in bidiwalker?~~
 * DONT DO THIS, but make a note that it's possible to do in the code (but may result in rounding errors):
   * make it so forward_walker can move backward, so if you're at slice n, you can subtract your way back to slice n-1
@@ -40,7 +45,9 @@ TODO:
 * ~~subdivider, when finding the node in the slice that's being passed through, should first get the final weight of the graph, then TEST the bidiwalk'd weight at that node to see if it matches the final weight (USER MUST DEFINE TOLERANCE)~~ DONT NEED TO DO THIS the assumption with subdivider is that at least 1 node in each slice goes over max path, so it's fine just pulling out the max weight for a slice
 * ~~sliceable_pairwise_alignment_graph_backtracker use bidiwalker instead (make sure to update bidiwalker's logic to what's in backtracker)~~
 * ~~sliceable_pairwise_alignment_graph_backtracker randomized tests against pairwise_alignment_graph_backtracker~~
-* run profiler and optmize functions (some local alignment functions may be doing a ton of unneeded work -- e.g. get_outputs_full)
+
+* run profiler and optimize functions (some local alignment functions may be doing a ton of unneeded work -- e.g. get_outputs_full)
+* fix compiler warnings
 
 * Update get_in_degree() / get_out_degree() functions to calculate directly
 * Add concept checks to autos

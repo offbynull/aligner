@@ -2,13 +2,11 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_BACKTRACKER_H
 
 #include <cstddef>
-#include <functional>
 #include <ranges>
 #include <algorithm>
 #include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/concepts.h"
-#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/container_creator_packs.h"
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/ready_queue.h"
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/slot_container.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
@@ -18,13 +16,17 @@
 namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker {
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::container_creator_packs::container_creator_pack;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::container_creator_packs::heap_container_creator_pack;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container_container_creator_pack;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container_stack_container_creator_pack;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue_container_creator_pack;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue_stack_container_creator_pack;
     using offbynull::helpers::container_creators::container_creator;
     using offbynull::helpers::container_creators::container_creator_of_type;
     using offbynull::helpers::container_creators::vector_container_creator;
@@ -32,11 +34,67 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
 
+
+
+
     template<
+        typename T,
+        typename G
+    >
+    concept backtracker_container_creator_pack =
+        readable_pairwise_alignment_graph<G>
+        && slot_container_container_creator_pack<typename T::SLOT_CONTAINER_CONTAINER_CREATOR_PACK, G>
+        && ready_queue_container_creator_pack<typename T::READY_QUEUE_CONTAINER_CREATOR_PACK, G>
+        && container_creator_of_type<typename T::PATH_CONTAINER_CREATOR, typename G::E>;;
+
+    template<
+        bool error_check,
+        readable_pairwise_alignment_graph G
+    >
+    struct backtracker_heap_container_creator_pack {
+        using E = typename G::E;
+
+        using SLOT_CONTAINER_CONTAINER_CREATOR_PACK=slot_container_heap_container_creator_pack<error_check, G>;
+        using READY_QUEUE_CONTAINER_CREATOR_PACK=ready_queue_heap_container_creator_pack<error_check, G>;
+        using PATH_CONTAINER_CREATOR=vector_container_creator<E, error_check>;
+    };
+
+    template<
+        bool error_check,
         readable_pairwise_alignment_graph G,
-        widenable_to_size_t COUNT,
-        container_creator_pack<G, COUNT> CONTAINER_CREATOR_PACK=heap_container_creator_pack<G, COUNT, true>,
-        bool error_check = true
+        std::size_t grid_down_cnt,
+        std::size_t grid_right_cnt
+    >
+    struct backtracker_stack_container_creator_pack {
+        using E = typename G::E;
+
+        using SLOT_CONTAINER_CONTAINER_CREATOR_PACK=slot_container_stack_container_creator_pack<
+            error_check,
+            G,
+            grid_down_cnt,
+            grid_right_cnt
+        >;
+        using READY_QUEUE_CONTAINER_CREATOR_PACK=ready_queue_stack_container_creator_pack<
+            error_check,
+            G,
+            grid_down_cnt,
+            grid_right_cnt
+        >;
+        using PATH_CONTAINER_CREATOR=static_vector_container_creator<
+            E,
+            G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt,
+            error_check
+        >;
+    };
+
+
+
+
+
+    template<
+        bool error_check,
+        readable_pairwise_alignment_graph G,
+        backtracker_container_creator_pack<G> CONTAINER_CREATOR_PACK=backtracker_heap_container_creator_pack<true, G>
     >
     requires backtrackable_node<typename G::N> &&
         backtrackable_edge<typename G::E>
@@ -47,10 +105,13 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
-        using SLOT_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::SLOT_CONTAINER_CREATOR;
+        using SLOT_CONTAINER_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::SLOT_CONTAINER_CONTAINER_CREATOR_PACK;
+        using READY_QUEUE_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::READY_QUEUE_CONTAINER_CREATOR_PACK;
         using PATH_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::PATH_CONTAINER_CREATOR;
+        using PATH_CONTAINER=decltype(std::declval<PATH_CONTAINER_CREATOR>().create_empty(std::nullopt));
 
-        using slot_container_t = slot_container<N, E, INDEX, COUNT, ED, SLOT_CONTAINER_CREATOR, error_check>;
+        using slot_container_t = slot_container<error_check, G, SLOT_CONTAINER_CONTAINER_CREATOR_PACK>;
+        using ready_queue_t = ready_queue<error_check, G, READY_QUEUE_CONTAINER_CREATOR_PACK>;
 
         slot_container_t populate_weights_and_backtrack_pointers(
             G& g
@@ -63,26 +124,14 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             auto slots_lazy {
                 std::views::common(
                     g.get_nodes()
-                    | std::views::transform([&](const auto& n) -> slot<N, E, COUNT, ED> {
+                    | std::views::transform([&](const auto& n) -> slot<N, E, ED> {
                         std::size_t in_degree { g.get_in_degree(n) };
-                        COUNT in_degree_narrowed { static_cast<COUNT>(in_degree) };
-                        if constexpr (error_check) {
-                            if (in_degree_narrowed != in_degree) {
-                                throw std::runtime_error("Narrowed but led to information loss");
-                            }
-                        }
-                        return { n, in_degree_narrowed };
+                        return { n, in_degree };
                     })
                 )
             };
             slot_container_t slots {
-                g.grid_down_cnt,
-                g.grid_right_cnt,
-                G::limits(
-                    g.grid_down_cnt,
-                    g.grid_right_cnt
-                ).max_grid_node_depth,
-                [&](const N& node) { return g.node_to_grid_offsets(node); },
+                g,
                 slots_lazy.begin(),
                 slots_lazy.end()
             };
@@ -92,7 +141,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             // parents processed, and so it can be processed). Since root nodes have no parents, they are ready-to-process from
             // the get-go. As such, the "ready_idxes" queue is primed with the "slots" indices for root nodes (of which there
             // should be only one).
-            ready_queue ready_idxes {};
+            ready_queue_t ready_idxes {};
             const N& root_node { g.get_root_node() };
             const auto& [root_slot_idx, root_slot] { slots.find(root_node) };
             ready_idxes.push(root_slot_idx);
@@ -123,7 +172,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                         | std::views::transform(
                             [&](const auto& edge) noexcept -> std::pair<E, ED> {
                                 const auto& src_node { g.get_edge_from(edge) };
-                                const slot<N, E, COUNT, ED>& src_node_slot { slots.find_ref(src_node) };
+                                const slot<N, E, ED>& src_node_slot { slots.find_ref(src_node) };
                                 const auto& edge_weight { g.get_edge_data(edge) };
                                 return { edge, src_node_slot.backtracking_weight + edge_weight };
                             }
@@ -155,7 +204,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                             throw std::runtime_error("Invalid number of unprocessed parents");
                         }
                     }
-                    dst_slot.unwalked_parent_cnt = static_cast<COUNT>(dst_slot.unwalked_parent_cnt - 1u);
+                    dst_slot.unwalked_parent_cnt = dst_slot.unwalked_parent_cnt - 1u;
                     if (dst_slot.unwalked_parent_cnt == 0u) {
                         ready_idxes.push(dst_slot_idx);
                     }
@@ -166,12 +215,11 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         }
 
         range_of_type<E> auto backtrack(
-                G& g,
-                slot_container_t& slots,
-                PATH_CONTAINER_CREATOR path_container_creator = {}
+            G& g,
+            slot_container_t& slots
         ) {
             auto next_node { g.get_leaf_node() };
-            auto path { path_container_creator.create_empty(std::nullopt) };
+            auto path { PATH_CONTAINER_CREATOR {}.create_empty(std::nullopt) };
             while (true) {
                 auto node { next_node };
                 if (!g.has_inputs(node)) {
@@ -188,7 +236,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         }
 
         auto find_max_path(
-                G& graph
+            G& graph
         ) {
             auto slots { populate_weights_and_backtrack_pointers(graph) };
             const auto& path { backtrack(graph, slots) };

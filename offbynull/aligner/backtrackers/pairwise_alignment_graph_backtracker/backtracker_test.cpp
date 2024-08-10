@@ -28,7 +28,7 @@ namespace {
 
         using E = decltype(g)::E;
 
-        backtracker<decltype(g), std::uint8_t> _backtracker{};
+        backtracker<true, decltype(g)> _backtracker{};
         const auto& [path, weight] {
             _backtracker.find_max_path(g)
         };
