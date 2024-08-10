@@ -43,7 +43,7 @@ namespace {
 
         // walk
         for (unsigned int down_offset { 0u }; down_offset < g.grid_down_cnt; down_offset++) {
-            bidi_walker<decltype(g)> bidi_walker_ { bidi_walker<decltype(g)>::create_and_initialize(g, down_offset) };
+            bidi_walker<true, decltype(g)> bidi_walker_ { bidi_walker<true, decltype(g)>::create_and_initialize(g, down_offset) };
             for (unsigned int right_offset { 0u }; right_offset < g.grid_right_cnt; right_offset++) {
                 const auto& [weight, forward_walk_edge, backward_walk_edge] {
                     walk_to_node(bidi_walker_, N {down_offset, right_offset})
@@ -68,7 +68,7 @@ namespace {
             std::cout << std::endl;
         }
 
-        bidi_walker<decltype(g)> bidi_walker_ { bidi_walker<decltype(g)>::create_and_initialize(g, 3u) };
+        bidi_walker<true, decltype(g)> bidi_walker_ { bidi_walker<true, decltype(g)>::create_and_initialize(g, 3u) };
         const auto& [weight, forward_walk_edge, backward_walk_edge] { walk_to_node(bidi_walker_,  N {3u, 3u}) };
         std::cout << std::endl;
         std::cout << weight << std::endl;
@@ -93,7 +93,7 @@ namespace {
 
         // walk
         for (unsigned int down_offset { 0u }; down_offset < g.grid_down_cnt; down_offset++) {
-            bidi_walker<decltype(g)> bidi_walker_ { bidi_walker<decltype(g)>::create_and_initialize(g, down_offset) };
+            bidi_walker<true, decltype(g)> bidi_walker_ { bidi_walker<true, decltype(g)>::create_and_initialize(g, down_offset) };
             for (unsigned int right_offset { 0u }; right_offset < g.grid_right_cnt; right_offset++) {
                 const auto& [weight, forward_walk_edge, backward_walk_edge] {
                     walk_to_node(bidi_walker_, N { down_offset, right_offset })
@@ -141,7 +141,7 @@ namespace {
 
         // walk
         for (unsigned int down_offset { 0u }; down_offset < g.grid_down_cnt; down_offset++) {
-            bidi_walker<decltype(g)> bidi_walker_ { bidi_walker<decltype(g)>::create_and_initialize(g, down_offset) };
+            bidi_walker<true, decltype(g)> bidi_walker_ { bidi_walker<true, decltype(g)>::create_and_initialize(g, down_offset) };
             for (unsigned int right_offset { 0u }; right_offset < g.grid_right_cnt; right_offset++) {
                 const auto& [weight, forward_walk_edge, backward_walk_edge] {
                     walk_to_node(bidi_walker_, N { down_offset, right_offset })
@@ -167,7 +167,7 @@ namespace {
         }
 
         // test
-        bidi_walker<decltype(g)> bidi_walker_ { bidi_walker<decltype(g)>::create_and_initialize(g, g.grid_down_cnt - 1u) };
+        bidi_walker<true, decltype(g)> bidi_walker_ { bidi_walker<true, decltype(g)>::create_and_initialize(g, g.grid_down_cnt - 1u) };
         const auto& [final_weight, forward_walk_edge, backward_walk_edge] { walk_to_node(bidi_walker_, g.get_leaf_node()) };
         std::cout << "final weight: " << final_weight << std::endl;
         for (const auto& node : g.resident_nodes()) {
@@ -212,7 +212,7 @@ namespace {
 
         // walk
         for (unsigned int down_offset { 0u }; down_offset < g.grid_down_cnt; down_offset++) {
-            bidi_walker<decltype(g)> bidi_walker_ { bidi_walker<decltype(g)>::create_and_initialize(g, down_offset) };
+            bidi_walker<true, decltype(g)> bidi_walker_ { bidi_walker<true, decltype(g)>::create_and_initialize(g, down_offset) };
             for (unsigned int right_offset { 0u }; right_offset < g.grid_right_cnt; right_offset++) {
                 const auto& [weight, forward_walk_edge, backward_walk_edge] {
                     walk_to_node(bidi_walker_, N { down_offset, right_offset })
@@ -238,7 +238,7 @@ namespace {
         }
 
         // test
-        bidi_walker<decltype(g)> bidi_walker_ { bidi_walker<decltype(g)>::create_and_initialize(g, g.grid_down_cnt - 1u) };
+        bidi_walker<true, decltype(g)> bidi_walker_ { bidi_walker<true, decltype(g)>::create_and_initialize(g, g.grid_down_cnt - 1u) };
         const auto& [final_weight, forward_walk_edge, backward_walk_edge] { walk_to_node(bidi_walker_, g.get_leaf_node()) };
         std::cout << "final weight: " << final_weight << std::endl;
         for (const auto& node : g.resident_nodes()) {

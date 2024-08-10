@@ -10,6 +10,8 @@
 #include <stdfloat>
 
 namespace {
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::hop;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::resident_segmenter;
     using offbynull::aligner::graphs::pairwise_global_alignment_graph::pairwise_global_alignment_graph;
     using offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph;
@@ -31,13 +33,16 @@ namespace {
             freeride_scorer
         };
 
-        resident_segmenter<decltype(g)> segmenter {};
-        using hop = decltype(segmenter)::hop;
-        using segment = decltype(segmenter)::segment;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        resident_segmenter<true, decltype(g)> segmenter {};
+        using hop_ = hop<E>;
+        using segment_ = segment<N>;
         const auto& [parts, final_weight] { segmenter.backtrack_segmentation_points(g, 0.000001f64) };
         std::cout << final_weight << std::endl;
         for (const auto& part : parts) {
-            if (const hop* hop_ptr = std::get_if<hop>(&part)) {
+            if (const hop_* hop_ptr = std::get_if<hop_>(&part)) {
                 const auto& [from_node, to_node] { hop_ptr->edge.inner_edge };
                 const auto& [from_node_down_offset, from_node_right_offset] { from_node };
                 const auto& [to_node_down_offset, to_node_right_offset] { to_node };
@@ -47,7 +52,7 @@ namespace {
                     << to_node_down_offset << ',' << to_node_right_offset
                     << " edgetype " << static_cast<std::uint8_t>(type)
                     << std::endl;
-            } else if (const segment* segment_ptr = std::get_if<segment>(&part)) {
+            } else if (const segment_* segment_ptr = std::get_if<segment_>(&part)) {
                 const auto& [from_node_down_offset, from_node_right_offset] { segment_ptr->from_node };
                 const auto& [to_node_down_offset, to_node_right_offset] { segment_ptr->to_node };
                 std::cout << "segment: " << from_node_down_offset << ',' << from_node_right_offset
@@ -89,13 +94,13 @@ namespace {
         // 0/0->5/0 5/0->6/1 6/1->7/2 7/2->8/3 8/3->8/8
         // 3
 
-        resident_segmenter<decltype(g)> segmenter {};
-        using hop = decltype(segmenter)::hop;
-        using segment = decltype(segmenter)::segment;
+        resident_segmenter<true, decltype(g)> segmenter {};
+        using hop_ = hop<E>;
+        using segment_ = segment<N>;
         const auto& [parts, final_weight] { segmenter.backtrack_segmentation_points(g, 0.000001f64) };
         std::cout << final_weight << std::endl;
         for (const auto& part : parts) {
-            if (const hop* hop_ptr = std::get_if<hop>(&part)) {
+            if (const hop_* hop_ptr = std::get_if<hop_>(&part)) {
                 const auto& [from_node, to_node] { hop_ptr->edge.inner_edge };
                 const auto& [from_node_down_offset, from_node_right_offset] { from_node };
                 const auto& [to_node_down_offset, to_node_right_offset] { to_node };
@@ -105,7 +110,7 @@ namespace {
                     << to_node_down_offset << ',' << to_node_right_offset
                     << " edgetype " << static_cast<std::uint8_t>(type)
                     << std::endl;
-            } else if (const segment* segment_ptr = std::get_if<segment>(&part)) {
+            } else if (const segment_* segment_ptr = std::get_if<segment_>(&part)) {
                 const auto& [from_node_down_offset, from_node_right_offset] { segment_ptr->from_node };
                 const auto& [to_node_down_offset, to_node_right_offset] { segment_ptr->to_node };
                 std::cout << "segment: " << from_node_down_offset << ',' << from_node_right_offset

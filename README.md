@@ -28,6 +28,8 @@ TODO:
 * ~~FIX EXTENDEDGAP slice_nodes() function to not use forward_range_join_view~~
   * ~~make adapater that create forward_range / forward_backward_range based on callbacks (e.g. next(value) func and prev(value) func)~~
 
+* graph node/edge types to structs instead of std::pair -- add friend functions that print out to std::out
+* error_check -> debug_mode
 * resident_segmenter - some use of std::vector -- move creation of types in container_pack_creators (SEE TODOs IN RESIDENT_SEGMENTER -- DOES IT EVEN NEED TO EXIST?)
 * ~~resident_segmenter - move is_node_on_max_path/walk_to_node to static functions in bidiwalker?~~
 * DONT DO THIS, but make a note that it's possible to do in the code (but may result in rounding errors):

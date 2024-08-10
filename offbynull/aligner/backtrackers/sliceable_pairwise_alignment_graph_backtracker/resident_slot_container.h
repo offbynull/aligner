@@ -14,7 +14,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::concepts::weight;
     using offbynull::helpers::container_creators::container_creator;
+    using offbynull::helpers::container_creators::container_creator_of_type;
     using offbynull::helpers::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::static_vector_container_creator;
 
     template<typename E, weight WEIGHT>
     struct resident_slot {
@@ -23,22 +25,22 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     };
 
     template<typename N, typename E, weight WEIGHT>
-    struct node_searchable_slot {
+    struct resident_slot_with_node {
         N node;
         resident_slot<E, WEIGHT> slot_;
     };
 
     template<typename N, typename E, weight WEIGHT>
-    struct node_searchable_slot_comparator {
+    struct resident_slot_with_node_comparator {
         bool operator()(
-            const node_searchable_slot<N, E, WEIGHT>& lhs,
-            const node_searchable_slot<N, E, WEIGHT>& rhs
+            const resident_slot_with_node<N, E, WEIGHT>& lhs,
+            const resident_slot_with_node<N, E, WEIGHT>& rhs
         ) const noexcept {
             return lhs.node < rhs.node;
         }
 
         bool operator()(
-            const node_searchable_slot<N, E, WEIGHT>& lhs,
+            const resident_slot_with_node<N, E, WEIGHT>& lhs,
             const N& rhs
         ) const noexcept {
             return lhs.node < rhs;
@@ -46,22 +48,66 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
         bool operator()(
             const N& lhs,
-            const node_searchable_slot<N, E, WEIGHT>& rhs
+            const resident_slot_with_node<N, E, WEIGHT>& rhs
         ) const noexcept {
             return lhs < rhs.node;
         }
     };
 
+
+
+
+
     template<
-        readable_sliceable_pairwise_alignment_graph G,
-        container_creator CONTAINER_CREATOR=vector_container_creator<
-            node_searchable_slot<
+        typename T,
+        typename G
+    >
+    concept resident_slot_container_container_creator_pack =
+        readable_sliceable_pairwise_alignment_graph<G>
+        && container_creator_of_type<
+            typename T::SLOT_CONTAINER_CREATOR,
+            resident_slot_with_node<
                 typename G::N,
                 typename G::E,
                 typename G::ED
             >
-        >,
-        bool error_check = true
+        >;
+
+    template<
+        bool error_check,
+        readable_sliceable_pairwise_alignment_graph G
+    >
+    struct resident_slot_container_heap_container_creator_pack {
+        using N = typename G::N;
+        using E = typename G::E;
+        using ED = typename G::ED;
+        using SLOT_CONTAINER_CREATOR=vector_container_creator<resident_slot_with_node<N, E, ED>, error_check>;
+    };
+
+    template<
+        bool error_check,
+        readable_sliceable_pairwise_alignment_graph G,
+        std::size_t grid_down_cnt,
+        std::size_t grid_right_cnt
+    >
+    struct resident_slot_container_stack_container_creator_pack {
+        using N = typename G::N;
+        using E = typename G::E;
+        using ED = typename G::ED;
+        using SLOT_CONTAINER_CREATOR=static_vector_container_creator<
+            resident_slot_with_node<N, E, ED>,
+            G::limits(grid_down_cnt, grid_right_cnt).max_resident_nodes_cnt,
+            error_check
+        >;
+    };
+
+
+
+
+    template<
+        bool error_check,
+        readable_sliceable_pairwise_alignment_graph G,
+        resident_slot_container_container_creator_pack<G> CONTAINER_CREATOR_PACK=resident_slot_container_heap_container_creator_pack<error_check, G>
     >
     class resident_slot_container {
     private:
@@ -70,27 +116,27 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ND = typename G::ND;
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
-        using CONTAINER=decltype(std::declval<CONTAINER_CREATOR>().create_objects(0zu));
+        using SLOT_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::SLOT_CONTAINER_CREATOR;
+        using SLOT_CONTAINER=decltype(std::declval<SLOT_CONTAINER_CREATOR>().create_objects(0zu));
 
-        CONTAINER slots;
+        SLOT_CONTAINER slots;
 
     public:
         resident_slot_container(
-            const G& graph_,
-            const CONTAINER_CREATOR& container_creator
+            const G& graph_
         )
         : slots{
-            container_creator.create_copy(
+            SLOT_CONTAINER_CREATOR {}.create_copy(
                 graph_.resident_nodes()
                 | std::views::transform([](const N& node) {
-                    return node_searchable_slot<N, E, ED> {
+                    return resident_slot_with_node<N, E, ED> {
                         node,
                         {}
                     };
                 })
             )
         } {
-            std::ranges::sort(slots.begin(), slots.end(), node_searchable_slot_comparator<N, E, ED>{});
+            std::ranges::sort(slots.begin(), slots.end(), resident_slot_with_node_comparator<N, E, ED>{});
         }
 
         std::optional<std::reference_wrapper<resident_slot<E, ED>>> find(const N& node) {
@@ -99,7 +145,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     slots.begin(),
                     slots.end(),
                     node,
-                    node_searchable_slot_comparator<N, E, ED>{}
+                    resident_slot_with_node_comparator<N, E, ED>{}
                 )
             };
             if (it != slots.end() && (*it).node == node) {

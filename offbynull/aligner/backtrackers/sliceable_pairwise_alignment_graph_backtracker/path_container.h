@@ -7,15 +7,22 @@
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container {
     using offbynull::aligner::concepts::weight;
-    using offbynull::helpers::container_creators::container_creator;
-    using offbynull::helpers::container_creators::vector_container_creator;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::helpers::container_creators::container_creator;
+    using offbynull::helpers::container_creators::container_creator_of_type;
+    using offbynull::helpers::container_creators::vector_container_creator;
+    using offbynull::helpers::container_creators::static_vector_container_creator;
 
     template<typename E>
     struct element {
         element<E>* prev;
         element<E>* next;
         E backtracking_edge;
+
+        element()
+        : prev{}
+        , next{}
+        , backtracking_edge{} {}
 
         element(
             element<E>* prev_,
@@ -95,41 +102,100 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         }
     };
 
+
+
+
+
+
+
+
+
     template<
+        typename T,
+        typename G
+    >
+    concept path_container_container_creator_pack =
+        readable_sliceable_pairwise_alignment_graph<G>
+        && container_creator_of_type<typename T::ELEMENT_CONTAINER_CREATOR, element<typename G::E>>;
+
+    template<
+        bool error_check,
+        readable_sliceable_pairwise_alignment_graph G
+    >
+    struct path_container_heap_container_creator_pack {
+        using E = typename G::E;
+        using ED = typename G::ED;
+        using ELEMENT_CONTAINER_CREATOR=vector_container_creator<element<typename G::E>, error_check>;
+    };
+
+    template<
+        bool error_check,
         readable_sliceable_pairwise_alignment_graph G,
-        container_creator ELEMENT_CONTAINER_CREATOR=vector_container_creator<element<typename G::E>>,
-        bool error_check=true
+        std::size_t grid_down_cnt,
+        std::size_t grid_right_cnt
+    >
+    struct path_container_stack_container_creator_pack {
+        using N = typename G::N;
+        using E = typename G::E;
+        using ED = typename G::ED;
+        using ELEMENT_CONTAINER_CREATOR=static_vector_container_creator<
+            element<typename G::E>,
+            G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt,
+            error_check
+        >;
+    };
+
+
+
+
+
+
+
+
+    template<
+        bool error_check,
+        readable_sliceable_pairwise_alignment_graph G,
+        path_container_container_creator_pack<G> CONTAINER_CREATOR_PACK=path_container_heap_container_creator_pack<error_check, G>
     >
     class path_container {
     private:
         using E = typename G::E;
+
+        using ELEMENT_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::ELEMENT_CONTAINER_CREATOR;
         using ELEMENT_CONTAINER=decltype(std::declval<ELEMENT_CONTAINER_CREATOR>().create_empty(0zu));
 
         ELEMENT_CONTAINER element_container;
         element<E>* head;
         element<E>* tail;
+        std::size_t next_idx;
 
     public:
-        path_container(
-            const std::size_t max_path_edge_cnt,
-            const ELEMENT_CONTAINER_CREATOR element_container_creator = {}
-        )
-        : element_container{ element_container_creator.create_empty(max_path_edge_cnt) } {}
+        path_container(const G& g)
+        : element_container{
+            ELEMENT_CONTAINER_CREATOR {}.create_objects(
+                G::limits(
+                   g.grid_down_cnt,
+                   g.grid_right_cnt
+               ).max_path_edge_cnt
+            )
+        }
+        , head{nullptr}
+        , tail{nullptr}
+        , next_idx{0zu} {}
 
         element<E>* initialize(const E& backtracking_edge) {
             if constexpr (error_check) {
-                if (!element_container.empty()) {
+                if (next_idx != 0zu) {
                     throw std::runtime_error("Already initialized");
                 }
-            }
-            element_container.push_back(
-                element<E> {
-                    nullptr,
-                    nullptr,
-                    backtracking_edge
+                if (next_idx >= element_container.size()) {
+                    // If this happens, G::limits().max_path_edge_cnt is probably giving back a number that's too low
+                    throw std::runtime_error("Container too small");
                 }
-            );
+            }
             element<E>* entry { &element_container[0zu] };
+            entry->backtracking_edge = backtracking_edge;
+            ++next_idx;
             head = entry;
             tail = entry;
             return entry;
@@ -137,18 +203,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
         element<E>* push_prefix(element<E>* entry, const E& backtracking_edge) {
             if constexpr (error_check) {
-                if (element_container.empty()) {
+                if (next_idx == 0zu) {
                     throw std::runtime_error("Not initialized");
                 }
-            }
-            element_container.push_back(
-                element<E> {
-                    nullptr,
-                    nullptr,
-                    backtracking_edge
+                if (next_idx >= element_container.size()) {
+                    // If this happens, G::limits().max_path_edge_cnt is probably giving back a number that's too low
+                    throw std::runtime_error("Container too small");
                 }
-            );
-            element<E>* prefix_entry { &element_container[element_container.size() - 1zu] };
+            }
+            element<E>* prefix_entry { &element_container[next_idx] };
+            prefix_entry->backtracking_edge = backtracking_edge;
+            ++next_idx;
             element<E>* orig_prev { entry->prev };
             if (orig_prev != nullptr) {
                 orig_prev->next = prefix_entry;
@@ -164,18 +229,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
         element<E>* push_suffix(element<E>* entry, const E& backtracking_edge) {
             if constexpr (error_check) {
-                if (element_container.empty()) {
+                if (next_idx == 0zu) {
                     throw std::runtime_error("Not initialized");
                 }
-            }
-            element_container.push_back(
-                element<E> {
-                    nullptr,
-                    nullptr,
-                    backtracking_edge
+                if (next_idx >= element_container.size()) {
+                    // If this happens, G::limits().max_path_edge_cnt is probably giving back a number that's too low
+                    throw std::runtime_error("Container too small");
                 }
-            );
-            element<E>* suffix_entry { &element_container[element_container.size() - 1zu] };
+            }
+            element<E>* suffix_entry { &element_container[next_idx] };
+            suffix_entry->backtracking_edge = backtracking_edge;
+            ++next_idx;
             element<E>* orig_next { entry->next };
             if (orig_next != nullptr) {
                 orig_next->prev = suffix_entry;

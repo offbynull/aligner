@@ -16,14 +16,65 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container::slice_slot_container;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::node_searchable_slot;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container::slice_slot_container_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container::slice_slot_container_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container::slice_slot_container_stack_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_with_node;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_container;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_container_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_container_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_container_stack_container_creator_pack;
     using offbynull::aligner::concepts::weight;
     using offbynull::helpers::container_creators::container_creator;
     using offbynull::helpers::container_creators::vector_container_creator;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
+
+
+
+
+    template<
+        typename T,
+        typename G
+    >
+    concept forward_walker_container_creator_pack =
+        readable_sliceable_pairwise_alignment_graph<G>
+        && slice_slot_container_container_creator_pack<typename T::SLICE_SLOT_CONTAINER_CREATOR_PACK, G>
+        && resident_slot_container_container_creator_pack<typename T::RESIDENT_SLOT_CONTAINER_CREATOR_PACK, G>;
+
+    template<
+        bool error_check,
+        readable_sliceable_pairwise_alignment_graph G
+    >
+    struct forward_walker_heap_container_creator_pack {
+        using SLICE_SLOT_CONTAINER_CREATOR_PACK=slice_slot_container_heap_container_creator_pack<error_check, G>;
+        using RESIDENT_SLOT_CONTAINER_CREATOR_PACK=resident_slot_container_heap_container_creator_pack<error_check, G>;
+    };
+
+    template<
+        bool error_check,
+        readable_sliceable_pairwise_alignment_graph G,
+        std::size_t grid_down_cnt,
+        std::size_t grid_right_cnt
+    >
+    struct forward_walker_stack_container_creator_pack {
+        using SLICE_SLOT_CONTAINER_CREATOR_PACK=slice_slot_container_stack_container_creator_pack<
+            error_check,
+            G,
+            grid_down_cnt,
+            grid_right_cnt
+        >;
+        using RESIDENT_SLOT_CONTAINER_CREATOR_PACK=slice_slot_container_stack_container_creator_pack<
+            error_check,
+            G,
+            grid_down_cnt,
+            grid_right_cnt
+        >;
+    };
+
+
+
 
     template<typename N, typename E, weight WEIGHT>
     struct slice_entry {
@@ -36,9 +87,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     };
 
     template<
+        bool error_check,
         readable_sliceable_pairwise_alignment_graph G,
-        container_creator SLICE_SLOT_CONTAINER_CREATOR,
-        bool error_check
+        slice_slot_container_container_creator_pack<G> SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK
     >
     struct slice_slot_container_pair {
         using N = typename G::N;
@@ -47,18 +98,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
-        slice_slot_container<G, SLICE_SLOT_CONTAINER_CREATOR, error_check> slots1;
-        slice_slot_container<G, SLICE_SLOT_CONTAINER_CREATOR, error_check> slots2;
-        slice_slot_container<G, SLICE_SLOT_CONTAINER_CREATOR, error_check>* previous_slots;  // row above current row
-        slice_slot_container<G, SLICE_SLOT_CONTAINER_CREATOR, error_check>* current_slots;  // current row
+        slice_slot_container<error_check, G, SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK> slots1;
+        slice_slot_container<error_check, G, SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK> slots2;
+        slice_slot_container<error_check, G, SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK>* previous_slots;  // row above current row
+        slice_slot_container<error_check, G, SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK>* current_slots;  // current row
         INDEX grid_down_offset;
 
         slice_slot_container_pair(
-            const G& graph,
-            const SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator
+            const G& graph
         )
-        : slots1{graph, slice_slot_container_creator}
-        , slots2{graph, slice_slot_container_creator}
+        : slots1{graph}
+        , slots2{graph}
         , previous_slots{&slots1}
         , current_slots{&slots2}
         , grid_down_offset{0u} {}
@@ -87,21 +137,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     };
 
     template<
+        bool error_check,
         readable_sliceable_pairwise_alignment_graph G,
-        container_creator SLICE_SLOT_CONTAINER_CREATOR=vector_container_creator<
-            slot<
-                typename G::E,
-                typename G::ED
-            >
-        >,
-        container_creator RESIDENT_SLOT_CONTAINER_CREATOR=vector_container_creator<
-            node_searchable_slot<
-                typename G::N,
-                typename G::E,
-                typename G::ED
-            >
-        >,
-        bool error_check = true
+        forward_walker_container_creator_pack<G> CONTAINER_CREATOR_PACK=forward_walker_heap_container_creator_pack<error_check, G>
     >
     class forward_walker {
     private:
@@ -111,9 +149,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
+        using SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::SLICE_SLOT_CONTAINER_CREATOR_PACK;
+        using RESIDENT_SLOT_CONTAINER_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::RESIDENT_SLOT_CONTAINER_CREATOR_PACK;
+
         const G& graph;
-        resident_slot_container<G, RESIDENT_SLOT_CONTAINER_CREATOR, error_check> resident_slots;
-        slice_slot_container_pair<G, SLICE_SLOT_CONTAINER_CREATOR, error_check> slice_slots;
+        resident_slot_container<error_check, G, RESIDENT_SLOT_CONTAINER_CONTAINER_CREATOR_PACK> resident_slots;
+        slice_slot_container_pair<error_check, G, SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK> slice_slots;
         decltype(graph.slice_nodes(0u)) slice;
         decltype(slice.begin()) slice_it;
         slice_entry<N, E, ED> slice_entry_;
@@ -121,16 +162,14 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     public:
         static forward_walker create_and_initialize(
             const G& graph,
-            const INDEX target_slice,
-            const SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
-            const RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {}
+            const INDEX target_slice
         ) {
             if constexpr (error_check) {
                 if (target_slice >= graph.grid_down_cnt) {
                     throw std::runtime_error("Slice too far down");
                 }
             }
-            forward_walker ret { graph, slice_slot_container_creator, resident_slot_container_creator };
+            forward_walker ret { graph };
             while (ret.slice_slots.grid_down_offset != target_slice || ret.slice_it != ret.slice.end()) {
                 ret.step_forward();
             }
@@ -154,13 +193,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     private:
         forward_walker(
-            const G& graph_,
-            const SLICE_SLOT_CONTAINER_CREATOR slice_slot_container_creator = {},
-            const RESIDENT_SLOT_CONTAINER_CREATOR resident_slot_container_creator = {}
+            const G& graph_
         )
         : graph{graph_}
-        , resident_slots{graph, resident_slot_container_creator}
-        , slice_slots{graph, slice_slot_container_creator}
+        , resident_slots{graph}
+        , slice_slots{graph}
         , slice{graph.slice_nodes(0u)}
         , slice_it{slice.begin()}
         , slice_entry_{}  {
