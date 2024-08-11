@@ -32,7 +32,7 @@ namespace {
         auto gap_scorer { simple_scorer<true, char, char, std::float64_t>::create_gap(0.0f64) };
         std::string seq1 { "abcdefg" };
         std::string seq2 { "abcZefg" };
-        pairwise_global_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_global_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -81,7 +81,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(0.0f64) };
         std::string seq1 { "aaaaalmnaaaaa" };
         std::string seq2 { "zzzzzlVnzzzzz" };
-        pairwise_local_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_local_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -129,7 +129,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(0.0f64) };
         std::string seq1 { "aaalmnaaa" };
         std::string seq2 { "lmn" };
-        pairwise_fitting_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_fitting_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -200,7 +200,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(0.0f64) };
         std::string seq1 { "aaaaalmn" };
         std::string seq2 { "lmnzzzzz" };
-        pairwise_overlap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_overlap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,

@@ -14,15 +14,15 @@ namespace {
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::scorers::simple_scorer::simple_scorer;
 
-    auto substitution_scorer { simple_scorer<char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
-    auto gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(0.0f64) };
-    auto freeride_scorer { simple_scorer<char, char, std::float64_t>::create_freeride() };
+    auto substitution_scorer { simple_scorer<true, char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
+    auto gap_scorer { simple_scorer<true, char, char, std::float64_t>::create_gap(0.0f64) };
+    auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride() };
 
     struct graph_bundle {
         std::string down_seq;
         std::string right_seq;
-        pairwise_local_alignment_graph<std::string, std::string> backing_g;
-        middle_sliceable_pairwise_alignment_graph<decltype(backing_g)> middle_g;
+        pairwise_local_alignment_graph<true, std::string, std::string> backing_g;
+        middle_sliceable_pairwise_alignment_graph<true, decltype(backing_g)> middle_g;
 
         graph_bundle(
             std::string _down_seq,

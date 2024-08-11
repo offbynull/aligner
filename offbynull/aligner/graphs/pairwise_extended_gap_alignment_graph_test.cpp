@@ -11,13 +11,13 @@ namespace {
     using offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph::layer;
     using offbynull::aligner::scorers::simple_scorer::simple_scorer;
 
-    auto substitution_scorer { simple_scorer<char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
-    auto initial_gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(0.0f64) };
-    auto extended_gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(0.1f64) };
-    auto freeride_scorer { simple_scorer<char, char, std::float64_t>::create_freeride() };
+    auto substitution_scorer { simple_scorer<true, char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
+    auto initial_gap_scorer { simple_scorer<true, char, char, std::float64_t>::create_gap(0.0f64) };
+    auto extended_gap_scorer { simple_scorer<true, char, char, std::float64_t>::create_gap(0.1f64) };
+    auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride() };
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, ConceptCheck) {
-        using G = pairwise_extended_gap_alignment_graph<std::string, std::string>;
+        using G = pairwise_extended_gap_alignment_graph<true, std::string, std::string>;
         static_assert(offbynull::aligner::graph::graph::readable_graph<G>);
         static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph<G>);
     }
@@ -25,7 +25,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, ListNodes) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -79,7 +79,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, ListEdges) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -159,7 +159,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, NodesExist) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -223,7 +223,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, RightEdgesExist) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -250,7 +250,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, DownEdgesExist) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -277,7 +277,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, DiagEdgesExist) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -300,7 +300,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, DownFreeRidgeEdgesExist) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -330,7 +330,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, RightFreeRidgeEdgesExist) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -360,7 +360,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, GetOutputs) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -646,7 +646,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, GetInputs) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -932,7 +932,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, GetOutputDegree) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -983,7 +983,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, GetInputDegree) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -1034,7 +1034,7 @@ namespace {
     TEST(PairwiseExtendedGapAlignmentGraphTest, GetEdgeData) {
         std::string seq1 { "ac" };
         std::string seq2 { "abc" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -1068,7 +1068,7 @@ namespace {
 
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -1149,7 +1149,7 @@ namespace {
 
         std::string seq1 { "accd" };
         std::string seq2 { "accd" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -1280,13 +1280,13 @@ namespace {
     };
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, IsReachableTest) {
-        auto substitution_scorer { simple_scorer<char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
-        auto initial_gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(-1.0f64) };
-        auto extended_gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(-0.1f64) };
-        auto freeride_scorer { simple_scorer<char, char, std::float64_t>::create_freeride(0.0f64) };
+        auto substitution_scorer { simple_scorer<true, char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
+        auto initial_gap_scorer { simple_scorer<true, char, char, std::float64_t>::create_gap(-1.0f64) };
+        auto extended_gap_scorer { simple_scorer<true, char, char, std::float64_t>::create_gap(-0.1f64) };
+        auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(0.0f64) };
         std::string seq1 { "aaalaa" };
         std::string seq2 { "lv" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,

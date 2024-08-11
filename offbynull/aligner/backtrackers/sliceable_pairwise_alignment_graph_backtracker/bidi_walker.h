@@ -90,7 +90,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     private:
         const G& g;
         const INDEX target_slice;
-        const reversed_sliceable_pairwise_alignment_graph<G, error_check> reversed_g;
+        const reversed_sliceable_pairwise_alignment_graph<error_check, G> reversed_g;
         forward_walker<error_check, G, FORWARD_WALKER_CONTAINER_CREATOR_PACK> forward_walker_;
         forward_walker<error_check, decltype(reversed_g), FORWARD_WALKER_CONTAINER_CREATOR_PACK> backward_walker;
 

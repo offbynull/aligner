@@ -20,7 +20,7 @@ namespace {
         auto gap_scorer { simple_scorer<true, char, char, std::float64_t>::create_gap(-1.0f64) };
         std::string seq1 { "abc" };
         std::string seq2 { "azc" };
-        pairwise_global_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_global_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -120,7 +120,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(0.0f64) };
         std::string seq1 { "aaa" };
         std::string seq2 { "zaz" };
-        pairwise_local_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_local_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,

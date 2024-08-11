@@ -198,7 +198,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     // paths. The problem is that we can't accept that because we're targeting exactly one optimal path,
                     // and so we want to reject anything BEFORE last_to_node because if it goes BEFORE last_to_node then
                     // we know it's targeting a different optimal path vs the one that goes through last_to_node.
-                    middle_sliceable_pairwise_alignment_graph<G, error_check> sub_graph {
+                    middle_sliceable_pairwise_alignment_graph<error_check, G> sub_graph {
                         g,
                         last_to_node,
                         g.get_leaf_node()

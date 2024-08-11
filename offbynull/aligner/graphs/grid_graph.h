@@ -25,11 +25,11 @@ namespace offbynull::aligner::graphs::grid_graph {
     using empty_type = std::tuple<>;
 
     template<
+        bool error_check,
         sequence DOWN_SEQ,
         sequence RIGHT_SEQ,
         widenable_to_size_t INDEX_ = std::size_t,
-        weight WEIGHT = std::float64_t,
-        bool error_check = true
+        weight WEIGHT = std::float64_t
     >
     class grid_graph {
     public:

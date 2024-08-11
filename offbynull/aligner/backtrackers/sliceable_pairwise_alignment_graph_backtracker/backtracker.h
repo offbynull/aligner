@@ -147,7 +147,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 if (const hop_* hop_ptr = std::get_if<hop_>(&part)) {
                     path.push_back(hop_ptr->edge);
                 } else if (const segment_* segment_ptr = std::get_if<segment_>(&part)) {
-                    middle_sliceable_pairwise_alignment_graph<G> g_segment {
+                    middle_sliceable_pairwise_alignment_graph<error_check, G> g_segment {
                         g,
                         segment_ptr->from_node,
                         segment_ptr->to_node

@@ -14,8 +14,8 @@ namespace offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph 
     using offbynull::aligner::concepts::weight;
 
     template<
-        readable_sliceable_pairwise_alignment_graph G,
-        bool error_check=true
+        bool error_check,
+        readable_sliceable_pairwise_alignment_graph G
     >
     class suffix_sliceable_pairwise_alignment_graph {
     public:
@@ -27,25 +27,25 @@ namespace offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph 
 
     private:
         const reversed_sliceable_pairwise_alignment_graph<
-            G,
-            error_check
+            error_check,
+            G
         > inner_inner_g;
         const prefix_sliceable_pairwise_alignment_graph<
+            error_check,
             reversed_sliceable_pairwise_alignment_graph<
-                G,
-                error_check
-            >,
-            error_check
+                error_check,
+                G
+            >
         > inner_g;
         const reversed_sliceable_pairwise_alignment_graph<
+            error_check,
             prefix_sliceable_pairwise_alignment_graph<
+                error_check,
                 reversed_sliceable_pairwise_alignment_graph<
-                    G,
-                    error_check
-                >,
-                error_check
-            >,
-            error_check
+                    error_check,
+                    G
+                >
+            >
         > g;
 
     public:

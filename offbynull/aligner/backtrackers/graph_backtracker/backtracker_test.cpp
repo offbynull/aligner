@@ -19,7 +19,7 @@ namespace {
 
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        pairwise_global_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_global_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -57,7 +57,7 @@ namespace {
         using E = std::pair<N, N>;
         using ND = std::tuple<std::optional<std::float64_t>, std::optional<E>>;
         using ED = std::float64_t;
-        using G = offbynull::aligner::graphs::directed_graph::directed_graph<N, ND, E, ED>;
+        using G = offbynull::aligner::graphs::directed_graph::directed_graph<true, N, ND, E, ED>;
 
         G g {};
         g.insert_node(std::pair{0zu, 0zu}, {std::nullopt, std::nullopt});

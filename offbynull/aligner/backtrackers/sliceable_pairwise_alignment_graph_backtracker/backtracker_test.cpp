@@ -26,7 +26,7 @@ namespace {
         auto gap_scorer { simple_scorer<true, char, char, std::float64_t>::create_gap(0.0f64) };
         std::string seq1 { "abc" };
         std::string seq2 { "azc" };
-        pairwise_global_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_global_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -67,7 +67,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(0.0f64) };
         std::string seq1 { "aaaaalmnaaaaa" };
         std::string seq2 { "zzzzzlmnzzzzz" };
-        pairwise_local_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_local_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -104,7 +104,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(0.0f64) };
         std::string seq1 { "aaaaalmn" };
         std::string seq2 { "lmnzzzzz" };
-        pairwise_overlap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_overlap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -141,7 +141,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(0.0f64) };
         std::string seq1 { "aaaaalmnaaaaa" };
         std::string seq2 { "lmn" };
-        pairwise_fitting_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_fitting_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -179,7 +179,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(0.0f64) };
         std::string seq1 { "aaalaa" };
         std::string seq2 { "l" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -236,7 +236,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(-0.55461590857866616f64) };
         std::string seq1 { "bj" };
         std::string seq2 { "ya" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -248,13 +248,13 @@ namespace {
         using E = typename decltype(g)::E;
 
         // N first_node { *g.slice_nodes(1u).begin() };
-        // offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph<decltype(g)> suffix_g { g, first_node };
+        // offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph<true, decltype(g)> suffix_g { g, first_node };
         // for (const N& n : suffix_g.slice_nodes(0u)) {
         //     const auto& [n_layer, n_down, n_right] { n };
         //     std::cout << n_down << '/' << n_right << '/' << static_cast<int>(n_layer) << std::endl;
         // }
-        // offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph<decltype(suffix_g)> reversed_suffix_g { suffix_g };
-        // offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker<decltype(reversed_suffix_g)> backward_walker { reversed_suffix_g };
+        // offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph<true, decltype(suffix_g)> reversed_suffix_g { suffix_g };
+        // offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker<true, decltype(reversed_suffix_g)> backward_walker { reversed_suffix_g };
         // while (!backward_walker.next()) {}
         // auto ret { backward_walker.find(N { offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph::layer::DOWN, 1u, 2u }) };
 
@@ -314,7 +314,7 @@ namespace {
         auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(-0.68120966590317833f64) };
         std::string seq1 { "rczs" };
         std::string seq2 { "r" };
-        pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+        pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -328,7 +328,7 @@ namespace {
         // using offbynull::aligner::graph::utils::pairwise_graph_to_graphviz;
         // N first_node { *g.slice_nodes(2u).begin() };
         // offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph<decltype(g)> g_1 { g };
-        // offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph<decltype(g_1)> g_2 { g_1, first_node };
+        // offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph<true, decltype(g_1)> g_2 { g_1, first_node };
         // std::cout << pairwise_graph_to_graphviz(
         //     g_2,
         //     [&](auto n) {
@@ -418,7 +418,7 @@ namespace {
             auto freeride_scorer { simple_scorer<true, char, char, std::float64_t>::create_freeride(random_float(-1.0f64, 1.0f64)) };
             std::string seq1 { random_string(5zu) };
             std::string seq2 { random_string(5zu) };
-            pairwise_extended_gap_alignment_graph<decltype(seq1), decltype(seq2)> g {
+            pairwise_extended_gap_alignment_graph<true, decltype(seq1), decltype(seq2)> g {
                 seq1,
                 seq2,
                 substitution_scorer,

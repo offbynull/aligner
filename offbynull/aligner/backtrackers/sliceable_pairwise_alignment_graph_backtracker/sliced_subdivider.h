@@ -169,7 +169,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             // for (auto i { 0 }; i < indent; i++) {
             //     indent_str += ' ';
             // }
-            middle_sliceable_pairwise_alignment_graph<G, error_check> sub_graph {
+            middle_sliceable_pairwise_alignment_graph<error_check, G> sub_graph {
                 whole_graph,
                 root_node,
                 leaf_node

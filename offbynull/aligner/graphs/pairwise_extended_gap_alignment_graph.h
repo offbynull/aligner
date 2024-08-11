@@ -35,11 +35,11 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     };
 
     template<
+        bool error_check,
         sequence DOWN_SEQ,
         sequence RIGHT_SEQ,
         widenable_to_size_t INDEX_ = std::size_t,
-        weight WEIGHT = std::float64_t,
-        bool error_check = true
+        weight WEIGHT = std::float64_t
     >
     class pairwise_extended_gap_alignment_graph {
     public:

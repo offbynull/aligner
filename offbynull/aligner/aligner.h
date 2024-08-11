@@ -119,6 +119,7 @@ namespace offbynull::aligner::aligner {
         using ND = std::tuple<>;
         using ED = WEIGHT;
         pairwise_global_alignment_graph<
+            true,
             ND,
             ED,
             INDEX,
@@ -164,12 +165,12 @@ namespace offbynull::aligner::aligner {
         using ND = std::tuple<>;
         using ED = WEIGHT;
         pairwise_local_alignment_graph<
+            true,
             ND,
             ED,
             INDEX,
             vector_grid_container_creator<ND, INDEX, error_check>,
-            vector_grid_container_creator<ED, INDEX, error_check>,
-            error_check
+            vector_grid_container_creator<ED, INDEX, error_check>
         > graph { v_node_cnt, w_node_cnt };
         graph.template assign_weights<WEIGHT>(
             v,
@@ -210,6 +211,7 @@ namespace offbynull::aligner::aligner {
         using ND = std::tuple<>;
         using ED = WEIGHT;
         pairwise_fitting_alignment_graph<
+            true,
             ND,
             ED,
             INDEX,
@@ -258,6 +260,7 @@ namespace offbynull::aligner::aligner {
         using ND = std::tuple<>;
         using ED = WEIGHT;
         pairwise_extended_gap_alignment_graph<
+            true,
             ND,
             ED,
             INDEX,
@@ -373,6 +376,7 @@ namespace offbynull::aligner::aligner {
         using ND = std::tuple<>;
         using ED = WEIGHT;
         pairwise_global_alignment_graph<
+            true,
             ND,
             ED,
             INDEX,
@@ -425,12 +429,12 @@ namespace offbynull::aligner::aligner {
         using ND = std::tuple<>;
         using ED = WEIGHT;
         pairwise_local_alignment_graph<
+            true,
             ND,
             ED,
             INDEX,
             array_grid_container_creator<ND, INDEX, v_node_cnt, w_node_cnt, error_check>,
-            array_grid_container_creator<ED, INDEX, v_node_cnt, w_node_cnt, error_check>,
-            error_check
+            array_grid_container_creator<ED, INDEX, v_node_cnt, w_node_cnt, error_check>
         > graph { v_node_cnt, w_node_cnt };
         graph.template assign_weights<WEIGHT>(
             v,
@@ -478,6 +482,7 @@ namespace offbynull::aligner::aligner {
         using ND = std::tuple<>;
         using ED = WEIGHT;
         pairwise_fitting_alignment_graph<
+            true,
             ND,
             ED,
             INDEX,
@@ -532,6 +537,7 @@ namespace offbynull::aligner::aligner {
         using ND = std::tuple<>;
         using ED = WEIGHT;
         pairwise_extended_gap_alignment_graph<
+            true,
             ND,
             ED,
             INDEX,

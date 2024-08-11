@@ -10,7 +10,7 @@ namespace {
         using offbynull::aligner::graph::utils::graph_to_string;
         using offbynull::aligner::graphs::directed_graph::directed_graph;
 
-        directed_graph<std::string, std::string, std::string, std::string> g {};
+        directed_graph<true, std::string, std::string, std::string, std::string> g {};
 
         g.insert_node("A", "");
         g.insert_node("B", "");

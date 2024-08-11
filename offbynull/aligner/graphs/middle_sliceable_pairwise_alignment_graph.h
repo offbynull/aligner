@@ -14,8 +14,8 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
     using offbynull::aligner::concepts::weight;
 
     template<
-        readable_sliceable_pairwise_alignment_graph G,
-        bool error_check=true
+        bool error_check,
+        readable_sliceable_pairwise_alignment_graph G
     >
     class middle_sliceable_pairwise_alignment_graph {
     public:
@@ -27,15 +27,15 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
 
     private:
         const prefix_sliceable_pairwise_alignment_graph<
-            G,
-            error_check
+            error_check,
+            G
         > inner_g;
         const suffix_sliceable_pairwise_alignment_graph<
+            error_check,
             prefix_sliceable_pairwise_alignment_graph<
-                G,
-                error_check
-            >,
-            error_check
+                error_check,
+                G
+            >
         > g;
 
     public:
@@ -66,7 +66,7 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
             }
         }
 
-        static middle_sliceable_pairwise_alignment_graph<G, error_check> create_using_offsets(
+        static middle_sliceable_pairwise_alignment_graph<error_check, G> create_using_offsets(
             const G& g,
             const INDEX down_offset_1,
             const INDEX right_offset_1,
@@ -78,7 +78,7 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
                     throw std::runtime_error("Top-left isn't top-left");
                 }
             }
-            return middle_sliceable_pairwise_alignment_graph<G, error_check> {
+            return middle_sliceable_pairwise_alignment_graph<error_check, G> {
                 g,
                 down_offset_1,
                 right_offset_1,

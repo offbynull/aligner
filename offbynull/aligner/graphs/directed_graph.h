@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace offbynull::aligner::graphs::directed_graph {
-    template<typename N_, typename ND_, typename E_, typename ED_, bool error_check = true>
+    template<bool error_check, typename N_, typename ND_, typename E_, typename ED_>
     class directed_graph {
     public:
         using N = N_;

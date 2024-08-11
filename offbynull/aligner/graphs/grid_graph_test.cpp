@@ -9,18 +9,18 @@ namespace {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
     using offbynull::aligner::scorers::simple_scorer::simple_scorer;
 
-    auto substitution_scorer { simple_scorer<char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
-    auto gap_scorer { simple_scorer<char, char, std::float64_t>::create_gap(0.0f64) };
+    auto substitution_scorer { simple_scorer<true, char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
+    auto gap_scorer { simple_scorer<true, char, char, std::float64_t>::create_gap(0.0f64) };
 
     TEST(GridGraphTest, ConceptCheck) {
-        using G = grid_graph<std::string, std::string>;
+        using G = grid_graph<true, std::string, std::string>;
         static_assert(offbynull::aligner::graph::graph::readable_graph<G>);
     }
 
     TEST(GridGraphTest, ListNodes) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -40,7 +40,7 @@ namespace {
     TEST(GridGraphTest, ListEdges) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -73,7 +73,7 @@ namespace {
     TEST(GridGraphTest, NodesExist) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -94,7 +94,7 @@ namespace {
     TEST(GridGraphTest, RightEdgesExist) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -112,7 +112,7 @@ namespace {
     TEST(GridGraphTest, DownEdgesExist) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -130,7 +130,7 @@ namespace {
     TEST(GridGraphTest, DiagEdgesExist) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -148,7 +148,7 @@ namespace {
     TEST(GridGraphTest, GetOutputs) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -210,7 +210,7 @@ namespace {
     TEST(GridGraphTest, GetInputs) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -272,7 +272,7 @@ namespace {
     TEST(GridGraphTest, GetOutputDegree) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
@@ -288,7 +288,7 @@ namespace {
     TEST(GridGraphTest, GetInputDegree) {
         std::string seq1 { "a" };
         std::string seq2 { "ac" };
-        grid_graph<decltype(seq1), decltype(seq2)> g {
+        grid_graph<true, decltype(seq1), decltype(seq2)> g {
             seq1,
             seq2,
             substitution_scorer,
