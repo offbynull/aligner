@@ -12,6 +12,7 @@
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 #include "offbynull/helpers/container_creators.h"
 #include "offbynull/concepts.h"
+#include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker {
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
@@ -33,6 +34,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     using offbynull::helpers::container_creators::static_vector_container_creator;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
+    using offbynull::concepts::random_access_range_of_type;
+    using offbynull::utils::static_vector_typer;
 
 
 
@@ -43,9 +46,11 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     >
     concept backtracker_container_creator_pack =
         readable_pairwise_alignment_graph<G>
-        && slot_container_container_creator_pack<typename T::SLOT_CONTAINER_CONTAINER_CREATOR_PACK, G>
-        && ready_queue_container_creator_pack<typename T::READY_QUEUE_CONTAINER_CREATOR_PACK, G>
-        && container_creator_of_type<typename T::PATH_CONTAINER_CREATOR, typename G::E>;;
+        && requires(T t) {
+            { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<G>;
+            { t.create_ready_queue_container_creator_pack() } -> ready_queue_container_creator_pack<G>;
+            { t.create_path_container() } -> random_access_range_of_type<typename G::E>;
+        };
 
     template<
         bool debug_mode,
@@ -54,9 +59,17 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     struct backtracker_heap_container_creator_pack {
         using E = typename G::E;
 
-        using SLOT_CONTAINER_CONTAINER_CREATOR_PACK=slot_container_heap_container_creator_pack<debug_mode, G>;
-        using READY_QUEUE_CONTAINER_CREATOR_PACK=ready_queue_heap_container_creator_pack<debug_mode, G>;
-        using PATH_CONTAINER_CREATOR=vector_container_creator<E, debug_mode>;
+        slot_container_heap_container_creator_pack<debug_mode, G> create_slot_container_container_creator_pack() {
+            return slot_container_heap_container_creator_pack<debug_mode, G> {};
+        }
+
+        ready_queue_heap_container_creator_pack<debug_mode, G> create_ready_queue_container_creator_pack() {
+            return ready_queue_heap_container_creator_pack<debug_mode, G> {};
+        }
+
+        std::vector<E> create_path_container() {
+            return std::vector<E> {};
+        }
     };
 
     template<
@@ -68,23 +81,20 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     struct backtracker_stack_container_creator_pack {
         using E = typename G::E;
 
-        using SLOT_CONTAINER_CONTAINER_CREATOR_PACK=slot_container_stack_container_creator_pack<
-            debug_mode,
-            G,
-            grid_down_cnt,
-            grid_right_cnt
-        >;
-        using READY_QUEUE_CONTAINER_CREATOR_PACK=ready_queue_stack_container_creator_pack<
-            debug_mode,
-            G,
-            grid_down_cnt,
-            grid_right_cnt
-        >;
-        using PATH_CONTAINER_CREATOR=static_vector_container_creator<
-            E,
-            G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt,
-            debug_mode
-        >;
+        slot_container_stack_container_creator_pack<debug_mode, G, grid_down_cnt, grid_right_cnt> create_slot_container_container_creator_pack() {
+            return slot_container_stack_container_creator_pack<debug_mode, G, grid_down_cnt, grid_right_cnt> {};
+        }
+
+        ready_queue_stack_container_creator_pack<debug_mode, G, grid_down_cnt, grid_right_cnt> create_ready_queue_container_creator_pack() {
+            return ready_queue_stack_container_creator_pack<debug_mode, G, grid_down_cnt, grid_right_cnt> {};
+        }
+
+        static constexpr std::size_t PATH_ELEM_COUNT { G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt };
+        using PATH_CONTAINER_TYPE = typename static_vector_typer<std::size_t, PATH_ELEM_COUNT, debug_mode>::type;
+
+        PATH_CONTAINER_TYPE create_path_container() {
+            return PATH_CONTAINER_TYPE {};
+        }
     };
 
 
@@ -105,13 +115,19 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
-        using SLOT_CONTAINER_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::SLOT_CONTAINER_CONTAINER_CREATOR_PACK;
-        using READY_QUEUE_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::READY_QUEUE_CONTAINER_CREATOR_PACK;
-        using PATH_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::PATH_CONTAINER_CREATOR;
-        using PATH_CONTAINER=decltype(std::declval<PATH_CONTAINER_CREATOR>().create_empty(std::nullopt));
+        using SLOT_CONTAINER_CONTAINER_CREATOR_PACK=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_slot_container_container_creator_pack());
+        using READY_QUEUE_CONTAINER_CREATOR_PACK=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_ready_queue_container_creator_pack());
+        using PATH_CONTAINER=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container());
 
         using slot_container_t = slot_container<debug_mode, G, SLOT_CONTAINER_CONTAINER_CREATOR_PACK>;
         using ready_queue_t = ready_queue<debug_mode, G, READY_QUEUE_CONTAINER_CREATOR_PACK>;
+
+        CONTAINER_CREATOR_PACK container_creator_pack;
+
+        backtracker(
+            CONTAINER_CREATOR_PACK container_creator_pack_ = {}
+        )
+        : container_creator_pack{container_creator_pack_} {}
 
         slot_container_t populate_weights_and_backtrack_pointers(
             G& g
@@ -219,7 +235,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             slot_container_t& slots
         ) {
             auto next_node { g.get_leaf_node() };
-            auto path { PATH_CONTAINER_CREATOR {}.create_empty(std::nullopt) };
+            PATH_CONTAINER path { container_creator_pack.create_path_container() };
             while (true) {
                 auto node { next_node };
                 if (!g.has_inputs(node)) {

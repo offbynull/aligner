@@ -2,15 +2,13 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_READY_QUEUE_H
 
 #include <cstddef>
-#include <stdexcept>
 #include "offbynull/helpers/container_creators.h"
+#include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue {
-    using offbynull::helpers::container_creators::container_creator;
-    using offbynull::helpers::container_creators::container_creator_of_type;
-    using offbynull::helpers::container_creators::vector_container_creator;
-    using offbynull::helpers::container_creators::static_vector_container_creator;
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
+    using offbynull::concepts::random_access_range_of_type;
+    using offbynull::utils::static_vector_typer;
 
 
 
@@ -21,14 +19,21 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     >
     concept ready_queue_container_creator_pack =
     readable_pairwise_alignment_graph<G>
-    && container_creator_of_type<typename T::QUEUE_CONTAINER_CREATOR, std::size_t>;
+    && requires(T t) {
+        { t.create_queue_container() } -> random_access_range_of_type<std::size_t>;
+    };
 
     template<
         bool debug_mode,
         readable_pairwise_alignment_graph G
     >
     struct ready_queue_heap_container_creator_pack {
-        using QUEUE_CONTAINER_CREATOR=vector_container_creator<std::size_t, debug_mode>;
+        using N = typename G::N;
+        using E = typename G::E;
+
+        std::vector<std::size_t> create_queue_container() {
+            return std::vector<std::size_t> {};
+        }
     };
 
     template<
@@ -38,11 +43,15 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         std::size_t grid_right_cnt
     >
     struct ready_queue_stack_container_creator_pack {
-        using QUEUE_CONTAINER_CREATOR=static_vector_container_creator<
-            std::size_t,
-            grid_down_cnt * grid_right_cnt * G::limits(grid_down_cnt, grid_right_cnt).max_grid_node_depth,
-            debug_mode
-        >;
+        using N = typename G::N;
+        using E = typename G::E;
+
+        static constexpr std::size_t ELEM_COUNT { grid_down_cnt * grid_right_cnt * G::limits(grid_down_cnt, grid_right_cnt).max_grid_node_depth };
+        using CONTAINER_TYPE = typename static_vector_typer<std::size_t, ELEM_COUNT, debug_mode>::type;
+
+        CONTAINER_TYPE create_queue_container() {
+            return CONTAINER_TYPE {};
+        }
     };
     
     
@@ -55,20 +64,15 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     >
     class ready_queue {
     private:
-        using QUEUE_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::QUEUE_CONTAINER_CREATOR;
-        using QUEUE_CONTAINER=decltype(std::declval<QUEUE_CONTAINER_CREATOR>().create_empty(std::nullopt));
+        using QUEUE_CONTAINER=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_queue_container());
 
         QUEUE_CONTAINER queue;
 
     public:
-        ready_queue()
-        : queue{QUEUE_CONTAINER_CREATOR {}.create_empty(std::nullopt)} {
-            if constexpr (debug_mode) {
-                if (!queue.empty()) {
-                    throw std::runtime_error("Queue must be sized 0 on creation");  // Happens on std::array sized > 0
-                }
-            }
-        }
+        ready_queue(
+            CONTAINER_CREATOR_PACK container_creator_pack = {}
+        )
+        : queue{container_creator_pack.create_queue_container()} {}
 
         bool empty() {
             return queue.empty();
