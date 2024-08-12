@@ -2,10 +2,9 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_BIDI_WALKER_H
 
 #include <ranges>
-#include <iostream>
+#include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/forward_walker.h"
-#include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/suffix_sliceable_pairwise_alignment_graph.h"
@@ -23,14 +22,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker_stack_container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_with_node;
-    using offbynull::helpers::container_creators::container_creator;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
-    using offbynull::helpers::container_creators::container_creator_of_type;
-    using offbynull::helpers::container_creators::vector_container_creator;
-    using offbynull::helpers::container_creators::static_vector_container_creator;
+    using offbynull::aligner::concepts::weight;
     using offbynull::utils::static_vector_typer;
 
 
@@ -38,33 +34,50 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         typename T,
-        typename G
+        typename N,
+        typename E,
+        typename ED
     >
     concept bidi_walker_container_creator_pack =
-        readable_sliceable_pairwise_alignment_graph<G>
-        && forward_walker_container_creator_pack<typename T::FORWARD_WALKER_CONTAINER_CREATOR_PACK, G>;
+        weight<ED>
+        && requires(T t) {
+            { t.create_forward_walker_container_creator_pack() } -> forward_walker_container_creator_pack<N, E, ED>;
+            { t.create_backward_walker_container_creator_pack() } -> forward_walker_container_creator_pack<N, E, ED>;
+        };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        typename N,
+        typename E,
+        typename ED
     >
     struct bidi_walker_heap_container_creator_pack {
-        using FORWARD_WALKER_CONTAINER_CREATOR_PACK=forward_walker_heap_container_creator_pack<debug_mode, G>;
+        forward_walker_heap_container_creator_pack<debug_mode, N, E, ED> create_forward_walker_container_creator_pack() {
+            return {};
+        }
+
+        forward_walker_heap_container_creator_pack<debug_mode, N, E, ED> create_backward_walker_container_creator_pack() {
+            return {};
+        }
     };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
-        std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt
+        typename N,
+        typename E,
+        weight ED,
+        std::size_t grid_right_cnt,
+        std::size_t grid_depth_cnt,
+        std::size_t max_resident_nodes_cnt
     >
     struct bidi_walker_stack_container_creator_pack {
-        using FORWARD_WALKER_CONTAINER_CREATOR_PACK=forward_walker_stack_container_creator_pack<
-            debug_mode,
-            G,
-            grid_down_cnt,
-            grid_right_cnt
-        >;
+        forward_walker_stack_container_creator_pack<debug_mode, N, E, ED, grid_right_cnt, grid_depth_cnt, max_resident_nodes_cnt> create_forward_walker_container_creator_pack() {
+            return {};
+        }
+
+        forward_walker_stack_container_creator_pack<debug_mode, N, E, ED, grid_right_cnt, grid_depth_cnt, max_resident_nodes_cnt> create_backward_walker_container_creator_pack() {
+            return {};
+        }
     };
 
 
@@ -73,7 +86,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
-        bidi_walker_container_creator_pack<G> CONTAINER_CREATOR_PACK=bidi_walker_heap_container_creator_pack<debug_mode, G>
+        bidi_walker_container_creator_pack<typename G::N, typename G::E, typename G::ED> CONTAINER_CREATOR_PACK=bidi_walker_heap_container_creator_pack<debug_mode, typename G::N, typename G::E, typename G::ED>
     >
     requires backtrackable_node<typename G::N> &&
         backtrackable_edge<typename G::E>
@@ -85,19 +98,21 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
-        using FORWARD_WALKER_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::FORWARD_WALKER_CONTAINER_CREATOR_PACK;
-
     private:
+        using FORWARD_WALKER_CONTAINER_CREATOR_PACK=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_forward_walker_container_creator_pack());
+        using BACKWARD_WALKER_CONTAINER_CREATOR_PACK=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_backward_walker_container_creator_pack());
+
         const G& g;
         const INDEX target_slice;
         const reversed_sliceable_pairwise_alignment_graph<debug_mode, G> reversed_g;
         forward_walker<debug_mode, G, FORWARD_WALKER_CONTAINER_CREATOR_PACK> forward_walker_;
-        forward_walker<debug_mode, decltype(reversed_g), FORWARD_WALKER_CONTAINER_CREATOR_PACK> backward_walker;
+        forward_walker<debug_mode, decltype(reversed_g), BACKWARD_WALKER_CONTAINER_CREATOR_PACK> backward_walker;
 
     public:
         static bidi_walker create_and_initialize(
             const G& graph,
-            const INDEX target_slice
+            const INDEX target_slice,
+            CONTAINER_CREATOR_PACK container_creator_pack = {}
         ) {
             if constexpr (debug_mode) {
                 if (target_slice >= graph.grid_down_cnt) {
@@ -106,7 +121,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             }
             bidi_walker ret {
                 graph,
-                target_slice
+                target_slice,
+                container_creator_pack
             };
             return ret;
         }
@@ -176,13 +192,26 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     private:
         bidi_walker(
             const G& g_,
-            const INDEX target_slice_
+            const INDEX target_slice_,
+            CONTAINER_CREATOR_PACK container_creator_pack_ = {}
         )
         : g { g_ }
         , target_slice { target_slice_ }
         , reversed_g { g }
-        , forward_walker_ { decltype(forward_walker_)::create_and_initialize(g, target_slice) }
-        , backward_walker { decltype(backward_walker)::create_and_initialize(reversed_g, g.grid_down_cnt - 1u - target_slice) } {}
+        , forward_walker_ {
+            decltype(forward_walker_)::create_and_initialize(
+                g,
+                target_slice,
+                container_creator_pack_.create_forward_walker_container_creator_pack()
+            )
+        }
+        , backward_walker {
+            decltype(backward_walker)::create_and_initialize(
+                reversed_g,
+                g.grid_down_cnt - 1u - target_slice,
+                container_creator_pack_.create_backward_walker_container_creator_pack()
+            )
+        } {}
     };
 }
 

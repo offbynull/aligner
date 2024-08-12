@@ -4,8 +4,9 @@
 #include <functional>
 #include <ranges>
 #include <algorithm>
+#include "offbynull/concepts.h"
+#include "offbynull/utils.h"
 #include "offbynull/aligner/concepts.h"
-#include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/slot.h"
 
@@ -13,10 +14,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::concepts::weight;
-    using offbynull::helpers::container_creators::container_creator;
-    using offbynull::helpers::container_creators::container_creator_of_type;
-    using offbynull::helpers::container_creators::vector_container_creator;
-    using offbynull::helpers::container_creators::static_vector_container_creator;
+    using offbynull::concepts::random_access_range_of_type;
+    using offbynull::utils::static_vector_typer;
 
     template<typename E, weight WEIGHT>
     struct resident_slot {
@@ -60,45 +59,66 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         typename T,
-        typename G
+        typename N,
+        typename E,
+        typename ED
     >
     concept resident_slot_container_container_creator_pack =
-        readable_sliceable_pairwise_alignment_graph<G>
-        && container_creator_of_type<
-            typename T::SLOT_CONTAINER_CREATOR,
-            resident_slot_with_node<
-                typename G::N,
-                typename G::E,
-                typename G::ED
-            >
-        >;
+        weight<ED>
+        && requires(
+            const T t,
+            const std::vector<resident_slot_with_node<N, E, ED>>& fake_range
+        ) {
+            { t.create_slot_container(fake_range) } -> random_access_range_of_type<resident_slot_with_node<N, E, ED>>;
+        };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        typename N,
+        typename E,
+        weight ED
     >
     struct resident_slot_container_heap_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
-        using ED = typename G::ED;
-        using SLOT_CONTAINER_CREATOR=vector_container_creator<resident_slot_with_node<N, E, ED>, debug_mode>;
+        std::vector<resident_slot_with_node<N, E, ED>> create_slot_container(const std::ranges::range auto& r) const {
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
+            // utils::type_displayer<decltype(*r.begin())> x{};
+            // static_assert(std::is_same_v<decltype(*r.begin()), resident_slot_with_node<N, E, ED>>);
+            std::vector<resident_slot_with_node<N, E, ED>> ret {};
+            for (auto element : r) {
+                ret.emplace_back(element);
+            }
+            return ret;
+        }
     };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
-        std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt
+        typename N,
+        typename E,
+        weight ED,
+        std::size_t max_resident_nodes_cnt
     >
     struct resident_slot_container_stack_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
-        using ED = typename G::ED;
-        using SLOT_CONTAINER_CREATOR=static_vector_container_creator<
-            resident_slot_with_node<N, E, ED>,
-            G::limits(grid_down_cnt, grid_right_cnt).max_resident_nodes_cnt,
-            debug_mode
-        >;
+        using CONTAINER_TYPE = typename static_vector_typer<resident_slot_with_node<N, E, ED>, max_resident_nodes_cnt, debug_mode>::type;
+        CONTAINER_TYPE create_slot_container(const std::ranges::range auto& r) const  {
+            return CONTAINER_TYPE(r.begin(), r.end());
+        }
     };
 
 
@@ -107,7 +127,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
-        resident_slot_container_container_creator_pack<G> CONTAINER_CREATOR_PACK=resident_slot_container_heap_container_creator_pack<debug_mode, G>
+        resident_slot_container_container_creator_pack<typename G::N, typename G::E, typename G::ED> CONTAINER_CREATOR_PACK=resident_slot_container_heap_container_creator_pack<debug_mode, typename G::N, typename G::E, typename G::ED>
     >
     class resident_slot_container {
     private:
@@ -116,17 +136,21 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ND = typename G::ND;
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
-        using SLOT_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::SLOT_CONTAINER_CREATOR;
-        using SLOT_CONTAINER=decltype(std::declval<SLOT_CONTAINER_CREATOR>().create_objects(0zu));
+        using SLOT_CONTAINER=decltype(
+            std::declval<CONTAINER_CREATOR_PACK>().create_slot_container(
+                std::declval<std::vector<resident_slot_with_node<N, E, ED>>>()
+            )
+        );
 
         SLOT_CONTAINER slots;
 
     public:
         resident_slot_container(
-            const G& graph_
+            const G& graph_,
+            CONTAINER_CREATOR_PACK container_creator_pack={}
         )
         : slots{
-            SLOT_CONTAINER_CREATOR {}.create_copy(
+            container_creator_pack.create_slot_container(
                 graph_.resident_nodes()
                 | std::views::transform([](const N& node) {
                     return resident_slot_with_node<N, E, ED> {

@@ -31,9 +31,15 @@ TODO:
 * ~~revise container_pack pattern being used across project to how it's being done in sliceable_pairwise_alignment_graph_backtracker~~ 
 * graph node/edge types to structs instead of std::pair -- add friend functions that print out to std::out
 * ~~error_check -> debug_mode~~
+* remove limits() function -- move fields directly into graph class and make them constexpr
+  * at least move grid depth into graph class, making it constexpr
 * container creators -- make them into static functions so you don't have to create an instance of container_creator each time you use it
-* add E_COUNT type to readable_pairwise_alignment_graph concept and graph implementations -- make use of it in slot_container.h rather than asking the user to supply it
-  E_COUNT is a type wide enough to hold the maximum number of edges from one node to another
+* const correct container_creator_packs
+* CHANGE const G& graph TO const G& g
+* sliced_subdivider -- changed "whole_graph" to "graph_partition"?
+* add E_COUNT type to readable_pairwise_alignment_graph concept and graph implementations -- make use of it in slot_container.h rather than asking the user to supply it 
+  * E_COUNT is a type wide enough to hold the maximum number of edges from one node to another 
+  * or ... use "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/utils.h" to determine what the correct type should be
 * max_grid_node_depth should be a parameter directly on the class, EVALUATABLE AT COMPILE_TIME
 * ~~resident_segmenter - some use of std::vector -- move creation of types in container_pack_creators (SEE TODOs IN RESIDENT_SEGMENTER -- DOES IT EVEN NEED TO EXIST?)~~
 * ~~resident_segmenter - move is_node_on_max_path/walk_to_node to static functions in bidiwalker?~~

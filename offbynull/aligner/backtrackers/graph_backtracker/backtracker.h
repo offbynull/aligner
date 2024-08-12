@@ -36,59 +36,57 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
 
     template<
         typename T,
-        typename G,
+        typename N,
+        typename E,
         typename WEIGHT
     >
     concept backtracker_container_creator_pack =
-        readable_graph<G>
-        && weight<WEIGHT>
-        && requires(T t) {
-            { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<G, WEIGHT>;
-            { t.create_ready_queue_container_creator_pack() } -> ready_queue_container_creator_pack<G>;
-            { t.create_path_container() } -> random_access_range_of_type<typename G::E>;
+        weight<WEIGHT>
+        && requires(const T t) {
+            { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<N, E, WEIGHT>;
+            { t.create_ready_queue_container_creator_pack() } -> ready_queue_container_creator_pack<>;
+            { t.create_path_container() } -> random_access_range_of_type<E>;
         };
 
     template<
         bool debug_mode,
-        readable_graph G,
+        typename N,
+        typename E,
         weight WEIGHT
     >
     struct backtracker_heap_container_creator_pack {
-        using E = typename G::E;
-
-        slot_container_heap_container_creator_pack<debug_mode, G, WEIGHT> create_slot_container_container_creator_pack() {
-            return slot_container_heap_container_creator_pack<debug_mode, G, WEIGHT> {};
+        slot_container_heap_container_creator_pack<debug_mode, N, E, WEIGHT> create_slot_container_container_creator_pack() const {
+            return slot_container_heap_container_creator_pack<debug_mode, N, E, WEIGHT> {};
         }
 
-        ready_queue_heap_container_creator_pack<debug_mode, G> create_ready_queue_container_creator_pack() {
-            return ready_queue_heap_container_creator_pack<debug_mode, G> {};
+        ready_queue_heap_container_creator_pack<debug_mode> create_ready_queue_container_creator_pack() const {
+            return ready_queue_heap_container_creator_pack<debug_mode> {};
         }
 
-        std::vector<E> create_path_container() {
+        std::vector<E> create_path_container() const {
             return std::vector<E> {};
         }
     };
 
     template<
         bool debug_mode,
-        readable_graph G,
+        typename N,
+        typename E,
         weight WEIGHT,
         std::size_t slot_container_heap_escape_size = 100zu,
         std::size_t ready_queue_heap_escape_size = 100zu,
         std::size_t path_container_heap_escape_size = 10zu
     >
     struct backtracker_stack_container_creator_pack {
-        using E = typename G::E;
-
-        slot_container_stack_container_creator_pack<debug_mode, G, WEIGHT, slot_container_heap_escape_size> create_slot_container_container_creator_pack() {
-            return slot_container_stack_container_creator_pack<debug_mode, G, WEIGHT, slot_container_heap_escape_size> {};
+        slot_container_stack_container_creator_pack<debug_mode, N, E, WEIGHT, slot_container_heap_escape_size> create_slot_container_container_creator_pack() const {
+            return slot_container_stack_container_creator_pack<debug_mode, N, E, WEIGHT, slot_container_heap_escape_size> {};
         }
 
-        ready_queue_stack_container_creator_pack<debug_mode, G, ready_queue_heap_escape_size> create_ready_queue_container_creator_pack() {
-            return ready_queue_stack_container_creator_pack<debug_mode, G, ready_queue_heap_escape_size> {};
+        ready_queue_stack_container_creator_pack<debug_mode, ready_queue_heap_escape_size> create_ready_queue_container_creator_pack() const {
+            return ready_queue_stack_container_creator_pack<debug_mode, ready_queue_heap_escape_size> {};
         }
 
-        boost::container::small_vector<E, path_container_heap_escape_size> create_path_container() {
+        boost::container::small_vector<E, path_container_heap_escape_size> create_path_container() const {
             return boost::container::small_vector<E, path_container_heap_escape_size> {};
         }
     };
@@ -101,7 +99,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
         bool debug_mode,
         readable_graph G,
         weight WEIGHT,
-        backtracker_container_creator_pack<G, WEIGHT> CONTAINER_CREATOR_PACK=backtracker_heap_container_creator_pack<debug_mode, G, WEIGHT>
+        backtracker_container_creator_pack<typename G::N, typename G::E, WEIGHT> CONTAINER_CREATOR_PACK=
+            backtracker_heap_container_creator_pack<debug_mode, typename G::N, typename G::E, WEIGHT>
     >
     requires backtrackable_node<typename G::N> &&
         backtrackable_edge<typename G::E>

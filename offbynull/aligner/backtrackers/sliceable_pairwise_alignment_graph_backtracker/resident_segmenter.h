@@ -6,12 +6,13 @@
 #include <iostream>
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/bidi_walker.h"
-#include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/suffix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/reversed_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/middle_sliceable_pairwise_alignment_graph.h"
+#include "offbynull/aligner/concepts.h"
+#include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter {
@@ -24,14 +25,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker_stack_container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_with_node;
-    using offbynull::helpers::container_creators::container_creator;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
-    using offbynull::helpers::container_creators::container_creator_of_type;
-    using offbynull::helpers::container_creators::vector_container_creator;
-    using offbynull::helpers::container_creators::static_vector_container_creator;
+    using offbynull::aligner::concepts::weight;
+    using offbynull::concepts::random_access_range_of_type;
     using offbynull::utils::static_vector_typer;
 
 
@@ -53,60 +52,86 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         typename T,
-        typename G
+        typename N,
+        typename E,
+        typename ED
     >
     concept resident_segmenter_container_creator_pack =
-        readable_sliceable_pairwise_alignment_graph<G>
-        && bidi_walker_container_creator_pack<typename T::BIDI_WALKER_CONTAINER_CREATOR_PACK, G>
-        && container_creator_of_type<typename T::RESIDENT_NODE_CONTAINER_CREATOR, typename G::N>
-        && container_creator_of_type<typename T::RESIDENT_EDGE_CONTAINER_CREATOR, typename G::E>
-        && container_creator_of_type<typename T::SEGMENT_CONTAINER_CREATOR, std::variant<hop<typename G::E>, segment<typename G::N>>>;
+        weight<ED>
+        && requires(const T t, std::size_t max_resident_nodes_cnt, const std::vector<N>& resident_nodes) {
+            { t.create_bidi_walker_container_creator_pack() } -> bidi_walker_container_creator_pack<N, E, ED>;
+            { t.create_resident_node_container(resident_nodes) } -> random_access_range_of_type<N>;
+            { t.create_resident_edge_container(max_resident_nodes_cnt) } -> random_access_range_of_type<E>;
+            { t.create_segment_container(max_resident_nodes_cnt) } -> random_access_range_of_type<std::variant<hop<E>, segment<N>>>;
+        };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        typename N,
+        typename E,
+        typename ED
     >
     struct resident_segmenter_heap_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
+        bidi_walker_heap_container_creator_pack<debug_mode, N, E, ED> create_bidi_walker_container_creator_pack() const {
+            return {};
+        }
 
-        using BIDI_WALKER_CONTAINER_CREATOR_PACK=bidi_walker_heap_container_creator_pack<debug_mode, G>;
-        using RESIDENT_NODE_CONTAINER_CREATOR=vector_container_creator<N, debug_mode>;
-        using RESIDENT_EDGE_CONTAINER_CREATOR=vector_container_creator<E, debug_mode>;
-        using SEGMENT_CONTAINER_CREATOR=vector_container_creator<std::variant<hop<E>, segment<N>>, debug_mode>;
+        std::vector<N> create_resident_node_container(const std::ranges::range auto& resident_nodes) const {
+            return std::vector<N>(resident_nodes.begin(), resident_nodes.end());
+        }
+
+        std::vector<E> create_resident_edge_container(std::size_t max_resident_nodes_cnt) const {
+            std::vector<E> ret {};
+            ret.reserve(max_resident_nodes_cnt);
+            return ret;
+        }
+
+        std::vector<std::variant<hop<E>, segment<N>>> create_segment_container(std::size_t max_resident_nodes_cnt) const {
+            std::vector<std::variant<hop<E>, segment<N>>> ret {};
+            ret.reserve(max_resident_nodes_cnt * 2zu + 1zu);
+            return ret;
+        }
     };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
-        std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt
+        typename N,
+        typename E,
+        typename ED,
+        std::size_t grid_right_cnt,
+        std::size_t grid_depth_cnt,
+        std::size_t max_resident_nodes_cnt
     >
     struct resident_segmenter_stack_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
+        bidi_walker_stack_container_creator_pack<debug_mode, N, E, ED, grid_right_cnt, grid_depth_cnt, max_resident_nodes_cnt> create_bidi_walker_container_creator_pack() const {
+            return {};
+        }
 
-        using BIDI_WALKER_CONTAINER_CREATOR_PACK=bidi_walker_stack_container_creator_pack<
-            debug_mode,
-            G,
-            grid_down_cnt,
-            grid_right_cnt
-        >;
-        using RESIDENT_NODE_CONTAINER_CREATOR=static_vector_container_creator<
-            N,
-            G::limits(grid_down_cnt, grid_right_cnt).max_resident_nodes_cnt,
-            debug_mode
-        >;
-        using RESIDENT_EDGE_CONTAINER_CREATOR=static_vector_container_creator<
-            E,
-            G::limits(grid_down_cnt, grid_right_cnt).max_resident_nodes_cnt,
-            debug_mode
-        >;
-        using SEGMENT_CONTAINER_CREATOR=static_vector_container_creator<
-            std::variant<hop<E>, segment<N>>,
-            G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt * 2zu + 1zu,
-            debug_mode
-        >;
+        using RESIDENT_NODE_CONTAINER_TYPE = typename static_vector_typer<N, max_resident_nodes_cnt, debug_mode>::type;
+        RESIDENT_NODE_CONTAINER_TYPE create_resident_node_container(const std::ranges::range auto& resident_nodes) const {
+            return RESIDENT_NODE_CONTAINER_TYPE(resident_nodes.begin(), resident_nodes.end());
+        }
+
+        using RESIDENT_EDGE_CONTAINER_TYPE = typename static_vector_typer<E, max_resident_nodes_cnt, debug_mode>::type;
+        RESIDENT_EDGE_CONTAINER_TYPE create_resident_edge_container(std::size_t max_resident_nodes_cnt_) const {
+            if constexpr (debug_mode) {
+                if (max_resident_nodes_cnt == max_resident_nodes_cnt_) {
+                    throw std::runtime_error {"Inconsistent node count"};
+                }
+            }
+            return RESIDENT_EDGE_CONTAINER_TYPE {};
+        }
+
+        static constexpr std::size_t max_segment_cnt { max_resident_nodes_cnt * 2zu + 1zu };
+        using SEGMENT_CONTAINER_TYPE = typename static_vector_typer<std::variant<hop<E>, segment<N>>, max_segment_cnt, debug_mode>::type;
+        SEGMENT_CONTAINER_TYPE create_segment_container(std::size_t resident_nodes_cnt_) const {
+            if constexpr (debug_mode) {
+                if (resident_nodes_cnt_ * 2zu + 1zu <= max_segment_cnt) {
+                    throw std::runtime_error {"Inconsistent node count"};
+                }
+            }
+            return SEGMENT_CONTAINER_TYPE {};
+        }
     };
 
 
@@ -117,7 +142,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
-        resident_segmenter_container_creator_pack<G> CONTAINER_CREATOR_PACK=resident_segmenter_heap_container_creator_pack<debug_mode, G>
+        resident_segmenter_container_creator_pack<typename G::N, typename G::E, typename G::ED> CONTAINER_CREATOR_PACK=resident_segmenter_heap_container_creator_pack<debug_mode, typename G::N, typename G::E, typename G::ED>
     >
     requires backtrackable_node<typename G::N> &&
         backtrackable_edge<typename G::E>
@@ -129,16 +154,18 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
-        using BIDI_WALKER_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::BIDI_WALKER_CONTAINER_CREATOR_PACK;
-        using RESIDENT_NODE_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::RESIDENT_NODE_CONTAINER_CREATOR;
-        using RESIDENT_NODE_CONTAINER=decltype(std::declval<RESIDENT_NODE_CONTAINER_CREATOR>().create_objects(0zu));
-        using RESIDENT_EDGE_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::RESIDENT_EDGE_CONTAINER_CREATOR;
-        using RESIDENT_EDGE_CONTAINER=decltype(std::declval<RESIDENT_EDGE_CONTAINER_CREATOR>().create_objects(0zu));
-        using SEGMENT_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::SEGMENT_CONTAINER_CREATOR;
-        using SEGMENT_CONTAINER=decltype(std::declval<SEGMENT_CONTAINER_CREATOR>().create_objects(0zu));
+        using BIDI_WALKER_CONTAINER_CREATOR_PACK=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_bidi_walker_container_creator_pack());
+        using RESIDENT_NODE_CONTAINER=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_resident_node_container(std::declval<std::vector<N>>()));
+        using RESIDENT_EDGE_CONTAINER=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_resident_edge_container(0zu));
+        using SEGMENT_CONTAINER=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_segment_container(0zu));
+
+        CONTAINER_CREATOR_PACK container_creator_pack;
 
     public:
-        resident_segmenter() {}
+        resident_segmenter(
+            CONTAINER_CREATOR_PACK container_creator_pack_ = {}
+        )
+        : container_creator_pack{container_creator_pack_} {}
 
         auto backtrack_segmentation_points(const G& g, const ED max_path_weight_comparison_tolerance) {
             ED max_path_weight {
@@ -154,13 +181,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
             const auto& resident_nodes { g.resident_nodes() };
             RESIDENT_NODE_CONTAINER resident_nodes_sorted {
-                RESIDENT_NODE_CONTAINER_CREATOR {}.create_copy(resident_nodes)
+                container_creator_pack.create_resident_node_container(
+                    resident_nodes
+                )
             };
             std::ranges::sort(resident_nodes_sorted);
             auto resident_nodes_sorted_it { resident_nodes_sorted.begin() };
 
             RESIDENT_EDGE_CONTAINER resident_edges {
-                RESIDENT_EDGE_CONTAINER_CREATOR {}.create_empty(resident_nodes_sorted.size())
+                container_creator_pack.create_resident_edge_container(
+                    resident_nodes_sorted.size()
+                )
             };
             {
                 N last_to_node { g.get_root_node() };
@@ -230,7 +261,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             }
 
             SEGMENT_CONTAINER parts {
-                SEGMENT_CONTAINER_CREATOR {}.create_empty(resident_edges.size() * 2zu + 1zu)
+                container_creator_pack.create_segment_container(
+                    resident_edges.size() // * 2zu + 1zu
+                )
             };
             {
                 N last_to_node { g.get_root_node() };

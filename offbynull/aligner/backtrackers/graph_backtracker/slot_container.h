@@ -58,41 +58,37 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
 
     template<
         typename T,
-        typename G,
+        typename N,
+        typename E,
         typename WEIGHT
     >
     concept slot_container_container_creator_pack =
-    readable_graph<G>
-    && weight<WEIGHT>
-    && requires(T t, std::vector<slot<typename G::N, typename G::E, WEIGHT>> fake_range) {
-        { t.create_slot_container(fake_range.begin(), fake_range.end()) } -> random_access_range_of_type<slot<typename G::N, typename G::E, WEIGHT>>;
-    };
+        weight<WEIGHT>
+        && requires(const T t, std::vector<slot<N, E, WEIGHT>> fake_range) {
+            { t.create_slot_container(fake_range.begin(), fake_range.end()) } -> random_access_range_of_type<slot<N, E, WEIGHT>>;
+        };
 
     template<
         bool debug_mode,
-        readable_graph G,
+        typename N,
+        typename E,
         weight WEIGHT
     >
     struct slot_container_heap_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
-
-        std::vector<slot<N, E, WEIGHT>> create_slot_container(auto begin, auto end) {
+        std::vector<slot<N, E, WEIGHT>> create_slot_container(auto begin, auto end) const {
             return std::vector<slot<N, E, WEIGHT>>(begin, end);
         }
     };
 
     template<
         bool debug_mode,
-        readable_graph G,
+        typename N,
+        typename E,
         weight WEIGHT,
         std::size_t heap_escape_size = 100zu
     >
     struct slot_container_stack_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
-
-        boost::container::small_vector<slot<N, E, WEIGHT>, heap_escape_size> create_slot_container(auto begin, auto end) {
+        boost::container::small_vector<slot<N, E, WEIGHT>, heap_escape_size> create_slot_container(auto begin, auto end) const {
             return boost::container::small_vector<slot<N, E, WEIGHT>, heap_escape_size>(begin, end);
         }
     };
@@ -105,7 +101,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
         bool debug_mode,
         readable_graph G,
         weight WEIGHT,
-        slot_container_container_creator_pack<G, WEIGHT> CONTAINER_CREATOR_PACK=slot_container_heap_container_creator_pack<debug_mode, G, WEIGHT>
+        slot_container_container_creator_pack<typename G::N, typename G::E, WEIGHT> CONTAINER_CREATOR_PACK=slot_container_heap_container_creator_pack<debug_mode, typename G::N, typename G::E, WEIGHT>
     >
     class slot_container {
     private:

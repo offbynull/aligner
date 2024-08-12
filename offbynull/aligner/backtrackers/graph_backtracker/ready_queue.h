@@ -13,38 +13,28 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue {
 
 
     template<
-        typename T,
-        typename G
+        typename T
     >
     concept ready_queue_container_creator_pack =
-    readable_graph<G>
-    && requires(T t) {
-        { t.create_queue_container() } -> random_access_range_of_type<std::size_t>;
-    };
+        requires(const T t) {
+            { t.create_queue_container() } -> random_access_range_of_type<std::size_t>;
+        };
 
     template<
-        bool debug_mode,
-        readable_graph G
+        bool debug_mode
     >
     struct ready_queue_heap_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
-
-        std::vector<std::size_t> create_queue_container() {
+        std::vector<std::size_t> create_queue_container() const {
             return std::vector<std::size_t> {};
         }
     };
 
     template<
         bool debug_mode,
-        readable_graph G,
         std::size_t heap_escape_size = 100zu
     >
     struct ready_queue_stack_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
-
-        boost::container::small_vector<std::size_t, heap_escape_size> create_queue_container() {
+        boost::container::small_vector<std::size_t, heap_escape_size> create_queue_container() const {
             return boost::container::small_vector<std::size_t, heap_escape_size> {};
         }
     };
@@ -55,7 +45,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue {
     template<
         bool debug_mode,
         readable_graph G,
-        ready_queue_container_creator_pack<G> CONTAINER_CREATOR_PACK=ready_queue_heap_container_creator_pack<debug_mode, G>
+        ready_queue_container_creator_pack CONTAINER_CREATOR_PACK=ready_queue_heap_container_creator_pack<debug_mode>
     >
     class ready_queue {
     private:

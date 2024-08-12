@@ -14,42 +14,32 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
 
     template<
-        typename T,
-        typename G
+        typename T
     >
     concept ready_queue_container_creator_pack =
-    readable_pairwise_alignment_graph<G>
-    && requires(T t) {
-        { t.create_queue_container() } -> random_access_range_of_type<std::size_t>;
-    };
+        requires(const T t) {
+            { t.create_queue_container() } -> random_access_range_of_type<std::size_t>;
+        };
 
     template<
-        bool debug_mode,
-        readable_pairwise_alignment_graph G
+        bool debug_mode
     >
     struct ready_queue_heap_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
-
-        std::vector<std::size_t> create_queue_container() {
+        std::vector<std::size_t> create_queue_container() const {
             return std::vector<std::size_t> {};
         }
     };
 
     template<
         bool debug_mode,
-        readable_pairwise_alignment_graph G,
         std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt
+        std::size_t grid_right_cnt,
+        std::size_t grid_depth_cnt
     >
     struct ready_queue_stack_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
-
-        static constexpr std::size_t ELEM_COUNT { grid_down_cnt * grid_right_cnt * G::limits(grid_down_cnt, grid_right_cnt).max_grid_node_depth };
+        static constexpr std::size_t ELEM_COUNT { grid_down_cnt * grid_right_cnt * grid_depth_cnt };
         using CONTAINER_TYPE = typename static_vector_typer<std::size_t, ELEM_COUNT, debug_mode>::type;
-
-        CONTAINER_TYPE create_queue_container() {
+        CONTAINER_TYPE create_queue_container() const {
             return CONTAINER_TYPE {};
         }
     };
@@ -60,7 +50,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     template<
         bool debug_mode,
         readable_pairwise_alignment_graph G,
-        ready_queue_container_creator_pack<G> CONTAINER_CREATOR_PACK=ready_queue_heap_container_creator_pack<debug_mode, G>
+        ready_queue_container_creator_pack CONTAINER_CREATOR_PACK=ready_queue_heap_container_creator_pack<debug_mode>
     >
     class ready_queue {
     private:

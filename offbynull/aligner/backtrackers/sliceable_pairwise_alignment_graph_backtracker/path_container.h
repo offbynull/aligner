@@ -8,10 +8,8 @@
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
-    using offbynull::helpers::container_creators::container_creator;
-    using offbynull::helpers::container_creators::container_creator_of_type;
-    using offbynull::helpers::container_creators::vector_container_creator;
-    using offbynull::helpers::container_creators::static_vector_container_creator;
+    using offbynull::concepts::random_access_range_of_type;
+    using offbynull::utils::static_vector_typer;
 
     template<typename E>
     struct element {
@@ -112,37 +110,37 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         typename T,
-        typename G
+        typename E
     >
     concept path_container_container_creator_pack =
-        readable_sliceable_pairwise_alignment_graph<G>
-        && container_creator_of_type<typename T::ELEMENT_CONTAINER_CREATOR, element<typename G::E>>;
+        requires(const T t, std::size_t max_path_edge_cnt) {
+            { t.create_element_container(max_path_edge_cnt) } -> random_access_range_of_type<element<E>>;
+        };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        typename E
     >
     struct path_container_heap_container_creator_pack {
-        using E = typename G::E;
-        using ED = typename G::ED;
-        using ELEMENT_CONTAINER_CREATOR=vector_container_creator<element<typename G::E>, debug_mode>;
+        std::vector<element<E>> create_element_container(std::size_t max_path_edge_cnt) const {
+            return std::vector<element<E>>(max_path_edge_cnt);
+        }
     };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
-        std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt
+        typename E,
+        std::size_t max_path_edge_cnt
     >
     struct path_container_stack_container_creator_pack {
-        using N = typename G::N;
-        using E = typename G::E;
-        using ED = typename G::ED;
-        using ELEMENT_CONTAINER_CREATOR=static_vector_container_creator<
-            element<typename G::E>,
-            G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt,
-            debug_mode
-        >;
+        std::array<element<E>, max_path_edge_cnt> create_element_container(std::size_t max_path_edge_cnt_) const {
+            if constexpr (debug_mode) {
+                if (max_path_edge_cnt != max_path_edge_cnt_) {
+                    throw std::runtime_error("Bad element count");
+                }
+            }
+            return std::array<element<E>, max_path_edge_cnt> {};
+        }
     };
 
 
@@ -155,14 +153,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
-        path_container_container_creator_pack<G> CONTAINER_CREATOR_PACK=path_container_heap_container_creator_pack<debug_mode, G>
+        path_container_container_creator_pack<typename G::E> CONTAINER_CREATOR_PACK=path_container_heap_container_creator_pack<debug_mode,typename G::E>
     >
     class path_container {
     private:
         using E = typename G::E;
 
-        using ELEMENT_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::ELEMENT_CONTAINER_CREATOR;
-        using ELEMENT_CONTAINER=decltype(std::declval<ELEMENT_CONTAINER_CREATOR>().create_empty(0zu));
+        using ELEMENT_CONTAINER=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_element_container(0zu));
 
         ELEMENT_CONTAINER element_container;
         element<E>* head;
@@ -170,13 +167,16 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         std::size_t next_idx;
 
     public:
-        path_container(const G& g)
+        path_container(
+            const G& g,
+            CONTAINER_CREATOR_PACK container_creator_pack = {}
+        )
         : element_container{
-            ELEMENT_CONTAINER_CREATOR {}.create_objects(
+            container_creator_pack.create_element_container(
                 G::limits(
-                   g.grid_down_cnt,
-                   g.grid_right_cnt
-               ).max_path_edge_cnt
+                    g.grid_down_cnt,
+                    g.grid_right_cnt
+                ).max_path_edge_cnt
             )
         }
         , head{nullptr}
