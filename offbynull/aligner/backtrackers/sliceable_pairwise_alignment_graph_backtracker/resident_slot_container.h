@@ -14,6 +14,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::concepts::weight;
+    using offbynull::concepts::range_of_type;
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::utils::static_vector_typer;
 
@@ -79,31 +80,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         weight ED
     >
     struct resident_slot_container_heap_container_creator_pack {
-        std::vector<resident_slot_with_node<N, E, ED>> create_slot_container(const std::ranges::range auto& r) const {
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            THIS IS BREAKING BECAUSE THE PARAM IS CONST&, IF YOU CHANGE TO AUTO&& IT WONT BREAK. BUT WHY?;
-            // utils::type_displayer<decltype(*r.begin())> x{};
-            // static_assert(std::is_same_v<decltype(*r.begin()), resident_slot_with_node<N, E, ED>>);
-            std::vector<resident_slot_with_node<N, E, ED>> ret {};
-            for (auto element : r) {
-                ret.emplace_back(element);
-            }
-            return ret;
+        std::vector<resident_slot_with_node<N, E, ED>> create_slot_container(range_of_type<resident_slot_with_node<N, E, ED>> auto&& r) const {
+            return std::vector<resident_slot_with_node<N, E, ED>>(r.begin(), r.end());
         }
     };
 
@@ -116,7 +94,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     >
     struct resident_slot_container_stack_container_creator_pack {
         using CONTAINER_TYPE = typename static_vector_typer<resident_slot_with_node<N, E, ED>, max_resident_nodes_cnt, debug_mode>::type;
-        CONTAINER_TYPE create_slot_container(const std::ranges::range auto& r) const  {
+        CONTAINER_TYPE create_slot_container(range_of_type<resident_slot_with_node<N, E, ED>> auto&& r) const  {
             return CONTAINER_TYPE(r.begin(), r.end());
         }
     };

@@ -1,18 +1,16 @@
 #ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICED_SUBDIVIDER_H
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICED_SUBDIVIDER_H
 
-#include <ranges>
-#include <algorithm>
 #include <iostream>
 #include "path_container.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/bidi_walker.h"
-#include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/suffix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/middle_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/reversed_sliceable_pairwise_alignment_graph.h"
+#include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider {
@@ -30,15 +28,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container_heap_container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container_stack_container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_with_node;
-    using offbynull::helpers::container_creators::container_creator;
-    using offbynull::helpers::container_creators::container_creator_of_type;
-    using offbynull::helpers::container_creators::array_container_creator;
-    using offbynull::helpers::container_creators::vector_container_creator;
-    using offbynull::helpers::container_creators::static_vector_container_creator;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_container_stack_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container::slice_slot_container_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container::slice_slot_container_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container::slice_slot_container_stack_container_creator_pack;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::concepts::weight;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
 
@@ -47,41 +45,50 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         typename T,
-        typename G
+        typename N,
+        typename E,
+        typename ED
     >
     concept sliced_subdivider_container_creator_pack =
-        readable_sliceable_pairwise_alignment_graph<G>
-        && bidi_walker_container_creator_pack<typename T::BIDI_WALKER_CONTAINER_CREATOR_PACK, G>
-        && path_container_container_creator_pack<typename T::PATH_CONTAINER_CONTAINER_CREATOR_PACK, G>;
+        weight<ED>
+        && requires(T t) {
+            { t.create_slice_slot_container_container_creator_pack() } -> slice_slot_container_container_creator_pack<E, ED>;
+            { t.create_path_container_container_creator_pack() } -> path_container_container_creator_pack<E>;
+        };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        typename N,
+        typename E,
+        weight ED
     >
     struct sliced_subdivider_heap_container_creator_pack {
-        using BIDI_WALKER_CONTAINER_CREATOR_PACK=bidi_walker_heap_container_creator_pack<debug_mode, G>;
-        using PATH_CONTAINER_CONTAINER_CREATOR_PACK=path_container_heap_container_creator_pack<debug_mode, G>;
+        slice_slot_container_heap_container_creator_pack<debug_mode, E, ED> create_slice_slot_container_container_creator_pack() const {
+            return {};
+        }
+
+        path_container_heap_container_creator_pack<debug_mode, E> create_path_container_container_creator_pack() const {
+            return {};
+        }
     };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
-        std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt
+        typename N,
+        typename E,
+        weight ED,
+        std::size_t grid_right_cnt,
+        std::size_t grid_depth_cnt,
+        std::size_t max_path_edge_cnt
     >
     struct sliced_subdivider_stack_container_creator_pack {
-        using BIDI_WALKER_CONTAINER_CREATOR_PACK=bidi_walker_stack_container_creator_pack<
-            debug_mode,
-            G,
-            grid_down_cnt,
-            grid_right_cnt
-        >;
-        using PATH_CONTAINER_CONTAINER_CREATOR_PACK=path_container_stack_container_creator_pack<
-            debug_mode,
-            G,
-            grid_down_cnt,
-            grid_right_cnt
-        >;
+        slice_slot_container_stack_container_creator_pack<debug_mode, E, ED, grid_right_cnt, grid_depth_cnt> create_slice_slot_container_container_creator_pack() const {
+            return {};
+        }
+
+        path_container_stack_container_creator_pack<debug_mode, E, max_path_edge_cnt> create_path_container_container_creator_pack() const {
+            return {};
+        }
     };
 
 
@@ -90,7 +97,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
-        sliced_subdivider_container_creator_pack<G> CONTAINER_CREATOR_PACK=sliced_subdivider_heap_container_creator_pack<debug_mode, G>
+        sliced_subdivider_container_creator_pack<typename G::N, typename G::E, typename G::ED> CONTAINER_CREATOR_PACK=sliced_subdivider_heap_container_creator_pack<debug_mode, typename G::N, typename G::E, typename G::ED>
     >
     requires backtrackable_node<typename G::N> &&
         backtrackable_edge<typename G::E>
@@ -102,20 +109,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
-        using PATH_CONTAINER_CONTAINER_CREATOR_PACK = typename CONTAINER_CREATOR_PACK::PATH_CONTAINER_CONTAINER_CREATOR_PACK;
-        using BIDI_WALKER_CONTAINER_CREATOR_PACK = typename CONTAINER_CREATOR_PACK::BIDI_WALKER_CONTAINER_CREATOR_PACK;
+        using SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_slice_slot_container_container_creator_pack());
+        using PATH_CONTAINER_CONTAINER_CREATOR_PACK=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container_container_creator_pack());
 
-        // whole_graph expected to have 2 resident nodes at most (one at root and one at leaf), so enforce this as a
-        // 2-length static_vector
-        using RESIDENT_SLOT_CONTAINER_CREATOR = static_vector_container_creator<
-            resident_slot_with_node<
-                typename G::N,
-                typename G::E,
-                typename G::ED
-            >,
-            2zu,
-            false
-        >;
+        CONTAINER_CREATOR_PACK container_creator_pack;
 
         const G& whole_graph;
 
@@ -127,9 +124,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     public:
         sliced_subdivider(
-            const G& g
+            const G& g,
+            CONTAINER_CREATOR_PACK container_creator_pack_ = {}
         )
-        : whole_graph { g } {
+        : whole_graph { g }
+        , container_creator_pack { container_creator_pack_ } {
             if constexpr (debug_mode) {
                 for (const auto& resident_node : whole_graph.resident_nodes()) {
                     if (resident_node != whole_graph.get_root_node() && resident_node != whole_graph.get_leaf_node()) {
@@ -140,7 +139,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         }
 
         path_container<debug_mode, G, PATH_CONTAINER_CONTAINER_CREATOR_PACK> subdivide() {
-            path_container<debug_mode, G, PATH_CONTAINER_CONTAINER_CREATOR_PACK> path_container_ { whole_graph };
+            path_container<debug_mode, G, PATH_CONTAINER_CONTAINER_CREATOR_PACK> path_container_ {
+                whole_graph,
+                container_creator_pack.create_path_container_container_creator_pack()
+            };
 
             ED weight {
                 subdivide(
@@ -198,9 +200,47 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             ED after_max_edge_weight;
             bool max_edge_assigned {};
             {
-                using BIDI_WALKER_TYPE = bidi_walker<debug_mode, decltype(sub_graph), BIDI_WALKER_CONTAINER_CREATOR_PACK>;
-                BIDI_WALKER_TYPE bidi_walker_ { BIDI_WALKER_TYPE::create_and_initialize(sub_graph, mid_down_offset) };
-
+                // whole_graph expected to have 2 resident nodes at most (one at root and one at leaf) -- override the
+                // resident_slot_containers being created to be stack-based and maxxed out to 2.
+                using BACKING_SSC_CCP_TYPE = decltype(
+                    container_creator_pack
+                        .create_slice_slot_container_container_creator_pack()
+                );
+                struct override_forward_walker_container_creator_pack {
+                    BACKING_SSC_CCP_TYPE backing_ssc_ccp;
+                    auto create_slice_slot_container_container_creator_pack() const {
+                        return backing_ssc_ccp;
+                    }
+                    auto create_resident_slot_container_container_creator_pack() const {
+                        return resident_slot_container_stack_container_creator_pack<debug_mode, N, E, ED, 2zu> {};
+                    }
+                };
+                struct override_bidi_walker_container_creator_pack {
+                    BACKING_SSC_CCP_TYPE backing_ssc_ccp;
+                    auto create_forward_walker_container_creator_pack() {
+                        return override_forward_walker_container_creator_pack { backing_ssc_ccp };
+                    }
+                    auto create_backward_walker_container_creator_pack() {
+                        return override_forward_walker_container_creator_pack { backing_ssc_ccp };
+                    }
+                };
+                // create bidiwalker
+                using BIDI_WALKER_TYPE = bidi_walker<
+                    debug_mode,
+                    decltype(sub_graph),
+                    override_bidi_walker_container_creator_pack
+                >;
+                BIDI_WALKER_TYPE bidi_walker_ {
+                    BIDI_WALKER_TYPE::create_and_initialize(
+                        sub_graph,
+                        mid_down_offset,
+                        override_bidi_walker_container_creator_pack {
+                            container_creator_pack
+                                .create_slice_slot_container_container_creator_pack()
+                        }
+                    )
+                };
+                // walk middle, pulling out node/edge with max weight
                 auto mid_slice { sub_graph.slice_nodes(mid_down_offset) };
                 if constexpr (debug_mode) {
                     if (mid_slice.begin() == mid_slice.end()) {

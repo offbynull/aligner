@@ -30,6 +30,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
+    using offbynull::concepts::range_of_type;
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::utils::static_vector_typer;
 
@@ -76,7 +77,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return {};
         }
 
-        std::vector<N> create_resident_node_container(const std::ranges::range auto& resident_nodes) const {
+        std::vector<N> create_resident_node_container(range_of_type<N> auto&& resident_nodes) const {
             return std::vector<N>(resident_nodes.begin(), resident_nodes.end());
         }
 
@@ -108,7 +109,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         }
 
         using RESIDENT_NODE_CONTAINER_TYPE = typename static_vector_typer<N, max_resident_nodes_cnt, debug_mode>::type;
-        RESIDENT_NODE_CONTAINER_TYPE create_resident_node_container(const std::ranges::range auto& resident_nodes) const {
+        RESIDENT_NODE_CONTAINER_TYPE create_resident_node_container(range_of_type<N> auto& resident_nodes) const {
             return RESIDENT_NODE_CONTAINER_TYPE(resident_nodes.begin(), resident_nodes.end());
         }
 
