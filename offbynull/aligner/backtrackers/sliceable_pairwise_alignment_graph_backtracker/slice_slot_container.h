@@ -95,7 +95,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 G::limits(
                     graph.grid_down_cnt,
                     graph.grid_right_cnt
-                ).max_path_edge_cnt
+                ).max_grid_node_depth
             )
         }
         , grid_down{} {}

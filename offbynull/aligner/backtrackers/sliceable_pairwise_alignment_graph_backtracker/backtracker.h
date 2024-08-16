@@ -9,7 +9,6 @@
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_segmenter.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_subdivider.h"
 #include "offbynull/aligner/concepts.h"
-#include "offbynull/helpers/container_creators.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/suffix_sliceable_pairwise_alignment_graph.h"
@@ -39,16 +38,14 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container_container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container_heap_container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container_stack_container_creator_pack;
-    using offbynull::helpers::container_creators::container_creator;
-    using offbynull::helpers::container_creators::container_creator_of_type;
-    using offbynull::helpers::container_creators::vector_container_creator;
-    using offbynull::helpers::container_creators::static_vector_container_creator;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph;
+    using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
+    using offbynull::utils::static_vector_typer;
 
 
 
@@ -56,52 +53,61 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         typename T,
-        typename G
+        typename N,
+        typename E,
+        typename ED
     >
     concept backtracker_container_creator_pack =
-        readable_sliceable_pairwise_alignment_graph<G>
-        && resident_segmenter_container_creator_pack<typename T::RESIDENT_SEGMENTER_CONTAINER_CREATOR_PACK, G>
-        && sliced_subdivider_container_creator_pack<typename T::SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK, G>
-        && container_creator_of_type<typename T::PATH_CONTAINER_CREATOR, typename G::E>;
+        weight<ED>
+        && requires(T t) {
+            { t.create_resident_segmenter_container_creator_pack() } -> resident_segmenter_container_creator_pack<N, E, ED>;
+            { t.create_sliced_subdivider_container_creator_pack() } -> sliced_subdivider_container_creator_pack<N, E, ED>;
+            { t.create_path_container() } -> random_access_range_of_type<E>;
+        };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        typename N,
+        typename E,
+        weight ED
     >
     struct backtracker_heap_container_creator_pack {
-        using E = typename G::E;
+        resident_segmenter_heap_container_creator_pack<debug_mode, N, E, ED> create_resident_segmenter_container_creator_pack() {
+            return {};
+        }
 
-        using RESIDENT_SEGMENTER_CONTAINER_CREATOR_PACK=resident_segmenter_heap_container_creator_pack<debug_mode, G>;
-        using SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK=sliced_subdivider_heap_container_creator_pack<debug_mode, G>;
-        using PATH_CONTAINER_CREATOR=vector_container_creator<E, debug_mode>;
+        sliced_subdivider_heap_container_creator_pack<debug_mode, N, E, ED> create_sliced_subdivider_container_creator_pack() {
+            return {};
+        }
+
+        std::vector<E> create_path_container() {
+            return {};
+        }
     };
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
-        std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt
+        typename N,
+        typename E,
+        weight ED,
+        std::size_t grid_right_cnt,
+        std::size_t grid_depth_cnt,
+        std::size_t max_resident_nodes_cnt,
+        std::size_t max_path_edge_cnt
     >
     struct backtracker_stack_container_creator_pack {
-        using E = typename G::E;
+        resident_segmenter_stack_container_creator_pack<debug_mode, N, E, ED, grid_right_cnt, grid_depth_cnt, max_resident_nodes_cnt> create_resident_segmenter_container_creator_pack() {
+            return {};
+        }
 
-        using RESIDENT_SEGMENTER_CONTAINER_CREATOR_PACK=resident_segmenter_stack_container_creator_pack<
-            debug_mode,
-            G,
-            grid_down_cnt,
-            grid_right_cnt
-        >;
-        using SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK=sliced_subdivider_stack_container_creator_pack<
-            debug_mode,
-            G,
-            grid_down_cnt,
-            grid_right_cnt
-        >;
-        using PATH_CONTAINER_CREATOR=static_vector_container_creator<
-            E,
-            G::limits(grid_down_cnt, grid_right_cnt).max_path_edge_cnt,
-            debug_mode
-        >;
+        sliced_subdivider_stack_container_creator_pack<debug_mode, N, E, ED, grid_right_cnt, grid_depth_cnt, max_resident_nodes_cnt> create_sliced_subdivider_container_creator_pack() {
+            return {};
+        }
+
+        using CONTAINER_TYPE = typename static_vector_typer<E, max_path_edge_cnt, debug_mode>::type;
+        CONTAINER_TYPE create_path_container() const  {
+            return {};
+        }
     };
 
 
@@ -111,7 +117,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
-        backtracker_container_creator_pack<G> CONTAINER_CREATOR_PACK=backtracker_heap_container_creator_pack<debug_mode, G>
+        backtracker_container_creator_pack<typename G::N, typename G::E, typename G::ED> CONTAINER_CREATOR_PACK=backtracker_heap_container_creator_pack<debug_mode, typename G::N, typename G::E, typename G::ED>
     >
     requires backtrackable_node<typename G::N> &&
         backtrackable_edge<typename G::E>
@@ -123,12 +129,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
-        using RESIDENT_SEGMENTER_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::RESIDENT_SEGMENTER_CONTAINER_CREATOR_PACK;
-        using SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK=typename CONTAINER_CREATOR_PACK::SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK;
-        using PATH_CONTAINER_CREATOR=typename CONTAINER_CREATOR_PACK::PATH_CONTAINER_CREATOR;
+        using RESIDENT_SEGMENTER_CONTAINER_CREATOR_PACK=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_resident_segmenter_container_creator_pack());
+        using SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_sliced_subdivider_container_creator_pack());
+        using PATH_CONTAINER=decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container());
+
+        CONTAINER_CREATOR_PACK container_creator_pack;
 
     public:
-        backtracker() {}
+        backtracker(
+            CONTAINER_CREATOR_PACK container_creator_pack_ = {}
+        )
+        : container_creator_pack{container_creator_pack_} {}
 
         auto find_max_path(
             const G& g,
@@ -138,11 +149,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 debug_mode,
                 G,
                 RESIDENT_SEGMENTER_CONTAINER_CREATOR_PACK
-            > resident_segmenter_ {};
+            > resident_segmenter_ {
+                container_creator_pack.create_resident_segmenter_container_creator_pack()
+            };
             using hop_ = hop<E>;
             using segment_ = segment<N>;
             const auto& [parts, final_weight] { resident_segmenter_.backtrack_segmentation_points(g, final_weight_comparison_tolerance) };
-            auto path { PATH_CONTAINER_CREATOR {}.create_empty(std::nullopt) };
+            PATH_CONTAINER path { container_creator_pack.create_path_container() };
             for (const auto& part : parts) {
                 if (const hop_* hop_ptr = std::get_if<hop_>(&part)) {
                     path.push_back(hop_ptr->edge);
@@ -157,7 +170,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                         decltype(g_segment),
                         SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK
                     > subdivider {
-                        g_segment
+                        g_segment,
+                        container_creator_pack.create_sliced_subdivider_container_creator_pack()
                     };
                     auto path_container { subdivider.subdivide() };
                     auto size_before { path.size() };

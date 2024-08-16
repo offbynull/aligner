@@ -33,8 +33,9 @@ TODO:
 * ~~error_check -> debug_mode~~
 * remove limits() function -- move fields directly into graph class and make them constexpr
   * at least move grid depth into graph class, making it constexpr
-* container creators -- make them into static functions so you don't have to create an instance of container_creator each time you use it
-* const correct container_creator_packs
+* ~~container creators -- make them into functions so you don't have to create an instance of container_creator each time you use it~~
+* container creators -- vectors being created can be reserved to max size????
+* ~~const correct container_creator_packs~~
 * CHANGE const G& graph TO const G& g
 * sliced_subdivider -- changed "whole_graph" to "graph_partition"?
 * add E_COUNT type to readable_pairwise_alignment_graph concept and graph implementations -- make use of it in slot_container.h rather than asking the user to supply it 
