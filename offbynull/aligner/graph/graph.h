@@ -10,6 +10,12 @@ namespace offbynull::aligner::graph::graph {
     using offbynull::concepts::one_of;
     using offbynull::concepts::range_of_one_of;
 
+    template<typename N>
+    concept node = std::regular<N>;
+
+    template<typename E>
+    concept edge = std::regular<E>;
+
     template <typename G>
     concept readable_graph =
         requires(G g, typename G::N n, typename G::E e) {
@@ -17,6 +23,8 @@ namespace offbynull::aligner::graph::graph {
             typename G::ND;
             typename G::E;
             typename G::ED;
+            { typename G::N {} } -> node;
+            { typename G::E {} } -> edge;
             { g.get_node_data(n) } -> one_of<typename G::ND, const typename G::ND&>;
             { g.get_edge_data(e) } -> one_of<typename G::ED, const typename G::ED&>;
             { g.get_edge_from(e) } -> one_of<typename G::N, const typename G::N&>;

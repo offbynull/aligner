@@ -2,16 +2,16 @@
 #define OFFBYNULL_ALIGNER_GRAPH_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_H
 
 #include "offbynull/concepts.h"
+#include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 
 namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
-    using offbynull::concepts::one_of;
-    using offbynull::concepts::range_of_type;
     using offbynull::concepts::range_of_one_of;
-    using offbynull::concepts::widenable_to_size_t;
+    using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
 
     template <typename G>
     concept readable_sliceable_pairwise_alignment_graph =
-        requires(
+        readable_pairwise_alignment_graph<G>
+        && requires(
             G g,
             typename G::N node,
             typename G::INDEX grid_down,
