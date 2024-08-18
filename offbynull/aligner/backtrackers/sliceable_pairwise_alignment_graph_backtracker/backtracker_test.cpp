@@ -40,8 +40,7 @@ namespace {
         backtracker<true, decltype(g)> backtracker_ { };
         const auto& [path, weight] { backtracker_.find_max_path(g, 0.000001f64) };
         for (const E& e : path) {
-            const auto& [n1, n2] { e };
-            std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
+            std::cout << e << ' ';
         }
         std::cout << std::endl;
         // std::cout << weight << std::endl;
@@ -81,8 +80,7 @@ namespace {
         backtracker<true, decltype(g)> backtracker_ { };
         const auto& [path, weight] { backtracker_.find_max_path(g, 0.000001f64) };
         for (const E& e : path) {
-            const auto& [n1, n2] { e.inner_edge };
-            std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
+            std::cout << e << ' ';
         }
         std::cout << std::endl;
         // std::cout << weight << std::endl;
@@ -118,8 +116,7 @@ namespace {
         backtracker<true, decltype(g)> backtracker_ { };
         const auto& [path, weight] { backtracker_.find_max_path(g, 0.000001f64) };
         for (const E& e : path) {
-            const auto& [n1, n2] { e.inner_edge };
-            std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
+            std::cout << e << ' ';
         }
         std::cout << std::endl;
         // std::cout << weight << std::endl;
@@ -155,8 +152,7 @@ namespace {
         backtracker<true, decltype(g)> backtracker_ { };
         const auto& [path, weight] { backtracker_.find_max_path(g, 0.000001f64) };
         for (const E& e : path) {
-            const auto& [n1, n2] { e.inner_edge };
-            std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
+            std::cout << e << ' ';
         }
         std::cout << std::endl;
         // std::cout << weight << std::endl;

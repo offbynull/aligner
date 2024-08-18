@@ -36,8 +36,7 @@ namespace {
         std::vector<E> forward_path(backward_path_view.begin(), backward_path_view.end());
         std::reverse(forward_path.begin(), forward_path.end());
         for (const E& e : forward_path) {
-            const auto& [n1, n2] { e };
-            std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
+            std::cout << e << ' ';
         }
         std::cout << std::endl;
         // std::cout << weight << std::endl;
@@ -85,8 +84,7 @@ namespace {
         std::vector<E> forward_path(backward_path_view.begin(), backward_path_view.end());
         std::reverse(forward_path.begin(), forward_path.end());
         for (const E& e : forward_path) {
-            const auto& [n1, n2] { e.inner_edge };
-            std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
+            std::cout << e << ' ';
         }
         std::cout << std::endl;
         // std::cout << weight << std::endl;

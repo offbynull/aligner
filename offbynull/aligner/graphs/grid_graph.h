@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <utility>
 #include <stdfloat>
+#include <iostream>
+#include <format>
 
 #include "offbynull/concepts.h"
 #include "offbynull/utils.h"
@@ -22,6 +24,20 @@ namespace offbynull::aligner::graphs::grid_graph {
 
     using empty_type = std::tuple<>;
 
+    template<widenable_to_size_t INDEX>
+    struct node {
+        INDEX down;
+        INDEX right;
+        auto operator<=>(const node&) const = default;
+    };
+
+    template<widenable_to_size_t INDEX>
+    struct edge {
+        node<INDEX> source;
+        node<INDEX> destination;
+        auto operator<=>(const edge&) const = default;
+    };
+
     template<
         bool debug_mode,
         sequence DOWN_SEQ,
@@ -34,9 +50,9 @@ namespace offbynull::aligner::graphs::grid_graph {
         using DOWN_ELEM = std::decay_t<decltype(std::declval<DOWN_SEQ>()[0u])>;
         using RIGHT_ELEM = std::decay_t<decltype(std::declval<RIGHT_SEQ>()[0u])>;
         using INDEX = INDEX_;
-        using N = std::pair<INDEX, INDEX>;
+        using N = node<INDEX>;
         using ND = empty_type;
-        using E = std::pair<N, N>;
+        using E = edge<INDEX>;
         using ED = WEIGHT;  // Differs from backing grid_graph because these values are derived at time of access
 
     private:
@@ -122,25 +138,25 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error("Edge doesn't exist");
                 }
             }
-            const auto& [n1_grid_down, n1_grid_right] { edge.first };
-            const auto& [n2_grid_down, n2_grid_right] { edge.second };
-            if (n1_grid_down == n2_grid_down && n1_grid_right + 1u == n2_grid_right) {
+            const N& n1 { edge.source };
+            const N& n2 { edge.destination };
+            if (n1.down == n2.down && n1.right + 1u == n2.right) {
                 return gap_lookup(
                     edge,
                     { std::nullopt },
-                    { { right_seq[n1_grid_right] } }
+                    { { right_seq[n1.right] } }
                 );
-            } else if (n1_grid_down + 1u == n2_grid_down && n1_grid_right == n2_grid_right) {
+            } else if (n1.down + 1u == n2.down && n1.right == n2.right) {
                 return gap_lookup(
                     edge,
-                    { { down_seq[n1_grid_down] } },
+                    { { down_seq[n1.down] } },
                     { std::nullopt }
                 );
-            } else if (n1_grid_down + 1u == n2_grid_down && n1_grid_right + 1u == n2_grid_right) {
+            } else if (n1.down + 1u == n2.down && n1.right + 1u == n2.right) {
                 return substitution_lookup(
                     edge,
-                    { { down_seq[n1_grid_down] } },
-                    { { right_seq[n1_grid_right] } }
+                    { { down_seq[n1.down] } },
+                    { { right_seq[n1.right] } }
                 );
             }
             if constexpr (debug_mode) {
@@ -155,7 +171,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            return edge.first;
+            return edge.source;
         }
 
         N get_edge_to(const E& edge) const {
@@ -164,7 +180,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                     throw std::runtime_error {"Edge doesn't exist"};
                 }
             }
-            return edge.second;
+            return edge.destination;
         }
 
         std::tuple<N, N, ED> get_edge(const E& edge) const {
@@ -228,16 +244,15 @@ namespace offbynull::aligner::graphs::grid_graph {
         }
 
         bool has_node(const N& node) const {
-            const auto& [n1_grid_down, n1_grid_right] { node };
-            return n1_grid_down < grid_down_cnt && n1_grid_down >= 0u && n1_grid_right < grid_right_cnt && n1_grid_right >= 0u;
+            return node.down < grid_down_cnt && node.down >= 0u && node.right < grid_right_cnt && node.right >= 0u;
         }
 
         bool has_edge(const E& edge) const {
-            const auto& [n1_grid_down, n1_grid_right] { edge.first };
-            const auto& [n2_grid_down, n2_grid_right] { edge.second };
-            return (n1_grid_down == n2_grid_down && n1_grid_right + 1u == n2_grid_right && n2_grid_right < grid_right_cnt)
-                || (n1_grid_down + 1u == n2_grid_down && n1_grid_right == n2_grid_right && n2_grid_down < grid_down_cnt)
-                || (n1_grid_down + 1u == n2_grid_down && n1_grid_right + 1u == n2_grid_right && n2_grid_down < grid_down_cnt && n2_grid_right < grid_right_cnt);
+            const N& n1 { edge.source };
+            const N& n2 { edge.destination };
+            return (n1.down == n2.down && n1.right + 1u == n2.right && n2.right < grid_right_cnt)
+                || (n1.down + 1u == n2.down && n1.right == n2.right && n2.down < grid_down_cnt)
+                || (n1.down + 1u == n2.down && n1.right + 1u == n2.right && n2.down < grid_down_cnt && n2.right < grid_right_cnt);
         }
 
         std::ranges::bidirectional_range auto get_outputs_full(const N& node) const {
@@ -380,11 +395,11 @@ namespace offbynull::aligner::graphs::grid_graph {
                 if (!(root_node <= leaf_node)) {
                     throw std::runtime_error("Bad node");
                 }
-                if (!(grid_down >= std::get<0>(root_node) && grid_down <= std::get<0>(leaf_node))) {
+                if (!(grid_down >= root_node.down && grid_down <= leaf_node.down)) {
                     throw std::runtime_error("Bad node");
                 }
             }
-            return std::views::iota(std::get<1>(root_node), std::get<1>(leaf_node) + 1u)
+            return std::views::iota(root_node.right, leaf_node.right + 1u)
                 | std::views::transform([grid_down](const auto& grid_right) { return N { grid_down, grid_right }; });
         }
 
@@ -410,4 +425,32 @@ namespace offbynull::aligner::graphs::grid_graph {
         }
     };
 }
+
+
+// Struct must be defined outside of namespace block above, otherwise compiler will treat it as part of that namespace.
+template<offbynull::concepts::widenable_to_size_t INDEX>
+struct std::formatter<offbynull::aligner::graphs::grid_graph::node<INDEX>> : std::formatter<std::string> {
+    auto format(const offbynull::aligner::graphs::grid_graph::node<INDEX>& n, std::format_context& ctx) const {
+        return std::format_to(ctx.out(), "[{},{}]", n.down, n.right);
+    }
+};
+
+template<offbynull::concepts::widenable_to_size_t INDEX>
+std::ostream& operator<<(std::ostream& os, const offbynull::aligner::graphs::grid_graph::node<INDEX>& n) {
+    return os << std::format("{}", n);
+}
+
+// Struct must be defined outside of namespace block above, otherwise compiler will treat it as part of that namespace.
+template<offbynull::concepts::widenable_to_size_t INDEX>
+struct std::formatter<offbynull::aligner::graphs::grid_graph::edge<INDEX>> : std::formatter<std::string> {
+    auto format(const offbynull::aligner::graphs::grid_graph::edge<INDEX>& e, std::format_context& ctx) const {
+        return std::format_to(ctx.out(), "{}->{}", e.source, e.destination);
+    }
+};
+
+template<offbynull::concepts::widenable_to_size_t INDEX>
+std::ostream& operator<<(std::ostream& os, const offbynull::aligner::graphs::grid_graph::edge<INDEX>& e) {
+    return os << std::format("{}", e);
+}
+
 #endif //OFFBYNULL_ALIGNER_GRAPHS_GRID_GRAPH_H

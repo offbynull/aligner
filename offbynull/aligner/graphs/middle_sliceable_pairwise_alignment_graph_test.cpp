@@ -30,16 +30,16 @@ namespace {
             decltype(backing_g)::N root_node,
             decltype(backing_g)::N leaf_node
         )
-        : down_seq{_down_seq}
-        , right_seq{_right_seq}
-        , backing_g{
+        : down_seq { _down_seq }
+        , right_seq { _right_seq }
+        , backing_g {
             down_seq,
             right_seq,
             substitution_scorer,
             gap_scorer,
             freeride_scorer
         }
-        , middle_g{backing_g, root_node, leaf_node} {}
+        , middle_g { backing_g, root_node, leaf_node } { }
     };
 
     TEST(MiddlePairwiseAlignmentGraphTest, ConceptCheck) {
@@ -52,12 +52,15 @@ namespace {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
         auto n = g.get_nodes();
         EXPECT_EQ(
             std::set(n.begin(), n.end()),
             (std::set {
-                std::pair{1zu, 1zu}, std::pair{1zu, 2zu},
-                std::pair{2zu, 1zu}, std::pair{2zu, 2zu},
+                N { 1zu, 1zu }, N { 1zu, 2zu },
+                N { 2zu, 1zu }, N { 2zu, 2zu },
             })
         );
     }
@@ -66,21 +69,22 @@ namespace {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         auto e = g.get_edges();
-        std::multiset<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
+        std::multiset<E> actual { }; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
         for (auto _e : e) {
             actual.insert(_e);
         }
         EXPECT_EQ(
             actual,
             (std::multiset<E> {
-                edge { edge_type::NORMAL, std::pair { std::pair{1zu, 1zu}, std::pair{1zu, 2zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{1zu, 1zu}, std::pair{2zu, 2zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{1zu, 1zu}, std::pair{2zu, 1zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{1zu, 2zu}, std::pair{2zu, 2zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{2zu, 1zu}, std::pair{2zu, 2zu} } },
+                E { edge_type::NORMAL, { { 1zu, 1zu }, { 1zu, 2zu } } },
+                E { edge_type::NORMAL, { { 1zu, 1zu }, { 2zu, 2zu } } },
+                E { edge_type::NORMAL, { { 1zu, 1zu }, { 2zu, 1zu } } },
+                E { edge_type::NORMAL, { { 1zu, 2zu }, { 2zu, 2zu } } },
+                E { edge_type::NORMAL, { { 2zu, 1zu }, { 2zu, 2zu } } },
             })
         );
     }
@@ -89,78 +93,85 @@ namespace {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 
-        EXPECT_FALSE(g.has_node({0zu, 0zu}));
-        EXPECT_FALSE(g.has_node({0zu, 1zu}));
-        EXPECT_FALSE(g.has_node({0zu, 2zu}));
-        EXPECT_FALSE(g.has_node({0zu, 3zu}));
-        EXPECT_FALSE(g.has_node({1zu, 0zu}));
-        EXPECT_TRUE(g.has_node({1zu, 1zu}));
-        EXPECT_TRUE(g.has_node({1zu, 2zu}));
-        EXPECT_FALSE(g.has_node({1zu, 3zu}));
-        EXPECT_FALSE(g.has_node({2zu, 0zu}));
-        EXPECT_TRUE(g.has_node({2zu, 1zu}));
-        EXPECT_TRUE(g.has_node({2zu, 2zu}));
-        EXPECT_FALSE(g.has_node({2zu, 3zu}));
-        EXPECT_FALSE(g.has_node({3zu, 0zu}));
-        EXPECT_FALSE(g.has_node({3zu, 1zu}));
-        EXPECT_FALSE(g.has_node({3zu, 2zu}));
-        EXPECT_FALSE(g.has_node({3zu, 3zu}));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_FALSE(g.has_node(N { 0zu, 0zu }));
+        EXPECT_FALSE(g.has_node(N { 0zu, 1zu }));
+        EXPECT_FALSE(g.has_node(N { 0zu, 2zu }));
+        EXPECT_FALSE(g.has_node(N { 0zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { 1zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { 1zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { 1zu, 2zu }));
+        EXPECT_FALSE(g.has_node(N { 1zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { 2zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { 2zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { 2zu, 2zu }));
+        EXPECT_FALSE(g.has_node(N { 2zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { 3zu, 0zu }));
+        EXPECT_FALSE(g.has_node(N { 3zu, 1zu }));
+        EXPECT_FALSE(g.has_node(N { 3zu, 2zu }));
+        EXPECT_FALSE(g.has_node(N { 3zu, 3zu }));
     }
 
     TEST(MiddlePairwiseAlignmentGraphTest, EdgesExist) {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{0zu, 0zu}, {0zu, 1zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{0zu, 1zu}, {0zu, 2zu}}}));
-        EXPECT_TRUE(g.has_edge({ edge_type::NORMAL, { {1zu, 1zu}, {1zu, 2zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::NORMAL, { {1zu, 1zu}, {2zu, 2zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::NORMAL, { {1zu, 1zu}, {2zu, 1zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::NORMAL, { {1zu, 2zu}, {2zu, 2zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::NORMAL, { {2zu, 1zu}, {2zu, 2zu} } }));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{6zu, 7zu}, {6zu, 8zu}}}));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_FALSE(g.has_edge(E { edge_type::NORMAL, { { 0zu, 0zu }, { 0zu, 1zu } } }));
+        EXPECT_FALSE(g.has_edge(E { edge_type::NORMAL, { { 0zu, 1zu }, { 0zu, 2zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::NORMAL, { { 1zu, 1zu }, { 1zu, 2zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::NORMAL, { { 1zu, 1zu }, { 2zu, 2zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::NORMAL, { { 1zu, 1zu }, { 2zu, 1zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::NORMAL, { { 1zu, 2zu }, { 2zu, 2zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::NORMAL, { { 2zu, 1zu }, { 2zu, 2zu } } }));
+        EXPECT_FALSE(g.has_edge(E { edge_type::NORMAL, { { 6zu, 7zu }, { 6zu, 8zu } } }));
     }
 
     TEST(MiddlePairwiseAlignmentGraphTest, GetOutputs) {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         {
-            std::vector<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
-            for (auto _e : g.get_outputs( { 1zu, 1zu } )) {
+            std::vector<E> actual { }; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
+            for (auto _e : g.get_outputs(N { 1zu, 1zu })) {
                 actual.push_back(_e);
             }
             std::sort(actual.begin(), actual.end());
             std::vector<E> expected {
-                { edge_type::NORMAL, {{1zu, 1zu}, {1zu, 2zu} } },
-                { edge_type::NORMAL, {{1zu, 1zu}, {2zu, 1zu} } },
-                { edge_type::NORMAL, {{1zu, 1zu}, {2zu, 2zu} } }
+                E { edge_type::NORMAL, { { 1zu, 1zu }, { 1zu, 2zu } } },
+                E { edge_type::NORMAL, { { 1zu, 1zu }, { 2zu, 1zu } } },
+                E { edge_type::NORMAL, { { 1zu, 1zu }, { 2zu, 2zu } } }
             };
             EXPECT_EQ(actual, expected);
         }
         {
-            std::vector<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
-            for (auto _e : g.get_outputs( { 2zu, 2zu } )) {
+            std::vector<E> actual { }; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
+            for (auto _e : g.get_outputs(N { 2zu, 2zu })) {
                 actual.push_back(_e);
             }
             std::sort(actual.begin(), actual.end());
             EXPECT_EQ(
                 actual,
-                (std::vector<E> {})
+                (std::vector<E> { })
             );
         }
         {
-            std::vector<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
-            for (auto _e : g.get_outputs( { 1zu, 2zu } )) {
+            std::vector<E> actual { }; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
+            for (auto _e : g.get_outputs(N { 1zu, 2zu })) {
                 actual.push_back(_e);
             }
             std::sort(actual.begin(), actual.end());
             EXPECT_EQ(
                 actual,
                 (std::vector<E> {
-                    { edge_type::NORMAL, { {1zu, 2zu}, {2zu, 2zu} } }
+                    E { edge_type::NORMAL, { { 1zu, 2zu }, { 2zu, 2zu } } }
                 })
             );
         }
@@ -170,43 +181,44 @@ namespace {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         {
-            std::vector<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
-            for (auto _e : g.get_inputs( std::pair{ 1zu, 1zu } )) {
+            std::vector<E> actual { }; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
+            for (auto _e : g.get_inputs(N { 1zu, 1zu })) {
                 actual.push_back(_e);
             }
             EXPECT_EQ(
                 actual,
-                (std::vector<E> {})
+                (std::vector<E> { })
             );
         }
         {
-            std::vector<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
-            for (auto _e : g.get_inputs( { 2zu, 2zu } )) {
+            std::vector<E> actual { }; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
+            for (auto _e : g.get_inputs(N { 2zu, 2zu })) {
                 actual.push_back(_e);
             }
             std::sort(actual.begin(), actual.end());
             EXPECT_EQ(
                 actual,
                 (std::vector<E> {
-                    { edge_type::NORMAL, {{1zu, 1zu}, {2zu, 2zu} } },
-                    { edge_type::NORMAL, {{1zu, 2zu}, {2zu, 2zu} } },
-                    { edge_type::NORMAL, {{2zu, 1zu}, {2zu, 2zu} } }
+                    E { edge_type::NORMAL, { { 1zu, 1zu }, { 2zu, 2zu } } },
+                    E { edge_type::NORMAL, { { 1zu, 2zu }, { 2zu, 2zu } } },
+                    E { edge_type::NORMAL, { { 2zu, 1zu }, { 2zu, 2zu } } }
                 })
             );
         }
         {
-            std::vector<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
-            for (auto _e : g.get_inputs( std::pair{1zu, 2zu} )) {
+            std::vector<E> actual { }; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
+            for (auto _e : g.get_inputs(N { 1zu, 2zu })) {
                 actual.push_back(_e);
             }
             std::sort(actual.begin(), actual.end());
             EXPECT_EQ(
                 actual,
                 (std::vector<E> {
-                    { edge_type::NORMAL, { {1zu, 1zu}, {1zu, 2zu} } }
+                    E { edge_type::NORMAL, { { 1zu, 1zu }, { 1zu, 2zu } } }
                 })
             );
         }
@@ -216,27 +228,33 @@ namespace {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 
-        EXPECT_EQ(g.get_out_degree(std::pair{ 1zu, 1zu } ), 3);
-        EXPECT_EQ(g.get_out_degree(std::pair{ 1zu, 2zu } ), 1);
-        EXPECT_EQ(g.get_out_degree(std::pair{ 2zu, 1zu } ), 1);
-        EXPECT_EQ(g.get_out_degree(std::pair{ 2zu, 2zu } ), 0);
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_EQ(g.get_out_degree(N { 1zu, 1zu }), 3);
+        EXPECT_EQ(g.get_out_degree(N { 1zu, 2zu }), 1);
+        EXPECT_EQ(g.get_out_degree(N { 2zu, 1zu }), 1);
+        EXPECT_EQ(g.get_out_degree(N { 2zu, 2zu }), 0);
     }
 
     TEST(MiddlePairwiseAlignmentGraphTest, GetInputDegree) {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 
-        EXPECT_EQ(g.get_in_degree(std::pair{ 1zu, 1zu } ), 0);
-        EXPECT_EQ(g.get_in_degree(std::pair{ 1zu, 2zu } ), 1);
-        EXPECT_EQ(g.get_in_degree(std::pair{ 2zu, 1zu } ), 1);
-        EXPECT_EQ(g.get_in_degree(std::pair{ 2zu, 2zu } ), 3);
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_EQ(g.get_in_degree(N { 1zu, 1zu }), 0);
+        EXPECT_EQ(g.get_in_degree(N { 1zu, 2zu }), 1);
+        EXPECT_EQ(g.get_in_degree(N { 2zu, 1zu }), 1);
+        EXPECT_EQ(g.get_in_degree(N { 2zu, 2zu }), 3);
     }
 
     TEST(MiddlePairwiseAlignmentGraphTest, SlicedWalk) {
         auto to_vector {
             [](auto &&r) {
                 auto it { r.begin() };
-                std::vector<std::decay_t<decltype(*it)>> ret {};
+                std::vector<std::decay_t<decltype(*it)>> ret { };
                 while (it != r.end()) {
                     ret.push_back(*it);
                     ++it;
@@ -248,9 +266,8 @@ namespace {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 
-        using G = std::decay_t<decltype(g)>;
-        using N = typename G::N;
-        using E = typename G::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         EXPECT_EQ(
             (to_vector(g.slice_nodes(0u))),
@@ -275,36 +292,36 @@ namespace {
 
         EXPECT_EQ(
             to_vector(g.outputs_to_residents(N { 1zu, 1zu })),
-            (std::vector<E> {})
+            (std::vector<E> { })
         );
         EXPECT_EQ(
             to_vector(g.outputs_to_residents(N { 1zu, 2zu })),
-            (std::vector<E> {})
+            (std::vector<E> { })
         );
         EXPECT_EQ(
             to_vector(g.outputs_to_residents(N { 2zu, 1zu })),
-            (std::vector<E> {})
+            (std::vector<E> { })
         );
         EXPECT_EQ(
             to_vector(g.outputs_to_residents(N { 2zu, 2zu })),
-            (std::vector<E> {})
+            (std::vector<E> { })
         );
 
         EXPECT_EQ(
             to_vector(g.inputs_from_residents(N { 2zu, 2zu })),
-            (std::vector<E> {})
+            (std::vector<E> { })
         );
         EXPECT_EQ(
             to_vector(g.inputs_from_residents(N { 2zu, 1zu })),
-            (std::vector<E> {})
+            (std::vector<E> { })
         );
         EXPECT_EQ(
             to_vector(g.inputs_from_residents(N { 1zu, 2zu })),
-            (std::vector<E> {})
+            (std::vector<E> { })
         );
         EXPECT_EQ(
             to_vector(g.inputs_from_residents(N { 1zu, 1zu })),
-            (std::vector<E> {})
+            (std::vector<E> { })
         );
     }
 }

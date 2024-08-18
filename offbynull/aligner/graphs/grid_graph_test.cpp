@@ -27,12 +27,14 @@ namespace {
             gap_scorer
         };
 
+        using N = typename decltype(g)::N;
+
         auto n = g.get_nodes();
         EXPECT_EQ(
             std::set(n.begin(), n.end()),
             (std::set {
-                std::pair{0zu, 0zu}, std::pair{0zu, 1zu}, std::pair{0zu, 2zu},
-                std::pair{1zu, 0zu}, std::pair{1zu, 1zu}, std::pair{1zu, 2zu}
+                N { 0zu, 0zu }, N { 0zu, 1zu }, N { 0zu, 2zu },
+                N { 1zu, 0zu }, N { 1zu, 1zu }, N { 1zu, 2zu }
             })
         );
     }
@@ -47,25 +49,26 @@ namespace {
             gap_scorer
         };
 
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         auto e = g.get_edges();
         std::set<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
-        for (auto _e : e) {
+        for (E _e : e) {
             actual.insert(_e);
         }
         EXPECT_EQ(
             actual,
             (std::set<E> {
-                std::pair { std::pair{0zu, 0zu}, std::pair{0zu, 1zu} },
-                std::pair { std::pair{0zu, 1zu}, std::pair{0zu, 2zu} },
-                std::pair { std::pair{1zu, 0zu}, std::pair{1zu, 1zu} },
-                std::pair { std::pair{1zu, 1zu}, std::pair{1zu, 2zu} },
-                std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 0zu} },
-                std::pair { std::pair{0zu, 1zu}, std::pair{1zu, 1zu} },
-                std::pair { std::pair{0zu, 2zu}, std::pair{1zu, 2zu} },
-                std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 1zu} },
-                std::pair { std::pair{0zu, 1zu}, std::pair{1zu, 2zu} }
+                E { N { 0zu, 0zu }, N { 0zu, 1zu } },
+                E { N { 0zu, 1zu }, N { 0zu, 2zu } },
+                E { N { 1zu, 0zu }, N { 1zu, 1zu } },
+                E { N { 1zu, 1zu }, N { 1zu, 2zu } },
+                E { N { 0zu, 0zu }, N { 1zu, 0zu } },
+                E { N { 0zu, 1zu }, N { 1zu, 1zu } },
+                E { N { 0zu, 2zu }, N { 1zu, 2zu } },
+                E { N { 0zu, 0zu }, N { 1zu, 1zu } },
+                E { N { 0zu, 1zu }, N { 1zu, 2zu } }
             })
         );
     }
@@ -155,25 +158,26 @@ namespace {
             gap_scorer
         };
 
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         {
             std::set<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
-            for (auto _e : g.get_outputs( std::pair{ 0zu, 0zu } )) {
+            for (E _e : g.get_outputs(N { 0zu, 0zu })) {
                 actual.insert(_e);
             }
             EXPECT_EQ(
                 actual,
                 (std::set<E> {
-                    std::pair { std::pair{0zu, 0zu}, std::pair{0zu, 1zu} },
-                    std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 0zu} },
-                    std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 1zu} }
+                    E { N { 0zu, 0zu }, N { 0zu, 1zu } },
+                    E { N { 0zu, 0zu }, N { 1zu, 0zu } },
+                    E { N { 0zu, 0zu }, N { 1zu, 1zu } }
                 })
             );
         }
         {
             std::set<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
-            for (auto _e : g.get_outputs( std::pair{ 1zu, 2zu } )) {
+            for (E _e : g.get_outputs(N { 1zu, 2zu })) {
                 actual.insert(_e);
             }
             EXPECT_EQ(
@@ -183,25 +187,25 @@ namespace {
         }
         {
             std::set<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
-            for (auto _e : g.get_outputs( std::pair{ 0zu, 2zu } )) {
+            for (E _e : g.get_outputs(N { 0zu, 2zu })) {
                 actual.insert(_e);
             }
             EXPECT_EQ(
                 actual,
                 (std::set<E> {
-                    std::pair { std::pair{0zu, 2zu}, std::pair{1zu, 2zu} }
+                    E { N { 0zu, 2zu }, N { 1zu, 2zu } }
                 })
             );
         }
         {
             std::set<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
-            for (auto _e : g.get_outputs( std::pair{ 1zu, 0zu } )) {
+            for (E _e : g.get_outputs(N { 1zu, 0zu })) {
                 actual.insert(_e);
             }
             EXPECT_EQ(
                 actual,
                 (std::set<E> {
-                    std::pair { std::pair{1zu, 0zu}, std::pair{1zu, 1zu} }
+                    E { N { 1zu, 0zu }, N { 1zu, 1zu } }
                 })
             );
         }
@@ -217,11 +221,12 @@ namespace {
             gap_scorer
         };
 
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         {
             std::set<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
-            for (auto _e : g.get_inputs( std::pair{ 0zu, 0zu } )) {
+            for (E _e : g.get_inputs(N { 0zu, 0zu })) {
                 actual.insert(_e);
             }
             EXPECT_EQ(
@@ -231,39 +236,39 @@ namespace {
         }
         {
             std::set<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
-            for (auto _e : g.get_inputs( std::pair{ 1zu, 2zu } )) {
+            for (E _e : g.get_inputs(N { 1zu, 2zu })) {
                 actual.insert(_e);
             }
             EXPECT_EQ(
                 actual,
                 (std::set<E> {
-                    std::pair { std::pair{0zu, 2zu}, std::pair{1zu, 2zu} },
-                    std::pair { std::pair{1zu, 1zu}, std::pair{1zu, 2zu} },
-                    std::pair { std::pair{0zu, 1zu}, std::pair{1zu, 2zu} }
+                    E { N { 0zu, 2zu }, N { 1zu, 2zu } },
+                    E { N { 1zu, 1zu }, N { 1zu, 2zu } },
+                    E { N { 0zu, 1zu }, N { 1zu, 2zu } }
                 })
             );
         }
         {
             std::set<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
-            for (auto _e : g.get_inputs( std::pair{0zu, 2zu} )) {
+            for (E _e : g.get_inputs(N { 0zu, 2zu })) {
                 actual.insert(_e);
             }
             EXPECT_EQ(
                 actual,
                 (std::set<E> {
-                    std::pair { std::pair{0zu, 1zu}, std::pair{0zu, 2zu} }
+                    E { N { 0zu, 1zu }, N { 0zu, 2zu } }
                 })
             );
         }
         {
             std::set<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
-            for (auto _e : g.get_inputs( std::pair{1zu, 0zu} )) {
+            for (E _e : g.get_inputs(N { 1zu, 0zu })) {
                 actual.insert(_e);
             }
             EXPECT_EQ(
                 actual,
                 (std::set<E> {
-                    std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 0zu} }
+                    E { N { 0zu, 0zu }, N { 1zu, 0zu } }
                 })
             );
         }
@@ -279,10 +284,12 @@ namespace {
             gap_scorer
         };
 
-        EXPECT_EQ(g.get_out_degree(std::pair{ 0zu, 0zu } ), 3);
-        EXPECT_EQ(g.get_out_degree(std::pair{ 1zu, 2zu } ), 0);
-        EXPECT_EQ(g.get_out_degree(std::pair{ 0zu, 2zu } ), 1);
-        EXPECT_EQ(g.get_out_degree(std::pair{ 1zu, 0zu } ), 1);
+        using N = typename decltype(g)::N;
+
+        EXPECT_EQ(g.get_out_degree(N { 0zu, 0zu }), 3);
+        EXPECT_EQ(g.get_out_degree(N { 1zu, 2zu }), 0);
+        EXPECT_EQ(g.get_out_degree(N { 0zu, 2zu }), 1);
+        EXPECT_EQ(g.get_out_degree(N { 1zu, 0zu }), 1);
     }
 
     TEST(GridGraphTest, GetInputDegree) {
@@ -295,9 +302,11 @@ namespace {
             gap_scorer
         };
 
-        EXPECT_EQ(g.get_in_degree(std::pair{ 0zu, 0zu } ), 0);
-        EXPECT_EQ(g.get_in_degree(std::pair{ 1zu, 2zu } ), 3);
-        EXPECT_EQ(g.get_in_degree(std::pair{ 0zu, 2zu } ), 1);
-        EXPECT_EQ(g.get_in_degree(std::pair{ 1zu, 0zu } ), 1);
+        using N = typename decltype(g)::N;
+
+        EXPECT_EQ(g.get_in_degree(N { 0zu, 0zu }), 0);
+        EXPECT_EQ(g.get_in_degree(N { 1zu, 2zu }), 3);
+        EXPECT_EQ(g.get_in_degree(N { 0zu, 2zu }), 1);
+        EXPECT_EQ(g.get_in_degree(N { 1zu, 0zu }), 1);
     }
 }

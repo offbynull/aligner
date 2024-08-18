@@ -2,7 +2,6 @@
 #define OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_GLOBAL_ALIGNMENT_GRAPH_H
 
 #include <cstddef>
-#include <ranges>
 #include <tuple>
 #include <stdexcept>
 #include <utility>
@@ -16,6 +15,8 @@
 
 namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
+    using offbynull::aligner::graphs::grid_graph::node;
+    using offbynull::aligner::graphs::grid_graph::edge;
     using offbynull::aligner::graphs::grid_graph::empty_type;
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::sequence::sequence::sequence;
@@ -29,25 +30,24 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         weight WEIGHT = std::float64_t
     >
     class pairwise_global_alignment_graph {
-    public:
-        using DOWN_ELEM = std::decay_t<decltype(std::declval<DOWN_SEQ>()[0u])>;
-        using RIGHT_ELEM = std::decay_t<decltype(std::declval<RIGHT_SEQ>()[0u])>;
-        using INDEX = INDEX_;
-        using N = std::pair<INDEX, INDEX>;
-        using E = std::pair<N, N>;
-        using ND = empty_type;
-        using ED = WEIGHT;  // Differs from backing grid_graph because these values are derived at time of access
-
     private:
         const grid_graph<
             debug_mode,
             DOWN_SEQ,
             RIGHT_SEQ,
-            INDEX,
+            INDEX_,
             WEIGHT
         > g;
 
     public:
+        using DOWN_ELEM = std::decay_t<decltype(std::declval<DOWN_SEQ>()[0u])>;
+        using RIGHT_ELEM = std::decay_t<decltype(std::declval<RIGHT_SEQ>()[0u])>;
+        using INDEX = INDEX_;
+        using N = node<INDEX>;
+        using E = edge<INDEX>;
+        using ND = empty_type;
+        using ED = WEIGHT;
+
         const INDEX grid_down_cnt;
         const INDEX grid_right_cnt;
         static constexpr INDEX grid_depth_cnt { decltype(g)::grid_depth_cnt };  // 0

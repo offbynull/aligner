@@ -30,8 +30,9 @@ TODO:
   * ~~make adapater that create forward_range / forward_backward_range based on callbacks (e.g. next(value) func and prev(value) func)~~
 
 * ~~revise container_pack pattern being used across project to how it's being done in sliceable_pairwise_alignment_graph_backtracker~~ 
-* graph node/edge types to structs instead of std::pair -- add friend functions that print out to std::out
+* ~~graph node/edge types to structs instead of std::pair -- add friend functions that print out to std::out~~
 * graph node/edge types -- add concepts to ensure they're regular types + support < operator
+* graphviz dump -- use string formatter / std::cout on node and edge outputs
 * local/fitting/overlap graph -- clean up ranges being produced so it doesn't run a filter function over an unneccesary number of nodes
 * ~~error_check -> debug_mode~~
 * ~~remove limits() function -- move fields directly into graph class and make them constexpr~~

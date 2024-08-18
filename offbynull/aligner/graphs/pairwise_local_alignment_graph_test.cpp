@@ -33,12 +33,14 @@ namespace {
             freeride_scorer
         };
         
+        using N = typename decltype(g)::N;
+        
         auto n = g.get_nodes();
         EXPECT_EQ(
             std::set(n.begin(), n.end()),
-            (std::set {
-                std::pair{0zu, 0zu}, std::pair{0zu, 1zu}, std::pair{0zu, 2zu},
-                std::pair{1zu, 0zu}, std::pair{1zu, 1zu}, std::pair{1zu, 2zu}
+            (std::set<N> {
+                N { 0zu, 0zu }, N { 0zu, 1zu }, N { 0zu, 2zu },
+                N { 1zu, 0zu }, N { 1zu, 1zu }, N { 1zu, 2zu }
             })
         );
     }
@@ -54,7 +56,8 @@ namespace {
             freeride_scorer
         };
         
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         auto e = g.get_edges();
         std::multiset<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
@@ -64,27 +67,27 @@ namespace {
         EXPECT_EQ(
             actual,
             (std::multiset<E> {
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{0zu, 1zu} } },
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{0zu, 2zu} } },
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 0zu} } },
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 1zu} } },
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 2zu} } },
+                E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 0zu, 1zu } } },
+                E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 0zu, 2zu } } },
+                E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 1zu, 0zu } } },
+                E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 1zu, 1zu } } },
+                E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 1zu, 2zu } } },
 
-                edge { edge_type::NORMAL, std::pair { std::pair{0zu, 0zu}, std::pair{0zu, 1zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{0zu, 1zu}, std::pair{0zu, 2zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{1zu, 0zu}, std::pair{1zu, 1zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{1zu, 1zu}, std::pair{1zu, 2zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 0zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{0zu, 1zu}, std::pair{1zu, 1zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{0zu, 2zu}, std::pair{1zu, 2zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 1zu} } },
-                edge { edge_type::NORMAL, std::pair { std::pair{0zu, 1zu}, std::pair{1zu, 2zu} } },
+                E { edge_type::NORMAL, { { 0zu, 0zu }, { 0zu, 1zu } } },
+                E { edge_type::NORMAL, { { 0zu, 1zu }, { 0zu, 2zu } } },
+                E { edge_type::NORMAL, { { 1zu, 0zu }, { 1zu, 1zu } } },
+                E { edge_type::NORMAL, { { 1zu, 1zu }, { 1zu, 2zu } } },
+                E { edge_type::NORMAL, { { 0zu, 0zu }, { 1zu, 0zu } } },
+                E { edge_type::NORMAL, { { 0zu, 1zu }, { 1zu, 1zu } } },
+                E { edge_type::NORMAL, { { 0zu, 2zu }, { 1zu, 2zu } } },
+                E { edge_type::NORMAL, { { 0zu, 0zu }, { 1zu, 1zu } } },
+                E { edge_type::NORMAL, { { 0zu, 1zu }, { 1zu, 2zu } } },
 
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 2zu} } },
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{0zu, 1zu}, std::pair{1zu, 2zu} } },
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{0zu, 2zu}, std::pair{1zu, 2zu} } },
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{1zu, 0zu}, std::pair{1zu, 2zu} } },
-                edge { edge_type::FREE_RIDE, std::pair { std::pair{1zu, 1zu}, std::pair{1zu, 2zu} } }
+                E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 1zu, 2zu } } },
+                E { edge_type::FREE_RIDE, { { 0zu, 1zu }, { 1zu, 2zu } } },
+                E { edge_type::FREE_RIDE, { { 0zu, 2zu }, { 1zu, 2zu } } },
+                E { edge_type::FREE_RIDE, { { 1zu, 0zu }, { 1zu, 2zu } } },
+                E { edge_type::FREE_RIDE, { { 1zu, 1zu }, { 1zu, 2zu } } }
             })
         );
     }
@@ -99,16 +102,19 @@ namespace {
             gap_scorer,
             freeride_scorer
         };
-        
-        EXPECT_TRUE(g.has_node({0zu, 0zu}));
-        EXPECT_TRUE(g.has_node({0zu, 1zu}));
-        EXPECT_TRUE(g.has_node({0zu, 2zu}));
-        EXPECT_FALSE(g.has_node({0zu, 3zu}));
-        EXPECT_TRUE(g.has_node({1zu, 0zu}));
-        EXPECT_TRUE(g.has_node({1zu, 1zu}));
-        EXPECT_TRUE(g.has_node({1zu, 2zu}));
-        EXPECT_FALSE(g.has_node({1zu, 3zu}));
-        EXPECT_FALSE(g.has_node({2zu, 3zu}));
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_TRUE(g.has_node(N {0zu, 0zu}));
+        EXPECT_TRUE(g.has_node(N {0zu, 1zu}));
+        EXPECT_TRUE(g.has_node(N {0zu, 2zu}));
+        EXPECT_FALSE(g.has_node(N {0zu, 3zu}));
+        EXPECT_TRUE(g.has_node(N {1zu, 0zu}));
+        EXPECT_TRUE(g.has_node(N {1zu, 1zu}));
+        EXPECT_TRUE(g.has_node(N {1zu, 2zu}));
+        EXPECT_FALSE(g.has_node(N {1zu, 3zu}));
+        EXPECT_FALSE(g.has_node(N {2zu, 3zu}));
     }
 
     TEST(PairwiseLocalAlignmentGraphTest, RightEdgesExist) {
@@ -121,13 +127,16 @@ namespace {
             gap_scorer,
             freeride_scorer
         };
-        
-        EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0zu, 0zu}, {0zu, 1zu}}}));
-        EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0zu, 1zu}, {0zu, 2zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{0zu, 2zu}, {0zu, 3zu}}}));
-        EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{1zu, 0zu}, {1zu, 1zu}}}));
-        EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{1zu, 1zu}, {1zu, 2zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{1zu, 2zu}, {1zu, 3zu}}}));
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_TRUE(g.has_edge(E {edge_type::NORMAL, {{0zu, 0zu}, {0zu, 1zu}}}));
+        EXPECT_TRUE(g.has_edge(E {edge_type::NORMAL, {{0zu, 1zu}, {0zu, 2zu}}}));
+        EXPECT_FALSE(g.has_edge(E {edge_type::NORMAL, {{0zu, 2zu}, {0zu, 3zu}}}));
+        EXPECT_TRUE(g.has_edge(E {edge_type::NORMAL, {{1zu, 0zu}, {1zu, 1zu}}}));
+        EXPECT_TRUE(g.has_edge(E {edge_type::NORMAL, {{1zu, 1zu}, {1zu, 2zu}}}));
+        EXPECT_FALSE(g.has_edge(E {edge_type::NORMAL, {{1zu, 2zu}, {1zu, 3zu}}}));
     }
 
     TEST(PairwiseLocalAlignmentGraphTest, DownEdgesExist) {
@@ -141,12 +150,15 @@ namespace {
             freeride_scorer
         };
 
-        EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0zu, 0zu}, {1zu, 0zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{1zu, 0zu}, {2zu, 0zu}}}));
-        EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0zu, 1zu}, {1zu, 1zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{1zu, 1zu}, {2zu, 1zu}}}));
-        EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0zu, 2zu}, {1zu, 2zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{1zu, 2zu}, {2zu, 2zu}}}));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_TRUE(g.has_edge(E {edge_type::NORMAL, {{0zu, 0zu}, {1zu, 0zu}}}));
+        EXPECT_FALSE(g.has_edge(E {edge_type::NORMAL, {{1zu, 0zu}, {2zu, 0zu}}}));
+        EXPECT_TRUE(g.has_edge(E {edge_type::NORMAL, {{0zu, 1zu}, {1zu, 1zu}}}));
+        EXPECT_FALSE(g.has_edge(E {edge_type::NORMAL, {{1zu, 1zu}, {2zu, 1zu}}}));
+        EXPECT_TRUE(g.has_edge(E {edge_type::NORMAL, {{0zu, 2zu}, {1zu, 2zu}}}));
+        EXPECT_FALSE(g.has_edge(E {edge_type::NORMAL, {{1zu, 2zu}, {2zu, 2zu}}}));
     }
 
     TEST(PairwiseLocalAlignmentGraphTest, DiagEdgesExist) {
@@ -159,13 +171,16 @@ namespace {
             gap_scorer,
             freeride_scorer
         };
-        
-        EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0zu, 0zu}, {1zu, 1zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{1zu, 0zu}, {2zu, 1zu}}}));
-        EXPECT_TRUE(g.has_edge({edge_type::NORMAL, {{0zu, 1zu}, {1zu, 2zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{1zu, 1zu}, {2zu, 2zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{0zu, 2zu}, {1zu, 3zu}}}));
-        EXPECT_FALSE(g.has_edge({edge_type::NORMAL, {{1zu, 2zu}, {2zu, 3zu}}}));
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_TRUE(g.has_edge(E {edge_type::NORMAL, {{0zu, 0zu}, {1zu, 1zu}}}));
+        EXPECT_FALSE(g.has_edge(E {edge_type::NORMAL, {{1zu, 0zu}, {2zu, 1zu}}}));
+        EXPECT_TRUE(g.has_edge(E {edge_type::NORMAL, {{0zu, 1zu}, {1zu, 2zu}}}));
+        EXPECT_FALSE(g.has_edge(E {edge_type::NORMAL, {{1zu, 1zu}, {2zu, 2zu}}}));
+        EXPECT_FALSE(g.has_edge(E {edge_type::NORMAL, {{0zu, 2zu}, {1zu, 3zu}}}));
+        EXPECT_FALSE(g.has_edge(E {edge_type::NORMAL, {{1zu, 2zu}, {2zu, 3zu}}}));
     }
 
     TEST(PairwiseLocalAlignmentGraphTest, FreeRideEdgesExist) {
@@ -178,20 +193,23 @@ namespace {
             gap_scorer,
             freeride_scorer
         };
-        
-        EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{0zu, 0zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{0zu, 1zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{0zu, 2zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 0zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 1zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 2zu} } }));
 
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0zu, 0zu}, std::pair{1zu, 2zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0zu, 1zu}, std::pair{1zu, 2zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{0zu, 2zu}, std::pair{1zu, 2zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{1zu, 0zu}, std::pair{1zu, 2zu} } }));
-        EXPECT_TRUE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{1zu, 1zu}, std::pair{1zu, 2zu} } }));
-        EXPECT_FALSE(g.has_edge({ edge_type::FREE_RIDE, std::pair { std::pair{1zu, 2zu}, std::pair{1zu, 2zu} } }));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+        
+        EXPECT_FALSE(g.has_edge(E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 0zu, 0zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 0zu, 1zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 0zu, 2zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 1zu, 0zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 1zu, 1zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 1zu, 2zu } } }));
+
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 0zu, 0zu }, { 1zu, 2zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 0zu, 1zu }, { 1zu, 2zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 0zu, 2zu }, { 1zu, 2zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 1zu, 0zu }, { 1zu, 2zu } } }));
+        EXPECT_TRUE(g.has_edge(E { edge_type::FREE_RIDE, { { 1zu, 1zu }, { 1zu, 2zu } } }));
+        EXPECT_FALSE(g.has_edge(E { edge_type::FREE_RIDE, { { 1zu, 2zu }, { 1zu, 2zu } } }));
     }
 
     TEST(PairwiseLocalAlignmentGraphTest, GetOutputs) {
@@ -204,8 +222,9 @@ namespace {
             gap_scorer,
             freeride_scorer
         };
-        
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         {
             std::vector<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
@@ -214,14 +233,14 @@ namespace {
             }
             std::sort(actual.begin(), actual.end());
             std::vector<E> expected {
-                { edge_type::FREE_RIDE, {{0zu, 0zu}, {0zu, 1zu} } },
-                { edge_type::FREE_RIDE, {{0zu, 0zu}, {0zu, 2zu} } },
-                { edge_type::FREE_RIDE, {{0zu, 0zu}, {1zu, 0zu} } },
-                { edge_type::FREE_RIDE, {{0zu, 0zu}, {1zu, 1zu} } },
-                { edge_type::FREE_RIDE, {{0zu, 0zu}, {1zu, 2zu} } },
-                { edge_type::NORMAL, {{0zu, 0zu}, {0zu, 1zu} } },
-                { edge_type::NORMAL, {{0zu, 0zu}, {1zu, 0zu} } },
-                { edge_type::NORMAL, {{0zu, 0zu}, {1zu, 1zu} } }
+                E { edge_type::FREE_RIDE, {{0zu, 0zu}, {0zu, 1zu} } },
+                E { edge_type::FREE_RIDE, {{0zu, 0zu}, {0zu, 2zu} } },
+                E { edge_type::FREE_RIDE, {{0zu, 0zu}, {1zu, 0zu} } },
+                E { edge_type::FREE_RIDE, {{0zu, 0zu}, {1zu, 1zu} } },
+                E { edge_type::FREE_RIDE, {{0zu, 0zu}, {1zu, 2zu} } },
+                E { edge_type::NORMAL, {{0zu, 0zu}, {0zu, 1zu} } },
+                E { edge_type::NORMAL, {{0zu, 0zu}, {1zu, 0zu} } },
+                E { edge_type::NORMAL, {{0zu, 0zu}, {1zu, 1zu} } }
             };
             EXPECT_EQ(actual, expected);
         }
@@ -245,10 +264,10 @@ namespace {
             EXPECT_EQ(
                 actual,
                 (std::vector<E> {
-                    { edge_type::FREE_RIDE, {{0zu, 1zu}, {1zu, 2zu} } },
-                    { edge_type::NORMAL, { {0zu, 1zu}, {0zu, 2zu} } },
-                    { edge_type::NORMAL, { {0zu, 1zu}, {1zu, 1zu} } },
-                    { edge_type::NORMAL, { {0zu, 1zu}, {1zu, 2zu} } }
+                    E { edge_type::FREE_RIDE, {{0zu, 1zu}, {1zu, 2zu} } },
+                    E { edge_type::NORMAL, { {0zu, 1zu}, {0zu, 2zu} } },
+                    E { edge_type::NORMAL, { {0zu, 1zu}, {1zu, 1zu} } },
+                    E { edge_type::NORMAL, { {0zu, 1zu}, {1zu, 2zu} } }
                 })
             );
         }
@@ -264,12 +283,13 @@ namespace {
             gap_scorer,
             freeride_scorer
         };
-        
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         {
             std::vector<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
-            for (auto _e : g.get_inputs( std::pair{ 0zu, 0zu } )) {
+            for (auto _e : g.get_inputs(N { 0zu, 0zu })) {
                 actual.push_back(_e);
             }
             EXPECT_EQ(
@@ -286,28 +306,28 @@ namespace {
             EXPECT_EQ(
                 actual,
                 (std::vector<E> {
-                    { edge_type::FREE_RIDE, {{0zu, 0zu}, {1zu, 2zu} } },
-                    { edge_type::FREE_RIDE, {{0zu, 1zu}, {1zu, 2zu} } },
-                    { edge_type::FREE_RIDE, {{0zu, 2zu}, {1zu, 2zu} } },
-                    { edge_type::FREE_RIDE, {{1zu, 0zu}, {1zu, 2zu} } },
-                    { edge_type::FREE_RIDE, {{1zu, 1zu}, {1zu, 2zu} } },
-                    { edge_type::NORMAL, {{0zu, 1zu}, {1zu, 2zu} } },
-                    { edge_type::NORMAL, {{0zu, 2zu}, {1zu, 2zu} } },
-                    { edge_type::NORMAL, {{1zu, 1zu}, {1zu, 2zu} } }
+                    E { edge_type::FREE_RIDE, {{0zu, 0zu}, {1zu, 2zu} } },
+                    E { edge_type::FREE_RIDE, {{0zu, 1zu}, {1zu, 2zu} } },
+                    E { edge_type::FREE_RIDE, {{0zu, 2zu}, {1zu, 2zu} } },
+                    E { edge_type::FREE_RIDE, {{1zu, 0zu}, {1zu, 2zu} } },
+                    E { edge_type::FREE_RIDE, {{1zu, 1zu}, {1zu, 2zu} } },
+                    E { edge_type::NORMAL, {{0zu, 1zu}, {1zu, 2zu} } },
+                    E { edge_type::NORMAL, {{0zu, 2zu}, {1zu, 2zu} } },
+                    E { edge_type::NORMAL, {{1zu, 1zu}, {1zu, 2zu} } }
                 })
             );
         }
         {
             std::vector<E> actual {}; // TODO: Can't pass being() and end() to constructor to automate this? Doesn't like end() with sentinel type
-            for (auto _e : g.get_inputs( std::pair{0zu, 2zu} )) {
+            for (auto _e : g.get_inputs( N { 0zu, 2zu } )) {
                 actual.push_back(_e);
             }
             std::sort(actual.begin(), actual.end());
             EXPECT_EQ(
                 actual,
                 (std::vector<E> {
-                    { edge_type::FREE_RIDE, { {0zu, 0zu}, {0zu, 2zu} } },
-                    { edge_type::NORMAL, { {0zu, 1zu}, {0zu, 2zu} } }
+                    E { edge_type::FREE_RIDE, { {0zu, 0zu}, {0zu, 2zu} } },
+                    E { edge_type::NORMAL, { {0zu, 1zu}, {0zu, 2zu} } }
                 })
             );
         }
@@ -323,11 +343,14 @@ namespace {
             gap_scorer,
             freeride_scorer
         };
-        
-        EXPECT_EQ(g.get_out_degree(std::pair{ 0zu, 0zu } ), 8);
-        EXPECT_EQ(g.get_out_degree(std::pair{ 1zu, 2zu } ), 0);
-        EXPECT_EQ(g.get_out_degree(std::pair{ 0zu, 2zu } ), 2);
-        EXPECT_EQ(g.get_out_degree(std::pair{ 1zu, 0zu } ), 2);
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_EQ(g.get_out_degree(N { 0zu, 0zu }), 8);
+        EXPECT_EQ(g.get_out_degree(N { 1zu, 2zu }), 0);
+        EXPECT_EQ(g.get_out_degree(N { 0zu, 2zu }), 2);
+        EXPECT_EQ(g.get_out_degree(N { 1zu, 0zu }), 2);
     }
 
     TEST(PairwiseLocalAlignmentGraphTest, GetInputDegree) {
@@ -340,11 +363,14 @@ namespace {
             gap_scorer,
             freeride_scorer
         };
-        
-        EXPECT_EQ(g.get_in_degree(std::pair{ 0zu, 0zu } ), 0);
-        EXPECT_EQ(g.get_in_degree(std::pair{ 1zu, 2zu } ), 8);
-        EXPECT_EQ(g.get_in_degree(std::pair{ 0zu, 2zu } ), 2);
-        EXPECT_EQ(g.get_in_degree(std::pair{ 1zu, 0zu } ), 2);
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_EQ(g.get_in_degree(N { 0zu, 0zu }), 0);
+        EXPECT_EQ(g.get_in_degree(N { 1zu, 2zu }), 8);
+        EXPECT_EQ(g.get_in_degree(N { 0zu, 2zu }), 2);
+        EXPECT_EQ(g.get_in_degree(N { 1zu, 0zu }), 2);
     }
 
     TEST(PairwiseLocalAlignmentGraphTest, SlicedWalk) {

@@ -19,6 +19,8 @@
 namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::aligner::graphs::grid_graph::grid_graph;
     using offbynull::aligner::graphs::grid_graph::empty_type;
+    using offbynull::aligner::graphs::grid_graph::edge;
+    using offbynull::aligner::graphs::grid_graph::node;
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::widenable_to_size_t;
@@ -30,14 +32,12 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         NORMAL
     };
 
-    template<widenable_to_size_t T>
-    class edge {
+    template<widenable_to_size_t INDEX>
+    class local_edge {
     public:
-        using N = std::pair<T, T>;
         edge_type type;
-        std::pair<N, N> inner_edge;
-
-        std::strong_ordering operator<=>(const edge& rhs) const = default;
+        edge<INDEX> inner_edge;
+        std::strong_ordering operator<=>(const local_edge& rhs) const = default;
     };
 
     template<
@@ -52,10 +52,10 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         using DOWN_ELEM = std::decay_t<decltype(std::declval<DOWN_SEQ>()[0u])>;
         using RIGHT_ELEM = std::decay_t<decltype(std::declval<RIGHT_SEQ>()[0u])>;
         using INDEX = INDEX_;
-        using N = std::pair<INDEX, INDEX>;
-        using E = edge<INDEX>;
+        using N = node<INDEX>;
+        using E = local_edge<INDEX>;
         using ND = empty_type;
-        using ED = WEIGHT;  // Differs from backing grid_graph because these values are derived at time of access
+        using ED = WEIGHT;
 
     private:
         const grid_graph<
@@ -294,8 +294,9 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                 )
                 | std::views::take(grid_down_cnt * grid_right_cnt - 1u)  // Remove leaf (will be added by non_leaf_only_outputs)
                 | std::views::drop(1u)  // Remove root
-                | std::views::transform([this](const N& n2) {
+                | std::views::transform([this](const auto& n2_coords) {
                     N n1 { 0, 0 };
+                    N n2 { std::get<0>(n2_coords), std::get<1>(n2_coords) };
                     E e { edge_type::FREE_RIDE, { n1, n2 } };
                     return std::tuple<E, N, N, ED> {e, n1, n2, freeride_lookup(e, { std::nullopt }, { std::nullopt })};
                 })
@@ -330,7 +331,8 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                 )
                 | std::views::take(grid_down_cnt * grid_right_cnt - 1u)  // Remove leaf
                 | std::views::drop(1u)  // Remove root (will be added by non_root_only_inputs)
-                | std::views::transform([this](const N& n1) {
+                | std::views::transform([this](const auto& n1_coords) {
+                    N n1 { std::get<0>(n1_coords), std::get<1>(n1_coords) };
                     N n2 { grid_down_cnt - 1u, grid_right_cnt - 1u };
                     E e { edge_type::FREE_RIDE, { n1, n2 } };
                     return std::tuple<E, N, N, ED> {e, n1, n2, freeride_lookup(e, { std::nullopt }, { std::nullopt })};
@@ -514,4 +516,24 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         }
     };
 }
+
+// Struct must be defined outside of namespace block above, otherwise compiler will treat it as part of that namespace.
+template<offbynull::concepts::widenable_to_size_t INDEX>
+struct std::formatter<offbynull::aligner::graphs::pairwise_local_alignment_graph::local_edge<INDEX>> : std::formatter<std::string> {
+    auto format(const offbynull::aligner::graphs::pairwise_local_alignment_graph::local_edge<INDEX>& e, std::format_context& ctx) const {
+        return std::format_to(
+            ctx.out(),
+            "{}-{}->{}",
+            e.inner_edge.source,
+            e.type == offbynull::aligner::graphs::pairwise_local_alignment_graph::edge_type::FREE_RIDE ? "fr" : "--",
+            e.inner_edge.destination
+        );
+    }
+};
+
+template<offbynull::concepts::widenable_to_size_t INDEX>
+std::ostream& operator<<(std::ostream& os, const offbynull::aligner::graphs::pairwise_local_alignment_graph::local_edge<INDEX>& e) {
+    return os << std::format("{}", e);
+}
+
 #endif //OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_LOCAL_ALIGNMENT_GRAPH_H

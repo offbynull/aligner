@@ -33,16 +33,15 @@ namespace {
             _backtracker.find_max_path(g)
         };
         for (const E& e : path) {
-            const auto& [n1, n2] { e };
-            std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
+            std::cout << e << ' ';
         }
         std::cout << std::endl;
         std::cout << weight << std::endl;
         EXPECT_EQ(
             path,
             (std::vector<E> {
-                { std::pair{0zu, 0zu}, std::pair{1zu, 1zu} },
-                { std::pair{1zu, 1zu}, std::pair{1zu, 2zu} }
+                E { { 0zu, 0zu }, { 1zu, 1zu } },
+                E { { 1zu, 1zu }, { 1zu, 2zu } }
             })
         );
         EXPECT_EQ(weight, 1.0);

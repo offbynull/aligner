@@ -8,7 +8,7 @@
 
 namespace {
     using offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph::pairwise_extended_gap_alignment_graph;
-    using offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph::layer;
+    using offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph::node_layer;
     using offbynull::aligner::scorers::simple_scorer::simple_scorer;
 
     auto substitution_scorer { simple_scorer<true, char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
@@ -34,7 +34,8 @@ namespace {
             freeride_scorer
         };
 
-        using N = typename std::remove_reference_t<decltype(g)>::N;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         std::set<N> actual {};
         for (const auto &n : g.get_nodes()) {
@@ -42,36 +43,36 @@ namespace {
         }
         EXPECT_EQ(
             actual,
-            (std::set {
-                N {layer::DIAGONAL, 0zu, 0zu},
-                N {layer::DIAGONAL, 0zu, 1zu},
-                N {layer::DIAGONAL, 0zu, 2zu},
-                N {layer::DIAGONAL, 0zu, 3zu},
-                N {layer::DIAGONAL, 1zu, 0zu},
-                N {layer::DIAGONAL, 1zu, 1zu},
-                N {layer::DIAGONAL, 1zu, 2zu},
-                N {layer::DIAGONAL, 1zu, 3zu},
-                N {layer::DIAGONAL, 2zu, 0zu},
-                N {layer::DIAGONAL, 2zu, 1zu},
-                N {layer::DIAGONAL, 2zu, 2zu},
-                N {layer::DIAGONAL, 2zu, 3zu},
-                N {layer::DOWN, 1zu, 0zu},
-                N {layer::DOWN, 1zu, 1zu},
-                N {layer::DOWN, 1zu, 2zu},
-                N {layer::DOWN, 1zu, 3zu},
-                N {layer::DOWN, 2zu, 0zu},
-                N {layer::DOWN, 2zu, 1zu},
-                N {layer::DOWN, 2zu, 2zu},
-                N {layer::DOWN, 2zu, 3zu},
-                N {layer::RIGHT, 0zu, 1zu},
-                N {layer::RIGHT, 1zu, 1zu},
-                N {layer::RIGHT, 2zu, 1zu},
-                N {layer::RIGHT, 0zu, 2zu},
-                N {layer::RIGHT, 1zu, 2zu},
-                N {layer::RIGHT, 2zu, 2zu},
-                N {layer::RIGHT, 0zu, 3zu},
-                N {layer::RIGHT, 1zu, 3zu},
-                N {layer::RIGHT, 2zu, 3zu}
+            (std::set<N> {
+                N { node_layer::DIAGONAL, 0zu, 0zu },
+                N { node_layer::DIAGONAL, 0zu, 1zu },
+                N { node_layer::DIAGONAL, 0zu, 2zu },
+                N { node_layer::DIAGONAL, 0zu, 3zu },
+                N { node_layer::DIAGONAL, 1zu, 0zu },
+                N { node_layer::DIAGONAL, 1zu, 1zu },
+                N { node_layer::DIAGONAL, 1zu, 2zu },
+                N { node_layer::DIAGONAL, 1zu, 3zu },
+                N { node_layer::DIAGONAL, 2zu, 0zu },
+                N { node_layer::DIAGONAL, 2zu, 1zu },
+                N { node_layer::DIAGONAL, 2zu, 2zu },
+                N { node_layer::DIAGONAL, 2zu, 3zu },
+                N { node_layer::DOWN, 1zu, 0zu },
+                N { node_layer::DOWN, 1zu, 1zu },
+                N { node_layer::DOWN, 1zu, 2zu },
+                N { node_layer::DOWN, 1zu, 3zu },
+                N { node_layer::DOWN, 2zu, 0zu },
+                N { node_layer::DOWN, 2zu, 1zu },
+                N { node_layer::DOWN, 2zu, 2zu },
+                N { node_layer::DOWN, 2zu, 3zu },
+                N { node_layer::RIGHT, 0zu, 1zu },
+                N { node_layer::RIGHT, 1zu, 1zu },
+                N { node_layer::RIGHT, 2zu, 1zu },
+                N { node_layer::RIGHT, 0zu, 2zu },
+                N { node_layer::RIGHT, 1zu, 2zu },
+                N { node_layer::RIGHT, 2zu, 2zu },
+                N { node_layer::RIGHT, 0zu, 3zu },
+                N { node_layer::RIGHT, 1zu, 3zu },
+                N { node_layer::RIGHT, 2zu, 3zu }
             })
         );
     }
@@ -88,8 +89,8 @@ namespace {
             freeride_scorer
         };
 
-        using N = typename std::remove_reference_t<decltype(g)>::N;
-        using E = typename std::remove_reference_t<decltype(g)>::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         auto e = g.get_edges();
         std::vector<E> actual {}; // TODO: I can't use being() and end() within set's constructor to automate this?
@@ -98,56 +99,56 @@ namespace {
         }
         std::ranges::sort(actual);
         std::vector<E> expected {
-            E { N {layer::DIAGONAL, 0zu, 0zu}, N {layer::DIAGONAL, 1zu, 1zu} },
-            E { N {layer::DIAGONAL, 0zu, 1zu}, N {layer::DIAGONAL, 1zu, 2zu} },
-            E { N {layer::DIAGONAL, 0zu, 2zu}, N {layer::DIAGONAL, 1zu, 3zu} },
-            E { N {layer::DIAGONAL, 1zu, 0zu}, N {layer::DIAGONAL, 2zu, 1zu} },
-            E { N {layer::DIAGONAL, 1zu, 1zu}, N {layer::DIAGONAL, 2zu, 2zu} },
-            E { N {layer::DIAGONAL, 1zu, 2zu}, N {layer::DIAGONAL, 2zu, 3zu} },
-            E { N {layer::DIAGONAL, 0zu, 0zu}, N {layer::RIGHT, 0zu, 1zu} },
-            E { N {layer::DIAGONAL, 0zu, 1zu}, N {layer::RIGHT, 0zu, 2zu} },
-            E { N {layer::DIAGONAL, 0zu, 2zu}, N {layer::RIGHT, 0zu, 3zu} },
-            E { N {layer::DIAGONAL, 1zu, 0zu}, N {layer::RIGHT, 1zu, 1zu} },
-            E { N {layer::DIAGONAL, 1zu, 1zu}, N {layer::RIGHT, 1zu, 2zu} },
-            E { N {layer::DIAGONAL, 1zu, 2zu}, N {layer::RIGHT, 1zu, 3zu} },
-            E { N {layer::DIAGONAL, 2zu, 0zu}, N {layer::RIGHT, 2zu, 1zu} },
-            E { N {layer::DIAGONAL, 2zu, 1zu}, N {layer::RIGHT, 2zu, 2zu} },
-            E { N {layer::DIAGONAL, 2zu, 2zu}, N {layer::RIGHT, 2zu, 3zu} },
-            E { N {layer::DIAGONAL, 0zu, 0zu}, N {layer::DOWN, 1zu, 0zu} },
-            E { N {layer::DIAGONAL, 1zu, 0zu}, N {layer::DOWN, 2zu, 0zu} },
-            E { N {layer::DIAGONAL, 0zu, 1zu}, N {layer::DOWN, 1zu, 1zu} },
-            E { N {layer::DIAGONAL, 1zu, 1zu}, N {layer::DOWN, 2zu, 1zu} },
-            E { N {layer::DIAGONAL, 0zu, 2zu}, N {layer::DOWN, 1zu, 2zu} },
-            E { N {layer::DIAGONAL, 1zu, 2zu}, N {layer::DOWN, 2zu, 2zu} },
-            E { N {layer::DIAGONAL, 0zu, 3zu}, N {layer::DOWN, 1zu, 3zu} },
-            E { N {layer::DIAGONAL, 1zu, 3zu}, N {layer::DOWN, 2zu, 3zu} },
-            E { N {layer::DOWN, 1zu, 0zu}, N {layer::DIAGONAL, 1zu, 0zu} },
-            E { N {layer::DOWN, 1zu, 1zu}, N {layer::DIAGONAL, 1zu, 1zu} },
-            E { N {layer::DOWN, 1zu, 2zu}, N {layer::DIAGONAL, 1zu, 2zu} },
-            E { N {layer::DOWN, 1zu, 3zu}, N {layer::DIAGONAL, 1zu, 3zu} },
-            E { N {layer::DOWN, 2zu, 0zu}, N {layer::DIAGONAL, 2zu, 0zu} },
-            E { N {layer::DOWN, 2zu, 1zu}, N {layer::DIAGONAL, 2zu, 1zu} },
-            E { N {layer::DOWN, 2zu, 2zu}, N {layer::DIAGONAL, 2zu, 2zu} },
-            E { N {layer::DOWN, 2zu, 3zu}, N {layer::DIAGONAL, 2zu, 3zu} },
-            E { N {layer::DOWN, 1zu, 0zu}, N {layer::DOWN, 2zu, 0zu} },
-            E { N {layer::DOWN, 1zu, 1zu}, N {layer::DOWN, 2zu, 1zu} },
-            E { N {layer::DOWN, 1zu, 2zu}, N {layer::DOWN, 2zu, 2zu} },
-            E { N {layer::DOWN, 1zu, 3zu}, N {layer::DOWN, 2zu, 3zu} },
-            E { N {layer::RIGHT, 0zu, 1zu}, N {layer::DIAGONAL, 0zu, 1zu} },
-            E { N {layer::RIGHT, 0zu, 2zu}, N {layer::DIAGONAL, 0zu, 2zu} },
-            E { N {layer::RIGHT, 0zu, 3zu}, N {layer::DIAGONAL, 0zu, 3zu} },
-            E { N {layer::RIGHT, 1zu, 1zu}, N {layer::DIAGONAL, 1zu, 1zu} },
-            E { N {layer::RIGHT, 1zu, 2zu}, N {layer::DIAGONAL, 1zu, 2zu} },
-            E { N {layer::RIGHT, 1zu, 3zu}, N {layer::DIAGONAL, 1zu, 3zu} },
-            E { N {layer::RIGHT, 2zu, 1zu}, N {layer::DIAGONAL, 2zu, 1zu} },
-            E { N {layer::RIGHT, 2zu, 2zu}, N {layer::DIAGONAL, 2zu, 2zu} },
-            E { N {layer::RIGHT, 2zu, 3zu}, N {layer::DIAGONAL, 2zu, 3zu} },
-            E { N {layer::RIGHT, 0zu, 1zu}, N {layer::RIGHT, 0zu, 2zu} },
-            E { N {layer::RIGHT, 0zu, 2zu}, N {layer::RIGHT, 0zu, 3zu} },
-            E { N {layer::RIGHT, 1zu, 1zu}, N {layer::RIGHT, 1zu, 2zu} },
-            E { N {layer::RIGHT, 1zu, 2zu}, N {layer::RIGHT, 1zu, 3zu} },
-            E { N {layer::RIGHT, 2zu, 1zu}, N {layer::RIGHT, 2zu, 2zu} },
-            E { N {layer::RIGHT, 2zu, 2zu}, N {layer::RIGHT, 2zu, 3zu} }
+            E { N {node_layer::DIAGONAL, 0zu, 0zu}, N {node_layer::DIAGONAL, 1zu, 1zu} },
+            E { N {node_layer::DIAGONAL, 0zu, 1zu}, N {node_layer::DIAGONAL, 1zu, 2zu} },
+            E { N {node_layer::DIAGONAL, 0zu, 2zu}, N {node_layer::DIAGONAL, 1zu, 3zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 0zu}, N {node_layer::DIAGONAL, 2zu, 1zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 1zu}, N {node_layer::DIAGONAL, 2zu, 2zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 2zu}, N {node_layer::DIAGONAL, 2zu, 3zu} },
+            E { N {node_layer::DIAGONAL, 0zu, 0zu}, N {node_layer::RIGHT, 0zu, 1zu} },
+            E { N {node_layer::DIAGONAL, 0zu, 1zu}, N {node_layer::RIGHT, 0zu, 2zu} },
+            E { N {node_layer::DIAGONAL, 0zu, 2zu}, N {node_layer::RIGHT, 0zu, 3zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 0zu}, N {node_layer::RIGHT, 1zu, 1zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 1zu}, N {node_layer::RIGHT, 1zu, 2zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 2zu}, N {node_layer::RIGHT, 1zu, 3zu} },
+            E { N {node_layer::DIAGONAL, 2zu, 0zu}, N {node_layer::RIGHT, 2zu, 1zu} },
+            E { N {node_layer::DIAGONAL, 2zu, 1zu}, N {node_layer::RIGHT, 2zu, 2zu} },
+            E { N {node_layer::DIAGONAL, 2zu, 2zu}, N {node_layer::RIGHT, 2zu, 3zu} },
+            E { N {node_layer::DIAGONAL, 0zu, 0zu}, N {node_layer::DOWN, 1zu, 0zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 0zu}, N {node_layer::DOWN, 2zu, 0zu} },
+            E { N {node_layer::DIAGONAL, 0zu, 1zu}, N {node_layer::DOWN, 1zu, 1zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 1zu}, N {node_layer::DOWN, 2zu, 1zu} },
+            E { N {node_layer::DIAGONAL, 0zu, 2zu}, N {node_layer::DOWN, 1zu, 2zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 2zu}, N {node_layer::DOWN, 2zu, 2zu} },
+            E { N {node_layer::DIAGONAL, 0zu, 3zu}, N {node_layer::DOWN, 1zu, 3zu} },
+            E { N {node_layer::DIAGONAL, 1zu, 3zu}, N {node_layer::DOWN, 2zu, 3zu} },
+            E { N {node_layer::DOWN, 1zu, 0zu}, N {node_layer::DIAGONAL, 1zu, 0zu} },
+            E { N {node_layer::DOWN, 1zu, 1zu}, N {node_layer::DIAGONAL, 1zu, 1zu} },
+            E { N {node_layer::DOWN, 1zu, 2zu}, N {node_layer::DIAGONAL, 1zu, 2zu} },
+            E { N {node_layer::DOWN, 1zu, 3zu}, N {node_layer::DIAGONAL, 1zu, 3zu} },
+            E { N {node_layer::DOWN, 2zu, 0zu}, N {node_layer::DIAGONAL, 2zu, 0zu} },
+            E { N {node_layer::DOWN, 2zu, 1zu}, N {node_layer::DIAGONAL, 2zu, 1zu} },
+            E { N {node_layer::DOWN, 2zu, 2zu}, N {node_layer::DIAGONAL, 2zu, 2zu} },
+            E { N {node_layer::DOWN, 2zu, 3zu}, N {node_layer::DIAGONAL, 2zu, 3zu} },
+            E { N {node_layer::DOWN, 1zu, 0zu}, N {node_layer::DOWN, 2zu, 0zu} },
+            E { N {node_layer::DOWN, 1zu, 1zu}, N {node_layer::DOWN, 2zu, 1zu} },
+            E { N {node_layer::DOWN, 1zu, 2zu}, N {node_layer::DOWN, 2zu, 2zu} },
+            E { N {node_layer::DOWN, 1zu, 3zu}, N {node_layer::DOWN, 2zu, 3zu} },
+            E { N {node_layer::RIGHT, 0zu, 1zu}, N {node_layer::DIAGONAL, 0zu, 1zu} },
+            E { N {node_layer::RIGHT, 0zu, 2zu}, N {node_layer::DIAGONAL, 0zu, 2zu} },
+            E { N {node_layer::RIGHT, 0zu, 3zu}, N {node_layer::DIAGONAL, 0zu, 3zu} },
+            E { N {node_layer::RIGHT, 1zu, 1zu}, N {node_layer::DIAGONAL, 1zu, 1zu} },
+            E { N {node_layer::RIGHT, 1zu, 2zu}, N {node_layer::DIAGONAL, 1zu, 2zu} },
+            E { N {node_layer::RIGHT, 1zu, 3zu}, N {node_layer::DIAGONAL, 1zu, 3zu} },
+            E { N {node_layer::RIGHT, 2zu, 1zu}, N {node_layer::DIAGONAL, 2zu, 1zu} },
+            E { N {node_layer::RIGHT, 2zu, 2zu}, N {node_layer::DIAGONAL, 2zu, 2zu} },
+            E { N {node_layer::RIGHT, 2zu, 3zu}, N {node_layer::DIAGONAL, 2zu, 3zu} },
+            E { N {node_layer::RIGHT, 0zu, 1zu}, N {node_layer::RIGHT, 0zu, 2zu} },
+            E { N {node_layer::RIGHT, 0zu, 2zu}, N {node_layer::RIGHT, 0zu, 3zu} },
+            E { N {node_layer::RIGHT, 1zu, 1zu}, N {node_layer::RIGHT, 1zu, 2zu} },
+            E { N {node_layer::RIGHT, 1zu, 2zu}, N {node_layer::RIGHT, 1zu, 3zu} },
+            E { N {node_layer::RIGHT, 2zu, 1zu}, N {node_layer::RIGHT, 2zu, 2zu} },
+            E { N {node_layer::RIGHT, 2zu, 2zu}, N {node_layer::RIGHT, 2zu, 3zu} }
         };
         std::ranges::sort(expected);
         EXPECT_EQ(
@@ -168,56 +169,59 @@ namespace {
             freeride_scorer
         };
 
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 0zu, 0zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 0zu, 1zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 0zu, 2zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 0zu, 3zu}));
-        EXPECT_FALSE(g.has_node({layer::DIAGONAL, 0zu, 4zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 1zu, 0zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 1zu, 1zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 1zu, 2zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 1zu, 3zu}));
-        EXPECT_FALSE(g.has_node({layer::DIAGONAL, 1zu, 4zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 2zu, 0zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 2zu, 1zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 2zu, 2zu}));
-        EXPECT_TRUE(g.has_node({layer::DIAGONAL, 2zu, 3zu}));
-        EXPECT_FALSE(g.has_node({layer::DIAGONAL, 2zu, 4zu}));
-        EXPECT_FALSE(g.has_node({layer::DIAGONAL, 3zu, 3zu}));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
-        EXPECT_FALSE(g.has_node({layer::DOWN, 0zu, 0zu}));
-        EXPECT_FALSE(g.has_node({layer::DOWN, 0zu, 1zu}));
-        EXPECT_FALSE(g.has_node({layer::DOWN, 0zu, 2zu}));
-        EXPECT_FALSE(g.has_node({layer::DOWN, 0zu, 3zu}));
-        EXPECT_FALSE(g.has_node({layer::DOWN, 0zu, 4zu}));
-        EXPECT_TRUE(g.has_node({layer::DOWN, 1zu, 0zu}));
-        EXPECT_TRUE(g.has_node({layer::DOWN, 1zu, 1zu}));
-        EXPECT_TRUE(g.has_node({layer::DOWN, 1zu, 2zu}));
-        EXPECT_TRUE(g.has_node({layer::DOWN, 1zu, 3zu}));
-        EXPECT_FALSE(g.has_node({layer::DOWN, 1zu, 4zu}));
-        EXPECT_TRUE(g.has_node({layer::DOWN, 2zu, 0zu}));
-        EXPECT_TRUE(g.has_node({layer::DOWN, 2zu, 1zu}));
-        EXPECT_TRUE(g.has_node({layer::DOWN, 2zu, 2zu}));
-        EXPECT_TRUE(g.has_node({layer::DOWN, 2zu, 3zu}));
-        EXPECT_FALSE(g.has_node({layer::DOWN, 2zu, 4zu}));
-        EXPECT_FALSE(g.has_node({layer::DOWN, 3zu, 3zu}));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 0zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 0zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 0zu, 2zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 0zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DIAGONAL, 0zu, 4zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 1zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 1zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 1zu, 2zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 1zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DIAGONAL, 1zu, 4zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 2zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 2zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 2zu, 2zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DIAGONAL, 2zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DIAGONAL, 2zu, 4zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DIAGONAL, 3zu, 3zu }));
 
-        EXPECT_FALSE(g.has_node({layer::RIGHT, 0zu, 0zu}));
-        EXPECT_TRUE(g.has_node({layer::RIGHT, 0zu, 1zu}));
-        EXPECT_TRUE(g.has_node({layer::RIGHT, 0zu, 2zu}));
-        EXPECT_TRUE(g.has_node({layer::RIGHT, 0zu, 3zu}));
-        EXPECT_FALSE(g.has_node({layer::RIGHT, 0zu, 4zu}));
-        EXPECT_FALSE(g.has_node({layer::RIGHT, 1zu, 0zu}));
-        EXPECT_TRUE(g.has_node({layer::RIGHT, 1zu, 1zu}));
-        EXPECT_TRUE(g.has_node({layer::RIGHT, 1zu, 2zu}));
-        EXPECT_TRUE(g.has_node({layer::RIGHT, 1zu, 3zu}));
-        EXPECT_FALSE(g.has_node({layer::RIGHT, 1zu, 4zu}));
-        EXPECT_FALSE(g.has_node({layer::RIGHT, 2zu, 0zu}));
-        EXPECT_TRUE(g.has_node({layer::RIGHT, 2zu, 1zu}));
-        EXPECT_TRUE(g.has_node({layer::RIGHT, 2zu, 2zu}));
-        EXPECT_TRUE(g.has_node({layer::RIGHT, 2zu, 3zu}));
-        EXPECT_FALSE(g.has_node({layer::RIGHT, 2zu, 4zu}));
-        EXPECT_FALSE(g.has_node({layer::RIGHT, 3zu, 3zu}));
+        EXPECT_FALSE(g.has_node(N { node_layer::DOWN, 0zu, 0zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DOWN, 0zu, 1zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DOWN, 0zu, 2zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DOWN, 0zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DOWN, 0zu, 4zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DOWN, 1zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DOWN, 1zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DOWN, 1zu, 2zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DOWN, 1zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DOWN, 1zu, 4zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DOWN, 2zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DOWN, 2zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DOWN, 2zu, 2zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::DOWN, 2zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DOWN, 2zu, 4zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::DOWN, 3zu, 3zu }));
+
+        EXPECT_FALSE(g.has_node(N { node_layer::RIGHT, 0zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::RIGHT, 0zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::RIGHT, 0zu, 2zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::RIGHT, 0zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::RIGHT, 0zu, 4zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::RIGHT, 1zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::RIGHT, 1zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::RIGHT, 1zu, 2zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::RIGHT, 1zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::RIGHT, 1zu, 4zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::RIGHT, 2zu, 0zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::RIGHT, 2zu, 1zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::RIGHT, 2zu, 2zu }));
+        EXPECT_TRUE(g.has_node(N { node_layer::RIGHT, 2zu, 3zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::RIGHT, 2zu, 4zu }));
+        EXPECT_FALSE(g.has_node(N { node_layer::RIGHT, 3zu, 3zu }));
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, RightEdgesExist) {
@@ -232,19 +236,22 @@ namespace {
             freeride_scorer
         };
 
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 0zu, 0zu}, {layer::RIGHT, 0zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 0zu, 1zu}, {layer::RIGHT, 0zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 0zu, 2zu}, {layer::RIGHT, 0zu, 3zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DIAGONAL, 0zu, 3zu}, {layer::RIGHT, 0zu, 4zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 1zu, 0zu}, {layer::RIGHT, 1zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 1zu, 1zu}, {layer::RIGHT, 1zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 1zu, 2zu}, {layer::RIGHT, 1zu, 3zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DIAGONAL, 1zu, 3zu}, {layer::RIGHT, 1zu, 4zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 2zu, 0zu}, {layer::RIGHT, 2zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 2zu, 1zu}, {layer::RIGHT, 2zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 2zu, 2zu}, {layer::RIGHT, 2zu, 3zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DIAGONAL, 2zu, 3zu}, {layer::RIGHT, 2zu, 4zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DIAGONAL, 3zu, 0zu}, {layer::RIGHT, 3zu, 1zu}}));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::RIGHT, 0zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 0zu, 1zu }, { node_layer::RIGHT, 0zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 0zu, 2zu }, { node_layer::RIGHT, 0zu, 3zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DIAGONAL, 0zu, 3zu }, { node_layer::RIGHT, 0zu, 4zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 1zu, 0zu }, { node_layer::RIGHT, 1zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 1zu, 1zu }, { node_layer::RIGHT, 1zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 1zu, 2zu }, { node_layer::RIGHT, 1zu, 3zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DIAGONAL, 1zu, 3zu }, { node_layer::RIGHT, 1zu, 4zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 2zu, 0zu }, { node_layer::RIGHT, 2zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 2zu, 1zu }, { node_layer::RIGHT, 2zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 2zu, 2zu }, { node_layer::RIGHT, 2zu, 3zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DIAGONAL, 2zu, 3zu }, { node_layer::RIGHT, 2zu, 4zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DIAGONAL, 3zu, 0zu }, { node_layer::RIGHT, 3zu, 1zu } }));
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, DownEdgesExist) {
@@ -259,19 +266,22 @@ namespace {
             freeride_scorer
         };
 
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 0zu, 0zu}, {layer::DOWN, 1zu, 0zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 1zu, 0zu}, {layer::DOWN, 2zu, 0zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DIAGONAL, 2zu, 0zu}, {layer::DOWN, 3zu, 0zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 0zu, 1zu}, {layer::DOWN, 1zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 1zu, 1zu}, {layer::DOWN, 2zu, 1zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DIAGONAL, 2zu, 1zu}, {layer::DOWN, 3zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 0zu, 2zu}, {layer::DOWN, 1zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 1zu, 2zu}, {layer::DOWN, 2zu, 2zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DIAGONAL, 2zu, 2zu}, {layer::DOWN, 3zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 0zu, 3zu}, {layer::DOWN, 1zu, 3zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DIAGONAL, 1zu, 3zu}, {layer::DOWN, 2zu, 3zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DIAGONAL, 2zu, 3zu}, {layer::DOWN, 3zu, 3zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DIAGONAL, 3zu, 0zu}, {layer::DOWN, 4zu, 0zu}}));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::DOWN, 1zu, 0zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 1zu, 0zu }, { node_layer::DOWN, 2zu, 0zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DIAGONAL, 2zu, 0zu }, { node_layer::DOWN, 3zu, 0zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 0zu, 1zu }, { node_layer::DOWN, 1zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 1zu, 1zu }, { node_layer::DOWN, 2zu, 1zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DIAGONAL, 2zu, 1zu }, { node_layer::DOWN, 3zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 0zu, 2zu }, { node_layer::DOWN, 1zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 1zu, 2zu }, { node_layer::DOWN, 2zu, 2zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DIAGONAL, 2zu, 2zu }, { node_layer::DOWN, 3zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 0zu, 3zu }, { node_layer::DOWN, 1zu, 3zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DIAGONAL, 1zu, 3zu }, { node_layer::DOWN, 2zu, 3zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DIAGONAL, 2zu, 3zu }, { node_layer::DOWN, 3zu, 3zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DIAGONAL, 3zu, 0zu }, { node_layer::DOWN, 4zu, 0zu } }));
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, DiagEdgesExist) {
@@ -286,15 +296,18 @@ namespace {
             freeride_scorer
         };
 
-        EXPECT_TRUE(g.has_edge({ {layer::DIAGONAL, 0zu, 0zu}, {layer::DIAGONAL, 1zu, 1zu} }));
-        EXPECT_TRUE(g.has_edge({ {layer::DIAGONAL, 0zu, 1zu}, {layer::DIAGONAL, 1zu, 2zu} }));
-        EXPECT_TRUE(g.has_edge({ {layer::DIAGONAL, 0zu, 2zu}, {layer::DIAGONAL, 1zu, 3zu} }));
-        EXPECT_FALSE(g.has_edge({ {layer::DIAGONAL, 0zu, 3zu}, {layer::DIAGONAL, 1zu, 4zu} }));
-        EXPECT_TRUE(g.has_edge({ {layer::DIAGONAL, 1zu, 0zu}, {layer::DIAGONAL, 2zu, 1zu} }));
-        EXPECT_TRUE(g.has_edge({ {layer::DIAGONAL, 1zu, 1zu}, {layer::DIAGONAL, 2zu, 2zu} }));
-        EXPECT_TRUE(g.has_edge({ {layer::DIAGONAL, 1zu, 2zu}, {layer::DIAGONAL, 2zu, 3zu} }));
-        EXPECT_FALSE(g.has_edge({ {layer::DIAGONAL, 1zu, 3zu}, {layer::DIAGONAL, 2zu, 4zu} }));
-        EXPECT_FALSE(g.has_edge({ {layer::DIAGONAL, 2zu, 0zu}, {layer::DIAGONAL, 3zu, 1zu} }));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_TRUE(g.has_edge(E { {node_layer::DIAGONAL, 0zu, 0zu}, {node_layer::DIAGONAL, 1zu, 1zu} }));
+        EXPECT_TRUE(g.has_edge(E { {node_layer::DIAGONAL, 0zu, 1zu}, {node_layer::DIAGONAL, 1zu, 2zu} }));
+        EXPECT_TRUE(g.has_edge(E { {node_layer::DIAGONAL, 0zu, 2zu}, {node_layer::DIAGONAL, 1zu, 3zu} }));
+        EXPECT_FALSE(g.has_edge(E { {node_layer::DIAGONAL, 0zu, 3zu}, {node_layer::DIAGONAL, 1zu, 4zu} }));
+        EXPECT_TRUE(g.has_edge(E { {node_layer::DIAGONAL, 1zu, 0zu}, {node_layer::DIAGONAL, 2zu, 1zu} }));
+        EXPECT_TRUE(g.has_edge(E { {node_layer::DIAGONAL, 1zu, 1zu}, {node_layer::DIAGONAL, 2zu, 2zu} }));
+        EXPECT_TRUE(g.has_edge(E { {node_layer::DIAGONAL, 1zu, 2zu}, {node_layer::DIAGONAL, 2zu, 3zu} }));
+        EXPECT_FALSE(g.has_edge(E { {node_layer::DIAGONAL, 1zu, 3zu}, {node_layer::DIAGONAL, 2zu, 4zu} }));
+        EXPECT_FALSE(g.has_edge(E { {node_layer::DIAGONAL, 2zu, 0zu}, {node_layer::DIAGONAL, 3zu, 1zu} }));
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, DownFreeRidgeEdgesExist) {
@@ -309,22 +322,25 @@ namespace {
             freeride_scorer
         };
 
-        EXPECT_FALSE(g.has_edge({{layer::DOWN, 0zu, 0zu}, {layer::DIAGONAL, 0zu, 0zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DOWN, 0zu, 1zu}, {layer::DIAGONAL, 0zu, 1zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DOWN, 0zu, 2zu}, {layer::DIAGONAL, 0zu, 2zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DOWN, 0zu, 3zu}, {layer::DIAGONAL, 0zu, 3zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DOWN, 1zu, 0zu}, {layer::DIAGONAL, 1zu, 0zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DOWN, 1zu, 1zu}, {layer::DIAGONAL, 1zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DOWN, 1zu, 2zu}, {layer::DIAGONAL, 1zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DOWN, 1zu, 3zu}, {layer::DIAGONAL, 1zu, 3zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DOWN, 2zu, 0zu}, {layer::DIAGONAL, 2zu, 0zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DOWN, 2zu, 1zu}, {layer::DIAGONAL, 2zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DOWN, 2zu, 2zu}, {layer::DIAGONAL, 2zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::DOWN, 2zu, 3zu}, {layer::DIAGONAL, 2zu, 3zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DOWN, 3zu, 0zu}, {layer::DIAGONAL, 3zu, 0zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DOWN, 3zu, 1zu}, {layer::DIAGONAL, 3zu, 1zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DOWN, 3zu, 2zu}, {layer::DIAGONAL, 3zu, 2zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::DOWN, 3zu, 3zu}, {layer::DIAGONAL, 3zu, 3zu}}));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DOWN, 0zu, 0zu }, { node_layer::DIAGONAL, 0zu, 0zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DOWN, 0zu, 1zu }, { node_layer::DIAGONAL, 0zu, 1zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DOWN, 0zu, 2zu }, { node_layer::DIAGONAL, 0zu, 2zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DOWN, 0zu, 3zu }, { node_layer::DIAGONAL, 0zu, 3zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DOWN, 1zu, 0zu }, { node_layer::DIAGONAL, 1zu, 0zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DOWN, 1zu, 1zu }, { node_layer::DIAGONAL, 1zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DOWN, 1zu, 2zu }, { node_layer::DIAGONAL, 1zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DOWN, 1zu, 3zu }, { node_layer::DIAGONAL, 1zu, 3zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DOWN, 2zu, 0zu }, { node_layer::DIAGONAL, 2zu, 0zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DOWN, 2zu, 1zu }, { node_layer::DIAGONAL, 2zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DOWN, 2zu, 2zu }, { node_layer::DIAGONAL, 2zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::DOWN, 2zu, 3zu }, { node_layer::DIAGONAL, 2zu, 3zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DOWN, 3zu, 0zu }, { node_layer::DIAGONAL, 3zu, 0zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DOWN, 3zu, 1zu }, { node_layer::DIAGONAL, 3zu, 1zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DOWN, 3zu, 2zu }, { node_layer::DIAGONAL, 3zu, 2zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::DOWN, 3zu, 3zu }, { node_layer::DIAGONAL, 3zu, 3zu } }));
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, RightFreeRidgeEdgesExist) {
@@ -339,22 +355,25 @@ namespace {
             freeride_scorer
         };
 
-        EXPECT_FALSE(g.has_edge({{layer::RIGHT, 0zu, 0zu}, {layer::DIAGONAL, 0zu, 0zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::RIGHT, 0zu, 1zu}, {layer::DIAGONAL, 0zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::RIGHT, 0zu, 2zu}, {layer::DIAGONAL, 0zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::RIGHT, 0zu, 3zu}, {layer::DIAGONAL, 0zu, 3zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::RIGHT, 1zu, 0zu}, {layer::DIAGONAL, 1zu, 0zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::RIGHT, 1zu, 1zu}, {layer::DIAGONAL, 1zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::RIGHT, 1zu, 2zu}, {layer::DIAGONAL, 1zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::RIGHT, 1zu, 3zu}, {layer::DIAGONAL, 1zu, 3zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::RIGHT, 2zu, 0zu}, {layer::DIAGONAL, 2zu, 0zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::RIGHT, 2zu, 1zu}, {layer::DIAGONAL, 2zu, 1zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::RIGHT, 2zu, 2zu}, {layer::DIAGONAL, 2zu, 2zu}}));
-        EXPECT_TRUE(g.has_edge({{layer::RIGHT, 2zu, 3zu}, {layer::DIAGONAL, 2zu, 3zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::RIGHT, 3zu, 0zu}, {layer::DIAGONAL, 3zu, 0zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::RIGHT, 3zu, 1zu}, {layer::DIAGONAL, 3zu, 1zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::RIGHT, 3zu, 2zu}, {layer::DIAGONAL, 3zu, 2zu}}));
-        EXPECT_FALSE(g.has_edge({{layer::RIGHT, 3zu, 3zu}, {layer::DIAGONAL, 3zu, 3zu}}));
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_FALSE(g.has_edge(E { { node_layer::RIGHT, 0zu, 0zu }, { node_layer::DIAGONAL, 0zu, 0zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::RIGHT, 0zu, 1zu }, { node_layer::DIAGONAL, 0zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::RIGHT, 0zu, 2zu }, { node_layer::DIAGONAL, 0zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::RIGHT, 0zu, 3zu }, { node_layer::DIAGONAL, 0zu, 3zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::RIGHT, 1zu, 0zu }, { node_layer::DIAGONAL, 1zu, 0zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::RIGHT, 1zu, 1zu }, { node_layer::DIAGONAL, 1zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::RIGHT, 1zu, 2zu }, { node_layer::DIAGONAL, 1zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::RIGHT, 1zu, 3zu }, { node_layer::DIAGONAL, 1zu, 3zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::RIGHT, 2zu, 0zu }, { node_layer::DIAGONAL, 2zu, 0zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::RIGHT, 2zu, 1zu }, { node_layer::DIAGONAL, 2zu, 1zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::RIGHT, 2zu, 2zu }, { node_layer::DIAGONAL, 2zu, 2zu } }));
+        EXPECT_TRUE(g.has_edge(E { { node_layer::RIGHT, 2zu, 3zu }, { node_layer::DIAGONAL, 2zu, 3zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::RIGHT, 3zu, 0zu }, { node_layer::DIAGONAL, 3zu, 0zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::RIGHT, 3zu, 1zu }, { node_layer::DIAGONAL, 3zu, 1zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::RIGHT, 3zu, 2zu }, { node_layer::DIAGONAL, 3zu, 2zu } }));
+        EXPECT_FALSE(g.has_edge(E { { node_layer::RIGHT, 3zu, 3zu }, { node_layer::DIAGONAL, 3zu, 3zu } }));
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, GetOutputs) {
@@ -369,8 +388,9 @@ namespace {
             freeride_scorer
         };
 
-        using E = typename std::remove_reference_t<decltype(g)>::E;
-        using N = typename std::remove_reference_t<decltype(g)>::N;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
         auto to_outputs {
             [&](N n) {
                 std::set<E> ret {}; // TODO: I can't use being() and end() within set's constructor to automate this?
@@ -384,262 +404,262 @@ namespace {
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 0zu}, {layer::DIAGONAL, 1zu, 1zu}},
-                    {{layer::DIAGONAL, 0zu, 0zu}, {layer::DOWN, 1zu, 0zu}},
-                    {{layer::DIAGONAL, 0zu, 0zu}, {layer::RIGHT, 0zu, 1zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::DIAGONAL, 1zu, 1zu } },
+                    E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::DOWN, 1zu, 0zu } },
+                    E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::RIGHT, 0zu, 1zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 0zu, 0zu})
+            to_outputs(N { node_layer::DIAGONAL, 0zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 1zu}, {layer::DIAGONAL, 1zu, 2zu}},
-                    {{layer::DIAGONAL, 0zu, 1zu}, {layer::DOWN, 1zu, 1zu}},
-                    {{layer::DIAGONAL, 0zu, 1zu}, {layer::RIGHT, 0zu, 2zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 1zu }, { node_layer::DIAGONAL, 1zu, 2zu } },
+                    E { { node_layer::DIAGONAL, 0zu, 1zu }, { node_layer::DOWN, 1zu, 1zu } },
+                    E { { node_layer::DIAGONAL, 0zu, 1zu }, { node_layer::RIGHT, 0zu, 2zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 0zu, 1zu})
+            to_outputs(N { node_layer::DIAGONAL, 0zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 2zu}, {layer::DIAGONAL, 1zu, 3zu}},
-                    {{layer::DIAGONAL, 0zu, 2zu}, {layer::DOWN, 1zu, 2zu}},
-                    {{layer::DIAGONAL, 0zu, 2zu}, {layer::RIGHT, 0zu, 3zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 2zu }, { node_layer::DIAGONAL, 1zu, 3zu } },
+                    E { { node_layer::DIAGONAL, 0zu, 2zu }, { node_layer::DOWN, 1zu, 2zu } },
+                    E { { node_layer::DIAGONAL, 0zu, 2zu }, { node_layer::RIGHT, 0zu, 3zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 0zu, 2zu})
+            to_outputs(N { node_layer::DIAGONAL, 0zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 3zu}, {layer::DOWN, 1zu, 3zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 3zu }, { node_layer::DOWN, 1zu, 3zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 0zu, 3zu})
+            to_outputs(N { node_layer::DIAGONAL, 0zu, 3zu })
         );
         // Diagonal 1,0 to 1,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 0zu}, {layer::DIAGONAL, 2zu, 1zu}},
-                    {{layer::DIAGONAL, 1zu, 0zu}, {layer::DOWN, 2zu, 0zu}},
-                    {{layer::DIAGONAL, 1zu, 0zu}, {layer::RIGHT, 1zu, 1zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 0zu}, { node_layer::DIAGONAL, 2zu, 1zu } },
+                    E { { node_layer::DIAGONAL, 1zu, 0zu}, { node_layer::DOWN, 2zu, 0zu } },
+                    E { { node_layer::DIAGONAL, 1zu, 0zu}, { node_layer::RIGHT, 1zu, 1zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 1zu, 0zu})
+            to_outputs(N { node_layer::DIAGONAL, 1zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 1zu}, {layer::DIAGONAL, 2zu, 2zu}},
-                    {{layer::DIAGONAL, 1zu, 1zu}, {layer::DOWN, 2zu, 1zu}},
-                    {{layer::DIAGONAL, 1zu, 1zu}, {layer::RIGHT, 1zu, 2zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 1zu }, { node_layer::DIAGONAL, 2zu, 2zu } },
+                    E { { node_layer::DIAGONAL, 1zu, 1zu }, { node_layer::DOWN, 2zu, 1zu } },
+                    E { { node_layer::DIAGONAL, 1zu, 1zu }, { node_layer::RIGHT, 1zu, 2zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 1zu, 1zu})
+            to_outputs(N { node_layer::DIAGONAL, 1zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 2zu}, {layer::DIAGONAL, 2zu, 3zu}},
-                    {{layer::DIAGONAL, 1zu, 2zu}, {layer::DOWN, 2zu, 2zu}},
-                    {{layer::DIAGONAL, 1zu, 2zu}, {layer::RIGHT, 1zu, 3zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 2zu }, { node_layer::DIAGONAL, 2zu, 3zu } },
+                    E { { node_layer::DIAGONAL, 1zu, 2zu }, { node_layer::DOWN, 2zu, 2zu } },
+                    E { { node_layer::DIAGONAL, 1zu, 2zu }, { node_layer::RIGHT, 1zu, 3zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 1zu, 2zu})
+            to_outputs(N { node_layer::DIAGONAL, 1zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 3zu}, {layer::DOWN, 2zu, 3zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 3zu }, { node_layer::DOWN, 2zu, 3zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 1zu, 3zu})
+            to_outputs(N { node_layer::DIAGONAL, 1zu, 3zu })
         );
         // Diagonal 2,0 to 2,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 2zu, 0zu}, {layer::RIGHT, 2zu, 1zu}}
+                    E { { node_layer::DIAGONAL, 2zu, 0zu }, { node_layer::RIGHT, 2zu, 1zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 2zu, 0zu})
+            to_outputs(N { node_layer::DIAGONAL, 2zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 2zu, 1zu}, {layer::RIGHT, 2zu, 2zu}}
+                    E { { node_layer::DIAGONAL, 2zu, 1zu }, { node_layer::RIGHT, 2zu, 2zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 2zu, 1zu})
+            to_outputs(N { node_layer::DIAGONAL, 2zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 2zu, 2zu}, {layer::RIGHT, 2zu, 3zu}}
+                    E { { node_layer::DIAGONAL, 2zu, 2zu }, { node_layer::RIGHT, 2zu, 3zu } }
                 }
             ),
-            to_outputs({layer::DIAGONAL, 2zu, 2zu})
+            to_outputs(N { node_layer::DIAGONAL, 2zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
                 }
             ),
-            to_outputs({layer::DIAGONAL, 2zu, 3zu})
+            to_outputs(N { node_layer::DIAGONAL, 2zu, 3zu })
         );
         // Down 1,0 to 1,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 1zu, 0zu}, {layer::DIAGONAL, 1zu, 0zu}},
-                    {{layer::DOWN, 1zu, 0zu}, {layer::DOWN, 2zu, 0zu}},
+                    E { { node_layer::DOWN, 1zu, 0zu }, { node_layer::DIAGONAL, 1zu, 0zu } },
+                    E { { node_layer::DOWN, 1zu, 0zu }, { node_layer::DOWN, 2zu, 0zu } },
                 }
             ),
-            to_outputs({layer::DOWN, 1zu, 0zu})
+            to_outputs(N { node_layer::DOWN, 1zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 1zu, 1zu}, {layer::DIAGONAL, 1zu, 1zu}},
-                    {{layer::DOWN, 1zu, 1zu}, {layer::DOWN, 2zu, 1zu}},
+                    E { { node_layer::DOWN, 1zu, 1zu }, { node_layer::DIAGONAL, 1zu, 1zu } },
+                    E { { node_layer::DOWN, 1zu, 1zu }, { node_layer::DOWN, 2zu, 1zu } },
                 }
             ),
-            to_outputs({layer::DOWN, 1zu, 1zu})
+            to_outputs(N { node_layer::DOWN, 1zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 1zu, 2zu}, {layer::DIAGONAL, 1zu, 2zu}},
-                    {{layer::DOWN, 1zu, 2zu}, {layer::DOWN, 2zu, 2zu}},
+                    E { { node_layer::DOWN, 1zu, 2zu }, { node_layer::DIAGONAL, 1zu, 2zu } },
+                    E { { node_layer::DOWN, 1zu, 2zu }, { node_layer::DOWN, 2zu, 2zu } },
                 }
             ),
-            to_outputs({layer::DOWN, 1zu, 2zu})
+            to_outputs(N { node_layer::DOWN, 1zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 1zu, 3zu}, {layer::DIAGONAL, 1zu, 3zu}},
-                    {{layer::DOWN, 1zu, 3zu}, {layer::DOWN, 2zu, 3zu}},
+                    E { { node_layer::DOWN, 1zu, 3zu }, { node_layer::DIAGONAL, 1zu, 3zu } },
+                    E { { node_layer::DOWN, 1zu, 3zu }, { node_layer::DOWN, 2zu, 3zu } },
                 }
             ),
-            to_outputs({layer::DOWN, 1zu, 3zu})
+            to_outputs(N { node_layer::DOWN, 1zu, 3zu })
         );
         // Down 2,0 to 2,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 2zu, 0zu}, {layer::DIAGONAL, 2zu, 0zu}},
+                    E { { node_layer::DOWN, 2zu, 0zu }, { node_layer::DIAGONAL, 2zu, 0zu } },
                 }
             ),
-            to_outputs({layer::DOWN, 2zu, 0zu})
+            to_outputs(N { node_layer::DOWN, 2zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 2zu, 1zu}, {layer::DIAGONAL, 2zu, 1zu}},
+                    E { { node_layer::DOWN, 2zu, 1zu }, { node_layer::DIAGONAL, 2zu, 1zu } },
                 }
             ),
-            to_outputs({layer::DOWN, 2zu, 1zu})
+            to_outputs(N { node_layer::DOWN, 2zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 2zu, 2zu}, {layer::DIAGONAL, 2zu, 2zu}},
+                    E { { node_layer::DOWN, 2zu, 2zu }, { node_layer::DIAGONAL, 2zu, 2zu } },
                 }
             ),
-            to_outputs({layer::DOWN, 2zu, 2zu})
+            to_outputs(N { node_layer::DOWN, 2zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 2zu, 3zu}, {layer::DIAGONAL, 2zu, 3zu}},
+                    E { { node_layer::DOWN, 2zu, 3zu }, { node_layer::DIAGONAL, 2zu, 3zu } },
                 }
             ),
-            to_outputs({layer::DOWN, 2zu, 3zu})
+            to_outputs(N { node_layer::DOWN, 2zu, 3zu })
         );
         // Right 0,1 to 0,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 0zu, 1zu}, {layer::DIAGONAL, 0zu, 1zu}},
-                    {{layer::RIGHT, 0zu, 1zu}, {layer::RIGHT, 0zu, 2zu}},
+                    E { { node_layer::RIGHT, 0zu, 1zu }, { node_layer::DIAGONAL, 0zu, 1zu } },
+                    E { { node_layer::RIGHT, 0zu, 1zu }, { node_layer::RIGHT, 0zu, 2zu } },
                 }
             ),
-            to_outputs({layer::RIGHT, 0zu, 1zu})
+            to_outputs(N { node_layer::RIGHT, 0zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 0zu, 2zu}, {layer::DIAGONAL, 0zu, 2zu}},
-                    {{layer::RIGHT, 0zu, 2zu}, {layer::RIGHT, 0zu, 3zu}},
+                    E { { node_layer::RIGHT, 0zu, 2zu }, { node_layer::DIAGONAL , 0zu, 2zu } },
+                    E { { node_layer::RIGHT, 0zu, 2zu }, { node_layer::RIGHT , 0zu, 3zu } },
                 }
             ),
-            to_outputs({layer::RIGHT, 0zu, 2zu})
+            to_outputs(N { node_layer::RIGHT, 0zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 0zu, 3zu}, {layer::DIAGONAL, 0zu, 3zu}},
+                    E { { node_layer::RIGHT, 0zu, 3zu }, { node_layer::DIAGONAL, 0zu, 3zu } },
                 }
             ),
-            to_outputs({layer::RIGHT, 0zu, 3zu})
+            to_outputs(N { node_layer::RIGHT, 0zu, 3zu })
         );
         // Right 1,1 to 1,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 1zu, 1zu}, {layer::DIAGONAL, 1zu, 1zu}},
-                    {{layer::RIGHT, 1zu, 1zu}, {layer::RIGHT, 1zu, 2zu}},
+                    E { { node_layer::RIGHT, 1zu, 1zu }, { node_layer::DIAGONAL, 1zu, 1zu } },
+                    E { { node_layer::RIGHT, 1zu, 1zu }, { node_layer::RIGHT, 1zu, 2zu } },
                 }
             ),
-            to_outputs({layer::RIGHT, 1zu, 1zu})
+            to_outputs(N { node_layer::RIGHT, 1zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 1zu, 2zu}, {layer::DIAGONAL, 1zu, 2zu}},
-                    {{layer::RIGHT, 1zu, 2zu}, {layer::RIGHT, 1zu, 3zu}},
+                    E { { node_layer::RIGHT, 1zu, 2zu }, { node_layer::DIAGONAL, 1zu, 2zu } },
+                    E { { node_layer::RIGHT, 1zu, 2zu }, { node_layer::RIGHT, 1zu, 3zu } },
                 }
             ),
-            to_outputs({layer::RIGHT, 1zu, 2zu})
+            to_outputs(N { node_layer::RIGHT, 1zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 1zu, 3zu}, {layer::DIAGONAL, 1zu, 3zu}},
+                    E { { node_layer::RIGHT, 1zu, 3zu }, { node_layer::DIAGONAL, 1zu, 3zu } },
                 }
             ),
-            to_outputs({layer::RIGHT, 1zu, 3zu})
+            to_outputs(N { node_layer::RIGHT, 1zu, 3zu })
         );
         // Right 2,1 to 2,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 2zu, 1zu}, {layer::DIAGONAL, 2zu, 1zu}},
-                    {{layer::RIGHT, 2zu, 1zu}, {layer::RIGHT, 2zu, 2zu}},
+                    E { { node_layer::RIGHT, 2zu, 1zu }, { node_layer::DIAGONAL, 2zu, 1zu } },
+                    E { { node_layer::RIGHT, 2zu, 1zu }, { node_layer::RIGHT, 2zu, 2zu } },
                 }
             ),
-            to_outputs({layer::RIGHT, 2zu, 1zu})
+            to_outputs(N { node_layer::RIGHT, 2zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 2zu, 2zu}, {layer::DIAGONAL, 2zu, 2zu}},
-                    {{layer::RIGHT, 2zu, 2zu}, {layer::RIGHT, 2zu, 3zu}},
+                    E { { node_layer::RIGHT, 2zu, 2zu }, { node_layer::DIAGONAL, 2zu, 2zu } },
+                    E { { node_layer::RIGHT, 2zu, 2zu }, { node_layer::RIGHT, 2zu, 3zu } },
                 }
             ),
-            to_outputs({layer::RIGHT, 2zu, 2zu})
+            to_outputs(N { node_layer::RIGHT, 2zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 2zu, 3zu}, {layer::DIAGONAL, 2zu, 3zu}},
+                    E { { node_layer::RIGHT, 2zu, 3zu }, { node_layer::DIAGONAL, 2zu, 3zu } },
                 }
             ),
-            to_outputs({layer::RIGHT, 2zu, 3zu})
+            to_outputs(N { node_layer::RIGHT, 2zu, 3zu })
         );
     }
 
@@ -655,8 +675,9 @@ namespace {
             freeride_scorer
         };
 
-        using E = typename std::remove_reference_t<decltype(g)>::E;
-        using N = typename std::remove_reference_t<decltype(g)>::N;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
         auto to_inputs {
             [&](N n) {
                 std::set<E> ret {}; // TODO: I can't use being() and end() within set's constructor to automate this?
@@ -672,260 +693,260 @@ namespace {
                 std::set<E> {
                 }
             ),
-            to_inputs({layer::DIAGONAL, 0zu, 0zu})
+            to_inputs(N { node_layer::DIAGONAL, 0zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 0zu, 1zu}, {layer::DIAGONAL, 0zu, 1zu}}
+                    E { { node_layer::RIGHT, 0zu, 1zu }, { node_layer::DIAGONAL, 0zu, 1zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 0zu, 1zu})
+            to_inputs(N { node_layer::DIAGONAL, 0zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 0zu, 2zu}, {layer::DIAGONAL, 0zu, 2zu}},
+                    E { { node_layer::RIGHT, 0zu, 2zu }, { node_layer::DIAGONAL, 0zu, 2zu } },
                 }
             ),
-            to_inputs({layer::DIAGONAL, 0zu, 2zu})
+            to_inputs(N { node_layer::DIAGONAL, 0zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::RIGHT, 0zu, 3zu}, {layer::DIAGONAL, 0zu, 3zu}}
+                    E { { node_layer::RIGHT, 0zu, 3zu }, { node_layer::DIAGONAL, 0zu, 3zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 0zu, 3zu})
+            to_inputs(N { node_layer::DIAGONAL, 0zu, 3zu })
         );
         // Diagonal 1,0 to 1,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 1zu, 0zu}, {layer::DIAGONAL, 1zu, 0zu}}
+                    E { { node_layer::DOWN, 1zu, 0zu }, { node_layer::DIAGONAL, 1zu, 0zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 1zu, 0zu})
+            to_inputs(N { node_layer::DIAGONAL, 1zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 0zu}, {layer::DIAGONAL, 1zu, 1zu}},
-                    {{layer::DOWN, 1zu, 1zu}, {layer::DIAGONAL, 1zu, 1zu}},
-                    {{layer::RIGHT, 1zu, 1zu}, {layer::DIAGONAL, 1zu, 1zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::DIAGONAL, 1zu, 1zu } },
+                    E { { node_layer::DOWN, 1zu, 1zu }, { node_layer::DIAGONAL, 1zu, 1zu } },
+                    E { { node_layer::RIGHT, 1zu, 1zu }, { node_layer::DIAGONAL, 1zu, 1zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 1zu, 1zu})
+            to_inputs(N { node_layer::DIAGONAL, 1zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 1zu}, {layer::DIAGONAL, 1zu, 2zu}},
-                    {{layer::DOWN, 1zu, 2zu}, {layer::DIAGONAL, 1zu, 2zu}},
-                    {{layer::RIGHT, 1zu, 2zu}, {layer::DIAGONAL, 1zu, 2zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 1zu }, { node_layer::DIAGONAL, 1zu, 2zu } },
+                    E { { node_layer::DOWN, 1zu, 2zu }, { node_layer::DIAGONAL, 1zu, 2zu } },
+                    E { { node_layer::RIGHT, 1zu, 2zu }, { node_layer::DIAGONAL, 1zu, 2zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 1zu, 2zu})
+            to_inputs(N { node_layer::DIAGONAL, 1zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 2zu}, {layer::DIAGONAL, 1zu, 3zu}},
-                    {{layer::DOWN, 1zu, 3zu}, {layer::DIAGONAL, 1zu, 3zu}},
-                    {{layer::RIGHT, 1zu, 3zu}, {layer::DIAGONAL, 1zu, 3zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 2zu }, { node_layer::DIAGONAL, 1zu, 3zu } },
+                    E { { node_layer::DOWN, 1zu, 3zu }, { node_layer::DIAGONAL, 1zu, 3zu } },
+                    E { { node_layer::RIGHT, 1zu, 3zu }, { node_layer::DIAGONAL, 1zu, 3zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 1zu, 3zu})
+            to_inputs(N { node_layer::DIAGONAL, 1zu, 3zu })
         );
         // Diagonal 2,0 to 2,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DOWN, 2zu, 0zu}, {layer::DIAGONAL, 2zu, 0zu}}
+                    E { { node_layer::DOWN, 2zu, 0zu }, { node_layer::DIAGONAL, 2zu, 0zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 2zu, 0zu})
+            to_inputs(N { node_layer::DIAGONAL, 2zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 0zu}, {layer::DIAGONAL, 2zu, 1zu}},
-                    {{layer::DOWN, 2zu, 1zu}, {layer::DIAGONAL, 2zu, 1zu}},
-                    {{layer::RIGHT, 2zu, 1zu}, {layer::DIAGONAL, 2zu, 1zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 0zu }, { node_layer::DIAGONAL, 2zu, 1zu } },
+                    E { { node_layer::DOWN, 2zu, 1zu }, { node_layer::DIAGONAL, 2zu, 1zu } },
+                    E { { node_layer::RIGHT, 2zu, 1zu }, { node_layer::DIAGONAL, 2zu, 1zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 2zu, 1zu})
+            to_inputs(N { node_layer::DIAGONAL, 2zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 1zu}, {layer::DIAGONAL, 2zu, 2zu}},
-                    {{layer::DOWN, 2zu, 2zu}, {layer::DIAGONAL, 2zu, 2zu}},
-                    {{layer::RIGHT, 2zu, 2zu}, {layer::DIAGONAL, 2zu, 2zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 1zu }, { node_layer::DIAGONAL, 2zu, 2zu } },
+                    E { { node_layer::DOWN, 2zu, 2zu }, { node_layer::DIAGONAL, 2zu, 2zu } },
+                    E { { node_layer::RIGHT, 2zu, 2zu }, { node_layer::DIAGONAL, 2zu, 2zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 2zu, 2zu})
+            to_inputs(N { node_layer::DIAGONAL, 2zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 2zu}, {layer::DIAGONAL, 2zu, 3zu}},
-                    {{layer::DOWN, 2zu, 3zu}, {layer::DIAGONAL, 2zu, 3zu}},
-                    {{layer::RIGHT, 2zu, 3zu}, {layer::DIAGONAL, 2zu, 3zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 2zu }, { node_layer::DIAGONAL, 2zu, 3zu } },
+                    E { { node_layer::DOWN, 2zu, 3zu }, { node_layer::DIAGONAL, 2zu, 3zu } },
+                    E { { node_layer::RIGHT, 2zu, 3zu }, { node_layer::DIAGONAL, 2zu, 3zu } }
                 }
             ),
-            to_inputs({layer::DIAGONAL, 2zu, 3zu})
+            to_inputs(N { node_layer::DIAGONAL, 2zu, 3zu })
         );
         // Down 1,0 to 1,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 0zu}, {layer::DOWN, 1zu, 0zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::DOWN, 1zu, 0zu } }
                 }
             ),
-            to_inputs({layer::DOWN, 1zu, 0zu})
+            to_inputs(N { node_layer::DOWN, 1zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 1zu}, {layer::DOWN, 1zu, 1zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 1zu }, { node_layer::DOWN, 1zu, 1zu } }
                 }
             ),
-            to_inputs({layer::DOWN, 1zu, 1zu})
+            to_inputs(N { node_layer::DOWN, 1zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 2zu}, {layer::DOWN, 1zu, 2zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 2zu }, { node_layer::DOWN, 1zu, 2zu } }
                 }
             ),
-            to_inputs({layer::DOWN, 1zu, 2zu})
+            to_inputs(N { node_layer::DOWN, 1zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 3zu}, {layer::DOWN, 1zu, 3zu}}
+                    E { { node_layer::DIAGONAL, 0zu, 3zu }, { node_layer::DOWN, 1zu, 3zu } }
                 }
             ),
-            to_inputs({layer::DOWN, 1zu, 3zu})
+            to_inputs(N { node_layer::DOWN, 1zu, 3zu })
         );
         // Down 2,0 to 2,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 0zu}, {layer::DOWN, 2zu, 0zu}},
-                    {{layer::DOWN, 1zu, 0zu}, {layer::DOWN, 2zu, 0zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 0zu }, { node_layer::DOWN, 2zu, 0zu } },
+                    E { { node_layer::DOWN, 1zu, 0zu }, { node_layer::DOWN, 2zu, 0zu } }
                 }
             ),
-            to_inputs({layer::DOWN, 2zu, 0zu})
+            to_inputs(N { node_layer::DOWN, 2zu, 0zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 1zu}, {layer::DOWN, 2zu, 1zu}},
-                    {{layer::DOWN, 1zu, 1zu}, {layer::DOWN, 2zu, 1zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 1zu }, { node_layer::DOWN, 2zu, 1zu } },
+                    E { { node_layer::DOWN, 1zu, 1zu }, { node_layer::DOWN, 2zu, 1zu } }
                 }
             ),
-            to_inputs({layer::DOWN, 2zu, 1zu})
+            to_inputs(N { node_layer::DOWN, 2zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 2zu}, {layer::DOWN, 2zu, 2zu}},
-                    {{layer::DOWN, 1zu, 2zu}, {layer::DOWN, 2zu, 2zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 2zu }, { node_layer::DOWN, 2zu, 2zu } },
+                    E { { node_layer::DOWN, 1zu, 2zu }, { node_layer::DOWN, 2zu, 2zu } }
                 }
             ),
-            to_inputs({layer::DOWN, 2zu, 2zu})
+            to_inputs(N { node_layer::DOWN, 2zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 3zu}, {layer::DOWN, 2zu, 3zu}},
-                    {{layer::DOWN, 1zu, 3zu}, {layer::DOWN, 2zu, 3zu}}
+                    E { { node_layer::DIAGONAL, 1zu, 3zu }, { node_layer::DOWN, 2zu, 3zu } },
+                    E { { node_layer::DOWN, 1zu, 3zu }, { node_layer::DOWN, 2zu, 3zu } }
                 }
             ),
-            to_inputs({layer::DOWN, 2zu, 3zu})
+            to_inputs(N { node_layer::DOWN, 2zu, 3zu })
         );
         // Right 0,1 to 0,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 0zu}, {layer::RIGHT, 0zu, 1zu}},
+                    E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::RIGHT, 0zu, 1zu } },
                 }
             ),
-            to_inputs({layer::RIGHT, 0zu, 1zu})
+            to_inputs(N { node_layer::RIGHT, 0zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 1zu}, {layer::RIGHT, 0zu, 2zu}},
-                    {{layer::RIGHT, 0zu, 1zu}, {layer::RIGHT, 0zu, 2zu}},
+                    E { { node_layer::DIAGONAL, 0zu, 1zu }, { node_layer::RIGHT, 0zu, 2zu } },
+                    E { { node_layer::RIGHT, 0zu, 1zu }, { node_layer::RIGHT, 0zu, 2zu } },
                 }
             ),
-            to_inputs({layer::RIGHT, 0zu, 2zu})
+            to_inputs(N { node_layer::RIGHT, 0zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 0zu, 2zu}, {layer::RIGHT, 0zu, 3zu}},
-                    {{layer::RIGHT, 0zu, 2zu}, {layer::RIGHT, 0zu, 3zu}},
+                    E { { node_layer::DIAGONAL, 0zu, 2zu }, { node_layer::RIGHT, 0zu, 3zu } },
+                    E { { node_layer::RIGHT, 0zu, 2zu }, { node_layer::RIGHT, 0zu, 3zu } },
                 }
             ),
-            to_inputs({layer::RIGHT, 0zu, 3zu})
+            to_inputs(N { node_layer::RIGHT, 0zu, 3zu })
         );
         // Right 1,1 to 1,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 0zu}, {layer::RIGHT, 1zu, 1zu}},
+                    E { { node_layer::DIAGONAL, 1zu, 0zu }, { node_layer::RIGHT, 1zu, 1zu } },
                 }
             ),
-            to_inputs({layer::RIGHT, 1zu, 1zu})
+            to_inputs(N { node_layer::RIGHT, 1zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 1zu}, {layer::RIGHT, 1zu, 2zu}},
-                    {{layer::RIGHT, 1zu, 1zu}, {layer::RIGHT, 1zu, 2zu}},
+                    E { { node_layer::DIAGONAL, 1zu, 1zu }, { node_layer::RIGHT, 1zu, 2zu } },
+                    E { { node_layer::RIGHT, 1zu, 1zu }, { node_layer::RIGHT, 1zu, 2zu } },
                 }
             ),
-            to_inputs({layer::RIGHT, 1zu, 2zu})
+            to_inputs(N { node_layer::RIGHT, 1zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 1zu, 2zu}, {layer::RIGHT, 1zu, 3zu}},
-                    {{layer::RIGHT, 1zu, 2zu}, {layer::RIGHT, 1zu, 3zu}},
+                    E { { node_layer::DIAGONAL, 1zu, 2zu }, { node_layer::RIGHT, 1zu, 3zu } },
+                    E { { node_layer::RIGHT, 1zu, 2zu }, { node_layer::RIGHT, 1zu, 3zu } },
                 }
             ),
-            to_inputs({layer::RIGHT, 1zu, 3zu})
+            to_inputs(N { node_layer::RIGHT, 1zu, 3zu })
         );
         // Right 2,1 to 2,3
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 2zu, 0zu}, {layer::RIGHT, 2zu, 1zu}},
+                    E { { node_layer::DIAGONAL, 2zu, 0zu }, { node_layer::RIGHT, 2zu, 1zu } },
                 }
             ),
-            to_inputs({layer::RIGHT, 2zu, 1zu})
+            to_inputs(N { node_layer::RIGHT, 2zu, 1zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 2zu, 1zu}, {layer::RIGHT, 2zu, 2zu}},
-                    {{layer::RIGHT, 2zu, 1zu}, {layer::RIGHT, 2zu, 2zu}},
+                    E { { node_layer::DIAGONAL, 2zu, 1zu }, { node_layer::RIGHT, 2zu, 2zu } },
+                    E { { node_layer::RIGHT, 2zu, 1zu }, { node_layer::RIGHT, 2zu, 2zu } },
                 }
             ),
-            to_inputs({layer::RIGHT, 2zu, 2zu})
+            to_inputs(N { node_layer::RIGHT, 2zu, 2zu })
         );
         EXPECT_EQ(
             (
                 std::set<E> {
-                    {{layer::DIAGONAL, 2zu, 2zu}, {layer::RIGHT, 2zu, 3zu}},
-                    {{layer::RIGHT, 2zu, 2zu}, {layer::RIGHT, 2zu, 3zu}},
+                    E { { node_layer::DIAGONAL, 2zu, 2zu }, { node_layer::RIGHT, 2zu, 3zu } },
+                    E { { node_layer::RIGHT, 2zu, 2zu }, { node_layer::RIGHT, 2zu, 3zu } },
                 }
             ),
-            to_inputs({layer::RIGHT, 2zu, 3zu})
+            to_inputs(N {node_layer::RIGHT, 2zu, 3zu })
         );
     }
 
@@ -941,43 +962,46 @@ namespace {
             freeride_scorer
         };
 
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
         // Diagonal 0,0 to 0,3
-        EXPECT_EQ(3zu, g.get_out_degree({layer::DIAGONAL, 0zu, 0zu}));
-        EXPECT_EQ(3zu, g.get_out_degree({layer::DIAGONAL, 0zu, 1zu}));
-        EXPECT_EQ(3zu, g.get_out_degree({layer::DIAGONAL, 0zu, 2zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::DIAGONAL, 0zu, 3zu}));
+        EXPECT_EQ(3zu, g.get_out_degree(N { node_layer::DIAGONAL, 0zu, 0zu }));
+        EXPECT_EQ(3zu, g.get_out_degree(N { node_layer::DIAGONAL, 0zu, 1zu }));
+        EXPECT_EQ(3zu, g.get_out_degree(N { node_layer::DIAGONAL, 0zu, 2zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::DIAGONAL, 0zu, 3zu }));
         // Diagonal 1,0 to 1,3
-        EXPECT_EQ(3zu, g.get_out_degree({layer::DIAGONAL, 1zu, 0zu}));
-        EXPECT_EQ(3zu, g.get_out_degree({layer::DIAGONAL, 1zu, 1zu}));
-        EXPECT_EQ(3zu, g.get_out_degree({layer::DIAGONAL, 1zu, 2zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::DIAGONAL, 1zu, 3zu}));
+        EXPECT_EQ(3zu, g.get_out_degree(N { node_layer::DIAGONAL, 1zu, 0zu }));
+        EXPECT_EQ(3zu, g.get_out_degree(N { node_layer::DIAGONAL, 1zu, 1zu }));
+        EXPECT_EQ(3zu, g.get_out_degree(N { node_layer::DIAGONAL, 1zu, 2zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::DIAGONAL, 1zu, 3zu }));
         // Diagonal 2,0 to 2,3
-        EXPECT_EQ(1zu, g.get_out_degree({layer::DIAGONAL, 2zu, 0zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::DIAGONAL, 2zu, 1zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::DIAGONAL, 2zu, 2zu}));
-        EXPECT_EQ(0zu, g.get_out_degree({layer::DIAGONAL, 2zu, 3zu}));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::DIAGONAL, 2zu, 0zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::DIAGONAL, 2zu, 1zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::DIAGONAL, 2zu, 2zu }));
+        EXPECT_EQ(0zu, g.get_out_degree(N { node_layer::DIAGONAL, 2zu, 3zu }));
         // Down 1,0 to 1,3
-        EXPECT_EQ(2zu, g.get_out_degree({layer::DOWN, 1zu, 0zu}));
-        EXPECT_EQ(2zu, g.get_out_degree({layer::DOWN, 1zu, 1zu}));
-        EXPECT_EQ(2zu, g.get_out_degree({layer::DOWN, 1zu, 2zu}));
-        EXPECT_EQ(2zu, g.get_out_degree({layer::DOWN, 1zu, 3zu}));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::DOWN, 1zu, 0zu }));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::DOWN, 1zu, 1zu }));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::DOWN, 1zu, 2zu }));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::DOWN, 1zu, 3zu }));
         // Down 2,0 to 2,3
-        EXPECT_EQ(1zu, g.get_out_degree({layer::DOWN, 2zu, 0zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::DOWN, 2zu, 1zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::DOWN, 2zu, 2zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::DOWN, 2zu, 3zu}));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::DOWN, 2zu, 0zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::DOWN, 2zu, 1zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::DOWN, 2zu, 2zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::DOWN, 2zu, 3zu }));
         // Right 0,1 to 0,3
-        EXPECT_EQ(2zu, g.get_out_degree({layer::RIGHT, 0zu, 1zu}));
-        EXPECT_EQ(2zu, g.get_out_degree({layer::RIGHT, 0zu, 2zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::RIGHT, 0zu, 3zu}));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::RIGHT, 0zu, 1zu }));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::RIGHT, 0zu, 2zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::RIGHT, 0zu, 3zu }));
         // Right 1,1 to 1,3
-        EXPECT_EQ(2zu, g.get_out_degree({layer::RIGHT, 1zu, 1zu}));
-        EXPECT_EQ(2zu, g.get_out_degree({layer::RIGHT, 1zu, 2zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::RIGHT, 1zu, 3zu}));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::RIGHT, 1zu, 1zu }));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::RIGHT, 1zu, 2zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::RIGHT, 1zu, 3zu }));
         // Right 2,1 to 2,3
-        EXPECT_EQ(2zu, g.get_out_degree({layer::RIGHT, 2zu, 1zu}));
-        EXPECT_EQ(2zu, g.get_out_degree({layer::RIGHT, 2zu, 2zu}));
-        EXPECT_EQ(1zu, g.get_out_degree({layer::RIGHT, 2zu, 3zu}));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::RIGHT, 2zu, 1zu }));
+        EXPECT_EQ(2zu, g.get_out_degree(N { node_layer::RIGHT, 2zu, 2zu }));
+        EXPECT_EQ(1zu, g.get_out_degree(N { node_layer::RIGHT, 2zu, 3zu }));
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, GetInputDegree) {
@@ -992,43 +1016,46 @@ namespace {
             freeride_scorer
         };
 
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
         // Diagonal 0,0 to 0,3
-        EXPECT_EQ(0zu, g.get_in_degree({layer::DIAGONAL, 0zu, 0zu}));
-        EXPECT_EQ(1zu, g.get_in_degree({layer::DIAGONAL, 0zu, 1zu}));
-        EXPECT_EQ(1zu, g.get_in_degree({layer::DIAGONAL, 0zu, 2zu}));
-        EXPECT_EQ(1zu, g.get_in_degree({layer::DIAGONAL, 0zu, 3zu}));
+        EXPECT_EQ(0zu, g.get_in_degree(N { node_layer::DIAGONAL, 0zu, 0zu }));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::DIAGONAL, 0zu, 1zu }));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::DIAGONAL, 0zu, 2zu }));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::DIAGONAL, 0zu, 3zu }));
         // Diagonal 1,0 to 1,3
-        EXPECT_EQ(1zu, g.get_in_degree({layer::DIAGONAL, 1zu, 0zu}));
-        EXPECT_EQ(3zu, g.get_in_degree({layer::DIAGONAL, 1zu, 1zu}));
-        EXPECT_EQ(3zu, g.get_in_degree({layer::DIAGONAL, 1zu, 2zu}));
-        EXPECT_EQ(3zu, g.get_in_degree({layer::DIAGONAL, 1zu, 3zu}));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::DIAGONAL, 1zu, 0zu }));
+        EXPECT_EQ(3zu, g.get_in_degree(N { node_layer::DIAGONAL, 1zu, 1zu }));
+        EXPECT_EQ(3zu, g.get_in_degree(N { node_layer::DIAGONAL, 1zu, 2zu }));
+        EXPECT_EQ(3zu, g.get_in_degree(N { node_layer::DIAGONAL, 1zu, 3zu }));
         // Diagonal 2,0 to 2,3
-        EXPECT_EQ(1zu, g.get_in_degree({layer::DIAGONAL, 2zu, 0zu}));
-        EXPECT_EQ(3zu, g.get_in_degree({layer::DIAGONAL, 2zu, 1zu}));
-        EXPECT_EQ(3zu, g.get_in_degree({layer::DIAGONAL, 2zu, 2zu}));
-        EXPECT_EQ(3zu, g.get_in_degree({layer::DIAGONAL, 2zu, 3zu}));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::DIAGONAL, 2zu, 0zu }));
+        EXPECT_EQ(3zu, g.get_in_degree(N { node_layer::DIAGONAL, 2zu, 1zu }));
+        EXPECT_EQ(3zu, g.get_in_degree(N { node_layer::DIAGONAL, 2zu, 2zu }));
+        EXPECT_EQ(3zu, g.get_in_degree(N { node_layer::DIAGONAL, 2zu, 3zu }));
         // Down 1,0 to 1,3
-        EXPECT_EQ(1zu, g.get_in_degree({layer::DOWN, 1zu, 0zu}));
-        EXPECT_EQ(1zu, g.get_in_degree({layer::DOWN, 1zu, 1zu}));
-        EXPECT_EQ(1zu, g.get_in_degree({layer::DOWN, 1zu, 2zu}));
-        EXPECT_EQ(1zu, g.get_in_degree({layer::DOWN, 1zu, 3zu}));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::DOWN, 1zu, 0zu }));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::DOWN, 1zu, 1zu }));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::DOWN, 1zu, 2zu }));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::DOWN, 1zu, 3zu }));
         // Down 2,0 to 2,3
-        EXPECT_EQ(2zu, g.get_in_degree({layer::DOWN, 2zu, 0zu}));
-        EXPECT_EQ(2zu, g.get_in_degree({layer::DOWN, 2zu, 1zu}));
-        EXPECT_EQ(2zu, g.get_in_degree({layer::DOWN, 2zu, 2zu}));
-        EXPECT_EQ(2zu, g.get_in_degree({layer::DOWN, 2zu, 3zu}));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::DOWN, 2zu, 0zu }));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::DOWN, 2zu, 1zu }));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::DOWN, 2zu, 2zu }));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::DOWN, 2zu, 3zu }));
         // Right 0,1 to 0,3
-        EXPECT_EQ(1zu, g.get_in_degree({layer::RIGHT, 0zu, 1zu}));
-        EXPECT_EQ(2zu, g.get_in_degree({layer::RIGHT, 0zu, 2zu}));
-        EXPECT_EQ(2zu, g.get_in_degree({layer::RIGHT, 0zu, 3zu}));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::RIGHT, 0zu, 1zu }));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::RIGHT, 0zu, 2zu }));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::RIGHT, 0zu, 3zu }));
         // Right 1,1 to 1,3
-        EXPECT_EQ(1zu, g.get_in_degree({layer::RIGHT, 1zu, 1zu}));
-        EXPECT_EQ(2zu, g.get_in_degree({layer::RIGHT, 1zu, 2zu}));
-        EXPECT_EQ(2zu, g.get_in_degree({layer::RIGHT, 1zu, 3zu}));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::RIGHT, 1zu, 1zu }));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::RIGHT, 1zu, 2zu }));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::RIGHT, 1zu, 3zu }));
         // Right 2,1 to 2,3
-        EXPECT_EQ(1zu, g.get_in_degree({layer::RIGHT, 2zu, 1zu}));
-        EXPECT_EQ(2zu, g.get_in_degree({layer::RIGHT, 2zu, 2zu}));
-        EXPECT_EQ(2zu, g.get_in_degree({layer::RIGHT, 2zu, 3zu}));
+        EXPECT_EQ(1zu, g.get_in_degree(N { node_layer::RIGHT, 2zu, 1zu }));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::RIGHT, 2zu, 2zu }));
+        EXPECT_EQ(2zu, g.get_in_degree(N { node_layer::RIGHT, 2zu, 3zu }));
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, GetEdgeData) {
@@ -1043,14 +1070,17 @@ namespace {
             freeride_scorer
         };
 
-        EXPECT_EQ(1.0f64, g.get_edge_data({{layer::DIAGONAL, 0zu, 0zu}, {layer::DIAGONAL, 1zu, 1zu}}));
-        EXPECT_EQ(-1.0f64, g.get_edge_data({{layer::DIAGONAL, 0zu, 1zu}, {layer::DIAGONAL, 1zu, 2zu}}));
-        EXPECT_EQ(0.0f64, g.get_edge_data({{layer::DIAGONAL, 0zu, 0zu}, {layer::DOWN, 1zu, 0zu}}));  // from match to extended gap
-        EXPECT_EQ(0.0f64, g.get_edge_data({{layer::DIAGONAL, 0zu, 0zu}, {layer::RIGHT, 0zu, 1zu}}));  // from match to extended gap
-        EXPECT_EQ(0.0f64, g.get_edge_data({{layer::RIGHT, 0zu, 1zu}, {layer::DIAGONAL, 0zu, 1zu}}));  // from extended gap to match
-        EXPECT_EQ(0.0f64, g.get_edge_data({{layer::DOWN, 1zu, 0zu}, {layer::DIAGONAL, 1zu, 0zu}}));  // from extended gap to match
-        EXPECT_EQ(0.1f64, g.get_edge_data({{layer::DOWN, 1zu, 0zu}, {layer::DOWN, 2zu, 0zu}}));  // from extended gap to extended gap
-        EXPECT_EQ(0.1f64, g.get_edge_data({{layer::RIGHT, 0zu, 1zu}, {layer::RIGHT, 0zu, 2zu}}));  // from extended gap to extended gap
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_EQ(1.0f64, g.get_edge_data(E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::DIAGONAL, 1zu, 1zu } }));
+        EXPECT_EQ(-1.0f64, g.get_edge_data(E { { node_layer::DIAGONAL, 0zu, 1zu }, { node_layer::DIAGONAL, 1zu, 2zu } }));
+        EXPECT_EQ(0.0f64, g.get_edge_data(E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::DOWN, 1zu, 0zu } }));  // from match to extended gap
+        EXPECT_EQ(0.0f64, g.get_edge_data(E { { node_layer::DIAGONAL, 0zu, 0zu }, { node_layer::RIGHT, 0zu, 1zu } }));  // from match to extended gap
+        EXPECT_EQ(0.0f64, g.get_edge_data(E { { node_layer::RIGHT, 0zu, 1zu }, { node_layer::DIAGONAL, 0zu, 1zu } }));  // from extended gap to match
+        EXPECT_EQ(0.0f64, g.get_edge_data(E { { node_layer::DOWN, 1zu, 0zu }, { node_layer::DIAGONAL, 1zu, 0zu } }));  // from extended gap to match
+        EXPECT_EQ(0.1f64, g.get_edge_data(E { { node_layer::DOWN, 1zu, 0zu }, { node_layer::DOWN, 2zu, 0zu } }));  // from extended gap to extended gap
+        EXPECT_EQ(0.1f64, g.get_edge_data(E { { node_layer::RIGHT, 0zu, 1zu }, { node_layer::RIGHT, 0zu, 2zu } }));  // from extended gap to extended gap
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, SlicedWalk) {
@@ -1077,61 +1107,60 @@ namespace {
             freeride_scorer
         };
 
-        using G = std::decay_t<decltype(g)>;
-        using N = typename G::N;
-        using E = typename G::E;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         EXPECT_EQ(
             (to_vector(g.slice_nodes(0u))),
             (std::vector<N> {
-                N { layer::DIAGONAL, 0zu, 0zu },
-                N { layer::RIGHT, 0zu, 1zu },
-                N { layer::DIAGONAL, 0zu, 1zu },
-                N { layer::RIGHT, 0zu, 2zu },
-                N { layer::DIAGONAL, 0zu, 2zu }
+                N { node_layer::DIAGONAL, 0zu, 0zu },
+                N { node_layer::RIGHT, 0zu, 1zu },
+                N { node_layer::DIAGONAL, 0zu, 1zu },
+                N { node_layer::RIGHT, 0zu, 2zu },
+                N { node_layer::DIAGONAL, 0zu, 2zu }
             })
         );
         EXPECT_EQ(
             (to_vector(g.slice_nodes(1u))),
             (std::vector<N> {
-                N { layer::DOWN, 1zu, 0zu },
-                N { layer::DIAGONAL, 1zu, 0zu },
-                N { layer::DOWN, 1zu, 1zu },
-                N { layer::RIGHT, 1zu, 1zu },
-                N { layer::DIAGONAL, 1zu, 1zu },
-                N { layer::DOWN, 1zu, 2zu },
-                N { layer::RIGHT, 1zu, 2zu },
-                N { layer::DIAGONAL, 1zu, 2zu }
+                N { node_layer::DOWN, 1zu, 0zu },
+                N { node_layer::DIAGONAL, 1zu, 0zu },
+                N { node_layer::DOWN, 1zu, 1zu },
+                N { node_layer::RIGHT, 1zu, 1zu },
+                N { node_layer::DIAGONAL, 1zu, 1zu },
+                N { node_layer::DOWN, 1zu, 2zu },
+                N { node_layer::RIGHT, 1zu, 2zu },
+                N { node_layer::DIAGONAL, 1zu, 2zu }
             })
         );
 
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DIAGONAL, 0zu, 0zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DOWN, 0zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::RIGHT, 0zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DIAGONAL, 0zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DOWN, 0zu, 2zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::RIGHT, 0zu, 2zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DIAGONAL, 1zu, 0zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DOWN, 1zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::RIGHT, 1zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DIAGONAL, 1zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DOWN, 1zu, 2zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::RIGHT, 1zu, 2zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.outputs_to_residents(N { layer::DIAGONAL, 1zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::DIAGONAL, 0zu, 0zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::DOWN, 0zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::RIGHT, 0zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::DIAGONAL, 0zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::DOWN, 0zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::RIGHT, 0zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::DIAGONAL, 1zu, 0zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::DOWN, 1zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::RIGHT, 1zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::DIAGONAL, 1zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::DOWN, 1zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::RIGHT, 1zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.outputs_to_residents(N { node_layer::DIAGONAL, 1zu, 2zu })), (std::vector<E> {}));
 
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DIAGONAL, 0zu, 0zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DOWN, 0zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::RIGHT, 0zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DIAGONAL, 0zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DOWN, 0zu, 2zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::RIGHT, 0zu, 2zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DIAGONAL, 1zu, 0zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DOWN, 1zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::RIGHT, 1zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DIAGONAL, 1zu, 1zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DOWN, 1zu, 2zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::RIGHT, 1zu, 2zu })), (std::vector<E> {}));
-        EXPECT_EQ(to_vector(g.inputs_from_residents(N { layer::DIAGONAL, 1zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::DIAGONAL, 0zu, 0zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::DOWN, 0zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::RIGHT, 0zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::DIAGONAL, 0zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::DOWN, 0zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::RIGHT, 0zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::DIAGONAL, 1zu, 0zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::DOWN, 1zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::RIGHT, 1zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::DIAGONAL, 1zu, 1zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::DOWN, 1zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::RIGHT, 1zu, 2zu })), (std::vector<E> {}));
+        EXPECT_EQ(to_vector(g.inputs_from_residents(N { node_layer::DIAGONAL, 1zu, 2zu })), (std::vector<E> {}));
     }
 
     TEST(PairwiseExtendedGapAlignmentGraphTest, SlicedWalkPartial) {
@@ -1158,110 +1187,110 @@ namespace {
             freeride_scorer
         };
 
-        using G = std::decay_t<decltype(g)>;
-        using N = typename G::N;
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
 
         EXPECT_EQ(
-            (to_vector(g.slice_nodes(0u, N { layer::DIAGONAL, 0zu, 0zu }, N { layer::DIAGONAL, 4zu, 4zu }))),
+            (to_vector(g.slice_nodes(0u, N { node_layer::DIAGONAL, 0zu, 0zu }, N { node_layer::DIAGONAL, 4zu, 4zu }))),
             (std::vector<N> {
-                N { layer::DIAGONAL, 0zu, 0zu },
-                N { layer::RIGHT, 0zu, 1zu },
-                N { layer::DIAGONAL, 0zu, 1zu },
-                N { layer::RIGHT, 0zu, 2zu },
-                N { layer::DIAGONAL, 0zu, 2zu },
-                N { layer::RIGHT, 0zu, 3zu },
-                N { layer::DIAGONAL, 0zu, 3zu },
-                N { layer::RIGHT, 0zu, 4zu },
-                N { layer::DIAGONAL, 0zu, 4zu },
+                N { node_layer::DIAGONAL, 0zu, 0zu },
+                N { node_layer::RIGHT, 0zu, 1zu },
+                N { node_layer::DIAGONAL, 0zu, 1zu },
+                N { node_layer::RIGHT, 0zu, 2zu },
+                N { node_layer::DIAGONAL, 0zu, 2zu },
+                N { node_layer::RIGHT, 0zu, 3zu },
+                N { node_layer::DIAGONAL, 0zu, 3zu },
+                N { node_layer::RIGHT, 0zu, 4zu },
+                N { node_layer::DIAGONAL, 0zu, 4zu },
             })
         );
         EXPECT_EQ(
-            (to_vector(g.slice_nodes(4u, N { layer::DIAGONAL, 0zu, 0zu }, N { layer::DIAGONAL, 4zu, 4zu }))),
+            (to_vector(g.slice_nodes(4u, N { node_layer::DIAGONAL, 0zu, 0zu }, N { node_layer::DIAGONAL, 4zu, 4zu }))),
             (std::vector<N> {
-                N { layer::DOWN, 4zu, 0zu },
-                N { layer::DIAGONAL, 4zu, 0zu },
-                N { layer::DOWN, 4zu, 1zu },
-                N { layer::RIGHT, 4zu, 1zu },
-                N { layer::DIAGONAL, 4zu, 1zu },
-                N { layer::DOWN, 4zu, 2zu },
-                N { layer::RIGHT, 4zu, 2zu },
-                N { layer::DIAGONAL, 4zu, 2zu },
-                N { layer::DOWN, 4zu, 3zu },
-                N { layer::RIGHT, 4zu, 3zu },
-                N { layer::DIAGONAL, 4zu, 3zu },
-                N { layer::DOWN, 4zu, 4zu },
-                N { layer::RIGHT, 4zu, 4zu },
-                N { layer::DIAGONAL, 4zu, 4zu }
-            })
-        );
-
-        EXPECT_EQ(
-            (to_vector(g.slice_nodes(1u, N { layer::DIAGONAL, 1zu, 1zu }, N { layer::RIGHT, 4zu, 4zu }))),
-            (std::vector<N> {
-                // N { layer::DOWN, 1zu, 1zu },
-                // N { layer::RIGHT, 1zu, 1zu },
-                N { layer::DIAGONAL, 1zu, 1zu },
-                N { layer::DOWN, 1zu, 2zu },
-                N { layer::RIGHT, 1zu, 2zu },
-                N { layer::DIAGONAL, 1zu, 2zu },
-                N { layer::DOWN, 1zu, 3zu },
-                N { layer::RIGHT, 1zu, 3zu },
-                N { layer::DIAGONAL, 1zu, 3zu },
-                N { layer::DOWN, 1zu, 4zu },
-                N { layer::RIGHT, 1zu, 4zu },
-                N { layer::DIAGONAL, 1zu, 4zu }
-            })
-        );
-        EXPECT_EQ(
-            (to_vector(g.slice_nodes(2u, N { layer::DIAGONAL, 1zu, 1zu }, N { layer::RIGHT, 4zu, 4zu }))),
-            (std::vector<N> {
-                N { layer::DOWN, 2zu, 1zu },
-                N { layer::RIGHT, 2zu, 1zu },
-                N { layer::DIAGONAL, 2zu, 1zu },
-                N { layer::DOWN, 2zu, 2zu },
-                N { layer::RIGHT, 2zu, 2zu },
-                N { layer::DIAGONAL, 2zu, 2zu },
-                N { layer::DOWN, 2zu, 3zu },
-                N { layer::RIGHT, 2zu, 3zu },
-                N { layer::DIAGONAL, 2zu, 3zu },
-                N { layer::DOWN, 2zu, 4zu },
-                N { layer::RIGHT, 2zu, 4zu },
-                N { layer::DIAGONAL, 2zu, 4zu }
-            })
-        );
-        EXPECT_EQ(
-            (to_vector(g.slice_nodes(4u, N { layer::DIAGONAL, 1zu, 1zu }, N { layer::RIGHT, 4zu, 4zu }))),
-            (std::vector<N> {
-                N { layer::DOWN, 4zu, 1zu },
-                N { layer::RIGHT, 4zu, 1zu },
-                N { layer::DIAGONAL, 4zu, 1zu },
-                N { layer::DOWN, 4zu, 2zu },
-                N { layer::RIGHT, 4zu, 2zu },
-                N { layer::DIAGONAL, 4zu, 2zu },
-                N { layer::DOWN, 4zu, 3zu },
-                N { layer::RIGHT, 4zu, 3zu },
-                N { layer::DIAGONAL, 4zu, 3zu },
-                N { layer::DOWN, 4zu, 4zu },
-                N { layer::RIGHT, 4zu, 4zu },
-                // N { layer::DIAGONAL, 4zu, 4zu },
+                N { node_layer::DOWN, 4zu, 0zu },
+                N { node_layer::DIAGONAL, 4zu, 0zu },
+                N { node_layer::DOWN, 4zu, 1zu },
+                N { node_layer::RIGHT, 4zu, 1zu },
+                N { node_layer::DIAGONAL, 4zu, 1zu },
+                N { node_layer::DOWN, 4zu, 2zu },
+                N { node_layer::RIGHT, 4zu, 2zu },
+                N { node_layer::DIAGONAL, 4zu, 2zu },
+                N { node_layer::DOWN, 4zu, 3zu },
+                N { node_layer::RIGHT, 4zu, 3zu },
+                N { node_layer::DIAGONAL, 4zu, 3zu },
+                N { node_layer::DOWN, 4zu, 4zu },
+                N { node_layer::RIGHT, 4zu, 4zu },
+                N { node_layer::DIAGONAL, 4zu, 4zu }
             })
         );
 
         EXPECT_EQ(
-            (to_vector(g.slice_nodes(1u, N { layer::DIAGONAL, 1zu, 1zu }, N { layer::RIGHT, 1zu, 4zu }))),
+            (to_vector(g.slice_nodes(1u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 4zu, 4zu }))),
             (std::vector<N> {
-                // N { layer::DOWN, 1zu, 1zu },
-                // N { layer::RIGHT, 1zu, 1zu },
-                N { layer::DIAGONAL, 1zu, 1zu },
-                N { layer::DOWN, 1zu, 2zu },
-                N { layer::RIGHT, 1zu, 2zu },
-                N { layer::DIAGONAL, 1zu, 2zu },
-                N { layer::DOWN, 1zu, 3zu },
-                N { layer::RIGHT, 1zu, 3zu },
-                N { layer::DIAGONAL, 1zu, 3zu },
-                N { layer::DOWN, 1zu, 4zu },
-                N { layer::RIGHT, 1zu, 4zu },
-                // N { layer::DIAGONAL, 1zu, 4zu }
+                // N { node_layer::DOWN, 1zu, 1zu },
+                // N { node_layer::RIGHT, 1zu, 1zu },
+                N { node_layer::DIAGONAL, 1zu, 1zu },
+                N { node_layer::DOWN, 1zu, 2zu },
+                N { node_layer::RIGHT, 1zu, 2zu },
+                N { node_layer::DIAGONAL, 1zu, 2zu },
+                N { node_layer::DOWN, 1zu, 3zu },
+                N { node_layer::RIGHT, 1zu, 3zu },
+                N { node_layer::DIAGONAL, 1zu, 3zu },
+                N { node_layer::DOWN, 1zu, 4zu },
+                N { node_layer::RIGHT, 1zu, 4zu },
+                N { node_layer::DIAGONAL, 1zu, 4zu }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(2u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 4zu, 4zu }))),
+            (std::vector<N> {
+                N { node_layer::DOWN, 2zu, 1zu },
+                N { node_layer::RIGHT, 2zu, 1zu },
+                N { node_layer::DIAGONAL, 2zu, 1zu },
+                N { node_layer::DOWN, 2zu, 2zu },
+                N { node_layer::RIGHT, 2zu, 2zu },
+                N { node_layer::DIAGONAL, 2zu, 2zu },
+                N { node_layer::DOWN, 2zu, 3zu },
+                N { node_layer::RIGHT, 2zu, 3zu },
+                N { node_layer::DIAGONAL, 2zu, 3zu },
+                N { node_layer::DOWN, 2zu, 4zu },
+                N { node_layer::RIGHT, 2zu, 4zu },
+                N { node_layer::DIAGONAL, 2zu, 4zu }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(4u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 4zu, 4zu }))),
+            (std::vector<N> {
+                N { node_layer::DOWN, 4zu, 1zu },
+                N { node_layer::RIGHT, 4zu, 1zu },
+                N { node_layer::DIAGONAL, 4zu, 1zu },
+                N { node_layer::DOWN, 4zu, 2zu },
+                N { node_layer::RIGHT, 4zu, 2zu },
+                N { node_layer::DIAGONAL, 4zu, 2zu },
+                N { node_layer::DOWN, 4zu, 3zu },
+                N { node_layer::RIGHT, 4zu, 3zu },
+                N { node_layer::DIAGONAL, 4zu, 3zu },
+                N { node_layer::DOWN, 4zu, 4zu },
+                N { node_layer::RIGHT, 4zu, 4zu },
+                // N { node_layer::DIAGONAL, 4zu, 4zu },
+            })
+        );
+
+        EXPECT_EQ(
+            (to_vector(g.slice_nodes(1u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 1zu, 4zu }))),
+            (std::vector<N> {
+                // N { node_layer::DOWN, 1zu, 1zu },
+                // N { node_layer::RIGHT, 1zu, 1zu },
+                N { node_layer::DIAGONAL, 1zu, 1zu },
+                N { node_layer::DOWN, 1zu, 2zu },
+                N { node_layer::RIGHT, 1zu, 2zu },
+                N { node_layer::DIAGONAL, 1zu, 2zu },
+                N { node_layer::DOWN, 1zu, 3zu },
+                N { node_layer::RIGHT, 1zu, 3zu },
+                N { node_layer::DIAGONAL, 1zu, 3zu },
+                N { node_layer::DOWN, 1zu, 4zu },
+                N { node_layer::RIGHT, 1zu, 4zu },
+                // N { node_layer::DIAGONAL, 1zu, 4zu }
             })
         );
     }
@@ -1294,6 +1323,7 @@ namespace {
             extended_gap_scorer,
             freeride_scorer
         };
+
         using N = typename decltype(g)::N;
         using E = typename decltype(g)::E;
 
