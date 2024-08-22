@@ -1,8 +1,7 @@
 #ifndef OFFBYNULL_ALIGNER_SCORERS_CONSTANT_SCORER_H
 #define OFFBYNULL_ALIGNER_SCORERS_CONSTANT_SCORER_H
 
-#include <concepts>
-#include <optional>
+#include <utility>
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/concepts.h"
 

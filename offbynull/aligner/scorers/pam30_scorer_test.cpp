@@ -1,7 +1,6 @@
 #include "offbynull/aligner/scorers/pam30_scorer.h"
 #include "gtest/gtest.h"
-#include <format>
-#include <stdfloat>
+#include <tuple>
 
 namespace {
     using offbynull::aligner::scorers::pam30_scorer::pam30_scorer;

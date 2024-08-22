@@ -7,6 +7,11 @@
 #include "offbynull/aligner/scorers/simple_scorer.h"
 #include "gtest/gtest.h"
 #include <stdfloat>
+#include <optional>
+#include <tuple>
+#include <string>
+#include <iostream>
+#include <ostream>
 
 namespace {
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker;

@@ -1,3 +1,7 @@
+#include <string>
+#include <set>
+#include <tuple>
+#include <stdexcept>
 #include "offbynull/aligner/graph/graph.h"
 #include "offbynull/aligner/graphs/directed_graph.h"
 #include "gtest/gtest.h"

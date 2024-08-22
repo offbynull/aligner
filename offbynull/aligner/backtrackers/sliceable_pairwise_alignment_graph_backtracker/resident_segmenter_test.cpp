@@ -8,6 +8,13 @@
 #include "offbynull/aligner/scorers/simple_scorer.h"
 #include "gtest/gtest.h"
 #include <stdfloat>
+#include <string>
+#include <iostream>
+#include <ostream>
+#include <variant>
+#include <cstdint>
+#include <cstddef>
+#include <stdexcept>
 
 namespace {
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::hop;

@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include <boost/filesystem.hpp>
 #include <fstream>
+#include <ios>
 
 namespace {
     using offbynull::aligner::sequence::sequence::sequence;

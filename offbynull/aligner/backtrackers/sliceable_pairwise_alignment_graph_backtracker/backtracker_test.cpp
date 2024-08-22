@@ -10,6 +10,14 @@
 #include "gtest/gtest.h"
 #include <stdfloat>
 #include <random>
+#include <string>
+#include <iostream>
+#include <ostream>
+#include <vector>
+#include <format>
+#include <cstddef>
+#include <ranges>
+#include <cmath>
 
 namespace {
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker;

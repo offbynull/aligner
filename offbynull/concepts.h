@@ -3,6 +3,9 @@
 
 #include <ranges>
 #include <limits>
+#include <concepts>
+#include <iterator>
+#include <cstddef>
 
 namespace offbynull::concepts {
     template <typename T, typename V>

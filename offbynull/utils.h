@@ -2,11 +2,11 @@
 #define OFFBYNULL_UTILS_H
 
 #include <cstddef>
-#include <functional>
+#include <concepts>
 
 #include "utils.h"
-#include "boost/container/static_vector.hpp"
-#include "boost/container/options.hpp"
+#include <boost/container/static_vector.hpp>
+#include <boost/container/options.hpp>
 
 namespace offbynull::utils {
     template<typename T>

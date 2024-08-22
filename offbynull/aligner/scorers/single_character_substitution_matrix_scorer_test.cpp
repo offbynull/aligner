@@ -1,7 +1,6 @@
 #include "offbynull/aligner/scorers/single_character_substitution_matrix_scorer.h"
 #include "gtest/gtest.h"
-#include <format>
-#include <stdfloat>
+#include <tuple>
 
 namespace {
     using offbynull::aligner::scorers::single_character_substitution_matrix_scorer::single_character_substitution_matrix_scorer;

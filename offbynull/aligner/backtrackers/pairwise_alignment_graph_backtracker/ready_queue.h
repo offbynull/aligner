@@ -2,6 +2,8 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_READY_QUEUE_H
 
 #include <cstddef>
+#include <vector>
+#include <utility>
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 #include "offbynull/utils.h"
 

@@ -4,7 +4,8 @@
 #include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/concepts.h"
 #include <cstddef>
-#include <utility>
+#include <functional>
+#include <limits>
 #include <tuple>
 
 namespace offbynull::aligner::sequences::zip_sequence {

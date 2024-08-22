@@ -5,6 +5,12 @@
 #include "offbynull/aligner/scorers/simple_scorer.h"
 #include "gtest/gtest.h"
 #include <stdfloat>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <stdexcept>
+#include <ostream>
+#include <iostream>
 
 namespace {
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider::sliced_subdivider;

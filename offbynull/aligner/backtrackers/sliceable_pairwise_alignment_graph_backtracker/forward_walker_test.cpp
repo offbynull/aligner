@@ -4,8 +4,8 @@
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/forward_walker.h"
 #include "offbynull/aligner/scorers/simple_scorer.h"
 #include "gtest/gtest.h"
-#include <format>
 #include <stdfloat>
+#include <string>
 #include <stdexcept>
 
 namespace {

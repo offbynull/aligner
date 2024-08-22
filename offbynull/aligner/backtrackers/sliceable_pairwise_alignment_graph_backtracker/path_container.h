@@ -3,6 +3,14 @@
 
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/forward_walker.h"
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <ranges>
+#include <vector>
+#include <array>
+#include <utility>
+#include <stdexcept>
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container {
     using offbynull::aligner::concepts::weight;

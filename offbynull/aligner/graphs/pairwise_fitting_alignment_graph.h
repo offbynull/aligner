@@ -1,6 +1,7 @@
 #ifndef OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_FITTING_ALIGNMENT_GRAPH_H
 #define OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_FITTING_ALIGNMENT_GRAPH_H
 
+#include <compare>
 #include <cstdint>
 #include <cstddef>
 #include <ranges>
@@ -9,6 +10,12 @@
 #include <utility>
 #include <functional>
 #include <stdfloat>
+#include <type_traits>
+#include <optional>
+#include <array>
+#include <format>
+#include <string>
+#include <ostream>
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/sequence/sequence.h"

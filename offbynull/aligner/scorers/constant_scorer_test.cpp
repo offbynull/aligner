@@ -1,7 +1,6 @@
 #include "offbynull/aligner/scorers/constant_scorer.h"
 #include "gtest/gtest.h"
-#include <format>
-#include <stdfloat>
+#include <tuple>
 
 namespace {
     using offbynull::aligner::scorers::constant_scorer::constant_scorer;

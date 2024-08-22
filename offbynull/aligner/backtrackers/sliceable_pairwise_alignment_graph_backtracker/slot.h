@@ -1,7 +1,7 @@
 #ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLOT_H
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLOT_H
 
-#include <ranges>
+#include <optional>
 #include "offbynull/aligner/concepts.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot {

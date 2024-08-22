@@ -4,6 +4,10 @@
 #include <functional>
 #include <ranges>
 #include <algorithm>
+#include <vector>
+#include <utility>
+#include <optional>
+#include <cstddef>
 #include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 #include "offbynull/aligner/concepts.h"

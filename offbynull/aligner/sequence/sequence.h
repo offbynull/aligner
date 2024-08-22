@@ -2,6 +2,9 @@
 #define OFFBYNULL_ALIGNER_SEQUENCE_SEQUENCE_H
 
 #include <concepts>
+#include <utility>
+#include <cstddef>
+#include <type_traits>
 
 namespace offbynull::aligner::sequence::sequence {
     template<typename T>

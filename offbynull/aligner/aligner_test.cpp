@@ -1,3 +1,9 @@
+#include <cstdint>
+#include <optional>
+#include <functional>
+#include <utility>
+#include <iostream>
+#include <ostream>
 #include <stdfloat>
 #include <string>
 #include "offbynull/aligner/aligner.h"

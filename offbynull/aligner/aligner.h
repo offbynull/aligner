@@ -1,10 +1,16 @@
 #ifndef OFFBYNULL_ALIGNER_ALIGNER_H
 #define OFFBYNULL_ALIGNER_ALIGNER_H
 
+#include <cstddef>
+#include <ranges>
 #include <functional>
+#include <optional>
 #include <utility>
 #include <cstdint>
 #include <type_traits>
+#include <stdexcept>
+#include <tuple>
+#include <limits>
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/backtrack.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
@@ -42,8 +48,12 @@ namespace offbynull::aligner::aligner {
         std::ranges::random_access_range auto&& v,
         std::ranges::random_access_range auto&& w
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns.");
 
         using G = std::decay_t<decltype(graph)>;
         using N = typename G::N;
@@ -98,8 +108,14 @@ namespace offbynull::aligner::aligner {
             )
         > weight_lookup
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns."
+        );
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns."
+        );
 
         INDEX v_node_cnt { static_cast<INDEX>(v.size() + 1zu) };
         INDEX w_node_cnt { static_cast<INDEX>(w.size() + 1zu) };
@@ -144,8 +160,14 @@ namespace offbynull::aligner::aligner {
         > weight_lookup,
         WEIGHT freeride_weight = {}
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns."
+        );
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns."
+        );
 
         INDEX v_node_cnt { static_cast<INDEX>(v.size() + 1zu) };
         INDEX w_node_cnt { static_cast<INDEX>(w.size() + 1zu) };
@@ -190,8 +212,14 @@ namespace offbynull::aligner::aligner {
         > weight_lookup,
         WEIGHT freeride_weight = {}
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns."
+        );
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns."
+        );
 
         INDEX v_node_cnt { static_cast<INDEX>(v.size() + 1zu) };
         INDEX w_node_cnt { static_cast<INDEX>(w.size() + 1zu) };
@@ -239,8 +267,14 @@ namespace offbynull::aligner::aligner {
         WEIGHT gap_weight = {},
         WEIGHT freeride_weight = {}
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns."
+        );
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns."
+        );
 
         INDEX v_slot_cnt { static_cast<INDEX>(v.size() + 1zu) };
         INDEX w_slot_cnt { static_cast<INDEX>(w.size() + 1zu) };
@@ -300,8 +334,14 @@ namespace offbynull::aligner::aligner {
         std::ranges::random_access_range auto&& v,
         std::ranges::random_access_range auto&& w
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns."
+        );
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns."
+        );
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {
@@ -314,7 +354,8 @@ namespace offbynull::aligner::aligner {
         using N = typename G::N;
         using E = typename G::E;
         using COUNT = std::size_t;
-        using SLOT_CONTAINER_CREATOR = array_container_creator<slot<N, E, COUNT, WEIGHT>, G::node_count(v_node_cnt, w_node_cnt), debug_mode>;
+        using SLOT_CONTAINER_CREATOR = array_container_creator<slot<N, E, COUNT, WEIGHT>, G::node_count(v_node_cnt, w_node_cnt),
+            debug_mode>;
         using PATH_CONTAINER_CREATOR = static_vector_container_creator<E, G::longest_path_edge_count(v_node_cnt, w_node_cnt), debug_mode>;
         backtracker<G, COUNT, WEIGHT, SLOT_CONTAINER_CREATOR, PATH_CONTAINER_CREATOR> backtracker_ {};
         using E = typename G::E;
@@ -350,8 +391,14 @@ namespace offbynull::aligner::aligner {
             )
         > weight_lookup
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns."
+        );
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns."
+        );
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {
@@ -403,8 +450,14 @@ namespace offbynull::aligner::aligner {
         > weight_lookup,
         WEIGHT freeride_weight = {}
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns."
+        );
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns."
+        );
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {
@@ -456,8 +509,14 @@ namespace offbynull::aligner::aligner {
         > weight_lookup,
         WEIGHT freeride_weight = {}
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns."
+        );
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns."
+        );
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {
@@ -511,8 +570,14 @@ namespace offbynull::aligner::aligner {
         WEIGHT gap_weight = {},
         WEIGHT freeride_weight = {}
     ) {
-        static_assert(!std::is_rvalue_reference_v<decltype(v)>, "v cannot be an rvalue reference: Function returns references into v, meaning v should continue to exist once function returns.");
-        static_assert(!std::is_rvalue_reference_v<decltype(w)>, "w cannot be an rvalue reference: Function returns references into w, meaning w should continue to exist once function returns.");
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(v)>,
+            "v cannot be an rvalue ref: Function returns references into v, meaning v should continue to exist once function returns."
+        );
+        static_assert(
+            !std::is_rvalue_reference_v<decltype(w)>,
+            "w cannot be an rvalue ref: Function returns references into w, meaning w should continue to exist once function returns."
+        );
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {

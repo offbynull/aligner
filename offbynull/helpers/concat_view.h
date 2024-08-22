@@ -2,8 +2,11 @@
 #define OFFBYNULL_HELPERS_CONCAT_VIEW_H
 
 #include <ranges>
-#include <vector>
-#include <offbynull/utils.h>
+#include <iterator>
+#include <utility>
+#include <concepts>
+#include <cstdint>
+#include "offbynull/utils.h"
 
 namespace offbynull::helpers::concat_view {
     class sentinel {

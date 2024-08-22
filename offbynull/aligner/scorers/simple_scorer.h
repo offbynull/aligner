@@ -4,6 +4,8 @@
 #include <concepts>
 #include <optional>
 #include <limits>
+#include <functional>
+#include <utility>
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/concepts.h"
 

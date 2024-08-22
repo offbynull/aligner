@@ -1,9 +1,11 @@
 #ifndef OFFBYNULL_ALIGNER_GRAPH_PAIRWISE_ALIGNMENT_GRAPH_H
 #define OFFBYNULL_ALIGNER_GRAPH_PAIRWISE_ALIGNMENT_GRAPH_H
 
+#include <cstddef>
 #include <concepts>
 #include <utility>
-#include <functional>
+#include <tuple>
+#include <optional>
 #include "offbynull/concepts.h"
 #include "offbynull/aligner/graph/graph.h"
 #include "offbynull/aligner/concepts.h"

@@ -1,4 +1,6 @@
 #include <ranges>
+#include <iostream>
+#include <ostream>
 #include "offbynull/helpers/simple_value_bidirectional_view.h"
 #include "gtest/gtest.h"
 

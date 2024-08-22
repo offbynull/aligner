@@ -6,7 +6,9 @@
 #include <cstddef>
 #include <array>
 #include <vector>
+#include <utility>
 #include <type_traits>
+#include <stdexcept>
 
 namespace offbynull::aligner::sequences::sliding_window_sequence {
     using offbynull::aligner::sequence::sequence::sequence;

@@ -1,6 +1,7 @@
 #include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/aligner/sequences/transform_sequence.h"
 #include "gtest/gtest.h"
+#include <cstdint>
 #include <cstddef>
 
 namespace {

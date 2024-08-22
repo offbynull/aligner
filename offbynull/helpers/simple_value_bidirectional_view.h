@@ -1,8 +1,12 @@
 #ifndef OFFBYNULL_HELPERS_SIMPLE_VALUE_BIDIRECTIONAL_VIEW_H
 #define OFFBYNULL_HELPERS_SIMPLE_VALUE_BIDIRECTIONAL_VIEW_H
 
+#include <cstdint>
 #include <ranges>
-#include <functional>
+#include <iterator>
+#include <type_traits>
+#include <concepts>
+#include <utility>
 
 namespace offbynull::helpers::simple_value_bidirectional_view {
     template<typename T>

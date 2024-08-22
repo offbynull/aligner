@@ -1,12 +1,20 @@
 #ifndef OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_LOCAL_ALIGNMENT_GRAPH_H
 #define OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_LOCAL_ALIGNMENT_GRAPH_H
 
+#include <compare>
+#include <cstddef>
 #include <cstdint>
 #include <ranges>
 #include <tuple>
 #include <stdexcept>
 #include <utility>
+#include <optional>
+#include <type_traits>
 #include <functional>
+#include <array>
+#include <string>
+#include <format>
+#include <ostream>
 #include <stdfloat>
 #include "offbynull/aligner/graph/utils.h"
 #include "offbynull/aligner/graphs/grid_graph.h"
@@ -220,7 +228,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                     return E { edge_type::NORMAL, p };
                 })
             };
-            // This should be using std::views::conat, but it wasn't included in this version of the C++ standard
+            // This should be using std::views::concat, but it wasn't included in this version of the C++ standard
             // library. The concat implementation below lacks several features (e.g. doesn't support the pipe operator)
             // and forcefully returns copies (concat_view::iterator::value_type ==
             // concat_view::iterator::reference_type).

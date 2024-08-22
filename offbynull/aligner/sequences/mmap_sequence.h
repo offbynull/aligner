@@ -5,6 +5,7 @@
 #include <functional>
 #include <cstddef>
 #include <stdexcept>
+#include <string>
 #include <boost/iostreams/device/mapped_file.hpp>
 
 namespace offbynull::aligner::sequences::mmap_sequence {

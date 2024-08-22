@@ -1,11 +1,18 @@
 #ifndef OFFBYNULL_ALIGNER_SCORERS_SINGLE_CHARACTER_SUBSTITUTION_MATRIX_SCORER_H
 #define OFFBYNULL_ALIGNER_SCORERS_SINGLE_CHARACTER_SUBSTITUTION_MATRIX_SCORER_H
 
+#include <cstddef>
+#include <ranges>
 #include <optional>
 #include <array>
 #include <algorithm>
+#include <string_view>
+#include <type_traits>
 #include <sstream>
 #include <limits>
+#include <utility>
+#include <functional>
+#include <stdexcept>
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/utils.h"
@@ -63,7 +70,7 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
                 | std::views::transform([](const std::string_view& line) {
                     return
                         std::views::split(line, ' ')
-                        | std::ranges::views::filter([](const auto& s) {
+                        | std::views::filter([](const auto& s) {
                             return s.begin() != s.end();
                         });
                 });

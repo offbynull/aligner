@@ -68,8 +68,10 @@ TODO:
   * ~~140char lines~~
   * ~~spaces between squiggly brackets: {}~~
   * python helper to ensure ...
-    * guards are correct
-    * #includes are there for all std:: and using offbynull::...
+    * ~~140 char line~~ 
+    * ~~guards are correct~~
+    * ~~#includes are there for all std:: and boost::~~
+    * #includes are there for all offbynull::
 
 * multithreaded backtracker -- should be easy
 

@@ -2,7 +2,7 @@
 #include "offbynull/aligner/graphs/pairwise_global_alignment_graph.h"
 #include "offbynull/aligner/scorers/simple_scorer.h"
 #include "gtest/gtest.h"
-#include <format>
+#include <string>
 #include <stdfloat>
 
 namespace {

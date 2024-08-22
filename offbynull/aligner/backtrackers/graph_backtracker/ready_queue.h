@@ -2,6 +2,8 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_READY_QUEUE_H
 
 #include <cstddef>
+#include <vector>
+#include <utility>
 #include <boost/container/small_vector.hpp>
 #include "offbynull/concepts.h"
 

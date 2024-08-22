@@ -1,9 +1,12 @@
 #ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_BACKTRACKER_H
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_BACKTRACKER_H
 
-#include <ranges>
 #include <algorithm>
-#include <iostream>
+#include <vector>
+#include <cstddef>
+#include <utility>
+#include <variant>
+#include <stdexcept>
 #include "path_container.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_segmenter.h"

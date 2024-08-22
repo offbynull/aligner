@@ -1,7 +1,6 @@
 #include "offbynull/aligner/scorers/blosum62_scorer.h"
 #include "gtest/gtest.h"
-#include <format>
-#include <stdfloat>
+#include <tuple>
 
 namespace {
     using offbynull::aligner::scorers::blosum62_scorer::blosum62_scorer;

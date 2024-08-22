@@ -5,12 +5,16 @@
 #include <cstddef>
 #include <ranges>
 #include <tuple>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 #include <functional>
 #include <stdfloat>
-#include <iostream>
+#include <string>
+#include <array>
+#include <ostream>
 #include <format>
+#include <type_traits>
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/concepts.h"

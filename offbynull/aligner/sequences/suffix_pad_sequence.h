@@ -4,7 +4,8 @@
 #include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/utils.h"
 #include <cstddef>
-#include <stdexcept>
+#include <utility>
+#include <type_traits>
 
 namespace offbynull::aligner::sequences::suffix_pad_sequence {
     using offbynull::aligner::sequence::sequence::sequence;

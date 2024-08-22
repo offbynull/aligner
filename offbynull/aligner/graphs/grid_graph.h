@@ -2,12 +2,16 @@
 #define OFFBYNULL_ALIGNER_GRAPHS_GRID_GRAPH_H
 
 #include <cstddef>
+#include <string>
 #include <ranges>
 #include <tuple>
 #include <stdexcept>
 #include <utility>
+#include <optional>
+#include <functional>
 #include <stdfloat>
-#include <iostream>
+#include <type_traits>
+#include <ostream>
 #include <format>
 
 #include "offbynull/concepts.h"

@@ -1,9 +1,7 @@
 #include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/aligner/sequences/sliding_window_sequence.h"
 #include "gtest/gtest.h"
-#include <boost/filesystem.hpp>
 #include <string>
-#include <array>
 #include <vector>
 
 namespace {

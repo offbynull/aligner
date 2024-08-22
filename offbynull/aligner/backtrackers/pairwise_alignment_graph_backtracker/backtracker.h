@@ -4,6 +4,11 @@
 #include <cstddef>
 #include <ranges>
 #include <algorithm>
+#include <vector>
+#include <utility>
+#include <functional>
+#include <limits>
+#include <stdexcept>
 #include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/concepts.h"

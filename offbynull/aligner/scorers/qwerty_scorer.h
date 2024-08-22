@@ -1,12 +1,13 @@
 #ifndef OFFBYNULL_ALIGNER_SCORERS_QWERTY_SCORER_H
 #define OFFBYNULL_ALIGNER_SCORERS_QWERTY_SCORER_H
 
-#include <optional>
+#include <cstddef>
+#include <ranges>
 #include <array>
 #include <algorithm>
-#include <sstream>
-#include <limits>
 #include <utility>
+#include <variant>
+#include <tuple>
 #include <cmath>
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/scorers/single_character_substitution_matrix_scorer.h"

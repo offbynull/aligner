@@ -1,7 +1,12 @@
 #ifndef OFFBYNULL_ALIGNER_GRAPHS_PREFIX_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_H
 #define OFFBYNULL_ALIGNER_GRAPHS_PREFIX_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_H
 
+#include <cstddef>
 #include <ranges>
+#include <tuple>
+#include <utility>
+#include <optional>
+#include <stdexcept>
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 

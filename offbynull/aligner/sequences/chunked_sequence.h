@@ -7,6 +7,8 @@
 #include <array>
 #include <vector>
 #include <type_traits>
+#include <utility>
+#include <stdexcept>
 
 namespace offbynull::aligner::sequences::chunked_sequence {
     using offbynull::aligner::sequence::sequence::sequence;

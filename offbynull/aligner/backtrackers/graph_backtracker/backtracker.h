@@ -4,7 +4,12 @@
 #include <cstddef>
 #include <functional>
 #include <ranges>
+#include <vector>
+#include <utility>
+#include <limits>
 #include <algorithm>
+#include <stdexcept>
+#include <boost/container/small_vector.hpp>
 #include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/concepts.h"

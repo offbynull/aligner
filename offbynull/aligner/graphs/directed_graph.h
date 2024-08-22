@@ -3,13 +3,13 @@
 
 #include <cstddef>
 #include <ranges>
-#include <algorithm>
 #include <map>
 #include <set>
 #include <tuple>
 #include <stdexcept>
 #include <utility>
-#include <vector>
+#include <string>
+#include <format>
 
 namespace offbynull::aligner::graphs::directed_graph {
     template<bool debug_mode, typename N_, typename ND_, typename E_, typename ED_>

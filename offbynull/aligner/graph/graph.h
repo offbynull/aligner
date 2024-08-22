@@ -2,8 +2,8 @@
 #define OFFBYNULL_ALIGNER_GRAPH_GRAPH_H
 
 #include <cstddef>
+#include <tuple>
 #include <concepts>
-#include <utility>
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::graph::graph {

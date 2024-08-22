@@ -1,4 +1,7 @@
 #include <ranges>
+#include <vector>
+#include <iostream>
+#include <utility>
 #include "offbynull/helpers/concat_view.h"
 #include "gtest/gtest.h"
 

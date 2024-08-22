@@ -1,10 +1,12 @@
 #ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_FORWARD_WALKER_H
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_FORWARD_WALKER_H
 
+#include <cstddef>
 #include <functional>
 #include <ranges>
-#include <algorithm>
+#include <optional>
 #include <utility>
+#include <stdexcept>
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/slot.h"

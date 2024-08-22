@@ -1,14 +1,21 @@
 #ifndef OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_OVERLAP_ALIGNMENT_GRAPH_H
 #define OFFBYNULL_ALIGNER_GRAPHS_PAIRWISE_OVERLAP_ALIGNMENT_GRAPH_H
 
+#include <compare>
 #include <cstdint>
 #include <cstddef>
 #include <ranges>
 #include <tuple>
 #include <stdexcept>
 #include <utility>
+#include <optional>
 #include <functional>
 #include <stdfloat>
+#include <string>
+#include <array>
+#include <format>
+#include <type_traits>
+#include <ostream>
 #include "offbynull/aligner/graphs/grid_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/sequence/sequence.h"

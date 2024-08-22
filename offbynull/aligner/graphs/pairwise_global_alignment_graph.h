@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <tuple>
 #include <stdexcept>
+#include <optional>
 #include <utility>
 #include <functional>
 #include <type_traits>

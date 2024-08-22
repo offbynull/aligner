@@ -3,6 +3,8 @@
 
 #include <concepts>
 #include <optional>
+#include <functional>
+#include <type_traits>
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 

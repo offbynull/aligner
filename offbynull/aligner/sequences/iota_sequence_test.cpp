@@ -1,7 +1,6 @@
 #include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/aligner/sequences/iota_sequence.h"
 #include "gtest/gtest.h"
-#include <cstddef>
 
 namespace {
     using offbynull::aligner::sequence::sequence::sequence;

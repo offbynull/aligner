@@ -2,7 +2,12 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICE_SLOT_CONTAINER_H
 
 #include <functional>
-#include <ranges>
+#include <optional>
+#include <utility>
+#include <array>
+#include <vector>
+#include <cstddef>
+#include <stdexcept>
 #include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 #include "offbynull/aligner/concepts.h"

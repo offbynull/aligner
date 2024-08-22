@@ -1,7 +1,11 @@
 #ifndef OFFBYNULL_ALIGNER_GRAPHS_MIDDLE_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_H
 #define OFFBYNULL_ALIGNER_GRAPHS_MIDDLE_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_H
 
-#include <ranges>
+#include <cstddef>
+#include <tuple>
+#include <optional>
+#include <utility>
+#include <stdexcept>
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/suffix_sliceable_pairwise_alignment_graph.h"

@@ -3,6 +3,12 @@
 
 #include <cstddef>
 #include <ranges>
+#include <vector>
+#include <iterator>
+#include <algorithm>
+#include <limits>
+#include <utility>
+#include <stdexcept>
 #include <boost/container/small_vector.hpp>
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"

@@ -2,6 +2,11 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLOT_CONTAINER_H
 
 #include <cstddef>
+#include <vector>
+#include <array>
+#include <iterator>
+#include <utility>
+#include <stdexcept>
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/utils.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"

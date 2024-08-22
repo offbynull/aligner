@@ -2,7 +2,7 @@
 #define OFFBYNULL_HELPERS_BLANKABLE_BIDIRECTIONAL_VIEW_H
 
 #include <ranges>
-#include <functional>
+#include <utility>
 
 namespace offbynull::helpers::blankable_bidirectional_view {
 

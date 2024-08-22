@@ -1,9 +1,7 @@
 #ifndef OFFBYNULL_ALIGNER_SCORERS_BLOSUM80_SCORER_H
 #define OFFBYNULL_ALIGNER_SCORERS_BLOSUM80_SCORER_H
 
-#include <concepts>
-#include <optional>
-#include <map>
+#include <utility>
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/scorers/single_character_substitution_matrix_scorer.h"
 #include "offbynull/aligner/concepts.h"

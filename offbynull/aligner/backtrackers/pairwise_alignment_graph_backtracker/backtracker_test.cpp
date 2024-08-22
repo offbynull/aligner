@@ -4,9 +4,11 @@
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/backtracker.h"
 #include "offbynull/aligner/scorers/simple_scorer.h"
 #include "gtest/gtest.h"
+#include <stdfloat>
+#include <string>
+#include <ostream>
 #include <iostream>
-#include <format>
-#include <cstddef>
+#include <vector>
 
 namespace {
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker;

@@ -1,4 +1,9 @@
-#include <cstddef>
+#include <stdfloat>
+#include <string>
+#include <set>
+#include <vector>
+#include <algorithm>
+#include <type_traits>
 #include "offbynull/aligner/graph/graph.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/pairwise_fitting_alignment_graph.h"

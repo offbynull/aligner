@@ -1,8 +1,8 @@
 #include "offbynull/aligner/scorers/qwerty_scorer.h"
 #include "gtest/gtest.h"
-#include <format>
-#include <stdfloat>
+#include <tuple>
 #include <iostream>
+#include <ostream>
 
 namespace {
     using offbynull::aligner::scorers::qwerty_scorer::qwerty_scorer;
