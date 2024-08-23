@@ -60,6 +60,7 @@ TODO:
 * ~~subdivider, when finding the node in the slice that's being passed through, should first get the final weight of the graph, then TEST the bidiwalk'd weight at that node to see if it matches the final weight (USER MUST DEFINE TOLERANCE)~~ DONT NEED TO DO THIS the assumption with subdivider is that at least 1 node in each slice goes over max path, so it's fine just pulling out the max weight for a slice
 * ~~sliceable_pairwise_alignment_graph_backtracker use bidiwalker instead (make sure to update bidiwalker's logic to what's in backtracker)~~
 * ~~sliceable_pairwise_alignment_graph_backtracker randomized tests against pairwise_alignment_graph_backtracker~~
+* graph constructors take take in scorers using std::function<...> -- uses scorer concept instead? e.g. scorer auto&& indel_scorer, scorer&& substitution scorer, etc... 
 
 * doxygen documentation
 * run profiler and optimize functions (some local alignment functions may be doing a ton of unneeded work -- e.g. get_outputs_full)

@@ -32,6 +32,43 @@ test('test', example)
 
 
 
+python3 = find_program('python3', required : false)
+if not python3.found()
+        warning('Python3 not found -- some non-critical tasks may be skipped')
+endif
+dot = find_program('dot', required : false)
+if not dot.found()
+        warning('Graphviz (dot) not found -- some non-critical tasks may be skipped')
+endif
+doxygen = find_program('doxygen', required : false)
+if not doxygen.found()
+        warning('doxygen not found -- some non-critical tasks may be skipped')
+endif
+
+if python3.found()
+        source_checker = custom_target(
+                'source_checker',
+                command: ['python3', meson.current_source_dir() + '/source_checker.py'],
+                output: ['unused'],
+                build_always_stale: true
+        )
+else
+        warning('Disabling source-check due to missing tools')
+        source_check = []
+endif
+
+if python3.found() and dot.found() and doxygen.found()
+        doc_generator = custom_target(
+                'doc_generator',
+                command: ['python3', meson.current_source_dir() + '/source_doxygen_runner.py'],
+                output : ['docs'],
+                build_always_stale: true
+        )
+else
+        warning('Disabling doc-generate due to missing tools')
+        doc_generator = []
+endif
+
 gtest = subproject('gtest')
 gtest_dep = gtest.get_variable('gtest_dep')
 gmock_dep = gtest.get_variable('gmock_dep')
@@ -85,17 +122,11 @@ tests_src = [
         'offbynull/aligner/scorers/qwerty_scorer_test.cpp',
 ##        'offbynull/aligner/aligner_test.cpp'
 ]
-source_check = custom_target(
-        'source-check',
-        command: ['python3', meson.current_source_dir() + '/source_check.py'],
-        output: 'unused',
-        build_by_default: true,
-        build_always_stale: true
-)
 test_exec = executable(
         'gtest-all',
         tests_src,
-        source_check,
+        source_checker,
+        doc_generator,
         dependencies : [boost_dep, gtest_dep, gmock_dep],
         cpp_args : ['-fconcepts-diagnostics-depth=9999', '-ftemplate-backtrace-limit=0', '-D_GLIBCXX_DEBUG']
 )

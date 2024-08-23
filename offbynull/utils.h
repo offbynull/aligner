@@ -9,6 +9,19 @@
 #include <boost/container/options.hpp>
 
 namespace offbynull::utils {
+    /**
+     * Unimplemented class template used as a hack to determine what some unknown type \c T is. Because this class template remains
+     * unimplemented for every \c T, declararing it a variable of type \c type_displayer<T> will result in a compiler error that explicitly
+     * states what \c T is.
+     *
+     * \code{.cpp}
+     * void my_func(const auto& x) {
+     *     type_displayer<decltype(x)> unused;  // error: 'type_displayer<const int&> unused' has incomplete type
+     * }
+     * \endcode
+     *
+     * @tparam T Type to display.
+     */
     template<typename T>
     struct type_displayer;
 
