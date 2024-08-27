@@ -195,7 +195,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
                         // COUNT in_degree_narrowed { static_cast<COUNT>(in_degree) };
                         // if constexpr (debug_mode) {
                         //     if (in_degree_narrowed != in_degree) {
-                        //         throw std::runtime_error("Narrowed but led to information loss");
+                        //         throw std::runtime_error { "Narrowed but led to information loss" };
                         //     }
                         // }
                         return { n, in_degree };
@@ -276,7 +276,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
                     const auto& [dst_slot_idx, dst_slot] { slots.find(dst_node) };
                     if constexpr (debug_mode) {
                         if (dst_slot.unwalked_parent_cnt == 0u) {
-                            throw std::runtime_error("Invalid number of unprocessed parents");
+                            throw std::runtime_error { "Invalid number of unprocessed parents" };
                         }
                     }
                     dst_slot.unwalked_parent_cnt = static_cast<std::size_t>(dst_slot.unwalked_parent_cnt - 1u);

@@ -8,6 +8,7 @@
 #include <utility>
 #include <optional>
 #include <cstddef>
+#include <type_traits>
 #include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 #include "offbynull/aligner/concepts.h"
@@ -94,13 +95,31 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         bool debug_mode,
         typename N,
         typename E,
-        weight ED
+        weight ED,
+        bool minimize_allocations
     >
     struct resident_slot_container_heap_container_creator_pack {
         std::vector<resident_slot_with_node<N, E, ED>> create_slot_container(
             range_of_type<resident_slot_with_node<N, E, ED>> auto&& r
         ) const {
-            return std::vector<resident_slot_with_node<N, E, ED>>(r.begin(), r.end());
+            if constexpr (std::ranges::sized_range<std::remove_cvref_t<decltype(r)>>) {
+                std::vector<resident_slot_with_node<N, E, ED>> ret {};
+                ret.reserve(std::ranges::size(r));
+                for (const auto& e : r) {
+                    ret.push_back(e);
+                }
+                return ret;
+            } else if constexpr (minimize_allocations) {
+                // Is this a bad idea? Calling std::ranges::distance() on large input much slower vs vector heap resizing that happens?
+                std::vector<resident_slot_with_node<N, E, ED>> ret {};
+                ret.reserve(std::ranges::distance(r.begin(), r.end()));
+                for (const auto& e : r) {
+                    ret.push_back(e);
+                }
+                return ret;
+            } else {
+                return std::vector<resident_slot_with_node<N, E, ED>>(r.begin(), r.end());
+            }
         }
     };
 
@@ -136,7 +155,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             debug_mode,
             typename G::N,
             typename G::E,
-            typename G::ED
+            typename G::ED,
+            true
         >
     >
     class resident_slot_container {

@@ -80,14 +80,14 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             auto element_view_it { element_view.begin() };
             if constexpr (debug_mode) {
                 if (element_view_it == element_view.end()) {
-                    throw std::runtime_error("Expected 1 character for each alphabet item -- empty");
+                    throw std::runtime_error { "Expected 1 character for each alphabet item -- empty" };
                 }
             }
             char ret { *element_view_it };
             if constexpr (debug_mode) {
                 ++element_view_it;
                 if (element_view_it != element_view.end()) {
-                    throw std::runtime_error("Expected 1 character for each alphabet item -- multiple");
+                    throw std::runtime_error { "Expected 1 character for each alphabet item -- multiple" };
                 }
             }
             return ret;
@@ -103,7 +103,7 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             if constexpr (debug_mode) {
                 auto size { std::ranges::distance(header_words) };
                 if (size != ALPHABET_SIZE) {
-                    throw std::runtime_error("Unexpected number of characters");
+                    throw std::runtime_error { "Unexpected number of characters" };
                 }
             }
             std::array<char, ALPHABET_SIZE> ret {};
@@ -124,13 +124,13 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             auto down_it { std::lower_bound(sorted_alphabet.begin(), sorted_alphabet.end(), down_elem) };
             if constexpr (debug_mode) {
                 if (*down_it != down_elem) {
-                    throw std::runtime_error("Not found");
+                    throw std::runtime_error { "Not found" };
                 }
             }
             auto right_it { std::lower_bound(sorted_alphabet.begin(), sorted_alphabet.end(), right_elem) };
             if constexpr (debug_mode) {
                 if (*right_it != right_elem) {
-                    throw std::runtime_error("Not found");
+                    throw std::runtime_error { "Not found" };
                 }
             }
             std::size_t down_idx { static_cast<std::size_t>(down_it - sorted_alphabet.begin()) };
@@ -170,7 +170,7 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
                     bool convert_success { std::istringstream { weight_str.data() } >> weight };
                     if constexpr (debug_mode) {
                         if (!convert_success) {
-                            throw std::runtime_error("Failed to convert string to numeric");
+                            throw std::runtime_error { "Failed to convert string to numeric" };
                         }
                     }
                     // insert weight

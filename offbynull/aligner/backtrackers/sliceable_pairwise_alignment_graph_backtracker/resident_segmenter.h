@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <utility>
 #include <variant>
+#include <ranges>
+#include <type_traits>
 #include <stdexcept>
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/bidi_walker.h"
@@ -78,25 +80,46 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         bool debug_mode,
         typename N,
         typename E,
-        typename ED
+        typename ED,
+        bool minimize_allocations
     >
     struct resident_segmenter_heap_container_creator_pack {
         bidi_walker_heap_container_creator_pack<
             debug_mode,
             N,
             E,
-            ED
+            ED,
+            minimize_allocations
         > create_bidi_walker_container_creator_pack() const {
             return {};
         }
 
         std::vector<N> create_resident_node_container(range_of_type<N> auto&& resident_nodes) const {
-            return std::vector<N>(resident_nodes.begin(), resident_nodes.end());
+            if constexpr (std::ranges::sized_range<std::remove_cvref_t<decltype(resident_nodes)>>) {
+                std::vector<N> ret {};
+                ret.reserve(std::ranges::size(resident_nodes));
+                for (const auto& n : resident_nodes) {
+                    ret.push_back(n);
+                }
+                return ret;
+            } else if constexpr (minimize_allocations) {
+                // Is this a bad idea? Calling std::ranges::distance() on large input much slower vs vector heap resizing that happens?
+                std::vector<N> ret {};
+                ret.reserve(std::ranges::distance(resident_nodes.begin(), resident_nodes.end()));
+                for (const auto& n : resident_nodes) {
+                    ret.push_back(n);
+                }
+                return ret;
+            } else {
+                return std::vector<N>(resident_nodes.begin(), resident_nodes.end());
+            }
         }
 
         std::vector<E> create_resident_edge_container(std::size_t resident_nodes_capacity) const {
             std::vector<E> ret {};
-            ret.reserve(resident_nodes_capacity);
+            if constexpr (minimize_allocations) {
+                ret.reserve(resident_nodes_capacity);
+            }
             return ret;
         }
 
@@ -107,7 +130,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             >
         > create_segment_container(std::size_t resident_nodes_capacity) const {
             std::vector<std::variant<hop<E>, segment<N>>> ret {};
-            ret.reserve(resident_nodes_capacity * 2zu + 1zu);
+            if constexpr (minimize_allocations) {
+                ret.reserve(resident_nodes_capacity * 2zu + 1zu);
+            }
             return ret;
         }
     };
@@ -176,8 +201,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
-        resident_segmenter_container_creator_pack<typename G::N, typename G::E, typename G::ED> CONTAINER_CREATOR_PACK =
-            resident_segmenter_heap_container_creator_pack<debug_mode, typename G::N, typename G::E, typename G::ED>
+        resident_segmenter_container_creator_pack<
+            typename G::N,
+            typename G::E,
+            typename G::ED
+        > CONTAINER_CREATOR_PACK = resident_segmenter_heap_container_creator_pack<
+            debug_mode,
+            typename G::N,
+            typename G::E,
+            typename G::ED,
+            true
+        >
     >
     requires backtrackable_node<typename G::N> &&
         backtrackable_edge<typename G::E>

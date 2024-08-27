@@ -177,7 +177,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             if constexpr (debug_mode) {
                 for (const auto& resident_node : whole_graph.resident_nodes()) {
                     if (resident_node != whole_graph.get_root_node() && resident_node != whole_graph.get_leaf_node()) {
-                        throw std::runtime_error("Graph must not have any resident nodes");
+                        throw std::runtime_error { "Graph must not have any resident nodes" };
                     }
                 }
             }
@@ -226,7 +226,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             //         << std::endl;
             if constexpr (debug_mode) {
                 if (!whole_graph.is_reachable(root_node, leaf_node)) {
-                    throw std::runtime_error("Root doesn't reach leaf");
+                    throw std::runtime_error { "Root doesn't reach leaf" };
                 }
             }
             INDEX mid_down_offset { (sub_graph.grid_down_cnt - 1u) / 2u };
@@ -285,7 +285,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 auto mid_slice { sub_graph.slice_nodes(mid_down_offset) };
                 if constexpr (debug_mode) {
                     if (mid_slice.begin() == mid_slice.end()) {
-                        throw std::runtime_error("Slice should never be empty");
+                        throw std::runtime_error { "Slice should never be empty" };
                     }
                 }
                 for (const N& node : mid_slice) {
@@ -306,7 +306,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                             before_max_edge_weight = forward_slot.backtracking_weight;
                             after_max_edge_weight = backward_slot.backtracking_weight - max_edge_weight;
                         } else [[unlikely]] {
-                            throw std::runtime_error("Should never happen");
+                            throw std::runtime_error { "Should never happen" };
                         }
                         max_path_weight = new_potential_path_weight;
                         max_edge_assigned = true;
@@ -314,7 +314,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 }
                 if constexpr (debug_mode) {
                     if (!max_edge_assigned) {
-                        throw std::runtime_error("Couldn't find a reachable node");
+                        throw std::runtime_error { "Couldn't find a reachable node" };
                     }
                 }
             }  // Everything above wrapped in its own scope so that walkers (and their associated containers) are destroyed
@@ -341,7 +341,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     break;
                 [[unlikely]] default:
                     if constexpr (debug_mode) {
-                        throw std::runtime_error("Unexpected");
+                        throw std::runtime_error { "Unexpected" };
                     }
                     break;
             }

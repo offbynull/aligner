@@ -66,7 +66,7 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         , path_edge_capacity { g.path_edge_capacity } {
             if constexpr (debug_mode) {
                 if (!g.has_node(new_leaf_node)) {
-                    throw std::runtime_error("Leaf node not found");
+                    throw std::runtime_error { "Leaf node not found" };
                 }
             }
         }

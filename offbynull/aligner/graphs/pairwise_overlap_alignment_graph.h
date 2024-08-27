@@ -447,7 +447,7 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
                 return RET { { std::nullopt, { n1_grid_right } } };
             }
             if constexpr (debug_mode) {
-                throw std::runtime_error("Bad edge");
+                throw std::runtime_error { "Bad edge" };
             }
             std::unreachable();
         }

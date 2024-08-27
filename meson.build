@@ -2,12 +2,6 @@ project('untitled', 'cpp',
         version : '0.0.1',
         default_options : ['warning_level=everything', 'cpp_std=c++23'])
 
-cc = meson.get_compiler('cpp')
-if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
-        add_project_arguments('-Wno-padded', language : 'cpp')
-        add_project_arguments('-Wno-noexcept', language : 'cpp')
-endif
-
 boost_dep = dependency('boost', modules : ['container', 'filesystem', 'iostreams'])
 
 example = executable(
@@ -122,12 +116,46 @@ tests_src = [
         'offbynull/aligner/scorers/qwerty_scorer_test.cpp',
 ##        'offbynull/aligner/aligner_test.cpp'
 ]
+test_exec_cpp_args = []
+test_exec_link_args = []
+cc = meson.get_compiler('cpp')
+if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
+        # No -W-padding
+        # -------------
+        # Don't care about the compiler padding a struct.
+        test_exec_cpp_args += ['-Wno-padded']
+        # No -W-noexcept
+        # -------------
+        # Don't care that functions can be marked with noexcept.
+        test_exec_cpp_args += ['-Wno-noexcept']
+        # No -W-inline
+        # ------------
+        # When function implementations are placed inside of class definitions, it's a hint to the compiler to inline the function. If it
+        # can't inline the function (or it doesn't inline it because it seems like a bad idea), it puts out a -Winline warning. This only
+        # shows up when compiling at higher optimization levels.
+        test_exec_cpp_args += ['-Wno-inline']
+        # Google saniitzers
+        # -----------------
+        # san_args = ['-fsanitize=undefined', '-fsanitize=thread']
+        # if cc.get_id() == 'clang'
+        #         # Only available in clang -- doesn't really matter because I use valgrind for these.
+        #         san_args += ['-fsanitize=memory']
+        #         san_args += ['-fsanitize=leak']
+        #         san_args += ['-fsanitize=address']
+        # endif
+        # test_exec_cpp_args += san_args
+        # test_exec_link_args += san_args
+        # Debugging flags / options
+        # -------------------------
+        test_exec_cpp_args += ['-fconcepts-diagnostics-depth=9999', '-ftemplate-backtrace-limit=0', '-D_GLIBCXX_DEBUG']
+endif
 test_exec = executable(
         'gtest-all',
         tests_src,
         source_checker,
         doc_generator,
         dependencies : [boost_dep, gtest_dep, gmock_dep],
-        cpp_args : ['-fconcepts-diagnostics-depth=9999', '-ftemplate-backtrace-limit=0', '-D_GLIBCXX_DEBUG']
+        cpp_args : test_exec_cpp_args,
+        link_args : test_exec_link_args
 )
 test('gtest tests', test_exec)

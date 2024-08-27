@@ -63,7 +63,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             if constexpr (debug_mode) {
                 std::size_t cnt { grid_right_cnt_ * grid_depth_cnt_ };
                 if (cnt != ELEM_COUNT) {
-                    throw std::runtime_error("Bad element count");
+                    throw std::runtime_error { "Bad element count" };
                 }
             }
             return {};

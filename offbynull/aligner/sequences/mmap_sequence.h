@@ -23,7 +23,7 @@ namespace offbynull::aligner::sequences::mmap_sequence {
         : file { path, boost::iostreams::mapped_file_base::readonly } {
             if constexpr (debug_mode) {
                 if (!file.is_open()) {
-                    throw std::runtime_error("File not open");
+                    throw std::runtime_error { "File not open" };
                 }
             }
         }

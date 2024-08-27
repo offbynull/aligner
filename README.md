@@ -41,7 +41,7 @@ TODO:
   * ~~move max_resident_nodes_cnt~~
   * ~~remove limits() function entirely~~
 * ~~container creators -- make them into functions so you don't have to create an instance of container_creator each time you use it~~
-* container creator packs -- vectors being created can be reserved to max size???? MAKE THIS AN OPTIONAL PARAMETER IN THE CONTAINER CREATOR PACK OR THE FUNCTION BEING CALLED?
+* ~~container creator packs -- vectors being created can be reserved to max size???? MAKE THIS AN OPTIONAL PARAMETER IN THE CONTAINER CREATOR PACK OR THE FUNCTION BEING CALLED?~~
 * ~~max_path_edge_cnt/max_resident_nodes_cnt to path_edge_capacity/resident_nodes_capacity~~
 * ~~const correct container_creator_packs~~
 * ~~CHANGE const G& graph TO const G& g~~
@@ -63,15 +63,17 @@ TODO:
 * ~~graph constructors take in scorers using std::function<...> -- uses scorer concept instead? e.g. scorer auto&& indel_scorer, scorer&& substitution scorer, etc...~~
 * ~~remove all std::function usages~~
 * ~~move out all "to_vector" functions as utility func~~
-* concepts should enforce that type being enforced is std::same_as<std::decay_t<T>, T>, meaning no cv and no refs
+* ~~concepts should enforce that type being enforced is std::same_as<std::decay_t<T>, T>, meaning no cv and no refs~~
   * ~~maybe use std::remove_cvref instead of std::decay?~~
 * create factory functions for everything that has heavy templating
 * ~~tests that copy to std::vector/set/multiset -- use helper functions instead~~
 * ~~remove pointers in forward_walker and path_container -- requires custom move/copy constructors + custom assignment operators~~ (leaving this as-is for now, with the custom constructors and assignment op overrides)
+* std::optional.value() and std::reference_wrapper.get() to using * operator -- no bounds checking done on * operator
 
 * doxygen documentation
 * run profiler and optimize functions (some local alignment functions may be doing a ton of unneeded work -- e.g. get_outputs_full)
 * ~~fix compiler warnings~~
+* ~~enable sanitizer (e.g. ubsan)~~
 * cleanup syntax
   * ~~some identifiers starting with _, change so they end with _~~ 
   * ~~140char lines~~

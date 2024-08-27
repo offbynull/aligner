@@ -85,7 +85,7 @@ namespace offbynull::aligner::aligner {
                         return std::pair<V_TYPE, W_TYPE> { { std::nullopt }, { w[*w_idx] } };
                     }
                     if constexpr (debug_mode) {
-                        throw std::runtime_error("Bad edge");
+                        throw std::runtime_error { "Bad edge" };
                     }
                     std::unreachable();
                 }),
@@ -121,7 +121,7 @@ namespace offbynull::aligner::aligner {
         INDEX w_node_cnt { static_cast<INDEX>(w.size() + 1zu) };
         if constexpr (debug_mode) {
             if (v_node_cnt != v.size() + 1zu || w_node_cnt != w.size() + 1zu) {
-                throw std::runtime_error("Index type too narrow");
+                throw std::runtime_error { "Index type too narrow" };
             }
         }
         using ND = std::tuple<>;
@@ -173,7 +173,7 @@ namespace offbynull::aligner::aligner {
         INDEX w_node_cnt { static_cast<INDEX>(w.size() + 1zu) };
         if constexpr (debug_mode) {
             if (v_node_cnt != v.size() + 1zu || w_node_cnt != w.size() + 1zu) {
-                throw std::runtime_error("Index type too narrow");
+                throw std::runtime_error { "Index type too narrow" };
             }
         }
         using ND = std::tuple<>;
@@ -225,7 +225,7 @@ namespace offbynull::aligner::aligner {
         INDEX w_node_cnt { static_cast<INDEX>(w.size() + 1zu) };
         if constexpr (debug_mode) {
             if (v_node_cnt != v.size() + 1zu || w_node_cnt != w.size() + 1zu) {
-                throw std::runtime_error("Index type too narrow");
+                throw std::runtime_error { "Index type too narrow" };
             }
         }
         using ND = std::tuple<>;
@@ -280,7 +280,7 @@ namespace offbynull::aligner::aligner {
         INDEX w_slot_cnt { static_cast<INDEX>(w.size() + 1zu) };
         if constexpr (debug_mode) {
             if (v_slot_cnt != v.size() + 1zu || w_slot_cnt != w.size() + 1zu) {
-                throw std::runtime_error("Index type too narrow");
+                throw std::runtime_error { "Index type too narrow" };
             }
         }
         using ND = std::tuple<>;
@@ -345,7 +345,7 @@ namespace offbynull::aligner::aligner {
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {
-                throw std::runtime_error("Size mismatch");
+                throw std::runtime_error { "Size mismatch" };
             }
         }
         constexpr std::size_t v_node_cnt { V_SIZE + 1u };
@@ -402,14 +402,14 @@ namespace offbynull::aligner::aligner {
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {
-                throw std::runtime_error("Size mismatch");
+                throw std::runtime_error { "Size mismatch" };
             }
         }
         constexpr INDEX v_node_cnt { V_SIZE + 1zu };
         constexpr INDEX w_node_cnt { W_SIZE + 1zu };
         if constexpr (debug_mode) {
             if (v_node_cnt != v.size() + 1zu || w_node_cnt != w.size() + 1zu) {
-                throw std::runtime_error("Index type too narrow");
+                throw std::runtime_error { "Index type too narrow" };
             }
         }
         using ND = std::tuple<>;
@@ -461,14 +461,14 @@ namespace offbynull::aligner::aligner {
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {
-                throw std::runtime_error("Size mismatch");
+                throw std::runtime_error { "Size mismatch" };
             }
         }
         constexpr INDEX v_node_cnt { V_SIZE + 1zu };
         constexpr INDEX w_node_cnt { W_SIZE + 1zu };
         if constexpr (debug_mode) {
             if (v_node_cnt != v.size() + 1zu || w_node_cnt != w.size() + 1zu) {
-                throw std::runtime_error("Index type too narrow");
+                throw std::runtime_error { "Index type too narrow" };
             }
         }
         using ND = std::tuple<>;
@@ -520,14 +520,14 @@ namespace offbynull::aligner::aligner {
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {
-                throw std::runtime_error("Size mismatch");
+                throw std::runtime_error { "Size mismatch" };
             }
         }
         constexpr INDEX v_node_cnt { V_SIZE + 1zu };
         constexpr INDEX w_node_cnt { W_SIZE + 1zu };
         if constexpr (debug_mode) {
             if (v_node_cnt != v.size() + 1zu || w_node_cnt != w.size() + 1zu) {
-                throw std::runtime_error("Index type too narrow");
+                throw std::runtime_error { "Index type too narrow" };
             }
         }
         using ND = std::tuple<>;
@@ -581,14 +581,14 @@ namespace offbynull::aligner::aligner {
 
         if constexpr (debug_mode) {
             if (V_SIZE != v.size() || W_SIZE != w.size()) {
-                throw std::runtime_error("Size mismatch");
+                throw std::runtime_error { "Size mismatch" };
             }
         }
         constexpr INDEX v_slot_cnt { V_SIZE + 1zu };
         constexpr INDEX w_slot_cnt { W_SIZE + 1zu };
         if constexpr (debug_mode) {
             if (v_slot_cnt != v.size() + 1zu || w_slot_cnt != w.size() + 1zu) {
-                throw std::runtime_error("Index type too narrow");
+                throw std::runtime_error { "Index type too narrow" };
             }
         }
         using ND = std::tuple<>;
@@ -631,7 +631,7 @@ namespace offbynull::aligner::aligner {
         } else if constexpr (n <= std::numeric_limits<std::uint64_t>::max()) {
             return type_encapsulator<std::uint64_t> {};
         } else {
-            throw std::runtime_error("Unable to find type large enough to support max number of incoming edges");
+            throw std::runtime_error { "Unable to find type large enough to support max number of incoming edges" };
         }
     }
 }

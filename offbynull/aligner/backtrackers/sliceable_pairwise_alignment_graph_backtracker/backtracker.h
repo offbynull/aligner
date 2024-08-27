@@ -74,24 +74,26 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     concept backtracker_container_creator_pack =
         unqualified_value_type<T>
         && weight<ED>
-        && requires(T t) {
+        && requires(T t, std::size_t path_edge_capacity) {
             { t.create_resident_segmenter_container_creator_pack() } -> resident_segmenter_container_creator_pack<N, E, ED>;
             { t.create_sliced_subdivider_container_creator_pack() } -> sliced_subdivider_container_creator_pack<N, E, ED>;
-            { t.create_path_container() } -> random_access_range_of_type<E>;
+            { t.create_path_container(path_edge_capacity) } -> random_access_range_of_type<E>;
         };
 
     template<
         bool debug_mode,
         typename N,
         typename E,
-        weight ED
+        weight ED,
+        bool minimize_allocations
     >
     struct backtracker_heap_container_creator_pack {
         resident_segmenter_heap_container_creator_pack<
             debug_mode,
             N,
             E,
-            ED
+            ED,
+            minimize_allocations
         > create_resident_segmenter_container_creator_pack() {
             return {};
         }
@@ -105,8 +107,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return {};
         }
 
-        std::vector<E> create_path_container() {
-            return {};
+        std::vector<E> create_path_container(std::size_t path_edge_capacity) {
+            std::vector<E> ret {};
+            if constexpr (minimize_allocations) {
+                ret.reserve(path_edge_capacity);
+            }
+            return ret;
         }
     };
 
@@ -146,7 +152,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         }
 
         using CONTAINER_TYPE = typename static_vector_typer<debug_mode, E, path_edge_capacity>::type;
-        CONTAINER_TYPE create_path_container() const  {
+        CONTAINER_TYPE create_path_container(std::size_t path_edge_capacity_) const  {
+            if constexpr (debug_mode) {
+                if (path_edge_capacity != path_edge_capacity_) {
+                    throw std::runtime_error { "Size mismatch" };
+                }
+            }
             return {};
         }
     };
@@ -166,7 +177,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             debug_mode,
             typename G::N,
             typename G::E,
-            typename G::ED
+            typename G::ED,
+            true
         >
     >
     requires backtrackable_node<typename G::N> &&
@@ -183,7 +195,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_resident_segmenter_container_creator_pack());
         using SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK =
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_sliced_subdivider_container_creator_pack());
-        using PATH_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container());
+        using PATH_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container(0zu));
 
         CONTAINER_CREATOR_PACK container_creator_pack;
 
@@ -207,7 +219,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             using hop_ = hop<E>;
             using segment_ = segment<N>;
             const auto& [parts, final_weight] { resident_segmenter_.backtrack_segmentation_points(g, final_weight_comparison_tolerance) };
-            PATH_CONTAINER path { container_creator_pack.create_path_container() };
+            PATH_CONTAINER path {
+                container_creator_pack.create_path_container(
+                    g.path_edge_capacity
+                )
+            };
             for (const auto& part : parts) {
                 if (const hop_* hop_ptr = std::get_if<hop_>(&part)) {
                     path.push_back(hop_ptr->edge);
@@ -235,7 +251,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                         path.end()
                     );
                 } else {
-                    throw std::runtime_error("This should never hapen");
+                    throw std::runtime_error { "This should never hapen" };
                 }
             }
             return std::make_pair(path, final_weight);

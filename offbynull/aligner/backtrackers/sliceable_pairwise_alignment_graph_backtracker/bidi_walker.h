@@ -61,14 +61,27 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         bool debug_mode,
         typename N,
         typename E,
-        typename ED
+        typename ED,
+        bool minimize_allocations
     >
     struct bidi_walker_heap_container_creator_pack {
-        forward_walker_heap_container_creator_pack<debug_mode, N, E, ED> create_forward_walker_container_creator_pack() {
+        forward_walker_heap_container_creator_pack<
+            debug_mode,
+            N,
+            E,
+            ED,
+            minimize_allocations
+        > create_forward_walker_container_creator_pack() {
             return {};
         }
 
-        forward_walker_heap_container_creator_pack<debug_mode, N, E, ED> create_backward_walker_container_creator_pack() {
+        forward_walker_heap_container_creator_pack<
+            debug_mode,
+            N,
+            E,
+            ED,
+            minimize_allocations
+        > create_backward_walker_container_creator_pack() {
             return {};
         }
     };
@@ -122,7 +135,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             debug_mode,
             typename G::N,
             typename G::E,
-            typename G::ED
+            typename G::ED,
+            true
         >
     >
     requires backtrackable_node<typename G::N> &&
@@ -155,7 +169,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         ) {
             if constexpr (debug_mode) {
                 if (target_slice >= g_.grid_down_cnt) {
-                    throw std::runtime_error("Slice too far down");
+                    throw std::runtime_error { "Slice too far down" };
                 }
             }
             bidi_walker ret {

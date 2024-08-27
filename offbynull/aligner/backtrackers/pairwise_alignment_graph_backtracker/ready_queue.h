@@ -21,16 +21,30 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     >
     concept ready_queue_container_creator_pack =
         unqualified_value_type<T>
-        && requires(const T t) {
-            { t.create_queue_container() } -> random_access_range_of_type<std::size_t>;
+        && requires(
+            const T t,
+            std::size_t grid_down_cnt,
+            std::size_t grid_right_cnt,
+            std::size_t grid_depth_cnt
+        ) {
+            { t.create_queue_container(grid_down_cnt, grid_right_cnt, grid_depth_cnt) } -> random_access_range_of_type<std::size_t>;
         };
 
     template<
-        bool debug_mode
+        bool debug_mode,
+        bool minimize_allocations
     >
     struct ready_queue_heap_container_creator_pack {
-        std::vector<std::size_t> create_queue_container() const {
-            return {};
+        std::vector<std::size_t> create_queue_container(
+            std::size_t grid_down_cnt,
+            std::size_t grid_right_cnt,
+            std::size_t grid_depth_cnt
+        ) const {
+            std::vector<std::size_t> ret {};
+            if constexpr (minimize_allocations) {
+                ret.reserve(grid_down_cnt * grid_right_cnt * grid_depth_cnt);
+            }
+            return ret;
         }
     };
 
@@ -54,19 +68,20 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     template<
         bool debug_mode,
         readable_pairwise_alignment_graph G,
-        ready_queue_container_creator_pack CONTAINER_CREATOR_PACK = ready_queue_heap_container_creator_pack<debug_mode>
+        ready_queue_container_creator_pack CONTAINER_CREATOR_PACK = ready_queue_heap_container_creator_pack<debug_mode, true>
     >
     class ready_queue {
     private:
-        using QUEUE_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_queue_container());
+        using QUEUE_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_queue_container(0zu, 0zu, 0zu));
 
         QUEUE_CONTAINER queue;
 
     public:
         ready_queue(
+            const G& g,
             CONTAINER_CREATOR_PACK container_creator_pack = {}
         )
-        : queue { container_creator_pack.create_queue_container() } {}
+        : queue { container_creator_pack.create_queue_container(g.grid_down_cnt, g.grid_right_cnt, g.grid_depth_cnt) } {}
 
         bool empty() {
             return queue.empty();

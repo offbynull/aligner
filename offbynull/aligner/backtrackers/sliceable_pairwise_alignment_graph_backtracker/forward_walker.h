@@ -61,7 +61,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         bool debug_mode,
         typename N,
         typename E,
-        weight ED
+        weight ED,
+        bool minimize_allocations
     >
     struct forward_walker_heap_container_creator_pack {
         slice_slot_container_heap_container_creator_pack<
@@ -76,7 +77,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             debug_mode,
             N,
             E,
-            ED
+            ED,
+            minimize_allocations
         > create_resident_slot_container_container_creator_pack() const {
             return {};
         }
@@ -229,7 +231,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             debug_mode,
             typename G::N,
             typename G::E,
-            typename G::ED
+            typename G::ED,
+            true
         >
     >
     class forward_walker {
@@ -260,7 +263,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         ) {
             if constexpr (debug_mode) {
                 if (target_slice >= g_.grid_down_cnt) {
-                    throw std::runtime_error("Slice too far down");
+                    throw std::runtime_error { "Slice too far down" };
                 }
             }
             forward_walker ret {
@@ -283,7 +286,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 return *found_slice;
             }
             if constexpr (debug_mode) {
-                throw std::runtime_error("Node not found");
+                throw std::runtime_error { "Node not found" };
             }
             std::unreachable();
         }
@@ -356,7 +359,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 };
                 if constexpr (debug_mode) {
                     if (!resident_slot_maybe.has_value()) {
-                        throw std::runtime_error("This should never happen");
+                        throw std::runtime_error { "This should never happen" };
                     }
                 }
                 resident_slot<E, ED>& resident_slot_ { (*resident_slot_maybe).get() };

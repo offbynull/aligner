@@ -22,7 +22,7 @@ namespace offbynull::aligner::sequences::substring_sequence {
         , length { length_ } {
             if constexpr (debug_mode) {
                 if (seq.length() - offset < length_) {
-                    throw std::runtime_error("Out of bounds length");
+                    throw std::runtime_error { "Out of bounds length" };
                 }
             }
         }

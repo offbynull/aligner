@@ -187,7 +187,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
                 // static_cast to size_t because dist_from_beginning should never be a negative value.
                 if constexpr (std::numeric_limits<decltype(dist_from_beginning)>::max() > std::numeric_limits<std::size_t>::max()) {
                     if (dist_from_beginning > std::numeric_limits<std::size_t>::max()) {
-                        throw std::runtime_error("Narrowed!");
+                        throw std::runtime_error { "Narrowed!" };
                     }
                 }
                 idx = { static_cast<std::size_t>(dist_from_beginning) };

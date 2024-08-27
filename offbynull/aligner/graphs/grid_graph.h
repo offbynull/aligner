@@ -130,7 +130,7 @@ namespace offbynull::aligner::graphs::grid_graph {
         ED get_edge_data(const E& edge) const  {
             if constexpr (debug_mode) {
                 if (!has_edge(edge)) {
-                    throw std::runtime_error("Edge doesn't exist");
+                    throw std::runtime_error { "Edge doesn't exist" };
                 }
             }
             const N& n1 { edge.source };
@@ -155,7 +155,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 );
             }
             if constexpr (debug_mode) {
-                throw std::runtime_error("Bad edge");
+                throw std::runtime_error { "Bad edge" };
             }
             std::unreachable();
         }
@@ -385,13 +385,13 @@ namespace offbynull::aligner::graphs::grid_graph {
         auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
             if constexpr (debug_mode) {
                 if (!has_node(root_node) || !has_node(leaf_node)) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
                 if (!(root_node <= leaf_node)) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
                 if (!(grid_down >= root_node.down && grid_down <= leaf_node.down)) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
             }
             return std::views::iota(root_node.right, leaf_node.right + 1u)
@@ -401,7 +401,7 @@ namespace offbynull::aligner::graphs::grid_graph {
         bool is_reachable(const N& n1, const N& n2) const {
             if constexpr (debug_mode) {
                 if (!has_node(n1) || !has_node(n2)) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
             }
             return n1 <= n2;

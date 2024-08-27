@@ -207,7 +207,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 );
             }
             if constexpr (debug_mode) {
-                throw std::runtime_error("Bad edge");
+                throw std::runtime_error { "Bad edge" };
             }
             std::unreachable();
         }
@@ -563,7 +563,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 return RET { std::nullopt };
             }
             if constexpr (debug_mode) {
-                throw std::runtime_error("Bad edge");
+                throw std::runtime_error { "Bad edge" };
             }
             std::unreachable();
         }
@@ -595,7 +595,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 next_node = { node_layer::DOWN, grid_down, grid_right + 1u };
             } else {
                 if constexpr (debug_mode) {
-                    throw std::runtime_error("This should never happen");
+                    throw std::runtime_error { "This should never happen" };
                 }
             }
             return next_node;
@@ -622,7 +622,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 prev_node = { node_layer::RIGHT, grid_down, grid_right };
             } else {
                 if constexpr (debug_mode) {
-                    throw std::runtime_error("This should never happen");
+                    throw std::runtime_error { "This should never happen" };
                 }
             }
             return prev_node;
@@ -636,13 +636,13 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
             if constexpr (debug_mode) {
                 if (!has_node(root_node) || !has_node(leaf_node)) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
                 if (!(root_node.down <= leaf_node.down)) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
                 if (!(root_node.right <= leaf_node.right)) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
                 // if single node in graph, make sure depth order is satisifed same: DOWN RIGHT DIAGONAL
                 if (
@@ -650,10 +650,10 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     && (root_node.right == leaf_node.right)
                     && !(root_node.layer <= leaf_node.layer)
                 ) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
                 if (!(grid_down >= root_node.down && grid_down <= leaf_node.down)) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
             }
 
@@ -706,7 +706,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         bool is_reachable(const N& n1, const N& n2) const {
             if constexpr (debug_mode) {
                 if (!has_node(n1) || !has_node(n2)) {
-                    throw std::runtime_error("Bad node");
+                    throw std::runtime_error { "Bad node" };
                 }
             }
 

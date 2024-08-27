@@ -52,7 +52,12 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     concept slot_container_container_creator_pack =
         unqualified_value_type<T>
         && weight<ED>
-        && requires(const T t, std::size_t grid_down_cnt, std::size_t grid_right_cnt, std::size_t grid_depth_cnt) {
+        && requires(
+            const T t,
+            std::size_t grid_down_cnt,
+            std::size_t grid_right_cnt,
+            std::size_t grid_depth_cnt
+        ) {
             { t.create_slot_container(grid_down_cnt, grid_right_cnt, grid_depth_cnt) } -> random_access_range_of_type<slot<N, E, ED>>;
         };
 
@@ -93,7 +98,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             if constexpr (debug_mode) {
                 std::size_t cnt { (grid_down_cnt_ * grid_right_cnt_) * grid_depth_cnt_ };
                 if (cnt != ELEM_COUNT) {
-                    throw std::runtime_error("Bad element count");
+                    throw std::runtime_error { "Bad element count" };
                 }
             }
             return std::array<slot<N, E, ED>, ELEM_COUNT> {};

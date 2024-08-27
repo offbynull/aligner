@@ -46,7 +46,7 @@ namespace offbynull::aligner::sequences::chunked_sequence {
         std::array<E, chunk_len> create_result_container(std::size_t reserve_len) const {
             if constexpr (debug_mode) {
                 if (chunk_len != reserve_len) {
-                    throw std::runtime_error("Bad element count");
+                    throw std::runtime_error { "Bad element count" };
                 }
             }
             return {};

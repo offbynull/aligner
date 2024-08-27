@@ -52,29 +52,34 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     concept backtracker_container_creator_pack =
         unqualified_value_type<T>
         && weight<ED>
-        && requires(const T t) {
+        && requires(const T t, std::size_t path_edge_capacity) {
             { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<N, E, ED>;
             { t.create_ready_queue_container_creator_pack() } -> ready_queue_container_creator_pack;
-            { t.create_path_container() } -> random_access_range_of_type<E>;
+            { t.create_path_container(path_edge_capacity) } -> random_access_range_of_type<E>;
         };
 
     template<
         bool debug_mode,
         typename N,
         typename E,
-        weight ED
+        weight ED,
+        bool minimize_allocations
     >
     struct backtracker_heap_container_creator_pack {
         slot_container_heap_container_creator_pack<debug_mode, N, E, ED> create_slot_container_container_creator_pack() const {
             return {};
         }
 
-        ready_queue_heap_container_creator_pack<debug_mode> create_ready_queue_container_creator_pack() const {
+        ready_queue_heap_container_creator_pack<debug_mode, minimize_allocations> create_ready_queue_container_creator_pack() const {
             return {};
         }
 
-        std::vector<E> create_path_container() const {
-            return {};
+        std::vector<E> create_path_container(std::size_t path_edge_capacity) const {
+            std::vector<E> ret {};
+            if constexpr (minimize_allocations) {
+                ret.reserve(path_edge_capacity);
+            }
+            return ret;
         }
     };
 
@@ -111,7 +116,12 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         }
 
         using PATH_CONTAINER_TYPE = typename static_vector_typer<debug_mode, std::size_t, path_edge_capacity>::type;
-        PATH_CONTAINER_TYPE create_path_container() const {
+        PATH_CONTAINER_TYPE create_path_container(std::size_t path_edge_capacity_) const {
+            if constexpr (debug_mode) {
+                if (path_edge_capacity != path_edge_capacity_) {
+                    throw std::runtime_error { "Size mismatch" };
+                }
+            }
             return {};
         }
     };
@@ -131,7 +141,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             debug_mode,
             typename G::N,
             typename G::E,
-            typename G::ED
+            typename G::ED,
+            true
         >
     >
     requires backtrackable_node<typename G::N> &&
@@ -147,7 +158,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_slot_container_container_creator_pack());
         using READY_QUEUE_CONTAINER_CREATOR_PACK =
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_ready_queue_container_creator_pack());
-        using PATH_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container());
+        using PATH_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container(0zu));
 
         using slot_container_t = slot_container<debug_mode, G, SLOT_CONTAINER_CONTAINER_CREATOR_PACK>;
         using ready_queue_t = ready_queue<debug_mode, G, READY_QUEUE_CONTAINER_CREATOR_PACK>;
@@ -187,7 +198,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             // parents processed, and so it can be processed). Since root nodes have no parents, they are ready-to-process from
             // the get-go. As such, the "ready_idxes" queue is primed with the "slots" indices for root nodes (of which there
             // should be only one).
-            ready_queue_t ready_idxes {};
+            ready_queue_t ready_idxes { g };
             const N& root_node { g.get_root_node() };
             const auto& [root_slot_idx, root_slot] { slots.find(root_node) };
             ready_idxes.push(root_slot_idx);
@@ -247,7 +258,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                     const auto& [dst_slot_idx, dst_slot] { slots.find(dst_node) };
                     if constexpr (debug_mode) {
                         if (dst_slot.unwalked_parent_cnt == 0u) {
-                            throw std::runtime_error("Invalid number of unprocessed parents");
+                            throw std::runtime_error { "Invalid number of unprocessed parents" };
                         }
                     }
                     dst_slot.unwalked_parent_cnt = dst_slot.unwalked_parent_cnt - 1u;
@@ -265,7 +276,11 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             slot_container_t& slots
         ) {
             auto next_node { g.get_leaf_node() };
-            PATH_CONTAINER path { container_creator_pack.create_path_container() };
+            PATH_CONTAINER path {
+                container_creator_pack.create_path_container(
+                    g.path_edge_capacity
+                )
+            };
             while (true) {
                 auto node { next_node };
                 if (!g.has_inputs(node)) {

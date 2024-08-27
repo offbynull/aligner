@@ -143,7 +143,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         > create_element_container(std::size_t path_edge_capacity_) const {
             if constexpr (debug_mode) {
                 if (path_edge_capacity != path_edge_capacity_) {
-                    throw std::runtime_error("Bad element count");
+                    throw std::runtime_error { "Bad element count" };
                 }
             }
             return {};
@@ -264,11 +264,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         element<E>* initialize(const E& backtracking_edge) {
             if constexpr (debug_mode) {
                 if (next_idx != 0zu) {
-                    throw std::runtime_error("Already initialized");
+                    throw std::runtime_error { "Already initialized" };
                 }
                 if (next_idx >= element_container.size()) {
                     // If this happens, G::path_edge_capacity is probably giving back a number that's too low
-                    throw std::runtime_error("Container too small");
+                    throw std::runtime_error { "Container too small" };
                 }
             }
             element<E>* entry { &element_container[0zu] };
@@ -282,11 +282,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         element<E>* push_prefix(element<E>* entry, const E& backtracking_edge) {
             if constexpr (debug_mode) {
                 if (next_idx == 0zu) {
-                    throw std::runtime_error("Not initialized");
+                    throw std::runtime_error { "Not initialized" };
                 }
                 if (next_idx >= element_container.size()) {
                     // If this happens, G::path_edge_capacity is probably giving back a number that's too low
-                    throw std::runtime_error("Container too small");
+                    throw std::runtime_error { "Container too small" };
                 }
             }
             element<E>* prefix_entry { &element_container[next_idx] };
@@ -308,11 +308,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         element<E>* push_suffix(element<E>* entry, const E& backtracking_edge) {
             if constexpr (debug_mode) {
                 if (next_idx == 0zu) {
-                    throw std::runtime_error("Not initialized");
+                    throw std::runtime_error { "Not initialized" };
                 }
                 if (next_idx >= element_container.size()) {
                     // If this happens, G::path_edge_capacity is probably giving back a number that's too low
-                    throw std::runtime_error("Container too small");
+                    throw std::runtime_error { "Container too small" };
                 }
             }
             element<E>* suffix_entry { &element_container[next_idx] };

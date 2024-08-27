@@ -71,7 +71,7 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
                 const auto& [root_down_offset, root_right_offset, root_depth] { g_.node_to_grid_offsets(new_root_node_) };
                 const auto& [leaf_down_offset, leaf_right_offset, leaf_depth] { g_.node_to_grid_offsets(new_leaf_node_) };
                 if (!(root_down_offset <= leaf_down_offset || root_right_offset <= leaf_right_offset)) {
-                    throw std::runtime_error("Bad grid range");
+                    throw std::runtime_error { "Bad grid range" };
                 }
             }
         }
@@ -85,7 +85,7 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
         ) {
             if constexpr (debug_mode) {
                 if (down_offset_1 > down_offset_2 || right_offset_1 > right_offset_2) {
-                    throw std::runtime_error("Top-left isn't top-left");
+                    throw std::runtime_error { "Top-left isn't top-left" };
                 }
             }
             return middle_sliceable_pairwise_alignment_graph<debug_mode, G> {

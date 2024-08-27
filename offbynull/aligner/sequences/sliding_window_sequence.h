@@ -46,7 +46,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
         std::array<E, chunk_len> create_result_container(std::size_t reserve_len) const {
             if constexpr (debug_mode) {
                 if (chunk_len != reserve_len) {
-                    throw std::runtime_error("Bad element count");
+                    throw std::runtime_error { "Bad element count" };
                 }
             }
             return {};
@@ -83,7 +83,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
         , container_creator_pack { container_creator_pack_ } {
             if constexpr (debug_mode) {
                 if (seq.size() < window_length) {
-                    throw std::runtime_error("Window length too large");
+                    throw std::runtime_error { "Window length too large" };
                 }
             }
         }
