@@ -103,7 +103,7 @@ namespace offbynull::aligner::scorers::simple_scorer {
             const std::optional<std::reference_wrapper<const RIGHT_ELEM>> right_elem
         ) const {
             if (down_elem.has_value() && right_elem.has_value()) {
-                if (down_elem.value().get() == right_elem.value().get()) {
+                if ((*down_elem).get() == (*right_elem).get()) {
                     return match_weight;
                 } else {
                     return mismatch_weight;

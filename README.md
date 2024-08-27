@@ -68,7 +68,7 @@ TODO:
 * create factory functions for everything that has heavy templating
 * ~~tests that copy to std::vector/set/multiset -- use helper functions instead~~
 * ~~remove pointers in forward_walker and path_container -- requires custom move/copy constructors + custom assignment operators~~ (leaving this as-is for now, with the custom constructors and assignment op overrides)
-* std::optional.value() and std::reference_wrapper.get() to using * operator -- no bounds checking done on * operator
+* ~~std::optional.value() to using * operator -- no bounds checking done on * operator~~
 
 * doxygen documentation
 * run profiler and optimize functions (some local alignment functions may be doing a ton of unneeded work -- e.g. get_outputs_full)
