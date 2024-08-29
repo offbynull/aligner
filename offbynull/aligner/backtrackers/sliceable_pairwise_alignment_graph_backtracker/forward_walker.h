@@ -16,6 +16,8 @@
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container::slice_slot_container;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container
@@ -51,6 +53,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     >
     concept forward_walker_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<ED>
         && requires(const T t) {
             { t.create_slice_slot_container_container_creator_pack() } -> slice_slot_container_container_creator_pack<E, ED>;
@@ -59,8 +63,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         bool minimize_allocations
     >
@@ -86,8 +90,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         std::size_t grid_right_cnt,
         std::size_t grid_depth_cnt,
@@ -118,7 +122,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
 
 
-    template<typename N, typename E, weight WEIGHT>
+    template<
+        backtrackable_node N,
+        backtrackable_edge E,
+        weight WEIGHT
+    >
     struct slice_entry {
         N node;
         slot<E, WEIGHT>* slot_ptr;

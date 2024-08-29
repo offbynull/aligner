@@ -67,6 +67,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     >
     concept sliced_subdivider_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<ED>
         && requires(T t) {
             { t.create_slice_slot_container_container_creator_pack() } -> slice_slot_container_container_creator_pack<E, ED>;
@@ -75,8 +77,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED
     >
     struct sliced_subdivider_heap_container_creator_pack {
@@ -98,8 +100,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         std::size_t grid_right_cnt,
         std::size_t grid_depth_cnt,

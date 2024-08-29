@@ -10,6 +10,7 @@
 #include <utility>
 #include <stdexcept>
 #include <boost/container/small_vector.hpp>
+#include "offbynull/aligner/backtrackers/graph_backtracker/concepts.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
 
@@ -19,8 +20,10 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::unqualified_value_type;
     using offbynull::aligner::graph::graph::readable_graph;
+    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_node;
+    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_edge;
 
-    template<typename N, typename E, weight WEIGHT>
+    template<backtrackable_node N, backtrackable_edge E, weight WEIGHT>
     struct slot {
         N node;
         std::size_t unwalked_parent_cnt;
@@ -41,8 +44,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
     };
 
     template<
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight WEIGHT
     >
     struct slots_comparator {
@@ -71,6 +74,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
     >
     concept slot_container_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<WEIGHT>
         && requires(const T t, std::vector<slot<N, E, WEIGHT>> fake_range) {
             { t.create_slot_container(fake_range.begin(), fake_range.end()) } -> random_access_range_of_type<slot<N, E, WEIGHT>>;
@@ -78,8 +83,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight WEIGHT
     >
     struct slot_container_heap_container_creator_pack {
@@ -92,8 +97,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight WEIGHT,
         std::size_t heap_escape_size = 100zu
     >

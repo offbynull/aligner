@@ -46,12 +46,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
 
 
-    template<typename E>
+    template<backtrackable_edge E>
     struct hop {
         E edge;
     };
 
-    template<typename N>
+    template<backtrackable_node N>
     struct segment {
         N from_node;
         N to_node;
@@ -68,6 +68,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     >
     concept resident_segmenter_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<ED>
         && requires(const T t, std::size_t resident_nodes_capacity, const std::vector<N>& resident_nodes) {
             { t.create_bidi_walker_container_creator_pack() } -> bidi_walker_container_creator_pack<N, E, ED>;
@@ -78,9 +80,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
-        typename ED,
+        backtrackable_node N,
+        backtrackable_edge E,
+        weight ED,
         bool minimize_allocations
     >
     struct resident_segmenter_heap_container_creator_pack {
@@ -139,9 +141,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
-        typename ED,
+        backtrackable_node N,
+        backtrackable_edge E,
+        weight ED,
         std::size_t grid_right_cnt,
         std::size_t grid_depth_cnt,
         std::size_t resident_nodes_capacity

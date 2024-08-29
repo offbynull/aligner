@@ -51,6 +51,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     >
     concept bidi_walker_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<ED>
         && requires(T t) {
             { t.create_forward_walker_container_creator_pack() } -> forward_walker_container_creator_pack<N, E, ED>;
@@ -59,9 +61,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
-        typename ED,
+        backtrackable_node N,
+        backtrackable_edge E,
+        weight ED,
         bool minimize_allocations
     >
     struct bidi_walker_heap_container_creator_pack {
@@ -88,8 +90,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         std::size_t grid_right_cnt,
         std::size_t grid_depth_cnt,

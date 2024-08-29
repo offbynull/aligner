@@ -8,9 +8,21 @@
 #include <tuple>
 #include <stdexcept>
 #include <utility>
+#include "offbynull/aligner/graph/graph.h"
+#include "offbynull/concepts.h"
 
 namespace offbynull::aligner::graphs::directed_graph {
-    template<bool debug_mode, typename N_, typename ND_, typename E_, typename ED_>
+    using offbynull::aligner::graph::graph::node;
+    using offbynull::aligner::graph::graph::edge;
+    using offbynull::concepts::unqualified_value_type;
+
+    template<
+        bool debug_mode,
+        node N_,
+        unqualified_value_type ND_,
+        edge E_,
+        unqualified_value_type ED_
+    >
     class directed_graph {
     public:
         using N = N_;

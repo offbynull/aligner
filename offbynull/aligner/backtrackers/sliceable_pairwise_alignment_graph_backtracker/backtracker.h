@@ -74,6 +74,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     >
     concept backtracker_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<ED>
         && requires(T t, std::size_t path_edge_capacity) {
             { t.create_resident_segmenter_container_creator_pack() } -> resident_segmenter_container_creator_pack<N, E, ED>;
@@ -83,8 +85,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         bool minimize_allocations
     >
@@ -119,8 +121,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         std::size_t grid_right_cnt,
         std::size_t grid_depth_cnt,

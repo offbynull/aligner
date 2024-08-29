@@ -52,6 +52,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     >
     concept backtracker_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<ED>
         && requires(const T t, std::size_t path_edge_capacity) {
             { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<N, E, ED>;
@@ -61,8 +63,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         bool minimize_allocations
     >
@@ -86,8 +88,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         std::size_t grid_down_cnt,
         std::size_t grid_right_cnt,

@@ -67,7 +67,7 @@ TODO:
   * ~~maybe use std::remove_cvref instead of std::decay?~~
 * ~~create factory functions for everything that has heavy templating~~
 * const correct offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/slot_container.h, then make its usages const where appropriate
-* template params typename N/E to use backtracking_node/backtracking_edge constrained types
+* ~~template params typename N/E to use backtracking_node/backtracking_edge constrained types~~
 * remove INDEX and force set to std::size_t
   * in backtrackers, automatically pick the right type for INDEX based on graph dimensions 
 * ~~tests that copy to std::vector/set/multiset -- use helper functions instead~~

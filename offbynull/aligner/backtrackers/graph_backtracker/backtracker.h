@@ -50,6 +50,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
     >
     concept backtracker_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<WEIGHT>
         && requires(const T t) {
             { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<N, E, WEIGHT>;
@@ -59,8 +61,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight WEIGHT
     >
     struct backtracker_heap_container_creator_pack {
@@ -86,8 +88,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight WEIGHT,
         std::size_t slot_container_heap_escape_size = 100zu,
         std::size_t ready_queue_heap_escape_size = 100zu,

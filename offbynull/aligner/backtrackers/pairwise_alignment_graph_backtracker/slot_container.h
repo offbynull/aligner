@@ -8,6 +8,7 @@
 #include <utility>
 #include <stdexcept>
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/utils.h"
+#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
@@ -17,8 +18,10 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::unqualified_value_type;
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
 
-    template<typename N, typename E, weight ED>
+    template<backtrackable_node N, backtrackable_edge E, weight ED>
     struct slot {
         N node;
         std::size_t unwalked_parent_cnt;
@@ -51,6 +54,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     >
     concept slot_container_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<ED>
         && requires(
             const T t,
@@ -63,8 +68,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED
     >
     struct slot_container_heap_container_creator_pack {
@@ -80,8 +85,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         std::size_t grid_down_cnt,
         std::size_t grid_right_cnt,

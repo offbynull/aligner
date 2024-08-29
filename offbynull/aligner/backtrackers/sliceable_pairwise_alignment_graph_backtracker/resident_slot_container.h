@@ -17,6 +17,8 @@
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::range_of_type;
@@ -25,7 +27,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::utils::static_vector_typer;
 
     template<
-        typename E,
+        backtrackable_edge E,
         weight WEIGHT
     >
     struct resident_slot {
@@ -34,8 +36,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     };
 
     template<
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight WEIGHT
     >
     struct resident_slot_with_node {
@@ -44,8 +46,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     };
 
     template<
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight WEIGHT
     >
     struct resident_slot_with_node_comparator {
@@ -83,6 +85,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     >
     concept resident_slot_container_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_node<N>
+        && backtrackable_edge<E>
         && weight<ED>
         && requires(
             const T t,
@@ -93,8 +97,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         bool minimize_allocations
     >
@@ -125,8 +129,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename N,
-        typename E,
+        backtrackable_node N,
+        backtrackable_edge E,
         weight ED,
         std::size_t resident_nodes_capacity
     >

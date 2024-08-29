@@ -12,10 +12,13 @@
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/slot.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container {
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::unqualified_value_type;
@@ -31,6 +34,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     >
     concept slice_slot_container_container_creator_pack =
         unqualified_value_type<T>
+        && backtrackable_edge<E>
         && weight<ED>
         && requires(const T t, std::size_t grid_right_cnt, std::size_t grid_depth_cnt) {
             { t.create_slot_container(grid_right_cnt, grid_depth_cnt) } -> random_access_range_of_type<slot<E, ED>>;
@@ -38,7 +42,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename E,
+        backtrackable_edge E,
         weight ED
     >
     struct slice_slot_container_heap_container_creator_pack {
@@ -50,7 +54,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        typename E,
+        backtrackable_edge E,
         weight ED,
         std::size_t grid_right_cnt,
         std::size_t grid_depth_cnt
