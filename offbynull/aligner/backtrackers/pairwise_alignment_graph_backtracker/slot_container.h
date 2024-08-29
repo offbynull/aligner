@@ -166,7 +166,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             }
         }
 
-        std::size_t find_idx(const N& node) {
+        std::size_t find_idx(const N& node) const {
             const auto& [down_offset, right_offset, depth] { g.node_to_grid_offsets(node) };
             return (g.grid_depth_cnt * ((down_offset * g.grid_right_cnt) + right_offset)) + depth;
         }
@@ -177,13 +177,29 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             return slot;
         }
 
+        const slot<N, E, ED>& find_ref(const N& node) const {
+            std::size_t idx { find_idx(node) };
+            const slot<N, E, ED>& slot { slots[idx] };
+            return slot;
+        }
+
         slot<N, E, ED>& at_idx(const std::size_t idx) {
+            return slots[idx];
+        }
+
+        const slot<N, E, ED>& at_idx(const std::size_t idx) const {
             return slots[idx];
         }
 
         std::pair<std::size_t, slot<N, E, ED>&> find(const N& node) {
             std::size_t idx { find_idx(node) };
             slot<N, E, ED>& slot { slots[idx] };
+            return { idx, slot };
+        }
+
+        std::pair<std::size_t, const slot<N, E, ED>&> find(const N& node) const {
+            std::size_t idx { find_idx(node) };
+            const slot<N, E, ED>& slot { slots[idx] };
             return { idx, slot };
         }
     };

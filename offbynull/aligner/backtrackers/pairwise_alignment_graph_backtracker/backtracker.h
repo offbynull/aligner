@@ -276,7 +276,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
         range_of_type<E> auto backtrack(
             const G& g,
-            slot_container_t& slots
+            const slot_container_t& slots
         ) {
             auto next_node { g.get_leaf_node() };
             PATH_CONTAINER path {
