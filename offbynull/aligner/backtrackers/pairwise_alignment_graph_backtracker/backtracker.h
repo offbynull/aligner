@@ -173,6 +173,17 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         )
         : container_creator_pack { container_creator_pack_ } {}
 
+        auto find_max_path(
+            const G& graph
+        ) {
+            auto slots { populate_weights_and_backtrack_pointers(graph) };
+            const auto& path { backtrack(graph, slots) };
+            const auto& leaf_node { graph.get_leaf_node() };
+            const auto& weight { slots.find_ref(leaf_node).backtracking_weight };
+            return std::make_pair(path, weight);
+        }
+
+    private:
         slot_container_t populate_weights_and_backtrack_pointers(
             const G& g
         ) {
@@ -297,16 +308,6 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             // (from first to last).
             std::reverse(path.begin(), path.end());
             return path;
-        }
-
-        auto find_max_path(
-            const G& graph
-        ) {
-            auto slots { populate_weights_and_backtrack_pointers(graph) };
-            const auto& path { backtrack(graph, slots) };
-            const auto& leaf_node { graph.get_leaf_node() };
-            const auto& weight { slots.find_ref(leaf_node).backtracking_weight };
-            return std::make_pair(path, weight);
         }
     };
 
