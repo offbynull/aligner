@@ -130,6 +130,8 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         static constexpr INDEX grid_depth_cnt { 3u };
         static constexpr std::size_t resident_nodes_capacity { 0zu };
         const std::size_t path_edge_capacity;
+        const std::size_t node_incoming_edge_capacity;
+        const std::size_t node_outgoing_edge_capacity;
 
         // Scorer params are not being made into universal references because there's a high chance of enabling a subtle bug: There's a
         // non-trivial possibility that the user will submit the same object for both scorers, and so if the universal reference ends up
@@ -150,7 +152,9 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         , freeride_scorer { freeride_scorer_ }
         , grid_down_cnt { down_seq.size() + 1zu }
         , grid_right_cnt { right_seq.size() + 1zu }
-        , path_edge_capacity { (grid_right_cnt - 1zu) * 2zu + (grid_down_cnt - 1zu) * 2zu } {}
+        , path_edge_capacity { (grid_right_cnt - 1zu) * 2zu + (grid_down_cnt - 1zu) * 2zu }
+        , node_incoming_edge_capacity { 3zu }
+        , node_outgoing_edge_capacity { 3zu } {}
 
         ND get_node_data(const N& node) const {
             if constexpr (debug_mode) {

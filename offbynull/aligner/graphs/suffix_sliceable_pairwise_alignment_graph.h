@@ -58,6 +58,8 @@ namespace offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph 
         const INDEX grid_depth_cnt;
         const std::size_t resident_nodes_capacity;
         const std::size_t path_edge_capacity;
+        const std::size_t node_incoming_edge_capacity;
+        const std::size_t node_outgoing_edge_capacity;
 
         suffix_sliceable_pairwise_alignment_graph(
             const G& g_,
@@ -70,7 +72,9 @@ namespace offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph 
         , grid_right_cnt { g.grid_right_cnt }
         , grid_depth_cnt { g.grid_depth_cnt }
         , resident_nodes_capacity { g.resident_nodes_capacity }
-        , path_edge_capacity { g.path_edge_capacity } {}
+        , path_edge_capacity { g.path_edge_capacity }
+        , node_incoming_edge_capacity { g.node_incoming_edge_capacity }
+        , node_outgoing_edge_capacity { g.node_outgoing_edge_capacity } {}
 
         // The first implementation of this was proxing the exact type. For example...
         //

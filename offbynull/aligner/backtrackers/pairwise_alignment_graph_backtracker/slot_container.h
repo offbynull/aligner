@@ -6,6 +6,7 @@
 #include <array>
 #include <iterator>
 #include <utility>
+#include <limits>
 #include <stdexcept>
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
@@ -175,6 +176,11 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                 g.grid_depth_cnt
             )
         } {
+            if constexpr (debug_mode) {
+                if (std::numeric_limits<PARENT_COUNT>::max() < g.node_incoming_edge_capacity) {
+                    throw std::runtime_error { "PARENT_COUNT not wide enough to support node_incoming_edge_capacity" };
+                }
+            }
             auto it { begin };
             while (it != end) {
                 const auto& slot { *it };

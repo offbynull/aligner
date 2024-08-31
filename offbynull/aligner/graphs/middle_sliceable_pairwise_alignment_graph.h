@@ -49,6 +49,8 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
         const INDEX grid_depth_cnt;
         const std::size_t resident_nodes_capacity;
         const std::size_t path_edge_capacity;
+        const std::size_t node_incoming_edge_capacity;
+        const std::size_t node_outgoing_edge_capacity;
 
         middle_sliceable_pairwise_alignment_graph(
             const G& g_,
@@ -67,7 +69,9 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
         , grid_right_cnt { g.grid_right_cnt }
         , grid_depth_cnt { g.grid_depth_cnt }
         , resident_nodes_capacity { g.resident_nodes_capacity }
-        , path_edge_capacity { g.path_edge_capacity } {
+        , path_edge_capacity { g.path_edge_capacity }
+        , node_incoming_edge_capacity { g.node_incoming_edge_capacity }
+        , node_outgoing_edge_capacity { g.node_outgoing_edge_capacity } {
             if constexpr (debug_mode) {
                 const auto& [root_down_offset, root_right_offset, root_depth] { g_.node_to_grid_offsets(new_root_node_) };
                 const auto& [leaf_down_offset, leaf_right_offset, leaf_depth] { g_.node_to_grid_offsets(new_leaf_node_) };

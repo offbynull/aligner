@@ -106,6 +106,8 @@ namespace offbynull::aligner::graphs::grid_graph {
         static constexpr INDEX grid_depth_cnt { 1u };
         static constexpr std::size_t resident_nodes_capacity { 0zu };
         const std::size_t path_edge_capacity;
+        const std::size_t node_incoming_edge_capacity;
+        const std::size_t node_outgoing_edge_capacity;
 
         // Scorer params are not being made into universal references because there's a high chance of enabling a subtle bug: There's a
         // non-trivial possibility that the user will submit the same object for both scorers, and so if the universal reference ends up
@@ -122,7 +124,9 @@ namespace offbynull::aligner::graphs::grid_graph {
         , gap_scorer { gap_scorer_ } // Copying object, not the ref
         , grid_down_cnt { down_seq_.size() + 1zu }
         , grid_right_cnt { right_seq_.size() + 1zu }
-        , path_edge_capacity { (grid_right_cnt - 1u) + (grid_down_cnt - 1u) } {}
+        , path_edge_capacity { (grid_right_cnt - 1u) + (grid_down_cnt - 1u) }
+        , node_incoming_edge_capacity { grid_down_cnt == 1zu || grid_right_cnt == 1zu ? 1zu : 3zu }
+        , node_outgoing_edge_capacity { grid_down_cnt == 1zu || grid_right_cnt == 1zu ? 1zu : 3zu } {}
 
         ND get_node_data(const N& node) const {
             if constexpr (debug_mode) {

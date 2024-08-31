@@ -53,6 +53,8 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         const INDEX grid_depth_cnt;
         const std::size_t resident_nodes_capacity;
         const std::size_t path_edge_capacity;
+        const std::size_t node_incoming_edge_capacity;
+        const std::size_t node_outgoing_edge_capacity;
 
         prefix_sliceable_pairwise_alignment_graph(
             const G& g_,
@@ -64,7 +66,9 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         , grid_right_cnt { std::get<1>(g.node_to_grid_offsets(new_leaf_node)) + 1u }
         , grid_depth_cnt { g.grid_depth_cnt }
         , resident_nodes_capacity { g.resident_nodes_capacity }
-        , path_edge_capacity { g.path_edge_capacity } {
+        , path_edge_capacity { g.path_edge_capacity }
+        , node_incoming_edge_capacity { g.node_incoming_edge_capacity }
+        , node_outgoing_edge_capacity { g.node_outgoing_edge_capacity } {
             if constexpr (debug_mode) {
                 if (!g.has_node(new_leaf_node)) {
                     throw std::runtime_error { "Leaf node not found" };

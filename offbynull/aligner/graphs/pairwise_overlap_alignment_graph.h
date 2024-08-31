@@ -144,6 +144,8 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
         static constexpr INDEX grid_depth_cnt { decltype(g)::grid_depth_cnt };
         const std::size_t resident_nodes_capacity;
         const std::size_t path_edge_capacity;
+        const std::size_t node_incoming_edge_capacity;
+        const std::size_t node_outgoing_edge_capacity;
 
         // Scorer params are not being made into universal references because there's a high chance of enabling a subtle bug: There's a
         // non-trivial possibility that the user will submit the same object for both scorers, and so if the universal reference ends up
@@ -165,7 +167,9 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
         , grid_down_cnt { g.grid_down_cnt }
         , grid_right_cnt { g.grid_right_cnt }
         , resident_nodes_capacity { 2zu }
-        , path_edge_capacity { g.path_edge_capacity } {}
+        , path_edge_capacity { g.path_edge_capacity }
+        , node_incoming_edge_capacity { g.node_incoming_edge_capacity + (grid_right_cnt - 1zu) }
+        , node_outgoing_edge_capacity { g.node_outgoing_edge_capacity + (grid_down_cnt - 1zu) } {}
 
         ND get_node_data(const N& node) const {
             return g.get_node_data(node);

@@ -105,7 +105,7 @@ namespace offbynull::utils {
     }
 
     PACK_STRUCT_START
-    template<unqualified_value_type T>
+    template<std::regular T>
     struct packable_optional {
         bool exists;
         T value;

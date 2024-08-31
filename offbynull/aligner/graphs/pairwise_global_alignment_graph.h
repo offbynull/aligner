@@ -70,6 +70,8 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         static constexpr INDEX grid_depth_cnt { decltype(g)::grid_depth_cnt };  // 0
         static constexpr std::size_t resident_nodes_capacity { decltype(g)::resident_nodes_capacity };  // 0
         const std::size_t path_edge_capacity;
+        const std::size_t node_incoming_edge_capacity;
+        const std::size_t node_outgoing_edge_capacity;
 
         // Scorer params are not being made into universal references because there's a high chance of enabling a subtle bug: There's a
         // non-trivial possibility that the user will submit the same object for both scorers, and so if the universal reference ends up
@@ -83,7 +85,9 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         : g { down_seq_, right_seq_, substitution_scorer_, gap_scorer_ }
         , grid_down_cnt { g.grid_down_cnt }
         , grid_right_cnt { g.grid_right_cnt }
-        , path_edge_capacity { g.path_edge_capacity } {}
+        , path_edge_capacity { g.path_edge_capacity }
+        , node_incoming_edge_capacity { g.node_incoming_edge_capacity }
+        , node_outgoing_edge_capacity { g.node_outgoing_edge_capacity } {}
 
         ND get_node_data(const N& node) const {
             return g.get_node_data(node);
