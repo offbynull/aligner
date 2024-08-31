@@ -26,6 +26,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::unqualified_value_type;
     using offbynull::utils::static_vector_typer;
 
+    PACK_STRUCT_START
     template<
         backtrackable_edge E,
         weight WEIGHT
@@ -33,8 +34,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     struct resident_slot {
         bool initialized;
         slot<E, WEIGHT> slot_;
-    };
+    }
+    PACK_STRUCT_STOP;
 
+    PACK_STRUCT_START
     template<
         backtrackable_node N,
         backtrackable_edge E,
@@ -43,7 +46,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     struct resident_slot_with_node {
         N node;
         resident_slot<E, WEIGHT> slot_;
-    };
+    }
+    PACK_STRUCT_STOP;
 
     template<
         backtrackable_node N,

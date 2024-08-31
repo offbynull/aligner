@@ -41,20 +41,24 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         DIAGONAL  // Diag is last - while in same grid offset, this is the layer that the other two feed into. Algorithms expect this.
     };
 
+    PACK_STRUCT_START
     template<widenable_to_size_t INDEX>
     struct node {
         node_layer layer;
         INDEX down;
         INDEX right;
         auto operator<=>(const node&) const = default;
-    };
+    }
+    PACK_STRUCT_STOP;
 
+    PACK_STRUCT_START
     template<widenable_to_size_t INDEX>
     struct edge {
         node<INDEX> source;
         node<INDEX> destination;
         auto operator<=>(const edge&) const = default;
-    };
+    }
+    PACK_STRUCT_STOP;
 
     template<
         bool debug_mode,

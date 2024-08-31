@@ -120,8 +120,8 @@ test_exec_cpp_args = []
 test_exec_link_args = []
 cc = meson.get_compiler('cpp')
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
-        # No -W-padding
-        # -------------
+        # No -W-padded
+        # ------------
         # Don't care about the compiler padding a struct.
         test_exec_cpp_args += ['-Wno-padded']
         # No -W-noexcept
@@ -134,6 +134,13 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         # can't inline the function (or it doesn't inline it because it seems like a bad idea), it puts out a -Winline warning. This only
         # shows up when compiling at higher optimization levels.
         test_exec_cpp_args += ['-Wno-inline']
+        # No -W-packed
+        # -------------
+        # When packing a struct, the compiler issues a warning if the struct is exactly the same size in its packed form vs its padded
+        # form (because all members are already aligned). These warnings are being supressed because the intention is for these structs to
+        # be packed, even if packing does nothing. In the future, should such a struct ever change such that members are no longer aligned,
+        # the packing will ensure padding stays out.
+        test_exec_cpp_args += ['-Wno-packed']
         # Google saniitzers
         # -----------------
         # san_args = ['-fsanitize=undefined', '-fsanitize=thread']
@@ -148,6 +155,9 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         # Debugging flags / options
         # -------------------------
         test_exec_cpp_args += ['-fconcepts-diagnostics-depth=9999', '-ftemplate-backtrace-limit=0', '-D_GLIBCXX_DEBUG']
+        # Enable struct packing
+        # ---------------------
+        test_exec_cpp_args += ['-DOBN_PACK_STRUCTS']
 endif
 test_exec = executable(
         'gtest-all',

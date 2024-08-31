@@ -9,8 +9,27 @@
 #include <type_traits>
 #include <boost/container/static_vector.hpp>
 #include <boost/container/options.hpp>
+#include "offbynull/concepts.h"
+
+// Adapted from https://stackoverflow.com/a/3312896
+#if defined(OBN_PACK_STRUCTS)
+#if defined(__GNUC__) || defined(__INTEL_COMPILER)  // G++, Clang, or Intel C++ Compiler
+#define PACK_STRUCT_START
+#define PACK_STRUCT_STOP __attribute__((__packed__))
+#elif defined(_MSC_VER)  // MSVC
+#define PACK_STRUCT_START __pragma(pack(push, 1))
+#define PACK_STRUCT_STOP __pragma(pack(pop))
+#else
+static_assert(false, "Struct packing not supported by compiler. Turn off OBN_PACK_STRUCTS define.");
+#endif
+#else
+#define PACK_STRUCT_START
+#define PACK_STRUCT_STOP
+#endif
 
 namespace offbynull::utils {
+    using offbynull::concepts::unqualified_value_type;
+
     /**
      * Unimplemented class template used as a hack to determine what some unknown type \c T is. Because this class template remains
      * unimplemented for every \c T, declararing it a variable of type \c type_displayer<T> will result in a compiler error that explicitly

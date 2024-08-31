@@ -44,13 +44,15 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
         NORMAL
     };
 
+    PACK_STRUCT_START
     template<widenable_to_size_t INDEX>
-    class fitting_edge {
+    struct fitting_edge {
     public:
         edge_type type;
         edge<INDEX> inner_edge;
         std::strong_ordering operator<=>(const fitting_edge& rhs) const = default;
-    };
+    }
+    PACK_STRUCT_STOP;
 
     // A scorer that translates calls from the grid_graph backing the pairwise_local_alignment_graph, such that the edge type becomes the
     // edge type of pairwise_local_alignment_graph.

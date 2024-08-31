@@ -2,6 +2,7 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_PATH_CONTAINER_H
 
 #include "offbynull/aligner/concepts.h"
+#include "offbynull/utils.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/forward_walker.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 #include <cstddef>
@@ -21,6 +22,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::unqualified_value_type;
     using offbynull::utils::static_vector_typer;
 
+    PACK_STRUCT_START
     template<backtrackable_edge E>
     struct element {
         element<E>* prev {};
@@ -30,7 +32,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         element() = default;
 
         bool operator==(const element &) const = default;
-    };
+    }
+    PACK_STRUCT_STOP;
 
 
 

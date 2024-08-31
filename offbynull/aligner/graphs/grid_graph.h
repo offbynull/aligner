@@ -30,19 +30,23 @@ namespace offbynull::aligner::graphs::grid_graph {
 
     using empty_type = std::tuple<>;
 
+    PACK_STRUCT_START
     template<widenable_to_size_t INDEX>
     struct node {
         INDEX down;
         INDEX right;
         auto operator<=>(const node&) const = default;
-    };
+    }
+    PACK_STRUCT_STOP;
 
+    PACK_STRUCT_START
     template<widenable_to_size_t INDEX>
     struct edge {
         node<INDEX> source;
         node<INDEX> destination;
         auto operator<=>(const edge&) const = default;
-    };
+    }
+    PACK_STRUCT_STOP;
 
     template<
         bool debug_mode,

@@ -7,7 +7,6 @@
 #include <iterator>
 #include <utility>
 #include <stdexcept>
-#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/utils.h"
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
@@ -17,18 +16,28 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
 
-    template<backtrackable_node N, backtrackable_edge E, weight ED>
+    // Because this struct is heavily templated, it's impossible to figure out how to organize member variables to reduce padding. One
+    // option may be to ask the compiler to specifically pack the struct, but this may cause performance problems and/or bugs to happen
+    // (depending on the architecture you're compiling for)?
+    PACK_STRUCT_START
+    template<
+        backtrackable_node N,
+        backtrackable_edge E,
+        weight ED,
+        widenable_to_size_t PARENT_COUNT
+    >
     struct slot {
         N node;
-        std::size_t unwalked_parent_cnt;
+        PARENT_COUNT unwalked_parent_cnt;
         E backtracking_edge;
         ED backtracking_weight;
 
-        slot(N node_, std::size_t unwalked_parent_cnt_)
+        slot(N node_, PARENT_COUNT unwalked_parent_cnt_)
         : node { node_ }
         , unwalked_parent_cnt { unwalked_parent_cnt_ }
         , backtracking_edge {}
@@ -39,7 +48,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         , unwalked_parent_cnt {}
         , backtracking_edge {}
         , backtracking_weight {} {}
-    };
+    }
+    PACK_STRUCT_STOP;
 
 
 
@@ -50,36 +60,41 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         typename T,
         typename N,
         typename E,
-        typename ED
+        typename ED,
+        typename PARENT_COUNT
     >
     concept slot_container_container_creator_pack =
         unqualified_value_type<T>
         && backtrackable_node<N>
         && backtrackable_edge<E>
         && weight<ED>
+        && widenable_to_size_t<PARENT_COUNT>
         && requires(
             const T t,
             std::size_t grid_down_cnt,
             std::size_t grid_right_cnt,
             std::size_t grid_depth_cnt
         ) {
-            { t.create_slot_container(grid_down_cnt, grid_right_cnt, grid_depth_cnt) } -> random_access_range_of_type<slot<N, E, ED>>;
+            { t.create_slot_container(grid_down_cnt, grid_right_cnt, grid_depth_cnt) } -> random_access_range_of_type<
+                slot<N, E, ED, PARENT_COUNT>
+            >;
         };
 
     template<
         bool debug_mode,
         backtrackable_node N,
         backtrackable_edge E,
-        weight ED
+        weight ED,
+        widenable_to_size_t PARENT_COUNT
     >
     struct slot_container_heap_container_creator_pack {
-        std::vector<slot<N, E, ED>> create_slot_container(
+        std::vector<slot<N, E, ED, PARENT_COUNT>> create_slot_container(
             std::size_t grid_down_cnt,
             std::size_t grid_right_cnt,
             std::size_t grid_depth_cnt
         ) const {
             std::size_t cnt { (grid_down_cnt * grid_right_cnt) * grid_depth_cnt };
-            return std::vector<slot<N, E, ED>>(cnt);
+            return std::vector<slot<N, E, ED, PARENT_COUNT>>(cnt);
         }
     };
 
@@ -88,6 +103,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         backtrackable_node N,
         backtrackable_edge E,
         weight ED,
+        widenable_to_size_t PARENT_COUNT,
         std::size_t grid_down_cnt,
         std::size_t grid_right_cnt,
         std::size_t grid_depth_cnt
@@ -95,7 +111,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     struct slot_container_stack_container_creator_pack {
         static constexpr std::size_t ELEM_COUNT { grid_down_cnt * grid_right_cnt * grid_depth_cnt };
 
-        std::array<slot<N, E, ED>, ELEM_COUNT> create_slot_container(
+        std::array<slot<N, E, ED, PARENT_COUNT>, ELEM_COUNT> create_slot_container(
             std::size_t grid_down_cnt_,
             std::size_t grid_right_cnt_,
             std::size_t grid_depth_cnt_
@@ -106,7 +122,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                     throw std::runtime_error { "Bad element count" };
                 }
             }
-            return std::array<slot<N, E, ED>, ELEM_COUNT> {};
+            return std::array<slot<N, E, ED, PARENT_COUNT>, ELEM_COUNT> {};
         }
     };
 
@@ -117,15 +133,18 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     template<
         bool debug_mode,
         readable_pairwise_alignment_graph G,
+        widenable_to_size_t PARENT_COUNT,
         slot_container_container_creator_pack<
             typename G::N,
             typename G::E,
-            typename G::ED
+            typename G::ED,
+            PARENT_COUNT
         > CONTAINER_CREATOR_PACK = slot_container_heap_container_creator_pack<
             debug_mode,
             typename G::N,
             typename G::E,
-            typename G::ED
+            typename G::ED,
+            PARENT_COUNT
         >
     >
     class slot_container {
@@ -171,35 +190,35 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             return (g.grid_depth_cnt * ((down_offset * g.grid_right_cnt) + right_offset)) + depth;
         }
 
-        slot<N, E, ED>& find_ref(const N& node) {
+        slot<N, E, ED, PARENT_COUNT>& find_ref(const N& node) {
             std::size_t idx { find_idx(node) };
-            slot<N, E, ED>& slot { slots[idx] };
+            slot<N, E, ED, PARENT_COUNT>& slot { slots[idx] };
             return slot;
         }
 
-        const slot<N, E, ED>& find_ref(const N& node) const {
+        const slot<N, E, ED, PARENT_COUNT>& find_ref(const N& node) const {
             std::size_t idx { find_idx(node) };
-            const slot<N, E, ED>& slot { slots[idx] };
+            const slot<N, E, ED, PARENT_COUNT>& slot { slots[idx] };
             return slot;
         }
 
-        slot<N, E, ED>& at_idx(const std::size_t idx) {
+        slot<N, E, ED, PARENT_COUNT>& at_idx(const std::size_t idx) {
             return slots[idx];
         }
 
-        const slot<N, E, ED>& at_idx(const std::size_t idx) const {
+        const slot<N, E, ED, PARENT_COUNT>& at_idx(const std::size_t idx) const {
             return slots[idx];
         }
 
-        std::pair<std::size_t, slot<N, E, ED>&> find(const N& node) {
+        std::pair<std::size_t, slot<N, E, ED, PARENT_COUNT>&> find(const N& node) {
             std::size_t idx { find_idx(node) };
-            slot<N, E, ED>& slot { slots[idx] };
+            slot<N, E, ED, PARENT_COUNT>& slot { slots[idx] };
             return { idx, slot };
         }
 
-        std::pair<std::size_t, const slot<N, E, ED>&> find(const N& node) const {
+        std::pair<std::size_t, const slot<N, E, ED, PARENT_COUNT>&> find(const N& node) const {
             std::size_t idx { find_idx(node) };
-            const slot<N, E, ED>& slot { slots[idx] };
+            const slot<N, E, ED, PARENT_COUNT>& slot { slots[idx] };
             return { idx, slot };
         }
     };

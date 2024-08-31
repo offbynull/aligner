@@ -46,9 +46,6 @@ TODO:
 * ~~const correct container_creator_packs~~
 * ~~CHANGE const G& graph TO const G& g~~
 * sliced_subdivider -- changed "whole_graph" to "graph_partition"?
-* add E_COUNT type to readable_pairwise_alignment_graph concept and graph implementations -- make use of it in slot_container.h rather than asking the user to supply it 
-  * E_COUNT is a type wide enough to hold the maximum number of edges from one node to another 
-  * or ... use "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/utils.h" to determine what the correct type should be
 * ~~max_grid_node_depth should be a parameter directly on the class, EVALUATABLE AT COMPILE_TIME~~
 * ~~resident_segmenter - some use of std::vector -- move creation of types in container_pack_creators (SEE TODOs IN RESIDENT_SEGMENTER -- DOES IT EVEN NEED TO EXIST?)~~
 * ~~resident_segmenter - move is_node_on_max_path/walk_to_node to static functions in bidiwalker?~~
@@ -68,8 +65,9 @@ TODO:
 * ~~create factory functions for everything that has heavy templating~~
 * ~~const correct offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/slot_container.h, then make its usages const where appropriate~~
 * ~~template params typename N/E to use backtracking_node/backtracking_edge constrained types~~
-* remove INDEX and force set to std::size_t (DONT DO THIS -- INDEX goes to be used in node and edge types, which are stored by the backtrackers?)
-  * in backtrackers, automatically pick the right type for INDEX based on graph dimensions 
+* ~~graph simplified factory functions that choose the best index types~~ didn't do this -- tough to do
+* directive to pack slot structs
+* add graph attribute that'll tell you max possible incoming edges to a node, and then test for that to make sure backtracker can run with supplied types
 * ~~tests that copy to std::vector/set/multiset -- use helper functions instead~~
 * ~~remove pointers in forward_walker and path_container -- requires custom move/copy constructors + custom assignment operators~~ (leaving this as-is for now, with the custom constructors and assignment op overrides)
 * ~~std::optional.value() to using * operator -- no bounds checking done on * operator~~

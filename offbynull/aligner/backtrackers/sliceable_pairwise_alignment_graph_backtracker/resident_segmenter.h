@@ -46,16 +46,20 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
 
 
+    PACK_STRUCT_START
     template<backtrackable_edge E>
     struct hop {
         E edge;
-    };
+    }
+    PACK_STRUCT_STOP;
 
+    PACK_STRUCT_START
     template<backtrackable_node N>
     struct segment {
         N from_node;
         N to_node;
-    };
+    }
+    PACK_STRUCT_STOP;
 
 
 

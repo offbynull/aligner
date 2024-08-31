@@ -10,7 +10,6 @@
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
-#include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/concepts.h"
 #include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/ready_queue.h"
@@ -48,16 +47,20 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         typename T,
         typename N,
         typename E,
-        typename ED
+        typename ED,
+        typename PARENT_COUNT,
+        typename SLOT_INDEX
     >
     concept backtracker_container_creator_pack =
         unqualified_value_type<T>
         && backtrackable_node<N>
         && backtrackable_edge<E>
         && weight<ED>
+        && widenable_to_size_t<PARENT_COUNT>
+        && widenable_to_size_t<SLOT_INDEX>
         && requires(const T t, std::size_t path_edge_capacity) {
-            { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<N, E, ED>;
-            { t.create_ready_queue_container_creator_pack() } -> ready_queue_container_creator_pack;
+            { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<N, E, ED, PARENT_COUNT>;
+            { t.create_ready_queue_container_creator_pack() } -> ready_queue_container_creator_pack<SLOT_INDEX>;
             { t.create_path_container(path_edge_capacity) } -> random_access_range_of_type<E>;
         };
 
@@ -66,14 +69,26 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         backtrackable_node N,
         backtrackable_edge E,
         weight ED,
+        widenable_to_size_t PARENT_COUNT,
+        widenable_to_size_t SLOT_INDEX,
         bool minimize_allocations
     >
     struct backtracker_heap_container_creator_pack {
-        slot_container_heap_container_creator_pack<debug_mode, N, E, ED> create_slot_container_container_creator_pack() const {
+        slot_container_heap_container_creator_pack<
+            debug_mode,
+            N,
+            E,
+            ED,
+            PARENT_COUNT
+        > create_slot_container_container_creator_pack() const {
             return {};
         }
 
-        ready_queue_heap_container_creator_pack<debug_mode, minimize_allocations> create_ready_queue_container_creator_pack() const {
+        ready_queue_heap_container_creator_pack<
+            debug_mode,
+            SLOT_INDEX,
+            minimize_allocations
+        > create_ready_queue_container_creator_pack() const {
             return {};
         }
 
@@ -91,6 +106,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         backtrackable_node N,
         backtrackable_edge E,
         weight ED,
+        widenable_to_size_t PARENT_COUNT,
+        widenable_to_size_t SLOT_INDEX,
         std::size_t grid_down_cnt,
         std::size_t grid_right_cnt,
         std::size_t grid_depth_cnt,
@@ -102,6 +119,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             N,
             E,
             ED,
+            PARENT_COUNT,
             grid_down_cnt,
             grid_right_cnt,
             grid_depth_cnt
@@ -111,6 +129,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
         ready_queue_stack_container_creator_pack<
             debug_mode,
+            SLOT_INDEX,
             grid_down_cnt,
             grid_right_cnt,
             grid_depth_cnt
@@ -136,15 +155,21 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     template<
         bool debug_mode,
         readable_pairwise_alignment_graph G,
+        widenable_to_size_t PARENT_COUNT,
+        widenable_to_size_t SLOT_INDEX,
         backtracker_container_creator_pack<
             typename G::N,
             typename G::E,
-            typename G::ED
+            typename G::ED,
+            PARENT_COUNT,
+            SLOT_INDEX
         > CONTAINER_CREATOR_PACK = backtracker_heap_container_creator_pack<
             debug_mode,
             typename G::N,
             typename G::E,
             typename G::ED,
+            PARENT_COUNT,
+            SLOT_INDEX,
             true
         >
     >
@@ -163,8 +188,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_ready_queue_container_creator_pack());
         using PATH_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container(0zu));
 
-        using slot_container_t = slot_container<debug_mode, G, SLOT_CONTAINER_CONTAINER_CREATOR_PACK>;
-        using ready_queue_t = ready_queue<debug_mode, G, READY_QUEUE_CONTAINER_CREATOR_PACK>;
+        using SLOT_CONTAINER = slot_container<debug_mode, G, PARENT_COUNT, SLOT_CONTAINER_CONTAINER_CREATOR_PACK>;
+        using READY_QUEUE = ready_queue<debug_mode, G, SLOT_INDEX, READY_QUEUE_CONTAINER_CREATOR_PACK>;
 
         CONTAINER_CREATOR_PACK container_creator_pack;
 
@@ -184,7 +209,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         }
 
     private:
-        slot_container_t populate_weights_and_backtrack_pointers(
+        SLOT_CONTAINER populate_weights_and_backtrack_pointers(
             const G& g
         ) {
             // Create "slots" list
@@ -195,13 +220,18 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             auto slots_lazy {
                 std::views::common(
                     g.get_nodes()
-                    | std::views::transform([&](const auto& n) -> slot<N, E, ED> {
+                    | std::views::transform([&](const auto& n) -> slot<N, E, ED, PARENT_COUNT> {
                         std::size_t in_degree { g.get_in_degree(n) };
-                        return { n, in_degree };
+                        if constexpr (debug_mode) {
+                            if (in_degree > std::numeric_limits<PARENT_COUNT>::max()) {
+                                throw std::runtime_error { "Type not wide enough" };
+                            }
+                        }
+                        return { n, static_cast<PARENT_COUNT>(in_degree) };
                     })
                 )
             };
-            slot_container_t slots {
+            SLOT_CONTAINER slots {
                 g,
                 slots_lazy.begin(),
                 slots_lazy.end()
@@ -212,7 +242,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             // parents processed, and so it can be processed). Since root nodes have no parents, they are ready-to-process from
             // the get-go. As such, the "ready_idxes" queue is primed with the "slots" indices for root nodes (of which there
             // should be only one).
-            ready_queue_t ready_idxes { g };
+            READY_QUEUE ready_idxes { g };
             const N& root_node { g.get_root_node() };
             const auto& [root_slot_idx, root_slot] { slots.find(root_node) };
             ready_idxes.push(root_slot_idx);
@@ -243,7 +273,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                         | std::views::transform(
                             [&](const auto& edge) noexcept -> std::pair<E, ED> {
                                 const auto& src_node { g.get_edge_from(edge) };
-                                const slot<N, E, ED>& src_node_slot { slots.find_ref(src_node) };
+                                const slot<N, E, ED, PARENT_COUNT>& src_node_slot { slots.find_ref(src_node) };
                                 const auto& edge_weight { g.get_edge_data(edge) };
                                 return { edge, src_node_slot.backtracking_weight + edge_weight };
                             }
@@ -287,7 +317,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
         range_of_type<E> auto backtrack(
             const G& g,
-            const slot_container_t& slots
+            const SLOT_CONTAINER& slots
         ) {
             auto next_node { g.get_leaf_node() };
             PATH_CONTAINER path {
@@ -323,11 +353,15 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         return backtracker<
             debug_mode,
             G,
+            std::size_t,
+            std::size_t,
             backtracker_heap_container_creator_pack<
                 debug_mode,
                 typename G::N,
                 typename G::E,
                 typename G::ED,
+                std::size_t,
+                std::size_t,
                 minimize_allocations
             >
         > {}.find_max_path(g);
@@ -358,11 +392,15 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         return backtracker<
             debug_mode,
             G,
+            std::size_t,
+            std::size_t,
             backtracker_stack_container_creator_pack<
                 debug_mode,
                 N,
                 E,
                 ED,
+                std::size_t,
+                std::size_t,
                 grid_down_cnt,
                 grid_right_cnt,
                 grid_depth_cnt,

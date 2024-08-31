@@ -13,6 +13,7 @@
 #include "offbynull/aligner/backtrackers/graph_backtracker/concepts.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
+#include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
     using offbynull::aligner::concepts::weight;
@@ -23,6 +24,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
     using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_edge;
 
+    PACK_STRUCT_START
     template<backtrackable_node N, backtrackable_edge E, weight WEIGHT>
     struct slot {
         N node;
@@ -41,7 +43,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
         , unwalked_parent_cnt {}
         , backtracking_edge {}
         , backtracking_weight {} {}
-    };
+    }
+    PACK_STRUCT_STOP;
 
     template<
         backtrackable_node N,

@@ -3,10 +3,12 @@
 
 #include <optional>
 #include "offbynull/aligner/concepts.h"
+#include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot {
     using offbynull::aligner::concepts::weight;
 
+    PACK_STRUCT_START
     template<typename E, weight WEIGHT>
     struct slot {
         std::optional<E> backtracking_edge;
@@ -21,7 +23,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         , backtracking_weight {} {}
 
         bool operator==(const slot&) const = default;
-    };
+    }
+    PACK_STRUCT_STOP;
 }
 
 #endif //OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLOT_H
