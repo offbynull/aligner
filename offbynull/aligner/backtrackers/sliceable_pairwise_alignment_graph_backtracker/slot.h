@@ -7,11 +7,12 @@
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot {
     using offbynull::aligner::concepts::weight;
+    using offbynull::utils::packable_optional;
 
     PACK_STRUCT_START
     template<typename E, weight WEIGHT>
     struct slot {
-        std::optional<E> backtracking_edge;
+        packable_optional<E> backtracking_edge;
         WEIGHT backtracking_weight;
 
         slot(E backtracking_edge_, WEIGHT backtracking_weight_)

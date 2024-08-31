@@ -9,7 +9,6 @@
 #include <stdfloat>
 #include <string>
 #include <vector>
-#include <utility>
 #include <tuple>
 #include <optional>
 #include <ostream>
@@ -166,30 +165,44 @@ namespace {
     }
 
     TEST(OABGBacktrackerTest, FindMaxPathOnDirectedGraph) {
-        using N = std::pair<unsigned int, unsigned int>;
-        using E = std::pair<N, N>;
+        PACK_STRUCT_START
+        struct node {
+            std::size_t down;
+            std::size_t right;
+            auto operator<=>(const node&) const = default;
+        }
+        PACK_STRUCT_STOP;
+        PACK_STRUCT_START
+        struct edge {
+            node from;
+            node to;
+            auto operator<=>(const edge&) const = default;
+        }
+        PACK_STRUCT_STOP;
+        using N = node;
+        using E = edge;
         using ND = std::tuple<std::optional<std::float64_t>, std::optional<E>>;
         using ED = std::float64_t;
         using G = offbynull::aligner::graphs::directed_graph::directed_graph<true, N, ND, E, ED>;
 
         G g {};
-        g.insert_node(std::pair { 0zu, 0zu }, { std::nullopt, std::nullopt });
-        g.insert_node(std::pair { 0zu, 1zu }, { std::nullopt, std::nullopt });
-        g.insert_node(std::pair { 0zu, 2zu }, { std::nullopt, std::nullopt });
-        g.insert_node(std::pair { 1zu, 0zu }, { std::nullopt, std::nullopt });
-        g.insert_node(std::pair { 1zu, 1zu }, { std::nullopt, std::nullopt });
-        g.insert_node(std::pair { 1zu, 2zu }, { std::nullopt, std::nullopt });
-        g.insert_edge(std::pair { std::pair { 0zu, 0zu }, std::pair { 0zu, 1zu } }, std::pair { 0zu, 0zu }, std::pair { 0zu, 1zu }, 0.0);
-        g.insert_edge(std::pair { std::pair { 0zu, 1zu }, std::pair { 0zu, 2zu } }, std::pair { 0zu, 1zu }, std::pair { 0zu, 2zu }, 0.0);
-        g.insert_edge(std::pair { std::pair { 1zu, 0zu }, std::pair { 1zu, 1zu } }, std::pair { 1zu, 0zu }, std::pair { 1zu, 1zu }, 0.0);
-        g.insert_edge(std::pair { std::pair { 1zu, 1zu }, std::pair { 1zu, 2zu } }, std::pair { 1zu, 1zu }, std::pair { 1zu, 2zu }, 0.0);
-        g.insert_edge(std::pair { std::pair { 0zu, 0zu }, std::pair { 1zu, 0zu } }, std::pair { 0zu, 0zu }, std::pair { 1zu, 0zu }, 0.0);
-        g.insert_edge(std::pair { std::pair { 0zu, 1zu }, std::pair { 1zu, 1zu } }, std::pair { 0zu, 1zu }, std::pair { 1zu, 1zu }, 0.0);
-        g.insert_edge(std::pair { std::pair { 0zu, 2zu }, std::pair { 1zu, 2zu } }, std::pair { 0zu, 2zu }, std::pair { 1zu, 2zu }, 0.0);
-        g.insert_edge(std::pair { std::pair { 0zu, 0zu }, std::pair { 1zu, 1zu } }, std::pair { 0zu, 0zu }, std::pair { 1zu, 1zu }, 0.0);
-        g.insert_edge(std::pair { std::pair { 0zu, 1zu }, std::pair { 1zu, 2zu } }, std::pair { 0zu, 1zu }, std::pair { 1zu, 2zu }, 0.0);
-        g.update_edge_data({ { 0zu, 0zu }, { 0zu, 1zu } }, 1.1);
-        g.update_edge_data({ { 1zu, 1zu }, { 1zu, 2zu } }, 1.4);
+        g.insert_node(N { 0zu, 0zu }, { std::nullopt, std::nullopt });
+        g.insert_node(N { 0zu, 1zu }, { std::nullopt, std::nullopt });
+        g.insert_node(N { 0zu, 2zu }, { std::nullopt, std::nullopt });
+        g.insert_node(N { 1zu, 0zu }, { std::nullopt, std::nullopt });
+        g.insert_node(N { 1zu, 1zu }, { std::nullopt, std::nullopt });
+        g.insert_node(N { 1zu, 2zu }, { std::nullopt, std::nullopt });
+        g.insert_edge(E { { 0zu, 0zu }, { 0zu, 1zu } }, N { 0zu, 0zu }, N { 0zu, 1zu }, 0.0);
+        g.insert_edge(E { { 0zu, 1zu }, { 0zu, 2zu } }, N { 0zu, 1zu }, N { 0zu, 2zu }, 0.0);
+        g.insert_edge(E { { 1zu, 0zu }, { 1zu, 1zu } }, N { 1zu, 0zu }, N { 1zu, 1zu }, 0.0);
+        g.insert_edge(E { { 1zu, 1zu }, { 1zu, 2zu } }, N { 1zu, 1zu }, N { 1zu, 2zu }, 0.0);
+        g.insert_edge(E { { 0zu, 0zu }, { 1zu, 0zu } }, N { 0zu, 0zu }, N { 1zu, 0zu }, 0.0);
+        g.insert_edge(E { { 0zu, 1zu }, { 1zu, 1zu } }, N { 0zu, 1zu }, N { 1zu, 1zu }, 0.0);
+        g.insert_edge(E { { 0zu, 2zu }, { 1zu, 2zu } }, N { 0zu, 2zu }, N { 1zu, 2zu }, 0.0);
+        g.insert_edge(E { { 0zu, 0zu }, { 1zu, 1zu } }, N { 0zu, 0zu }, N { 1zu, 1zu }, 0.0);
+        g.insert_edge(E { { 0zu, 1zu }, { 1zu, 2zu } }, N { 0zu, 1zu }, N { 1zu, 2zu }, 0.0);
+        g.update_edge_data(E { { 0zu, 0zu }, { 0zu, 1zu } }, 1.1);
+        g.update_edge_data(E { { 1zu, 1zu }, { 1zu, 2zu } }, 1.4);
 
         auto edge_weight_accessor { [&g](const E& edge) { return g.get_edge_data(edge); } };
         backtracker<
@@ -206,16 +219,16 @@ namespace {
         };
         for (const E& e : path) {
             const auto& [n1, n2] { e };
-            std::cout << n1.first << '/' << n1.second << "->" << n2.first << '/' << n2.second << ' ';
+            std::cout << n1.down << '/' << n1.right << "->" << n2.down << '/' << n2.right << ' ';
         }
         std::cout << std::endl;
         std::cout << weight << std::endl;
         EXPECT_EQ(
             path,
             (std::vector<E> {
-                { std::pair { 0zu, 0zu }, std::pair { 0zu, 1zu } },
-                { std::pair { 0zu, 1zu }, std::pair { 1zu, 1zu } },
-                { std::pair { 1zu, 1zu }, std::pair { 1zu, 2zu } }
+                E { { 0zu, 0zu }, { 0zu, 1zu } },
+                E { { 0zu, 1zu }, { 1zu, 1zu } },
+                E { { 1zu, 1zu }, { 1zu, 2zu } }
             })
         );
         EXPECT_EQ(weight, 2.5);

@@ -7,6 +7,8 @@
 #include <set>
 #include <ranges>
 #include <type_traits>
+#include <optional>
+#include <utility>
 #include <boost/container/static_vector.hpp>
 #include <boost/container/options.hpp>
 #include "offbynull/concepts.h"
@@ -82,7 +84,7 @@ namespace offbynull::utils {
             ret.push_back(e);
         }
         return ret;
-    };
+    }
 
     auto copy_to_set(std::ranges::range auto&& range) -> std::set<std::remove_cvref_t<decltype(*range.begin())>> {
         using ELEM = std::remove_cvref_t<decltype(*range.begin())>;
@@ -91,7 +93,7 @@ namespace offbynull::utils {
             ret.insert(e);
         }
         return ret;
-    };
+    }
 
     auto copy_to_multiset(std::ranges::range auto&& range) -> std::multiset<std::remove_cvref_t<decltype(*range.begin())>> {
         using ELEM = std::remove_cvref_t<decltype(*range.begin())>;
@@ -100,7 +102,45 @@ namespace offbynull::utils {
             ret.insert(e);
         }
         return ret;
-    };
+    }
+
+    PACK_STRUCT_START
+    template<unqualified_value_type T>
+    struct packable_optional {
+        bool exists;
+        T value;
+
+        packable_optional()
+        : exists{ false }
+        , value {} {}
+
+        packable_optional(const T& value_)
+        : exists { true }
+        , value { value_ } {}
+
+        packable_optional(T&& value_)
+        : exists { true }
+        , value { std::move(value_) } {}
+
+        packable_optional(std::nullopt_t)
+        : exists { false }
+        , value {} {}
+
+        bool has_value() const {
+            return exists;
+        }
+
+        T& operator*() {
+            return value;
+        }
+
+        const T& operator*() const {
+            return value;
+        }
+
+        bool operator==(const packable_optional& other) const = default;
+    }
+    PACK_STRUCT_STOP;
 }
 
 #endif //OFFBYNULL_UTILS_H

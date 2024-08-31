@@ -66,8 +66,9 @@ TODO:
 * ~~const correct offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/slot_container.h, then make its usages const where appropriate~~
 * ~~template params typename N/E to use backtracking_node/backtracking_edge constrained types~~
 * ~~graph simplified factory functions that choose the best index types~~ didn't do this -- tough to do
-* directive to pack slot structs
+* ~~directive to pack slot structs~~
 * add graph attribute that'll tell you max possible incoming edges to a node, and then test for that to make sure backtracker can run with supplied types
+* remove noexcept usages
 * ~~tests that copy to std::vector/set/multiset -- use helper functions instead~~
 * ~~remove pointers in forward_walker and path_container -- requires custom move/copy constructors + custom assignment operators~~ (leaving this as-is for now, with the custom constructors and assignment op overrides)
 * ~~std::optional.value() to using * operator -- no bounds checking done on * operator~~

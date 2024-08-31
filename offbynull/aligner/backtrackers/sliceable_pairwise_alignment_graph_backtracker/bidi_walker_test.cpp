@@ -5,10 +5,10 @@
 #include "offbynull/aligner/graphs/pairwise_global_alignment_graph.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/bidi_walker.h"
 #include "offbynull/aligner/scorers/simple_scorer.h"
+#include "offbynull/utils.h"
 #include "gtest/gtest.h"
 #include <cstddef>
 #include <stdfloat>
-#include <optional>
 #include <tuple>
 #include <string>
 #include <iostream>
@@ -21,6 +21,7 @@ namespace {
     using offbynull::aligner::graphs::pairwise_fitting_alignment_graph::pairwise_fitting_alignment_graph;
     using offbynull::aligner::graphs::pairwise_overlap_alignment_graph::pairwise_overlap_alignment_graph;
     using offbynull::aligner::scorers::simple_scorer::simple_scorer;
+    using offbynull::utils::packable_optional;
 
     auto walk_to_node(auto bidi_walker_, auto node) {
         using E = decltype(bidi_walker_)::E;
@@ -28,9 +29,9 @@ namespace {
 
         auto result { bidi_walker_.find(node) };
         ED weight { result.forward_slot.backtracking_weight + result.backward_slot.backtracking_weight };
-        std::optional<E> forward_edge { result.forward_slot.backtracking_edge };
-        std::optional<E> backward_edge { result.backward_slot.backtracking_edge };
-        return std::tuple<ED, std::optional<E>, std::optional<E>> { weight, forward_edge, backward_edge };
+        packable_optional<E> forward_edge { result.forward_slot.backtracking_edge };
+        packable_optional<E> backward_edge { result.backward_slot.backtracking_edge };
+        return std::tuple<ED, packable_optional<E>, packable_optional<E>> { weight, forward_edge, backward_edge };
     }
 
     TEST(OABSBidiWalkerTest, WalkGlobal) {
