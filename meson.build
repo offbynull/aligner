@@ -168,4 +168,22 @@ test_exec = executable(
         cpp_args : test_exec_cpp_args,
         link_args : test_exec_link_args
 )
-test('gtest tests', test_exec)
+if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
+        test_exec_optimized_cpp_args = []
+        foreach item : test_exec_cpp_args
+                if item != '-D_GLIBCXX_DEBUG'
+                        test_exec_optimized_cpp_args += item
+                endif
+        endforeach
+endif
+test_exec_optimized = executable(
+        'gtest-all optimized',
+        tests_src,
+        source_checker,
+        doc_generator,
+        dependencies : [boost_dep, gtest_dep, gmock_dep],
+        override_options : ['optimization=3', 'buildtype=release', 'b_lto=true'],
+        cpp_args : test_exec_optimized_cpp_args,
+        link_args : test_exec_link_args
+)
+# test('gtest tests', test_exec)
