@@ -23,12 +23,17 @@ namespace offbynull::aligner::sequences::substring_sequence {
         , length { length_ } {
             if constexpr (debug_mode) {
                 if (seq.length() - offset < length_) {
-                    throw std::runtime_error { "Out of bounds length" };
+                    throw std::runtime_error { "Length out of bounds" };
                 }
             }
         }
 
         decltype(seq[0zu]) operator[](std::size_t index) const {
+            if constexpr (debug_mode) {
+                if (index >= length) {
+                    throw std::runtime_error { "Index out of bounds" };
+                }
+            }
             return seq[index + offset];
         }
 

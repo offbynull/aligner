@@ -27,7 +27,7 @@ namespace offbynull::aligner::sequences::iota_sequence {
         , bound { bound_ } {
             if constexpr (debug_mode) {
                 if (offset > bound) {
-                    throw std::runtime_error { "value exceeds bound" };
+                    throw std::runtime_error { "Value exceeds bound" };
                 }
             }
         }

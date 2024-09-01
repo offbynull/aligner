@@ -194,7 +194,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
             if constexpr (debug_mode && !widenable_to_size_t<decltype(dist_from_beginning)>) {
                 if constexpr (std::numeric_limits<decltype(dist_from_beginning)>::max() > std::numeric_limits<std::size_t>::max()) {
                     if (dist_from_beginning > std::numeric_limits<std::size_t>::max()) {
-                        throw std::runtime_error { "Narrowed!" };
+                        throw std::runtime_error { "Narrowing of distance will result in information loss" };
                     }
                 }
             }

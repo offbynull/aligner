@@ -308,7 +308,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                             before_max_edge_weight = forward_slot.backtracking_weight;
                             after_max_edge_weight = backward_slot.backtracking_weight - max_edge_weight;
                         } else [[unlikely]] {
-                            throw std::runtime_error { "Should never happen" };
+                            throw std::runtime_error { "This should never happen" };
                         }
                         max_path_weight = new_potential_path_weight;
                         max_edge_assigned = true;
@@ -343,7 +343,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     break;
                 [[unlikely]] default:
                     if constexpr (debug_mode) {
-                        throw std::runtime_error { "Unexpected" };
+                        throw std::runtime_error { "This should never happen" };
                     }
                     break;
             }

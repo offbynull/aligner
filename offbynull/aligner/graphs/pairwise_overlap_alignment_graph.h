@@ -437,6 +437,11 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
         auto edge_to_element_offsets(
             const E& edge
         ) const {
+            if constexpr (debug_mode) {
+                if (!has_edge(edge)) {
+                    throw std::runtime_error { "Edge doesn't exist" };
+                }
+            }
             using OPT_INDEX = std::optional<INDEX>;
             using RET = std::optional<std::pair<OPT_INDEX, OPT_INDEX>>;
 
@@ -454,7 +459,7 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
                 return RET { { std::nullopt, { n1_grid_right } } };
             }
             if constexpr (debug_mode) {
-                throw std::runtime_error { "Bad edge" };
+                throw std::runtime_error { "This should never happen" };
             }
             std::unreachable();
         }

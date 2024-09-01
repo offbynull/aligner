@@ -70,7 +70,7 @@ TODO:
 * ~~add graph attribute that'll tell you max possible incoming edges to a node, and then test for that to make sure backtracker can run with supplied types~~
 * ~~remove noexcept usages OR apply noexcepts -- removed all but  added noexcepts for move constructor and move assignment, because containers change their code if the type they hold has a move assignment/constructor that throws an exception~~
   * NOTE: noexcept is a user-level thing? you can write code that does something different if some type is a invokable noexcept vs invokable that does throw an exception
-* better exception messages
+* ~~clean up exception messages~~
 * ~~make meson.build more abstract -- use variables for debug options vs release options, and use those across multiple executables~~
 * ~~make simple test that does all 4char by 4char alignments~~
   * ~~in optimized mode using heap~~

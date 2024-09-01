@@ -165,7 +165,7 @@ namespace offbynull::aligner::graphs::grid_graph {
                 );
             }
             if constexpr (debug_mode) {
-                throw std::runtime_error { "Bad edge" };
+                throw std::runtime_error { "This should never happen" };
             }
             std::unreachable();
         }
@@ -411,7 +411,7 @@ namespace offbynull::aligner::graphs::grid_graph {
         bool is_reachable(const N& n1, const N& n2) const {
             if constexpr (debug_mode) {
                 if (!has_node(n1) || !has_node(n2)) {
-                    throw std::runtime_error { "Bad node" };
+                    throw std::runtime_error { "Node doesn't exist" };
                 }
             }
             return n1 <= n2;

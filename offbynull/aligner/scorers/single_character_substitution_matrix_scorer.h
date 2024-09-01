@@ -80,14 +80,14 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             auto element_view_it { element_view.begin() };
             if constexpr (debug_mode) {
                 if (element_view_it == element_view.end()) {
-                    throw std::runtime_error { "Expected 1 character for each alphabet item -- empty" };
+                    throw std::runtime_error { "Expected 1 character for each alphabet item but 0 characters found" };
                 }
             }
             char ret { *element_view_it };
             if constexpr (debug_mode) {
                 ++element_view_it;
                 if (element_view_it != element_view.end()) {
-                    throw std::runtime_error { "Expected 1 character for each alphabet item -- multiple" };
+                    throw std::runtime_error { "Expected 1 character for each alphabet item but >1 characters found" };
                 }
             }
             return ret;
@@ -123,14 +123,14 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
         ) {
             auto down_it { std::lower_bound(sorted_alphabet.begin(), sorted_alphabet.end(), down_elem) };
             if constexpr (debug_mode) {
-                if (*down_it != down_elem) {
-                    throw std::runtime_error { "Not found" };
+                if (down_it == sorted_alphabet.end() || *down_it != down_elem) {
+                    throw std::runtime_error { "Down element not in matrix" };
                 }
             }
             auto right_it { std::lower_bound(sorted_alphabet.begin(), sorted_alphabet.end(), right_elem) };
             if constexpr (debug_mode) {
-                if (*right_it != right_elem) {
-                    throw std::runtime_error { "Not found" };
+                if (right_it == sorted_alphabet.end() || *right_it != right_elem) {
+                    throw std::runtime_error { "Right element not in matrix" };
                 }
             }
             std::size_t down_idx { static_cast<std::size_t>(down_it - sorted_alphabet.begin()) };

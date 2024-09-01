@@ -209,7 +209,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
                         // COUNT in_degree_narrowed { static_cast<COUNT>(in_degree) };
                         // if constexpr (debug_mode) {
                         //     if (in_degree_narrowed != in_degree) {
-                        //         throw std::runtime_error { "Narrowed but led to information loss" };
+                        //         throw std::runtime_error { "Input count narroweing led to information loss" };
                         //     }
                         // }
                         return { n, in_degree };
