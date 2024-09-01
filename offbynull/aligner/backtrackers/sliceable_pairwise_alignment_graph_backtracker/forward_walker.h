@@ -336,7 +336,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     std::views::common(
                         g.get_inputs(slice_entry_.node)
                         | std::views::transform(
-                            [&](const auto& edge) noexcept -> std::pair<E, ED> {
+                            [&](const auto& edge) -> std::pair<E, ED> {
                                 const N& n_from { g.get_edge_from(edge) };
                                 const ED& edge_weight { g.get_edge_data(edge) };
                                 slot<E, ED>& n_from_slot { find(n_from) };
@@ -349,7 +349,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     std::ranges::max_element(
                         incoming_accumulated.begin(),
                         incoming_accumulated.end(),
-                        [](const std::pair<E, ED>& a, const std::pair<E, ED>& b) noexcept {
+                        [](const std::pair<E, ED>& a, const std::pair<E, ED>& b) {
                             return a.second < b.second;
                         }
                     )

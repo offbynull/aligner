@@ -259,7 +259,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
                     std::views::common(
                         g.get_inputs(current_slot.node)
                         | std::views::transform(
-                            [&](const auto& edge) noexcept -> std::pair<E, WEIGHT> {
+                            [&](const auto& edge) -> std::pair<E, WEIGHT> {
                                 const auto& src_node { g.get_edge_from(edge) };
                                 const slot<N, E, WEIGHT>& src_node_slot { slots.find_ref(src_node) };
                                 const auto& edge_weight { edge_weight_accessor(edge) };

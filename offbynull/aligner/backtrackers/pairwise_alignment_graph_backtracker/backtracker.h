@@ -271,7 +271,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                     std::views::common(
                         g.get_inputs(current_slot.node)
                         | std::views::transform(
-                            [&](const auto& edge) noexcept -> std::pair<E, ED> {
+                            [&](const auto& edge) -> std::pair<E, ED> {
                                 const auto& src_node { g.get_edge_from(edge) };
                                 const slot<N, E, ED, PARENT_COUNT>& src_node_slot { slots.find_ref(src_node) };
                                 const auto& edge_weight { g.get_edge_data(edge) };
@@ -285,7 +285,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                     std::ranges::max_element(
                         incoming_accumulated.begin(),
                         incoming_accumulated.end(),
-                        [](const std::pair<E, ED>& a, const std::pair<E, ED>& b) noexcept {
+                        [](const std::pair<E, ED>& a, const std::pair<E, ED>& b) {
                             return a.second < b.second;
                         }
                     )

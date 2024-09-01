@@ -24,11 +24,11 @@ namespace offbynull::helpers::blankable_bidirectional_view {
         blankable_bidirectional_view<R>& operator=(const blankable_bidirectional_view<R>& other) = default;
         blankable_bidirectional_view<R>& operator=(blankable_bidirectional_view<R>&& other) = default;
 
-        auto begin() const noexcept {
+        auto begin() const {
             return passthrough ? range.begin() : range.end();
         }
 
-        auto end() const noexcept {
+        auto end() const {
             return range.end();
         }
     };

@@ -225,7 +225,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
             auto from_src_range {
                 std::views::iota(0u, g.grid_down_cnt)
                 | std::views::drop(1) // drop 0
-                | std::views::transform([&](const auto & grid_down) noexcept {
+                | std::views::transform([&](const auto & grid_down) {
                     N n1 { 0u, 0u };
                     N n2 { grid_down, 0u };
                     return E { edge_type::FREE_RIDE, { n1, n2 } };
@@ -234,7 +234,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
             auto to_sink_range {
                 std::views::iota(0u, g.grid_down_cnt)
                 | ( std::views::reverse | std::views::drop(1) | std::views::reverse ) // drop last
-                | std::views::transform([&](const auto & grid_down) noexcept {
+                | std::views::transform([&](const auto & grid_down) {
                     N n1 { grid_down, g.grid_right_cnt - 1u };
                     N n2 { g.grid_down_cnt - 1u, g.grid_right_cnt - 1u };
                     return E { edge_type::FREE_RIDE, { n1, n2 } };
@@ -242,7 +242,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
             };
             auto real_range {
                 g.get_edges()
-                | std::views::transform([&](const auto & p) noexcept {
+                | std::views::transform([&](const auto & p) {
                     return E { edge_type::NORMAL, p };
                 })
             };
@@ -291,7 +291,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
         auto get_outputs_full(const N& node) const {
             auto standard_outputs {
                 g.get_outputs_full(node)
-                | std::views::transform([this](const auto& raw_full_edge) noexcept {
+                | std::views::transform([this](const auto& raw_full_edge) {
                     N n1 { std::get<1>(raw_full_edge) };
                     N n2 { std::get<2>(raw_full_edge) };
                     E e { edge_type::NORMAL, { n1, n2 } };
@@ -302,7 +302,7 @@ namespace offbynull::aligner::graphs::pairwise_fitting_alignment_graph {
             blankable_bidirectional_view freeride_set_1 {
                 has_freeride_to_leaf,  // passthru if condition is met, otherwise blank
                 std::views::single(get_leaf_node())
-                | std::views::transform([node, this](const N& n2) noexcept {
+                | std::views::transform([node, this](const N& n2) {
                     N n1 { node };
                     E e { edge_type::FREE_RIDE, { n1, n2 } };
                     return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };

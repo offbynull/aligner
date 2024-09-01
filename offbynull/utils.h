@@ -110,7 +110,7 @@ namespace offbynull::utils {
         bool exists;
         T value;
 
-        packable_optional() noexcept
+        packable_optional()
         : exists{ false }
         , value {} {}
 
@@ -118,11 +118,11 @@ namespace offbynull::utils {
         : exists { true }
         , value { value_ } {}
 
-        packable_optional(T&& value_) noexcept
+        packable_optional(T&& value_)
         : exists { true }
         , value { std::move(value_) } {}
 
-        packable_optional(std::nullopt_t) noexcept
+        packable_optional(std::nullopt_t)
         : exists { false }
         , value {} {}
 

@@ -97,11 +97,11 @@ namespace offbynull::helpers::simple_value_bidirectional_view {
         simple_value_bidirectional_view<STATE>& operator=(const simple_value_bidirectional_view<STATE>& other) = default;
         simple_value_bidirectional_view<STATE>& operator=(simple_value_bidirectional_view<STATE>&& other) = default;
 
-        iterator<STATE> begin() const noexcept {
+        iterator<STATE> begin() const {
             return { begin_state };
         }
 
-        iterator<STATE> end() const noexcept {
+        iterator<STATE> end() const {
             return { end_state };
         }
     };

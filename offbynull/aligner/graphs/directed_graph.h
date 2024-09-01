@@ -239,7 +239,7 @@ namespace offbynull::aligner::graphs::directed_graph {
         }
 
         auto get_root_nodes() const {
-            auto ret { this->get_nodes() | std::views::filter([&](const auto& n) noexcept { return !has_inputs(n); }) };
+            auto ret { this->get_nodes() | std::views::filter([&](const auto& n) { return !has_inputs(n); }) };
             return ret;
         }
 
@@ -255,7 +255,7 @@ namespace offbynull::aligner::graphs::directed_graph {
         }
 
         auto get_leaf_nodes() const {
-            auto ret { this->get_nodes() | std::views::filter([&](const auto& n) noexcept { return !has_outputs(n); }) };
+            auto ret { this->get_nodes() | std::views::filter([&](const auto& n) { return !has_outputs(n); }) };
             return ret;
         }
 
@@ -271,11 +271,11 @@ namespace offbynull::aligner::graphs::directed_graph {
         }
 
         auto get_nodes() const {
-            return this->node_outbound | std::views::transform([](const auto& p) noexcept -> const N& { return p.first; });
+            return this->node_outbound | std::views::transform([](const auto& p) -> const N& { return p.first; });
         }
 
         auto get_edges() const {
-            return this->edges | std::views::transform([](auto& p) noexcept -> const E& { return p.first; });
+            return this->edges | std::views::transform([](auto& p) -> const E& { return p.first; });
         }
 
         bool has_node(const N& node) const {
@@ -292,7 +292,7 @@ namespace offbynull::aligner::graphs::directed_graph {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            return this->node_outbound.at(node) | std::views::transform([this](auto& e) noexcept {
+            return this->node_outbound.at(node) | std::views::transform([this](auto& e) {
                 const auto& [from_node, to_node, edge_data] { this->get_edge(e) };
                 return std::tuple<const E&, const N&, const N&, const ED&> { e, from_node, to_node, edge_data };
             });
@@ -304,7 +304,7 @@ namespace offbynull::aligner::graphs::directed_graph {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            return this->node_inbound.at(node) | std::views::transform([this](auto& e) noexcept {
+            return this->node_inbound.at(node) | std::views::transform([this](auto& e) {
                 const auto& [from_node, to_node, edge_data] { this->get_edge(e) };
                 return std::tuple<const E&, const N&, const N&, const ED&> { e, from_node, to_node, edge_data };
             });
@@ -317,7 +317,7 @@ namespace offbynull::aligner::graphs::directed_graph {
                 }
             }
             return this->node_outbound.at(node)
-                | std::views::transform([this](auto& e) noexcept -> const E& { return e; });
+                | std::views::transform([this](auto& e) -> const E& { return e; });
         }
 
         auto get_inputs(const N& node) const {
@@ -327,7 +327,7 @@ namespace offbynull::aligner::graphs::directed_graph {
                 }
             }
             return this->node_inbound.at(node)
-                | std::views::transform([this](auto& e) noexcept -> const E& { return e; });
+                | std::views::transform([this](auto& e) -> const E& { return e; });
         }
 
         bool has_outputs(const N& node) const {

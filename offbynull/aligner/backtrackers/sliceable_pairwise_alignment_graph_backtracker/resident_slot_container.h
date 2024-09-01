@@ -58,21 +58,21 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         bool operator()(
             const resident_slot_with_node<N, E, WEIGHT>& lhs,
             const resident_slot_with_node<N, E, WEIGHT>& rhs
-        ) const noexcept {
+        ) const {
             return lhs.node < rhs.node;
         }
 
         bool operator()(
             const resident_slot_with_node<N, E, WEIGHT>& lhs,
             const N& rhs
-        ) const noexcept {
+        ) const {
             return lhs.node < rhs;
         }
 
         bool operator()(
             const N& lhs,
             const resident_slot_with_node<N, E, WEIGHT>& rhs
-        ) const noexcept {
+        ) const {
             return lhs < rhs.node;
         }
     };

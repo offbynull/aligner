@@ -271,7 +271,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     std::views::iota(0u, grid_down_cnt),
                     std::views::iota(0u, grid_right_cnt)
                 )
-                | std::views::transform([](const auto & p) noexcept {
+                | std::views::transform([](const auto & p) {
                     const auto &[grid_down, grid_right] { p };
                     return N { node_layer::DIAGONAL, grid_down, grid_right };
                 })
@@ -281,7 +281,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     std::views::iota(1u, grid_down_cnt),
                     std::views::iota(0u, grid_right_cnt)
                 )
-                | std::views::transform([](const auto & p) noexcept {
+                | std::views::transform([](const auto & p) {
                     const auto &[grid_down, grid_right] { p };
                     return N { node_layer::DOWN, grid_down, grid_right };
                 })
@@ -291,7 +291,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     std::views::iota(0u, grid_down_cnt),
                     std::views::iota(1u, grid_right_cnt)
                 )
-                | std::views::transform([](const auto & p) noexcept {
+                | std::views::transform([](const auto & p) {
                     const auto &[grid_down, grid_right] { p };
                     return N { node_layer::RIGHT, grid_down, grid_right };
                 })
@@ -497,7 +497,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            return this->get_outputs_full(node) | std::views::transform([this](const auto& v) noexcept -> E { return std::get<0>(v); });
+            return this->get_outputs_full(node) | std::views::transform([this](const auto& v) -> E { return std::get<0>(v); });
         }
 
         auto get_inputs(const N& node) const {
@@ -506,7 +506,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            return this->get_inputs_full(node) | std::views::transform([this](const auto& v) noexcept -> E { return std::get<0>(v); });
+            return this->get_inputs_full(node) | std::views::transform([this](const auto& v) -> E { return std::get<0>(v); });
         }
 
         bool has_outputs(const N& node) const {
