@@ -8,8 +8,12 @@ namespace {
     using offbynull::utils::is_debug_mode;
 
     TEST(OASConstantScorerTest, SanityTest) {
-        constant_scorer<is_debug_mode(), int> scorer { 5 };
-        EXPECT_EQ(5, (scorer(std::tuple<> {}, 'a', 'b')));
-        EXPECT_EQ(5, (scorer(std::tuple<> {}, 'z', 'c')));
+        constant_scorer<is_debug_mode(), char, char, int> scorer { 5 };
+        char a_ { 'a' };
+        char b_ { 'b' };
+        char z_ { 'z' };
+        char c_ { 'c' };
+        EXPECT_EQ(5, (scorer(std::tuple<> {}, { { a_ } }, { { b_ } })));
+        EXPECT_EQ(5, (scorer(std::tuple<> {}, { { z_ } }, { { c_ } })));
     }
 }

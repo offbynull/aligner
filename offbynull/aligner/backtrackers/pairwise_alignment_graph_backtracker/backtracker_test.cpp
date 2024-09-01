@@ -87,7 +87,7 @@ namespace {
         using E = decltype(g)::E;
 
         const auto& [path, weight] {
-            heap_find_max_path<is_debug_mode(), false>(g)
+            heap_find_max_path<is_debug_mode(), std::size_t, std::size_t, false>(g)
         };
 
         for (const E& e : path) {
@@ -129,7 +129,7 @@ namespace {
         using E = decltype(g)::E;
 
         const auto& [path, weight] {
-            heap_find_max_path<is_debug_mode(), true>(g)
+            heap_find_max_path<is_debug_mode(), std::size_t, std::size_t, true>(g)
         };
 
         for (const E& e : path) {
@@ -173,6 +173,8 @@ namespace {
         const auto& [path, weight] {
             stack_find_max_path<
                 is_debug_mode(),
+                std::size_t,
+                std::size_t,
                 2zu /*grid_down_cnt*/,
                 3zu /*grid_right_cnt*/,
                 1zu /*grid_depth_cnt*/,
