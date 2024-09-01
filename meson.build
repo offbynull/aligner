@@ -116,37 +116,51 @@ tests_src = [
         'offbynull/aligner/scorers/qwerty_scorer_test.cpp',
 ##        'offbynull/aligner/aligner_test.cpp'
 ]
-test_exec_cpp_args = []
-test_exec_link_args = []
+base_cpp_args = []
+base_link_args = []
+base_override_options = []
+base_debug_cpp_args = []
+base_debug_link_args = []
+base_debug_override_options = base_override_options + ['optimization=0', 'buildtype=debug', 'b_lto=false', 'b_ndebug=false', 'debug=true', 'cpp_debugstl=true']
+base_release_cpp_args = []
+base_release_link_args = []
+base_release_override_options = base_override_options +['optimization=3', 'buildtype=release', 'b_lto=true', 'b_ndebug=true', 'debug=false', 'cpp_debugstl=false']
 cc = meson.get_compiler('cpp')
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         # No -W-padded
         # ------------
         # Don't care about the compiler padding a struct.
-        test_exec_cpp_args += ['-Wno-padded']
+        base_cpp_args += ['-Wno-padded']
         # No -W-noexcept
         # -------------
         # Don't care that functions can be marked with noexcept.
-        test_exec_cpp_args += ['-Wno-noexcept']
+        base_cpp_args += ['-Wno-noexcept']
         # No -W-inline
         # ------------
         # When function implementations are placed inside of class definitions, it's a hint to the compiler to inline the function. If it
         # can't inline the function (or it doesn't inline it because it seems like a bad idea), it puts out a -Winline warning. This only
         # shows up when compiling at higher optimization levels.
-        test_exec_cpp_args += ['-Wno-inline']
+        base_cpp_args += ['-Wno-inline']
         # No -W-packed
         # -------------
         # When packing a struct, the compiler issues a warning if the struct is exactly the same size in its packed form vs its padded
         # form (because all members are already aligned). These warnings are being supressed because the intention is for these structs to
         # be packed, even if packing does nothing. In the future, should such a struct ever change such that members are no longer aligned,
         # the packing will ensure padding stays out.
-        test_exec_cpp_args += ['-Wno-packed']
-        # No -Wsuggest-attribute=pure
-        # ---------------------------
-        # This is warning about applying an extension specific to g++. It doesn't apply to portable C++ code. As such, don't care about it.
-        test_exec_cpp_args += ['-Wno-suggest-attribute=pure']
-        # Google saniitzers
-        # -----------------
+        base_cpp_args += ['-Wno-packed']
+        # No warnings for non-portable features
+        # -------------------------------------
+        # These warnings are about applying extensions specific to g++. It doesn't apply to portable C++ code. As such, don't care about
+        # them.
+        base_cpp_args += ['-Wno-suggest-attribute=pure', '-Wno-suggest-attribute=const']
+        # Compiler diagnostics
+        # --------------------
+        base_cpp_args += ['-fconcepts-diagnostics-depth=9999', '-ftemplate-backtrace-limit=0']
+
+        base_debug_cpp_args = base_cpp_args + base_debug_cpp_args  # Move in base args that were decided in the blocks above
+        base_debug_link_args = base_cpp_args + base_debug_cpp_args  # Move in base args that were decided in the blocks above
+        # Google sanititzers
+        # ------------------
         # DON'T USE THIS? MESON HAS b_sanitize OPTION?
         # san_args = ['-fsanitize=undefined', '-fsanitize=thread']
         # if cc.get_id() == 'clang'
@@ -155,40 +169,35 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         #         san_args += ['-fsanitize=leak']
         #         san_args += ['-fsanitize=address']
         # endif
-        # test_exec_cpp_args += san_args
-        # test_exec_link_args += san_args
-        # Debugging flags / options
-        # -------------------------
-        test_exec_cpp_args += ['-fconcepts-diagnostics-depth=9999', '-ftemplate-backtrace-limit=0', '-D_GLIBCXX_DEBUG']
-        # Enable struct packing
-        # ---------------------
-        test_exec_cpp_args += ['-DOBN_PACK_STRUCTS']
+        # debug_cpp_args += san_args
+        # debug_link_args += san_args
+        # Extra standard library debugging
+        # --------------------------------
+        base_debug_cpp_args += ['-D_GLIBCXX_DEBUG']
+
+        base_release_cpp_args = base_cpp_args + base_release_cpp_args  # Move in base args that were decided in the blocks above
+        base_release_link_args = base_cpp_args + base_release_cpp_args  # Move in base args that were decided in the blocks above
 endif
 test_exec = executable(
-        'gtest-all',
+        'gtest-all_debug',
         tests_src,
         source_checker,
         doc_generator,
+        override_options : base_debug_override_options,
         dependencies : [boost_dep, gtest_dep, gmock_dep],
-        cpp_args : test_exec_cpp_args,
-        link_args : test_exec_link_args
+        cpp_args : base_debug_cpp_args \
+                + ['-DOBN_PACK_STRUCTS'],  # Pack structs -- done to ensure code doesn't crash when structs are packed
+        link_args : base_debug_link_args
 )
-if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
-        test_exec_optimized_cpp_args = []
-        foreach item : test_exec_cpp_args
-                if item != '-D_GLIBCXX_DEBUG'
-                        test_exec_optimized_cpp_args += item
-                endif
-        endforeach
-endif
 test_exec_optimized = executable(
-        'gtest-all optimized',
+        'gtest-all_optimized',
         tests_src,
         source_checker,
         doc_generator,
         dependencies : [boost_dep, gtest_dep, gmock_dep],
-        override_options : ['optimization=3', 'buildtype=release', 'b_lto=true', 'b_ndebug=true', 'debug=false', 'cpp_debugstl=false'],
-        cpp_args : test_exec_optimized_cpp_args,
-        link_args : test_exec_link_args
+        override_options : base_release_override_options,
+        cpp_args : base_release_cpp_args \
+                + ['-DOBN_PACK_STRUCTS'],  # Pack structs -- done to ensure code doesn't crash when structs are packed
+        link_args : base_release_link_args
 )
 # test('gtest tests', test_exec)
