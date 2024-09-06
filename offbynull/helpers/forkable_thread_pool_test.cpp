@@ -13,7 +13,7 @@ namespace {
         struct reducer {
             const std::int64_t num {};
             std::int64_t operator()(forkable_thread_pool<std::int64_t>& owner) const {
-                std::cout << num << std::endl;
+                // std::cout << num << std::endl;
                 if (num == 1) {
                     return 1;
                 }
@@ -24,8 +24,9 @@ namespace {
         };
 
         forkable_thread_pool<std::int64_t> pool { 4zu };
-        std::int64_t final_num { (*pool.queue(reducer {15})).get() };
+        std::int64_t final_num { (*pool.queue(reducer {10})).get() };
         std::cout << final_num << std::endl;
         pool.close();
+        EXPECT_EQ(512, final_num);
     }
 }
