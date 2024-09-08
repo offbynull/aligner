@@ -57,6 +57,7 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::ranges::size': 'ranges',
     'std::ranges::distance': 'ranges',
     'std::ranges::sort': 'algorithm',
+    'std::min': 'algorithm',
     'std::ranges::max_element': 'ranges',
     'std::ranges::begin': 'ranges',
     'std::ranges::end': 'ranges',

@@ -34,6 +34,10 @@ namespace offbynull::concepts {
     // the sizeof() test below could be wrong.
     template<typename T>
     concept widenable_to_size_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() <= std::numeric_limits<std::size_t>::max();
+
+    // Checks if > 2 types are all the same
+    template<typename T, typename... Ts>
+    concept many_same_as = (std::same_as<T, Ts> && ...);
 }
 
 #endif //OFFBYNULL_CONCEPTS_H
