@@ -191,7 +191,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         };
 
         auto list() {
-            return g.slice_nodes(target_slice)
+            return g.row_nodes(target_slice)
                 | std::views::transform([&](const N& n) {
                     return list_entry { n, find(n) };
                 });

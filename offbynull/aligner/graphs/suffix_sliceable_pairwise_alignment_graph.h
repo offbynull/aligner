@@ -178,12 +178,12 @@ namespace offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph 
             return g.node_to_grid_offsets(node);
         }
 
-        auto slice_nodes(INDEX grid_down) const {
-            return g.slice_nodes(grid_down);
+        auto row_nodes(INDEX grid_down) const {
+            return g.row_nodes(grid_down);
         }
 
-        auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
-            return g.slice_nodes(grid_down, root_node, leaf_node);
+        auto row_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
+            return g.row_nodes(grid_down, root_node, leaf_node);
         }
 
         bool is_reachable(const N& n1, const N& n2) const {

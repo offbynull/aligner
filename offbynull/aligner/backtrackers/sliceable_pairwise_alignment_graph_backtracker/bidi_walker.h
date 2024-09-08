@@ -158,7 +158,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_backward_walker_container_creator_pack());
 
         const G& g;
-        const INDEX target_slice;
+        const INDEX target_row;
         const reversed_sliceable_pairwise_alignment_graph<debug_mode, G> reversed_g;
         forward_walker<debug_mode, G, FORWARD_WALKER_CONTAINER_CREATOR_PACK> forward_walker_;
         forward_walker<debug_mode, std::remove_const_t<decltype(reversed_g)>, BACKWARD_WALKER_CONTAINER_CREATOR_PACK> backward_walker;
@@ -166,17 +166,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     public:
         static bidi_walker create_and_initialize(
             const G& g_,
-            const INDEX target_slice,
+            const INDEX target_row,
             CONTAINER_CREATOR_PACK container_creator_pack = {}
         ) {
             if constexpr (debug_mode) {
-                if (target_slice >= g_.grid_down_cnt) {
+                if (target_row >= g_.grid_down_cnt) {
                     throw std::runtime_error { "Slice too far down" };
                 }
             }
             bidi_walker ret {
                 g_,
-                target_slice,
+                target_row,
                 container_creator_pack
             };
             return ret;
@@ -199,7 +199,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         };
 
         auto list() {
-            return g.slice_nodes(target_slice)
+            return g.row_nodes(target_row)
                 | std::views::transform([&](const N& n) {
                     return list_entry { n, find(n) };
                 });
@@ -251,23 +251,23 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     private:
         bidi_walker(
             const G& g_,
-            const INDEX target_slice_,
+            const INDEX target_row_,
             CONTAINER_CREATOR_PACK container_creator_pack_ = {}
         )
         : g { g_ }
-        , target_slice { target_slice_ }
+        , target_row { target_row_ }
         , reversed_g { g }
         , forward_walker_ {
             decltype(forward_walker_)::create_and_initialize(
                 g,
-                target_slice,
+                target_row,
                 container_creator_pack_.create_forward_walker_container_creator_pack()
             )
         }
         , backward_walker {
             decltype(backward_walker)::create_and_initialize(
                 reversed_g,
-                g.grid_down_cnt - 1u - target_slice,
+                g.grid_down_cnt - 1u - target_row,
                 container_creator_pack_.create_backward_walker_container_creator_pack()
             )
         } {}

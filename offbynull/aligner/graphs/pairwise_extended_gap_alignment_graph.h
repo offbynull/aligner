@@ -644,11 +644,11 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         }
 
     public:
-        auto slice_nodes(INDEX grid_down) const {
-            return slice_nodes(grid_down, get_root_node(), get_leaf_node());
+        auto row_nodes(INDEX grid_down) const {
+            return row_nodes(grid_down, get_root_node(), get_leaf_node());
         }
 
-        auto slice_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
+        auto row_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
             if constexpr (debug_mode) {
                 if (!has_node(root_node) || !has_node(leaf_node)) {
                     throw std::runtime_error { "Bad node" };

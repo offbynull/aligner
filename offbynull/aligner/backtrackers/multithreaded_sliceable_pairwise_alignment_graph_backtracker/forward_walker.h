@@ -11,7 +11,8 @@
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/backtrackers/multithreaded_sliceable_pairwise_alignment_graph_backtracker/slot.h"
 #include "offbynull/aligner/backtrackers/multithreaded_sliceable_pairwise_alignment_graph_backtracker/diagonal_slice_slot_container.h"
-#include "offbynull/aligner/backtrackers/multithreaded_sliceable_pairwise_alignment_graph_backtracker/diagonal_slice_slot_container_triplet.h"
+#include "offbynull/aligner/backtrackers/multithreaded_sliceable_pairwise_alignment_graph_backtracker/\
+diagonal_slice_slot_container_triplet.h"
 #include "offbynull/aligner/backtrackers/multithreaded_sliceable_pairwise_alignment_graph_backtracker/resident_slot_container.h"
 #include "offbynull/concepts.h"
 
@@ -177,7 +178,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         const G& g;
         resident_slot_container<debug_mode, G, RESIDENT_SLOT_CONTAINER_CONTAINER_CREATOR_PACK> resident_slots;
         diagonal_slice_slot_container_triplet<debug_mode, G, SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK> slice_slots;
-        decltype(g.slice_nodes(0u)) slice;
+        decltype(g.row_nodes(0u)) slice;
         decltype(slice.begin()) slice_it;
         slice_entry<N, E, ED> slice_entry_;
 
@@ -225,7 +226,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         : g { g_ }
         , resident_slots { g, container_creator_pack_.create_resident_slot_container_container_creator_pack() }
         , slice_slots { g, container_creator_pack_.create_slice_slot_container_container_creator_pack() }
-        , slice { g.slice_nodes(0u) }
+        , slice { g.row_nodes(0u) }
         , slice_it { slice.begin() }
         , slice_entry_ {} {
             slice_entry_.node = *slice_it;
@@ -241,7 +242,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
                     return;
                 }
                 slice_slots.move_down();
-                slice = g.slice_nodes(slice_slots.grid_down_offset);
+                slice = g.row_nodes(slice_slots.grid_down_offset);
                 slice_it = slice.begin();
                 slice_entry_.node = *slice_it;
                 slice_entry_.slot_ptr = &find(slice_entry_.node);

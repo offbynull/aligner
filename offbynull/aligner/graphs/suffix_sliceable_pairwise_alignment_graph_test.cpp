@@ -308,7 +308,7 @@ namespace {
         using E = typename decltype(g)::E;
 
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(0u))),
+            (copy_to_vector(g.row_nodes(0u))),
             (std::vector<N> {
                 N { 5zu, 5zu },
                 N { 5zu, 6zu },
@@ -316,7 +316,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(1u))),
+            (copy_to_vector(g.row_nodes(1u))),
             (std::vector<N> {
                 N { 6zu, 5zu },
                 N { 6zu, 6zu },
@@ -408,13 +408,13 @@ namespace {
         std::cout << std::endl;
 
         std::cout << "norm0" << std::endl;
-        for (auto&& n : g.slice_nodes(0zu)) {
+        for (auto&& n : g.row_nodes(0zu)) {
             std::cout << n << " ";
         }
         std::cout << std::endl;
 
         std::cout << "norm1" << std::endl;
-        for (auto&& n : g.slice_nodes(1zu)) {
+        for (auto&& n : g.row_nodes(1zu)) {
             std::cout << n << " ";
         }
         std::cout << std::endl;

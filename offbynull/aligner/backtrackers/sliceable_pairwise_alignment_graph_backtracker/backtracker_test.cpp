@@ -312,12 +312,12 @@ namespace {
         };
         using E = typename decltype(g)::E;
 
-        // N first_node { *g.slice_nodes(1u).begin() };
+        // N first_node { *g.row_nodes(1u).begin() };
         // offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph<
         //     true,
         //     decltype(g)
         // > suffix_g { g, first_node };
-        // for (const N& n : suffix_g.slice_nodes(0u)) {
+        // for (const N& n : suffix_g.row_nodes(0u)) {
         //     const auto& [n_layer, n_down, n_right] { n };
         //     std::cout << n_down << '/' << n_right << '/' << static_cast<int>(n_layer) << std::endl;
         // }
@@ -414,7 +414,7 @@ namespace {
         using E = typename decltype(g)::E;
 
         // using offbynull::aligner::graph::utils::pairwise_graph_to_graphviz;
-        // N first_node { *g.slice_nodes(2u).begin() };
+        // N first_node { *g.row_nodes(2u).begin() };
         // offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph<
         //     decltype(g)
         // > g_1 { g };

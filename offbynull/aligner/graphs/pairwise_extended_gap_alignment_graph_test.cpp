@@ -1317,7 +1317,7 @@ namespace {
         using E = typename decltype(g)::E;
 
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(0u))),
+            (copy_to_vector(g.row_nodes(0u))),
             (std::vector<N> {
                 N { node_layer::DIAGONAL, 0zu, 0zu },
                 N { node_layer::RIGHT, 0zu, 1zu },
@@ -1327,7 +1327,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(1u))),
+            (copy_to_vector(g.row_nodes(1u))),
             (std::vector<N> {
                 N { node_layer::DOWN, 1zu, 0zu },
                 N { node_layer::DIAGONAL, 1zu, 0zu },
@@ -1398,7 +1398,7 @@ namespace {
         using N = typename decltype(g)::N;
 
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(0u, N { node_layer::DIAGONAL, 0zu, 0zu }, N { node_layer::DIAGONAL, 4zu, 4zu }))),
+            (copy_to_vector(g.row_nodes(0u, N { node_layer::DIAGONAL, 0zu, 0zu }, N { node_layer::DIAGONAL, 4zu, 4zu }))),
             (std::vector<N> {
                 N { node_layer::DIAGONAL, 0zu, 0zu },
                 N { node_layer::RIGHT, 0zu, 1zu },
@@ -1412,7 +1412,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(4u, N { node_layer::DIAGONAL, 0zu, 0zu }, N { node_layer::DIAGONAL, 4zu, 4zu }))),
+            (copy_to_vector(g.row_nodes(4u, N { node_layer::DIAGONAL, 0zu, 0zu }, N { node_layer::DIAGONAL, 4zu, 4zu }))),
             (std::vector<N> {
                 N { node_layer::DOWN, 4zu, 0zu },
                 N { node_layer::DIAGONAL, 4zu, 0zu },
@@ -1432,7 +1432,7 @@ namespace {
         );
 
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(1u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 4zu, 4zu }))),
+            (copy_to_vector(g.row_nodes(1u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 4zu, 4zu }))),
             (std::vector<N> {
                 // N { node_layer::DOWN, 1zu, 1zu },
                 // N { node_layer::RIGHT, 1zu, 1zu },
@@ -1449,7 +1449,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(2u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 4zu, 4zu }))),
+            (copy_to_vector(g.row_nodes(2u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 4zu, 4zu }))),
             (std::vector<N> {
                 N { node_layer::DOWN, 2zu, 1zu },
                 N { node_layer::RIGHT, 2zu, 1zu },
@@ -1466,7 +1466,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(4u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 4zu, 4zu }))),
+            (copy_to_vector(g.row_nodes(4u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 4zu, 4zu }))),
             (std::vector<N> {
                 N { node_layer::DOWN, 4zu, 1zu },
                 N { node_layer::RIGHT, 4zu, 1zu },
@@ -1484,7 +1484,7 @@ namespace {
         );
 
         EXPECT_EQ(
-            (copy_to_vector(g.slice_nodes(1u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 1zu, 4zu }))),
+            (copy_to_vector(g.row_nodes(1u, N { node_layer::DIAGONAL, 1zu, 1zu }, N { node_layer::RIGHT, 1zu, 4zu }))),
             (std::vector<N> {
                 // N { node_layer::DOWN, 1zu, 1zu },
                 // N { node_layer::RIGHT, 1zu, 1zu },

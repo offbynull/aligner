@@ -41,12 +41,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         ::resident_slot_with_node;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container
         ::resident_slot_container_stack_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container
-        ::slice_slot_container_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container
-        ::slice_slot_container_heap_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container
-        ::slice_slot_container_stack_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container
+        ::row_slot_container_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container
+        ::row_slot_container_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container
+        ::row_slot_container_stack_container_creator_pack;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
@@ -71,7 +71,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         && backtrackable_edge<E>
         && weight<ED>
         && requires(T t) {
-            { t.create_slice_slot_container_container_creator_pack() } -> slice_slot_container_container_creator_pack<E, ED>;
+            { t.create_row_slot_container_container_creator_pack() } -> row_slot_container_container_creator_pack<E, ED>;
             { t.create_path_container_container_creator_pack() } -> path_container_container_creator_pack<E>;
         };
 
@@ -82,11 +82,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         weight ED
     >
     struct sliced_subdivider_heap_container_creator_pack {
-        slice_slot_container_heap_container_creator_pack<
+        row_slot_container_heap_container_creator_pack<
             debug_mode,
             E,
             ED
-        > create_slice_slot_container_container_creator_pack() const {
+        > create_row_slot_container_container_creator_pack() const {
             return {};
         }
 
@@ -108,13 +108,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         std::size_t path_edge_capacity
     >
     struct sliced_subdivider_stack_container_creator_pack {
-        slice_slot_container_stack_container_creator_pack<
+        row_slot_container_stack_container_creator_pack<
             debug_mode,
             E,
             ED,
             grid_right_cnt,
             grid_depth_cnt
-        > create_slice_slot_container_container_creator_pack() const {
+        > create_row_slot_container_container_creator_pack() const {
             return {};
         }
 
@@ -154,8 +154,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
-        using SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK =
-            decltype(std::declval<CONTAINER_CREATOR_PACK>().create_slice_slot_container_container_creator_pack());
+        using ROW_SLOT_CONTAINER_CONTAINER_CREATOR_PACK =
+            decltype(std::declval<CONTAINER_CREATOR_PACK>().create_row_slot_container_container_creator_pack());
         using PATH_CONTAINER_CONTAINER_CREATOR_PACK =
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container_container_creator_pack());
 
@@ -247,11 +247,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 // resident_slot_containers being created to be stack-based and maxxed out to 2.
                 using BACKING_SSC_CCP_TYPE = decltype(
                     container_creator_pack
-                        .create_slice_slot_container_container_creator_pack()
+                        .create_row_slot_container_container_creator_pack()
                 );
                 struct override_forward_walker_container_creator_pack {
                     BACKING_SSC_CCP_TYPE backing_ssc_ccp;
-                    auto create_slice_slot_container_container_creator_pack() const {
+                    auto create_row_slot_container_container_creator_pack() const {
                         return backing_ssc_ccp;
                     }
                     auto create_resident_slot_container_container_creator_pack() const {
@@ -279,18 +279,18 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                         mid_down_offset,
                         override_bidi_walker_container_creator_pack {
                             container_creator_pack
-                                .create_slice_slot_container_container_creator_pack()
+                                .create_row_slot_container_container_creator_pack()
                         }
                     )
                 };
                 // walk middle, pulling out node/edge with max weight
-                auto mid_slice { sub_graph.slice_nodes(mid_down_offset) };
+                auto mid_row { sub_graph.row_nodes(mid_down_offset) };
                 if constexpr (debug_mode) {
-                    if (mid_slice.begin() == mid_slice.end()) {
-                        throw std::runtime_error { "Slice should never be empty" };
+                    if (mid_row.begin() == mid_row.end()) {
+                        throw std::runtime_error { "Row should never be empty" };
                     }
                 }
-                for (const N& node : mid_slice) {
+                for (const N& node : mid_row) {
                     const auto& [forward_slot, backward_slot] { bidi_walker_.find(node) };
                     const auto new_potential_path_weight {
                         existing_weight_at_root + forward_slot.backtracking_weight + backward_slot.backtracking_weight

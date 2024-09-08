@@ -1,5 +1,5 @@
-#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICE_SLOT_CONTAINER_H
-#define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICE_SLOT_CONTAINER_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_ROW_SLOT_CONTAINER_H
+#define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_ROW_SLOT_CONTAINER_H
 
 #include <functional>
 #include <optional>
@@ -14,7 +14,7 @@
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/slot.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 
-namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slice_slot_container {
+namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container {
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
@@ -32,7 +32,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         typename E,
         typename ED
     >
-    concept slice_slot_container_container_creator_pack =
+    concept row_slot_container_container_creator_pack =
         unqualified_value_type<T>
         && backtrackable_edge<E>
         && weight<ED>
@@ -45,7 +45,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         backtrackable_edge E,
         weight ED
     >
-    struct slice_slot_container_heap_container_creator_pack {
+    struct row_slot_container_heap_container_creator_pack {
         std::vector<slot<E, ED>> create_slot_container(std::size_t grid_right_cnt, std::size_t grid_depth_cnt) const {
             std::size_t cnt { grid_right_cnt * grid_depth_cnt };
             return std::vector<slot<E, ED>>(cnt);
@@ -59,7 +59,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         std::size_t grid_right_cnt,
         std::size_t grid_depth_cnt
     >
-    struct slice_slot_container_stack_container_creator_pack {
+    struct row_slot_container_stack_container_creator_pack {
         static constexpr std::size_t max_elem_cnt { grid_right_cnt * grid_depth_cnt };
         using SEGMENT_CONTAINER_TYPE = typename static_vector_typer<
             debug_mode,
@@ -83,16 +83,16 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
-        slice_slot_container_container_creator_pack<
+        row_slot_container_container_creator_pack<
             typename G::E,
             typename G::ED
-        > CONTAINER_CREATOR_PACK = slice_slot_container_heap_container_creator_pack<
+        > CONTAINER_CREATOR_PACK = row_slot_container_heap_container_creator_pack<
             debug_mode,
             typename G::E,
             typename G::ED
         >
     >
-    class slice_slot_container {
+    class row_slot_container {
     private:
         using N = typename G::N;
         using E = typename G::E;
@@ -106,7 +106,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         INDEX grid_down;
 
     public:
-        slice_slot_container(
+        row_slot_container(
             const G& g_,
             CONTAINER_CREATOR_PACK container_creator_pack= {}
         )
@@ -134,4 +134,4 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     };
 }
 
-#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_SLICE_SLOT_CONTAINER_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_ROW_SLOT_CONTAINER_H
