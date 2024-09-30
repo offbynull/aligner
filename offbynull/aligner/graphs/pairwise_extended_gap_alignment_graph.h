@@ -15,6 +15,7 @@
 #include <format>
 #include <type_traits>
 #include <functional>
+#include "offbynull/aligner/graph/multithreaded_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/sequence/sequence.h"
 #include "offbynull/aligner/scorer/scorer.h"
@@ -26,6 +27,8 @@
 namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::sequence::sequence::sequence;
+    using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
+    using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::generic_segmented_diagonal_nodes;
     using offbynull::aligner::scorer::scorer::scorer;
     using offbynull::aligner::scorer::scorer::scorer_without_explicit_weight;
     using offbynull::concepts::widenable_to_size_t;
@@ -583,13 +586,44 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             std::unreachable();
         }
 
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) const {
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offset(const N& node) const {
             const auto& [layer, down_offset, right_offset] { node };
             return { down_offset, right_offset, static_cast<std::size_t>(layer) };
         }
 
+        std::ranges::bidirectional_range auto grid_offset_to_nodes(INDEX grid_down, INDEX grid_right) const {
+            if constexpr (debug_mode) {
+                if (grid_down >= grid_down_cnt || grid_right >= grid_right_cnt) {
+                    throw std::runtime_error { "Out of bounds" };
+                }
+            }
+            using CONTAINER = static_vector_typer<debug_mode, N, 3zu>::type;
+            CONTAINER ret {};
+            N n1 { node_layer::DOWN, grid_down, grid_right };
+            if (has_node(n1)) {
+                ret.push_back(n1);
+            }
+            N n2 { node_layer::RIGHT, grid_down, grid_right };
+            if (has_node(n2)) {
+                ret.push_back(n2);
+            }
+            N n3 { node_layer::DIAGONAL, grid_down, grid_right };
+            if (has_node(n3)) {
+                ret.push_back(n3);
+            }
+            return ret;
+            // THE FOLLOWING IS NOT POSSIBLE BECAUSE IT RESULTS IN A FORWARD RANGE, NOT A BIDIRECTIONAL RANGE:
+            // return
+            //     std::array<N, 3zu> {
+            //         N { node_layer::DOWN, grid_down, grid_right },
+            //         N { node_layer::RIGHT, grid_down, grid_right },
+            //         N { node_layer::DIAGONAL, grid_down, grid_right }
+            //     }
+            //     | std::views::filter([this](const N& n) { return has_node(n); });
+        }
+
     private:
-        static N slice_next_node_(const N& node) {
+        static N row_next_node_(const N& node) {
             const auto& [layer_, grid_down, grid_right] { node };
             N next_node;
             if (grid_down == 0u && grid_right == 0u && layer_ == node_layer::DIAGONAL) {
@@ -616,7 +650,7 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             return next_node;
         }
 
-        static N slice_prev_node_(const N& node) {
+        static N row_prev_node_(const N& node) {
             const auto& [layer_, grid_down, grid_right] { node };
             N prev_node;
             if (grid_down == 0u && grid_right == 1u && layer_ == node_layer::RIGHT) {
@@ -700,14 +734,14 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 } else {
                     end_node = { node_layer::DIAGONAL, grid_down, leaf_right };
                 }
-                end_node = slice_next_node_(end_node);  // +1, because iterator.end() should be 1 past the last element
+                end_node = row_next_node_(end_node);  // +1, because iterator.end() should be 1 past the last element
             }
 
             struct state {
                 N value_;
 
-                void to_prev() { value_ = slice_prev_node_(value_); }
-                void to_next() { value_ = slice_next_node_(value_); }
+                void to_prev() { value_ = row_prev_node_(value_); }
+                void to_next() { value_ = row_next_node_(value_); }
                 N value() const { return value_; }
 
                 bool operator==(const state& other) const = default;
@@ -716,6 +750,24 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
                 state { begin_node },
                 state { end_node }
             };
+        }
+
+        auto segmented_diagonal_nodes(
+            axis axis_,
+            INDEX axis_position,
+            std::size_t max_segments
+        ) {
+            return generic_segmented_diagonal_nodes<debug_mode>(*this, axis_, axis_position, max_segments);
+        }
+
+        auto segmented_diagonal_nodes(
+            axis axis_,
+            INDEX axis_position,
+            const N& root_node,
+            const N& leaf_node,
+            std::size_t max_segments
+        ) {
+            return generic_segmented_diagonal_nodes<debug_mode>(*this, axis_, axis_position, root_node, leaf_node, max_segments);
         }
 
         bool is_reachable(const N& n1, const N& n2) const {

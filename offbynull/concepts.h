@@ -27,6 +27,26 @@ namespace offbynull::concepts {
     template<typename T, typename... Ts>
     concept range_of_one_of = std::ranges::range<T> && (std::same_as<std::ranges::range_value_t<T>, Ts> || ...);
 
+    template<typename T, typename... Ts>
+    concept range_of_range_of_one_of = std::ranges::range<T> && std::ranges::range<std::ranges::range_value_t<T>>
+        && (std::same_as<std::ranges::range_value_t<std::ranges::range_value_t<T>>, Ts> || ...);
+
+    template<typename T, typename V>
+    concept bidirectional_range_of_type = std::ranges::bidirectional_range<T> && std::same_as<std::ranges::range_value_t<T>, V>;
+
+    template<typename T, typename... Ts>
+    concept bidirectional_range_of_one_of = std::ranges::bidirectional_range<T>
+        && (std::same_as<std::ranges::range_value_t<T>, Ts> || ...);
+
+    template<typename T>
+    concept bidirectional_range_of_bidirectional_range = std::ranges::bidirectional_range<T>
+        && std::ranges::bidirectional_range<std::ranges::range_value_t<T>>;
+
+    template<typename T, typename... Ts>
+    concept bidirectional_range_of_bidirectional_range_of_one_of = std::ranges::bidirectional_range<T>
+        && std::ranges::bidirectional_range<std::ranges::range_value_t<T>>
+        && (std::same_as<std::ranges::range_value_t<std::ranges::range_value_t<T>>, Ts> || ...);
+
     template<typename T, typename ... Ts>
     concept one_of = (std::same_as<T, Ts> || ...);
 

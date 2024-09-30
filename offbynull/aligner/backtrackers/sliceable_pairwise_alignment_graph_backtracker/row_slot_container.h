@@ -120,7 +120,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         , grid_down {} {}
 
         std::optional<std::reference_wrapper<slot<E, ED>>> find(const N& node) {
-            const auto& [down_offset, right_offset, depth] { g.node_to_grid_offsets(node) };
+            const auto& [down_offset, right_offset, depth] { g.node_to_grid_offset(node) };
             if (grid_down != down_offset) {
                 return { std::nullopt };
             }

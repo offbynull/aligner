@@ -9,10 +9,12 @@
 #include <stdexcept>
 #include <type_traits>
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
+#include "offbynull/aligner/graph/multithreaded_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 
 namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::concepts::weight;
 
     template<
@@ -32,7 +34,7 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         const N new_leaf_node;
 
         bool node_out_of_bound(const N& node) const {
-            const auto& [down_offset, right_offset, _] { g.node_to_grid_offsets(node) };
+            const auto& [down_offset, right_offset, _] { g.node_to_grid_offset(node) };
             if (down_offset >= grid_down_cnt || right_offset >= grid_right_cnt) {
                 return true;
             } else if (down_offset == grid_down_cnt - 1u || right_offset == grid_right_cnt - 1u) {
@@ -62,8 +64,8 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
         )
         : g { g_ }
         , new_leaf_node { new_leaf_node_ }
-        , grid_down_cnt { std::get<0>(g.node_to_grid_offsets(new_leaf_node)) + 1u }
-        , grid_right_cnt { std::get<1>(g.node_to_grid_offsets(new_leaf_node)) + 1u }
+        , grid_down_cnt { std::get<0>(g.node_to_grid_offset(new_leaf_node)) + 1u }
+        , grid_right_cnt { std::get<1>(g.node_to_grid_offset(new_leaf_node)) + 1u }
         , grid_depth_cnt { g.grid_depth_cnt }
         , resident_nodes_capacity { g.resident_nodes_capacity }
         , path_edge_capacity { g.path_edge_capacity }
@@ -251,8 +253,22 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
             return g.edge_to_element_offsets(edge);
         }
 
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) const {
-            return g.node_to_grid_offsets(node);
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offset(const N& node) const {
+            return g.node_to_grid_offset(node);
+        }
+
+        auto grid_offset_to_nodes(INDEX grid_down, INDEX grid_right) const {
+            if constexpr (debug_mode) {
+                if (grid_down >= grid_down_cnt || grid_right >= grid_right_cnt) {
+                    throw std::runtime_error { "Out of bounds" };
+                }
+            }
+            N root_node { g.root_node() };
+            N leaf_node { g.leaf_node() };
+            return g.grid_offset_to_nodes(grid_down, grid_right)
+                | std::views::filter([&g, root_node, leaf_node](const N& node) {
+                    return g.is_reachable(root_node, node) && g.is_reachable(node, leaf_node);
+                });
         }
 
         auto row_nodes(INDEX grid_down) const {
@@ -267,6 +283,25 @@ namespace offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph 
             }
             return g.row_nodes(grid_down, root_node, leaf_node)
                 | std::views::filter([&](const N& node) { return !node_out_of_bound(node); });
+        }
+
+        auto segmented_diagonal_nodes(axis grid_axis, INDEX grid_axis_position, std::size_t max_segment_cnt) const {
+            return segmented_diagonal_nodes(grid_axis, grid_axis_position, g.get_root_node(), new_leaf_node, max_segment_cnt);
+        }
+
+        auto segmented_diagonal_nodes(
+            axis grid_axis,
+            INDEX grid_axis_position,
+            const N& root_node,
+            const N& leaf_node,
+            std::size_t max_segment_cnt
+        ) const {
+            if constexpr (debug_mode) {
+                if (!has_node(root_node) || !has_node(leaf_node)) {
+                    throw std::runtime_error { "Node doesn't exist" };
+                }
+            }
+            return g.segmented_diagonal_nodes(grid_axis, grid_axis_position, root_node, leaf_node, max_segment_cnt);
         }
 
         bool is_reachable(const N& n1, const N& n2) const {

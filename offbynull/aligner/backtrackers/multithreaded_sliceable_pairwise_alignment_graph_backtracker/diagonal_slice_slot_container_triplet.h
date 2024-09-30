@@ -75,7 +75,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         diagonal_slice_slot_container<debug_mode, G, DIAGONAL_SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK>* n_minus_0_slots;
         axis grid_axis;
         INDEX grid_axis_position;
-        INDEX grid_down_cnt;  // copy of g.grid_down_cnt -- here to avoid keeping a reference ot hte graph
+        INDEX grid_down_cnt;  // copy of g.grid_down_cnt -- here to avoid keeping a reference ot the graph
 
         diagonal_slice_slot_container_triplet(
             const G& g,

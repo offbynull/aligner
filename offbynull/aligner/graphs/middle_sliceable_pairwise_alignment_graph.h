@@ -7,6 +7,7 @@
 #include <utility>
 #include <stdexcept>
 #include <type_traits>
+#include "offbynull/aligner/graph/multithreaded_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/suffix_sliceable_pairwise_alignment_graph.h"
@@ -16,6 +17,7 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::concepts::weight;
 
     template<
@@ -73,8 +75,8 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
         , node_incoming_edge_capacity { g.node_incoming_edge_capacity }
         , node_outgoing_edge_capacity { g.node_outgoing_edge_capacity } {
             if constexpr (debug_mode) {
-                const auto& [root_down_offset, root_right_offset, root_depth] { g_.node_to_grid_offsets(new_root_node_) };
-                const auto& [leaf_down_offset, leaf_right_offset, leaf_depth] { g_.node_to_grid_offsets(new_leaf_node_) };
+                const auto& [root_down_offset, root_right_offset, root_depth] { g_.node_to_grid_offset(new_root_node_) };
+                const auto& [leaf_down_offset, leaf_right_offset, leaf_depth] { g_.node_to_grid_offset(new_leaf_node_) };
                 if (!(root_down_offset <= leaf_down_offset || root_right_offset <= leaf_right_offset)) {
                     throw std::runtime_error { "Bad grid range" };
                 }
@@ -190,8 +192,12 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
             return g.edge_to_element_offsets(edge);
         }
 
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) const {
-            return g.node_to_grid_offsets(node);
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offset(const N& node) const {
+            return g.node_to_grid_offset(node);
+        }
+
+        auto grid_offset_to_nodes(INDEX grid_down, INDEX grid_right) const {
+            return g.grid_offset_to_nodes(grid_down, grid_right);
         }
 
         auto row_nodes(INDEX grid_down) const {
@@ -200,6 +206,20 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
 
         auto row_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
             return g.row_nodes(grid_down, root_node, leaf_node);
+        }
+
+        auto segmented_diagonal_nodes(axis grid_axis, INDEX grid_axis_position, std::size_t max_segment_cnt) const {
+            return g.segmented_diagonal_nodes(grid_axis, grid_axis_position, max_segment_cnt);
+        }
+
+        auto segmented_diagonal_nodes(
+            axis grid_axis,
+            INDEX grid_axis_position,
+            const N& root_node,
+            const N& leaf_node,
+            std::size_t max_segment_cnt
+        ) const {
+            return g.segmented_diagonal_nodes(grid_axis, grid_axis_position, root_node, leaf_node, max_segment_cnt);
         }
 
         bool is_reachable(const N& n1, const N& n2) const {

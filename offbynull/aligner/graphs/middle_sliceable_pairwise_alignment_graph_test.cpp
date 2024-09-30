@@ -5,7 +5,7 @@
 #include <vector>
 #include <ranges>
 #include <type_traits>
-#include "offbynull/aligner/graph/graph.h"
+#include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/pairwise_local_alignment_graph.h"
 #include "offbynull/aligner/graphs/middle_sliceable_pairwise_alignment_graph.h"
@@ -220,7 +220,7 @@ namespace {
         EXPECT_EQ(g.get_in_degree(N { 2zu, 2zu }), 3);
     }
 
-    TEST(OAGMiddleSliceablePairwiseAlignmentGraphTest, SlicedWalk) {
+    TEST(OAGMiddleSliceablePairwiseAlignmentGraphTest, RowWalk) {
         graph_bundle g_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } };
         auto g { g_bundle.middle_g };
 

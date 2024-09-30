@@ -300,7 +300,7 @@ namespace {
         EXPECT_EQ(g.get_in_degree(N { 6zu, 5zu } ), 1);
     }
 
-    TEST(OAGSuffixSliceablePairwiseAlignmentGraphTest, SlicedWalk) {
+    TEST(OAGSuffixSliceablePairwiseAlignmentGraphTest, RowWalk) {
         graph_bundle g_bundle { "234567", "2345678", { 5zu, 5zu }  };
         auto g { g_bundle.suffix_g };
         

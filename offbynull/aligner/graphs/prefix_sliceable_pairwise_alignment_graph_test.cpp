@@ -278,7 +278,7 @@ namespace {
         EXPECT_EQ(g.get_in_degree(N { 1zu, 0zu }), 2);
     }
 
-    TEST(OAGPrefixSliceablePairwiseAlignmentGraphTest, SlicedWalk) {
+    TEST(OAGPrefixSliceablePairwiseAlignmentGraphTest, RowWalk) {
         graph_bundle g_bundle { "234567", "2345678", { 1zu, 2zu } };
         auto g { g_bundle.prefix_g };
 

@@ -7,11 +7,14 @@
 #include <optional>
 #include <ranges>
 #include <type_traits>
+#include <stdexcept>
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
+#include "offbynull/aligner/graph/multithreaded_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 
 namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::concepts::weight;
 
     template<
@@ -159,9 +162,18 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
             return offset;
         }
 
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offsets(const N& node) const {
-            const auto& [grid_down, grid_right, depth] { g.node_to_grid_offsets(node) };
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offset(const N& node) const {
+            const auto& [grid_down, grid_right, depth] { g.node_to_grid_offset(node) };
             return { grid_down_cnt - grid_down - 1u, grid_right_cnt - grid_right - 1u, depth };
+        }
+
+        auto grid_offset_to_nodes(INDEX grid_down, INDEX grid_right) const {
+            if constexpr (debug_mode) {
+                if (grid_down >= grid_down_cnt || grid_right >= grid_right_cnt) {
+                    throw std::runtime_error { "Out of bounds" };
+                }
+            }
+            return g.grid_offset_to_nodes(grid_down_cnt - grid_down - 1u, grid_right_cnt - grid_right - 1u);
         }
 
         auto row_nodes(INDEX grid_down) const {
@@ -170,6 +182,26 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
 
         auto row_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
             return g.row_nodes(grid_down_cnt - grid_down - 1u, leaf_node, root_node) | std::views::reverse;
+        }
+
+        auto segmented_diagonal_nodes(axis grid_axis, INDEX grid_axis_position, std::size_t max_segment_cnt) const {
+            return
+                g.segmented_diagonal_nodes(grid_axis, grid_axis_position, max_segment_cnt)
+                | std::views::transform([](auto&& r) { return r | std::views::reverse; })
+                | std::views::reverse;
+        }
+
+        auto segmented_diagonal_nodes(
+            axis grid_axis,
+            INDEX grid_axis_position,
+            const N& root_node,
+            const N& leaf_node,
+            std::size_t max_segment_cnt
+        ) const {
+            return
+                g.segmented_diagonal_nodes(grid_axis, grid_axis_position, root_node, leaf_node, max_segment_cnt)
+                | std::views::transform([](auto&& r) { return r | std::views::reverse; })
+                | std::views::reverse;
         }
 
         bool is_reachable(const N& n1, const N& n2) const {

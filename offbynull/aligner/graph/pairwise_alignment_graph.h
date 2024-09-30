@@ -36,13 +36,14 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
             { g.path_edge_capacity } -> std::same_as<const std::size_t&>;
             { g.node_incoming_edge_capacity } -> std::same_as<const std::size_t&>;
             { g.node_outgoing_edge_capacity } -> std::same_as<const std::size_t&>;
-            { g.node_to_grid_offsets(node) } -> std::same_as<
+            { g.node_to_grid_offset(node) } -> std::same_as<
                 std::tuple<
                     typename G::INDEX,
                     typename G::INDEX,
                     std::size_t
                 >
             >;
+            { g.grid_offset_to_nodes(indexer, indexer) } -> range_of_one_of<typename G::N, const typename G::N&>;
             { g.edge_to_element_offsets(edge) } -> std::same_as<
                 std::optional<
                     std::pair<

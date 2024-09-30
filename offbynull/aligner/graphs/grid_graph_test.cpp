@@ -3,17 +3,20 @@
 #include <string>
 #include <set>
 #include <type_traits>
+#include <vector>
+#include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/grid_graph.h"
-#include "offbynull/aligner/graph/graph.h"
 #include "offbynull/aligner/scorers/simple_scorer.h"
 #include "offbynull/utils.h"
 #include "gtest/gtest.h"
 
 namespace {
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::graphs::grid_graph::grid_graph;
     using offbynull::aligner::graphs::grid_graph::create_grid_graph;
     using offbynull::aligner::scorers::simple_scorer::simple_scorer;
     using offbynull::utils::copy_to_set;
+    using offbynull::utils::copy_to_vector;
     using offbynull::utils::is_debug_mode;
 
     auto substitution_scorer { simple_scorer<is_debug_mode(), char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
@@ -350,6 +353,267 @@ namespace {
         EXPECT_EQ(g.get_in_degree(N { 1zu, 2zu }), 3);
         EXPECT_EQ(g.get_in_degree(N { 0zu, 2zu }), 1);
         EXPECT_EQ(g.get_in_degree(N { 1zu, 0zu }), 1);
+    }
+
+    TEST(OAGGridGraphTest, RowWalk) {
+        std::string seq1 { "a" };
+        std::string seq2 { "ac" };
+        grid_graph<
+            is_debug_mode(),
+            std::size_t,
+            std::float64_t,
+            decltype(seq1),
+            decltype(seq2),
+            decltype(substitution_scorer),
+            decltype(gap_scorer)
+        > g {
+            seq1,
+            seq2,
+            substitution_scorer,
+            gap_scorer
+        };
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_EQ(
+            (copy_to_vector(g.row_nodes(0u))),
+            (std::vector<N> {
+                N { 0zu, 0zu },
+                N { 0zu, 1zu },
+                N { 0zu, 2zu }
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.row_nodes(1u))),
+            (std::vector<N> {
+                N { 1zu, 0zu },
+                N { 1zu, 1zu },
+                N { 1zu, 2zu }
+            })
+        );
+
+        EXPECT_EQ(g.resident_nodes_capacity, 0zu);
+        EXPECT_EQ(g.resident_nodes().size(), 0zu);
+
+        EXPECT_EQ(
+            copy_to_vector(g.outputs_to_residents(N { 0zu, 0zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.outputs_to_residents(N { 0zu, 1zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.outputs_to_residents(N { 0zu, 2zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.outputs_to_residents(N { 1zu, 0zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.outputs_to_residents(N { 1zu, 1zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.outputs_to_residents(N { 1zu, 2zu })),
+            (std::vector<E> {})
+        );
+
+
+        EXPECT_EQ(
+            copy_to_vector(g.inputs_from_residents(N { 0zu, 0zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.inputs_from_residents(N { 0zu, 1zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.inputs_from_residents(N { 0zu, 2zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.inputs_from_residents(N { 1zu, 0zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.inputs_from_residents(N { 1zu, 1zu })),
+            (std::vector<E> {})
+        );
+        EXPECT_EQ(
+            copy_to_vector(g.inputs_from_residents(N { 1zu, 2zu })),
+            (std::vector<E> {})
+        );
+    }
+
+    TEST(OAGGridGraphTest, DiagionalWalk1) {
+        std::string seq1 { "a" };
+        std::string seq2 { "ac" };
+        grid_graph<
+            is_debug_mode(),
+            std::size_t,
+            std::float64_t,
+            decltype(seq1),
+            decltype(seq2),
+            decltype(substitution_scorer),
+            decltype(gap_scorer)
+        > g {
+            seq1,
+            seq2,
+            substitution_scorer,
+            gap_scorer
+        };
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 0u))),
+            (std::vector<N> {
+                N { 0zu, 0zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 1u))),
+            (std::vector<N> {
+                N { 1zu, 0zu },
+                N { 0zu, 1zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 0u))),
+            (std::vector<N> {
+                N { 1zu, 0zu },
+                N { 0zu, 1zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 1u))),
+            (std::vector<N> {
+                N { 1zu, 1zu },
+                N { 0zu, 2zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 2u))),
+            (std::vector<N> {
+                N { 1zu, 2zu }
+            })
+        );
+    }
+
+    TEST(OAGGridGraphTest, DiagionalWalk2) {
+        std::string seq1 { "ac" };
+        std::string seq2 { "a" };
+        grid_graph<
+            is_debug_mode(),
+            std::size_t,
+            std::float64_t,
+            decltype(seq1),
+            decltype(seq2),
+            decltype(substitution_scorer),
+            decltype(gap_scorer)
+        > g {
+            seq1,
+            seq2,
+            substitution_scorer,
+            gap_scorer
+        };
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 0u))),
+            (std::vector<N> {
+                N { 0zu, 0zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 1u))),
+            (std::vector<N> {
+                N { 1zu, 0zu },
+                N { 0zu, 1zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 2u))),
+            (std::vector<N> {
+                N { 2zu, 0zu },
+                N { 1zu, 1zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 0u))),
+            (std::vector<N> {
+                N { 2zu, 0zu },
+                N { 1zu, 1zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 1u))),
+            (std::vector<N> {
+                N { 2zu, 1zu }
+            })
+        );
+    }
+
+    TEST(OAGGridGraphTest, DiagionalWalk3) {
+        std::string seq1 { "abcd" };
+        std::string seq2 { "wxyz" };
+        grid_graph<
+            is_debug_mode(),
+            std::size_t,
+            std::float64_t,
+            decltype(seq1),
+            decltype(seq2),
+            decltype(substitution_scorer),
+            decltype(gap_scorer)
+        > g {
+            seq1,
+            seq2,
+            substitution_scorer,
+            gap_scorer
+        };
+
+        using N = typename decltype(g)::N;
+        using E = typename decltype(g)::E;
+
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 1u, N { 1u, 1u}, N { 3u, 2u }))),
+            (std::vector<N> {
+                N { 1zu, 1zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 2u, N { 1u, 1u}, N { 3u, 2u }))),
+            (std::vector<N> {
+                N { 2zu, 1zu },
+                N { 1zu, 2zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 3u, N { 1u, 1u}, N { 3u, 2u }))),
+            (std::vector<N> {
+                N { 3zu, 1zu },
+                N { 2zu, 2zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 1u, N { 1u, 1u}, N { 3u, 2u }))),
+            (std::vector<N> {
+                N { 3zu, 1zu },
+                N { 2zu, 2zu },
+            })
+        );
+        EXPECT_EQ(
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 2u, N { 1u, 1u}, N { 3u, 2u }))),
+            (std::vector<N> {
+                N { 3zu, 2zu }
+            })
+        );
     }
 
     TEST(OAGGridGraphTest, CreateViaFactory) {

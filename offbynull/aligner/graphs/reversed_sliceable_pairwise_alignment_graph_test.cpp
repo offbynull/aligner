@@ -289,7 +289,7 @@ namespace {
         EXPECT_EQ(g.get_in_degree(N { 1zu, 0zu }), 2);
     }
 
-    TEST(OAGReversedSliceablePairwiseAlignmentGraphTest, SlicedWalk) {
+    TEST(OAGReversedSliceablePairwiseAlignmentGraphTest, RowWalk) {
         graph_bundle g_bundle { "a", "ac" };
         auto g { g_bundle.reversed_g };
     

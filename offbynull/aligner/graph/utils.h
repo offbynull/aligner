@@ -55,7 +55,7 @@ namespace offbynull::aligner::graph::utils {
         out += "  layout=fdp;\n";
         out += "  overlap=true;\n";
         for (const auto& n : g.get_nodes()) {
-            const auto& [down, right, depth] { g.node_to_grid_offsets(n) };
+            const auto& [down, right, depth] { g.node_to_grid_offset(n) };
             std::string name { to_name_func(n) };
             float draw_y { (static_cast<float>(down) * space_between_grid_offsets) + (depth_offset * static_cast<float>(depth)) };
             float draw_x { (static_cast<float>(right) * space_between_grid_offsets) + (depth_offset * static_cast<float>(depth)) };
@@ -88,7 +88,7 @@ namespace offbynull::aligner::graph::utils {
         return pairwise_graph_to_graphviz(
             g,
             [&](auto n) {
-                // const auto& [down, right, depth] { g.node_to_grid_offsets(n) };
+                // const auto& [down, right, depth] { g.node_to_grid_offset(n) };
                 // return std::string { std::format(" {}x {}x {}", down, right, depth) };
                 return std::format("{}", n);
             },
@@ -132,7 +132,7 @@ namespace offbynull::aligner::graph::utils {
         return graph_to_graphviz(
             g,
             [&](auto n) {
-                // const auto& [down, right, depth] { g.node_to_grid_offsets(n) };
+                // const auto& [down, right, depth] { g.node_to_grid_offset(n) };
                 // return std::string { std::format(" {}x {}x {}", down, right, depth) };
                 return std::format("{}", n);
             }

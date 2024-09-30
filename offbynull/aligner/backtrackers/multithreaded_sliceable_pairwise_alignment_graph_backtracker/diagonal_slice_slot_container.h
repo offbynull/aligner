@@ -177,7 +177,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
                               6 6
                               7
              */
-            const auto& [down_offset, right_offset, depth] { g.node_to_grid_offsets(node) };
+            const auto& [down_offset, right_offset, depth] { g.node_to_grid_offset(node) };
             switch (axis_) {
                 case axis::DOWN_FROM_TOP_LEFT: {
                     if (down_offset > axis_position) {

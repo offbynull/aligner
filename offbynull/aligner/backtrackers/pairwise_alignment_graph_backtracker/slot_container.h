@@ -184,7 +184,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             auto it { begin };
             while (it != end) {
                 const auto& slot { *it };
-                const auto& [down_offset, right_offset, depth] { g.node_to_grid_offsets(slot.node) };
+                const auto& [down_offset, right_offset, depth] { g.node_to_grid_offset(slot.node) };
                 std::size_t idx { (g.grid_depth_cnt * ((down_offset * g.grid_right_cnt) + right_offset)) + depth };
                 slots[idx] = slot;
                 ++it;
@@ -192,7 +192,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         }
 
         std::size_t find_idx(const N& node) const {
-            const auto& [down_offset, right_offset, depth] { g.node_to_grid_offsets(node) };
+            const auto& [down_offset, right_offset, depth] { g.node_to_grid_offset(node) };
             return (g.grid_depth_cnt * ((down_offset * g.grid_right_cnt) + right_offset)) + depth;
         }
 

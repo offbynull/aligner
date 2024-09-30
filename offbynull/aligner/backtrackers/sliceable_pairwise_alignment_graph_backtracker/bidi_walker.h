@@ -216,7 +216,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             const G& g,
             const N& node
         ) {
-            const auto& [down, right, depth] { g.node_to_grid_offsets(node) };
+            const auto& [down, right, depth] { g.node_to_grid_offset(node) };
             bidi_walker bidi_walker_ { bidi_walker::create_and_initialize(g, down) };
             find_result found { bidi_walker_.find(node) };
             return find_result_copy { found.forward_slot, found.backward_slot };
@@ -236,7 +236,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             const typename G::ED max_path_weight,
             const typename G::ED max_path_weight_comparison_tolerance
         ) {
-            const auto& [down, right, depth] { g_.node_to_grid_offsets(node) };
+            const auto& [down, right, depth] { g_.node_to_grid_offset(node) };
 
             bidi_walker bidi_walker_ { bidi_walker::create_and_initialize(g_, down) };
             for (const auto& entry : bidi_walker_.list()) {
