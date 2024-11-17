@@ -110,30 +110,16 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
         const auto& [root_down, root_right, root_depth] { g.node_to_grid_offset(root_node) };
         const auto& [leaf_down, leaf_right, leaf_depth] { g.node_to_grid_offset(leaf_node) };
         const INDEX isolated_down_cnt { leaf_down - root_down + 1u };
-        const INDEX isolated_right_cnt { leaf_right - root_right + 1u };
+        // const INDEX isolated_right_cnt { leaf_right - root_right + 1u };
         std::pair<INDEX, INDEX> isolated_grid_start;
         std::pair<INDEX, INDEX> isolated_grid_stop;  // inclusive
         switch (axis_) {
             case axis::DOWN_FROM_TOP_LEFT: {
                 isolated_grid_start = { axis_position, 0u };
-                if (axis_position < isolated_right_cnt) {
-                    isolated_grid_stop = { 0u, axis_position };
-                } else {
-                    isolated_grid_stop = { axis_position - (isolated_right_cnt - 1u), isolated_right_cnt - 1u };
-                }
                 break;
             }
             case axis::RIGHT_FROM_BOTTOM_LEFT: {
                 isolated_grid_start = { isolated_down_cnt - 1u, axis_position };
-                if (isolated_down_cnt < isolated_right_cnt) {
-                    if (axis_position < isolated_down_cnt) {
-                        isolated_grid_stop = { 0u, axis_position + isolated_right_cnt - 1u };  // ok
-                    } else {
-                        isolated_grid_stop = { axis_position - isolated_down_cnt + 1u, isolated_right_cnt - 1u };  // ok
-                    }
-                } else {
-                    isolated_grid_stop = { isolated_down_cnt - (isolated_right_cnt - axis_position), isolated_right_cnt - 1u }; // ok
-                }
                 break;
             }
             [[unlikely]] default: {
@@ -143,6 +129,10 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
                 std::unreachable();
             }
         }
+        auto isolated_dist_to_top { std::get<0>(isolated_grid_start) };
+        auto isolated_dist_to_right { leaf_right - (root_right + std::get<1>(isolated_grid_start)) };
+        auto isolated_dist { std::min(isolated_dist_to_top, isolated_dist_to_right) };
+        isolated_grid_stop = { std::get<0>(isolated_grid_start) - isolated_dist, std::get<1>(isolated_grid_start) + isolated_dist };
 
         // isolated_grid_start's down will always be below or at that of isolated_grid_stop's down, so no need to worry about rollover for
         // isolated_diagonal_len.

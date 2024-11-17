@@ -1252,7 +1252,474 @@ namespace {
         );
     }
 
-    // TEST(OAGMultithreadedSliceablePairwiseAlignmentGraphTest, DiagionalWalkWithCustomRootLeafSegmentedDownShorter) {
-    //     IMPLEMENT;
-    // }
+    TEST(OAGMultithreadedSliceablePairwiseAlignmentGraphTest, DiagionalWalkWithCustomRootLeafSegmentedDownShorter) {
+        auto substitution_scorer { simple_scorer<is_debug_mode(), char, char, std::float64_t>::create_substitution(1.0f64, -1.0f64) };
+        auto initial_gap_scorer { simple_scorer<is_debug_mode(), char, char, std::float64_t>::create_gap(0.0f64) };
+        auto extended_gap_scorer { simple_scorer<is_debug_mode(), char, char, std::float64_t>::create_gap(0.1f64) };
+        auto freeride_scorer { simple_scorer<is_debug_mode(), char, char, std::float64_t>::create_freeride() };
+        std::string seq1 { "yy12341234123412y" };
+        std::string seq2 { "x123412341234123xx" };
+        pairwise_extended_gap_alignment_graph<
+            is_debug_mode(),
+            std::size_t,
+            std::float64_t,
+            decltype(seq1),
+            decltype(seq2),
+            decltype(substitution_scorer),
+            decltype(initial_gap_scorer),
+            decltype(extended_gap_scorer),
+            decltype(freeride_scorer)
+        > g {
+            seq1,
+            seq2,
+            substitution_scorer,
+            initial_gap_scorer,
+            extended_gap_scorer,
+            freeride_scorer
+        };
+
+        using N = typename decltype(g)::N;
+
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::DOWN_FROM_TOP_LEFT,
+                    0u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DIAGONAL, 2zu+0zu, 1zu+0zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::DOWN_FROM_TOP_LEFT,
+                    1u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+1zu, 1zu+0zu },
+                    N { node_layer::DIAGONAL, 2zu+1zu, 1zu+0zu },
+                },
+                {
+                    N { node_layer::RIGHT, 2zu+0zu, 1zu+1zu },
+                    N { node_layer::DIAGONAL, 2zu+0zu, 1zu+1zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::DOWN_FROM_TOP_LEFT,
+                    2u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+2zu, 1zu+0zu },
+                    N { node_layer::DIAGONAL, 2zu+2zu, 1zu+0zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+1zu, 1zu+1zu },
+                    N { node_layer::RIGHT, 2zu+1zu, 1zu+1zu },
+                    N { node_layer::DIAGONAL, 2zu+1zu, 1zu+1zu }
+                },
+                {
+                    N { node_layer::RIGHT, 2zu+0zu, 1zu+2zu },
+                    N { node_layer::DIAGONAL, 2zu+0zu, 1zu+2zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::DOWN_FROM_TOP_LEFT,
+                    3u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+3zu, 1zu+0zu },
+                    N { node_layer::DIAGONAL, 2zu+3zu, 1zu+0zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+2zu, 1zu+1zu },
+                    N { node_layer::RIGHT, 2zu+2zu, 1zu+1zu },
+                    N { node_layer::DIAGONAL, 2zu+2zu, 1zu+1zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+1zu, 1zu+2zu },
+                    N { node_layer::RIGHT, 2zu+1zu, 1zu+2zu },
+                    N { node_layer::DIAGONAL, 2zu+1zu, 1zu+2zu }
+                },
+                {
+                    N { node_layer::RIGHT, 2zu+0zu, 1zu+3zu },
+                    N { node_layer::DIAGONAL, 2zu+0zu, 1zu+3zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::DOWN_FROM_TOP_LEFT,
+                    4u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+4zu, 1zu+0zu },
+                    N { node_layer::DIAGONAL, 2zu+4zu, 1zu+0zu },
+                    N { node_layer::DOWN, 2zu+3zu, 1zu+1zu },
+                    N { node_layer::RIGHT, 2zu+3zu, 1zu+1zu },
+                    N { node_layer::DIAGONAL, 2zu+3zu, 1zu+1zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+2zu, 1zu+2zu },
+                    N { node_layer::RIGHT, 2zu+2zu, 1zu+2zu },
+                    N { node_layer::DIAGONAL, 2zu+2zu, 1zu+2zu },
+                    N { node_layer::DOWN, 2zu+1zu, 1zu+3zu },
+                    N { node_layer::RIGHT, 2zu+1zu, 1zu+3zu },
+                    N { node_layer::DIAGONAL, 2zu+1zu, 1zu+3zu }
+                },
+                {
+                    N { node_layer::RIGHT, 2zu+0zu, 1zu+4zu },
+                    N { node_layer::DIAGONAL, 2zu+0zu, 1zu+4zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::DOWN_FROM_TOP_LEFT,
+                    5u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+5zu, 1zu+0zu },
+                    N { node_layer::DIAGONAL, 2zu+5zu, 1zu+0zu },
+                    N { node_layer::DOWN, 2zu+4zu, 1zu+1zu },
+                    N { node_layer::RIGHT, 2zu+4zu, 1zu+1zu },
+                    N { node_layer::DIAGONAL, 2zu+4zu, 1zu+1zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+3zu, 1zu+2zu },
+                    N { node_layer::RIGHT, 2zu+3zu, 1zu+2zu },
+                    N { node_layer::DIAGONAL, 2zu+3zu, 1zu+2zu },
+                    N { node_layer::DOWN, 2zu+2zu, 1zu+3zu },
+                    N { node_layer::RIGHT, 2zu+2zu, 1zu+3zu },
+                    N { node_layer::DIAGONAL, 2zu+2zu, 1zu+3zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+1zu, 1zu+4zu },
+                    N { node_layer::RIGHT, 2zu+1zu, 1zu+4zu },
+                    N { node_layer::DIAGONAL, 2zu+1zu, 1zu+4zu },
+                    N { node_layer::RIGHT, 2zu+0zu, 1zu+5zu },
+                    N { node_layer::DIAGONAL, 2zu+0zu, 1zu+5zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::DOWN_FROM_TOP_LEFT,
+                    6u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+6zu, 1zu+0zu },
+                    N { node_layer::DIAGONAL, 2zu+6zu, 1zu+0zu },
+                    N { node_layer::DOWN, 2zu+5zu, 1zu+1zu },
+                    N { node_layer::RIGHT, 2zu+5zu, 1zu+1zu },
+                    N { node_layer::DIAGONAL, 2zu+5zu, 1zu+1zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+4zu, 1zu+2zu },
+                    N { node_layer::RIGHT, 2zu+4zu, 1zu+2zu },
+                    N { node_layer::DIAGONAL, 2zu+4zu, 1zu+2zu },
+                    N { node_layer::DOWN, 2zu+3zu, 1zu+3zu },
+                    N { node_layer::RIGHT, 2zu+3zu, 1zu+3zu },
+                    N { node_layer::DIAGONAL, 2zu+3zu, 1zu+3zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+2zu, 1zu+4zu },
+                    N { node_layer::RIGHT, 2zu+2zu, 1zu+4zu },
+                    N { node_layer::DIAGONAL, 2zu+2zu, 1zu+4zu },
+                    N { node_layer::DOWN, 2zu+1zu, 1zu+5zu },
+                    N { node_layer::RIGHT, 2zu+1zu, 1zu+5zu },
+                    N { node_layer::DIAGONAL, 2zu+1zu, 1zu+5zu }
+                },
+                {
+                    N { node_layer::RIGHT, 2zu+0zu, 1zu+6zu },
+                    N { node_layer::DIAGONAL, 2zu+0zu, 1zu+6zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::DOWN_FROM_TOP_LEFT,
+                    7u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+7zu, 1zu+0zu },
+                    N { node_layer::DIAGONAL, 2zu+7zu, 1zu+0zu },
+                    N { node_layer::DOWN, 2zu+6zu, 1zu+1zu },
+                    N { node_layer::RIGHT, 2zu+6zu, 1zu+1zu },
+                    N { node_layer::DIAGONAL, 2zu+6zu, 1zu+1zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+5zu, 1zu+2zu },
+                    N { node_layer::RIGHT, 2zu+5zu, 1zu+2zu },
+                    N { node_layer::DIAGONAL, 2zu+5zu, 1zu+2zu },
+                    N { node_layer::DOWN, 2zu+4zu, 1zu+3zu },
+                    N { node_layer::RIGHT, 2zu+4zu, 1zu+3zu },
+                    N { node_layer::DIAGONAL, 2zu+4zu, 1zu+3zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+3zu, 1zu+4zu },
+                    N { node_layer::RIGHT, 2zu+3zu, 1zu+4zu },
+                    N { node_layer::DIAGONAL, 2zu+3zu, 1zu+4zu },
+                    N { node_layer::DOWN, 2zu+2zu, 1zu+5zu },
+                    N { node_layer::RIGHT, 2zu+2zu, 1zu+5zu },
+                    N { node_layer::DIAGONAL, 2zu+2zu, 1zu+5zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+1zu, 1zu+6zu },
+                    N { node_layer::RIGHT, 2zu+1zu, 1zu+6zu },
+                    N { node_layer::DIAGONAL, 2zu+1zu, 1zu+6zu },
+                    N { node_layer::RIGHT, 2zu+0zu, 1zu+7zu },
+                    N { node_layer::DIAGONAL, 2zu+0zu, 1zu+7zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::DOWN_FROM_TOP_LEFT,
+                    8u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+8zu, 1zu+0zu },
+                    N { node_layer::DIAGONAL, 2zu+8zu, 1zu+0zu },
+                    N { node_layer::DOWN, 2zu+7zu, 1zu+1zu },
+                    N { node_layer::RIGHT, 2zu+7zu, 1zu+1zu },
+                    N { node_layer::DIAGONAL, 2zu+7zu, 1zu+1zu },
+                    N { node_layer::DOWN, 2zu+6zu, 1zu+2zu },
+                    N { node_layer::RIGHT, 2zu+6zu, 1zu+2zu },
+                    N { node_layer::DIAGONAL, 2zu+6zu, 1zu+2zu },
+                },
+                {
+                    N { node_layer::DOWN, 2zu+5zu, 1zu+3zu },
+                    N { node_layer::RIGHT, 2zu+5zu, 1zu+3zu },
+                    N { node_layer::DIAGONAL, 2zu+5zu, 1zu+3zu },
+                    N { node_layer::DOWN, 2zu+4zu, 1zu+4zu },
+                    N { node_layer::RIGHT, 2zu+4zu, 1zu+4zu },
+                    N { node_layer::DIAGONAL, 2zu+4zu, 1zu+4zu },
+                    N { node_layer::DOWN, 2zu+3zu, 1zu+5zu },
+                    N { node_layer::RIGHT, 2zu+3zu, 1zu+5zu },
+                    N { node_layer::DIAGONAL, 2zu+3zu, 1zu+5zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+2zu, 1zu+6zu },
+                    N { node_layer::RIGHT, 2zu+2zu, 1zu+6zu },
+                    N { node_layer::DIAGONAL, 2zu+2zu, 1zu+6zu },
+                    N { node_layer::DOWN, 2zu+1zu, 1zu+7zu },
+                    N { node_layer::RIGHT, 2zu+1zu, 1zu+7zu },
+                    N { node_layer::DIAGONAL, 2zu+1zu, 1zu+7zu },
+                    N { node_layer::RIGHT, 2zu+0zu, 1zu+8zu },
+                    N { node_layer::DIAGONAL, 2zu+0zu, 1zu+8zu }
+                }
+            })
+        );
+        // ... REMOVED MIDDLE ...
+        // ... REMOVED MIDDLE ...
+        // ... REMOVED MIDDLE ...
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::RIGHT_FROM_BOTTOM_LEFT,
+                    11u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+14zu, 1zu+11zu },
+                    N { node_layer::RIGHT, 2zu+14zu, 1zu+11zu },
+                    N { node_layer::DIAGONAL, 2zu+14zu, 1zu+11zu },
+                    N { node_layer::DOWN, 2zu+13zu, 1zu+12zu },
+                    N { node_layer::RIGHT, 2zu+13zu, 1zu+12zu },
+                    N { node_layer::DIAGONAL, 2zu+13zu, 1zu+12zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+12zu, 1zu+13zu },
+                    N { node_layer::RIGHT, 2zu+12zu, 1zu+13zu },
+                    N { node_layer::DIAGONAL, 2zu+12zu, 1zu+13zu },
+                    N { node_layer::DOWN, 2zu+11zu, 1zu+14zu },
+                    N { node_layer::RIGHT, 2zu+11zu, 1zu+14zu },
+                    N { node_layer::DIAGONAL, 2zu+11zu, 1zu+14zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+10zu, 1zu+15zu },
+                    N { node_layer::RIGHT, 2zu+10zu, 1zu+15zu },
+                    N { node_layer::DIAGONAL, 2zu+10zu, 1zu+15zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::RIGHT_FROM_BOTTOM_LEFT,
+                    12u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+14zu, 1zu+12zu },
+                    N { node_layer::RIGHT, 2zu+14zu, 1zu+12zu },
+                    N { node_layer::DIAGONAL, 2zu+14zu, 1zu+12zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+13zu, 1zu+13zu },
+                    N { node_layer::RIGHT, 2zu+13zu, 1zu+13zu },
+                    N { node_layer::DIAGONAL, 2zu+13zu, 1zu+13zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+12zu, 1zu+14zu },
+                    N { node_layer::RIGHT, 2zu+12zu, 1zu+14zu },
+                    N { node_layer::DIAGONAL, 2zu+12zu, 1zu+14zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+11zu, 1zu+15zu },
+                    N { node_layer::RIGHT, 2zu+11zu, 1zu+15zu },
+                    N { node_layer::DIAGONAL, 2zu+11zu, 1zu+15zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::RIGHT_FROM_BOTTOM_LEFT,
+                    13u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+14zu, 1zu+13zu },
+                    N { node_layer::RIGHT, 2zu+14zu, 1zu+13zu },
+                    N { node_layer::DIAGONAL, 2zu+14zu, 1zu+13zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+13zu, 1zu+14zu },
+                    N { node_layer::RIGHT, 2zu+13zu, 1zu+14zu },
+                    N { node_layer::DIAGONAL, 2zu+13zu, 1zu+14zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+12zu, 1zu+15zu },
+                    N { node_layer::RIGHT, 2zu+12zu, 1zu+15zu },
+                    N { node_layer::DIAGONAL, 2zu+12zu, 1zu+15zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::RIGHT_FROM_BOTTOM_LEFT,
+                    14u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+14zu, 1zu+14zu },
+                    N { node_layer::RIGHT, 2zu+14zu, 1zu+14zu },
+                    N { node_layer::DIAGONAL, 2zu+14zu, 1zu+14zu }
+                },
+                {
+                    N { node_layer::DOWN, 2zu+13zu, 1zu+15zu },
+                    N { node_layer::RIGHT, 2zu+13zu, 1zu+15zu },
+                    N { node_layer::DIAGONAL, 2zu+13zu, 1zu+15zu }
+                }
+            })
+        );
+        EXPECT_EQ(
+            (to_vector_of_vector(
+                generic_segmented_diagonal_nodes<is_debug_mode()>(
+                    g,
+                    axis::RIGHT_FROM_BOTTOM_LEFT,
+                    15u,
+                    N { node_layer::DIAGONAL, 2zu, 1zu },
+                    N { node_layer::DIAGONAL, 16zu, 16zu },
+                    4zu
+                )
+            )),
+            (std::vector<std::vector<N>> {
+                {
+                    N { node_layer::DOWN, 2zu+14zu, 1zu+15zu },
+                    N { node_layer::RIGHT, 2zu+14zu, 1zu+15zu },
+                    N { node_layer::DIAGONAL, 2zu+14zu, 1zu+15zu }
+                }
+            })
+        );
+    }
 }
