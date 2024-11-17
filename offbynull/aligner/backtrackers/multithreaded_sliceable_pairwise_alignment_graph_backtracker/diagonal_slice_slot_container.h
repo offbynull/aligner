@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <algorithm>
+#include <shared_mutex>
 #include "offbynull/concepts.h"
 #include "offbynull/utils.h"
 #include "offbynull/aligner/concepts.h"
@@ -65,8 +66,9 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         unqualified_value_type<T>
         && backtrackable_edge<E>
         && weight<ED>
-        && requires(const T t, std::size_t grid_down_cnt, std::size_t grid_right_cnt, std::size_t grid_depth_cnt) {
-            { t.create_slot_container(grid_down_cnt, grid_right_cnt, grid_depth_cnt) } -> random_access_range_of_type<slot<E, ED>>;
+        && requires(const T t, std::size_t segment_cnt, std::size_t items_per_segment, std::size_t grid_depth_cnt) {
+            { t.create_slot_container(segment_cnt, items_per_segment, grid_depth_cnt) } -> random_access_range_of_type<slot<E, ED>>;
+            { t.create_mutex_container(segment_cnt) } -> random_access_range_of_type<std::shared_mutex>;
         };
 
     template<
@@ -77,17 +79,15 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
     struct diagonal_slice_slot_container_heap_container_creator_pack {
         std::vector<slot<E, ED>> create_slot_container(
             std::size_t segment_cnt,
-            std::size_t grid_down_cnt,
-            std::size_t grid_right_cnt,
+            std::size_t items_per_segment,
             std::size_t grid_depth_cnt
         ) const {
-            auto diagonal_len { std::min(grid_down_cnt, grid_right_cnt) };
-            auto nodes_per_segment { diagonal_len / segment_cnt };
-            if (diagonal_len % segment_cnt != 0u) {
-                ++nodes_per_segment;
-            }
-            std::size_t cnt { nodes_per_segment *  * grid_depth_cnt };
+            std::size_t cnt { items_per_segment * segment_cnt * grid_depth_cnt };
             return std::vector<slot<E, ED>>(cnt);
+        }
+
+        std::vector<std::shared_mutex> create_mutex_container(std::size_t segment_cnt) const {
+            return std::vector<std::shared_mutex>(segment_cnt);
         }
     };
 
@@ -95,29 +95,43 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         bool debug_mode,
         backtrackable_edge E,
         weight ED,
-        std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt,
+        std::size_t segment_cnt,
+        std::size_t items_per_segment,
         std::size_t grid_depth_cnt
     >
     struct diagonal_slice_slot_container_stack_container_creator_pack {
-        static constexpr std::size_t max_elem_cnt { std::min(grid_down_cnt, grid_right_cnt) * grid_depth_cnt };
+        static constexpr std::size_t max_elem_cnt { items_per_segment * segment_cnt * grid_depth_cnt };
         using SEGMENT_CONTAINER_TYPE = typename static_vector_typer<
             debug_mode,
             slot<E, ED>,
             max_elem_cnt
         >::type;
         SEGMENT_CONTAINER_TYPE create_slot_container(
-            std::size_t grid_down_cnt_,
-            std::size_t grid_right_cnt_,
+            std::size_t segment_cnt_,
+            std::size_t items_per_segment_,
             std::size_t grid_depth_cnt_
         ) const {
-            std::size_t cnt { std::min(grid_down_cnt_, grid_right_cnt_) * grid_depth_cnt_ };
+            std::size_t cnt { items_per_segment_ * segment_cnt_ * grid_depth_cnt_ };
             if constexpr (debug_mode) {
                 if (cnt > max_elem_cnt) {
                     throw std::runtime_error { "Bad element count" };
                 }
             }
             return SEGMENT_CONTAINER_TYPE(cnt);
+        }
+
+        using MUTEX_CONTAINER_TYPE = typename static_vector_typer<
+            debug_mode,
+            std::shared_mutex,
+            segment_cnt
+        >::type;
+        MUTEX_CONTAINER_TYPE create_mutex_container(std::size_t segment_cnt_) const {
+            if constexpr (debug_mode) {
+                if (segment_cnt_ > segment_cnt) {
+                    throw std::runtime_error { "Bad element count" };
+                }
+            }
+            return MUTEX_CONTAINER_TYPE(segment_cnt);
         }
     };
 
@@ -151,8 +165,10 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
         using SLOT_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_slot_container(0zu, 0zu, 0zu));
+        using MUTEX_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_mutex_container(0zu));
 
         const G& g;
+        MUTEX_CONTAINER mutexs;
         SLOT_CONTAINER slots;
         axis axis_;
         INDEX axis_position;
@@ -160,19 +176,28 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
     public:
         diagonal_slice_slot_container(
             const G& g_,
+            std::size_t segment_cnt,
+            std::size_t items_per_segment,
             CONTAINER_CREATOR_PACK container_creator_pack = {}
         )
         : g { g_ }
+        , mutexs {
+            container_creator_pack.create_mutex_container(
+                segment_cnt
+            )
+        }
         , slots {
             container_creator_pack.create_slot_container(
-                g.grid_down_cnt,
-                g.grid_right_cnt,
+                segment_cnt,
+                items_per_segment,
                 g.grid_depth_cnt
             )
         }
         , axis_ { axis::DOWN_FROM_TOP_LEFT }
         , axis_position {} {}
 
+
+FIND SHOULD TAKE IN WHICH WORKER IS ACCESSING, SO IT CAN RETURN LOCK (IF NESECCARY)
         std::optional<std::reference_wrapper<slot<E, ED>>> find(const N& node) {
             /*
                               1

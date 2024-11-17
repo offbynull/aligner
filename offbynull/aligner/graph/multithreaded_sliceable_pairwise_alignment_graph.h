@@ -33,7 +33,8 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
         typename INDEX
     >
     concept diagonal_segments =
-        backtrackable_node<N>
+        unqualified_value_type<T>
+        && backtrackable_node<N>
         && widenable_to_size_t<INDEX>
         && requires(T obj) {
             { obj.len_per_segment } -> std::same_as<INDEX>;
@@ -164,8 +165,8 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
         // isolated_diagonal_len.
         INDEX isolated_diagonal_len { std::get<0>(isolated_grid_start) - std::get<0>(isolated_grid_stop) + 1u };
         INDEX isolated_segments { std::min(max_segments, isolated_diagonal_len) };
-        INDEX isolated_nodes_per_segment { isolated_diagonal_len / isolated_segments };
-        // Add 1 to isolated_nodes_per_segment if there wasn't a clean division. Why? Because the way nodes are broken up into segments when
+        INDEX isolated_items_per_segment { isolated_diagonal_len / isolated_segments };
+        // Add 1 to isolated_items_per_segment if there wasn't a clean division. Why? Because the way items are broken up into segments when
         // 1 isn't added, any remainder gets pushed to the last worker (code further below). For example, imagine that ...
         //
         // * isolated_diagonal_len == 4 and isolated_segments == 4, 4/4 == 1, the workload will break down be as [*] [*] [*] [*]
@@ -174,7 +175,7 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
         // * isolated_diagonal_len == 7 and isolated_segments == 4, 7/4 == 1, the workload will break down be as [*] [*] [*] [****]
         // * isolated_diagonal_len == 8 and isolated_segments == 4, 8/4 == 2, the workload will break down be as [**] [**] [**] [**]
         //
-        // With this change, nodes are more evenly distributed between segments. For example, imagine that ...
+        // With this change, items are more evenly distributed between segments. For example, imagine that ...
         //
         // * isolated_diagonal_len == 4 and isolated_segments == 4, 4/4+0 == 1, the workload will break down be as [*] [*] [*] [*]
         // * isolated_diagonal_len == 5 and isolated_segments == 4, 5/4+1 == 2, the workload will break down be as [**] [**] [*] []
@@ -187,13 +188,13 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
         // is not added), it'll unduly add to the processing time. This is assuming that each node requires roughly the same amount of
         // processing time.
         if (isolated_diagonal_len % isolated_segments != 0u) {
-            ++isolated_nodes_per_segment;
-            // Update isolated_segments based on incremented isolated_nodes_per_segment. Now that more nodes are being consumed in each
+            ++isolated_items_per_segment;
+            // Update isolated_segments based on incremented isolated_items_per_segment. Now that more items are being consumed in each
             // segment, the number of segments needed may get reduced.
-            bool extra_segment { isolated_diagonal_len % isolated_nodes_per_segment != 0u }; // Used to add extra segment if not cleanly div
+            bool extra_segment { isolated_diagonal_len % isolated_items_per_segment != 0u }; // Used to add extra segment if not cleanly div
             isolated_segments = std::min(
                 isolated_segments,
-                isolated_diagonal_len / isolated_nodes_per_segment + (extra_segment ? 1u : 0u)
+                isolated_diagonal_len / isolated_items_per_segment + (extra_segment ? 1u : 0u)
             );
         }
         auto segments {
@@ -205,24 +206,24 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
                     leaf_node,
                     isolated_grid_start,
                     isolated_grid_stop,
-                    isolated_nodes_per_segment,
+                    isolated_items_per_segment,
                     isolated_segments
                 ](const auto& segment) {
                     const auto& [root_down_, root_right_, _] { g.node_to_grid_offset(root_node) };
                     // First grid offset in segment (this is NOT isolated)
                     std::pair<INDEX, INDEX> segment_first {
-                        root_down_ + std::get<0>(isolated_grid_start) - (segment * isolated_nodes_per_segment),
-                        root_right_ + std::get<1>(isolated_grid_start) + (segment * isolated_nodes_per_segment)
+                        root_down_ + std::get<0>(isolated_grid_start) - (segment * isolated_items_per_segment),
+                        root_right_ + std::get<1>(isolated_grid_start) + (segment * isolated_items_per_segment)
                     };
                     // Last grid offset in segment (this is NOT isolated)
                     std::pair<INDEX, INDEX> segment_last;
                     if (segment != isolated_segments - 1u) {
                         segment_last = {
-                            std::get<0>(segment_first) - isolated_nodes_per_segment + 1u, // +1 because exclusive
-                            std::get<1>(segment_first) + isolated_nodes_per_segment - 1u  // -1 because exclusive
+                            std::get<0>(segment_first) - isolated_items_per_segment + 1u, // +1 because exclusive
+                            std::get<1>(segment_first) + isolated_items_per_segment - 1u  // -1 because exclusive
                         };
                     } else {
-                        // Ensure last segment consumes the remainder -- division used to produce isolated_nodes_per_segment may have
+                        // Ensure last segment consumes the remainder -- division used to produce isolated_items_per_segment may have
                         // resulted in rounding.
                         segment_last = {
                             root_down_ + std::get<0>(isolated_grid_stop),
@@ -253,7 +254,7 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
             )
         };
         return generic_diagonal_segments<N, INDEX, decltype(segments)> {
-            isolated_nodes_per_segment,
+            isolated_items_per_segment,
             std::move(segments)
         };
     }
