@@ -11,6 +11,7 @@
 #include <future>
 #include <algorithm>
 #include <vector>
+#include <shared_mutex>
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/helpers/forkable_thread_pool.h"
 #include "offbynull/aligner/graph/multithreaded_sliceable_pairwise_alignment_graph.h"
@@ -31,14 +32,6 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::slot::slot;
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker
         ::diagonal_slice_slot_container_triplet::diagonal_slice_slot_container_triplet;
-    using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::diagonal_slice_slot_container
-        ::diagonal_slice_slot_container;
-    using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::diagonal_slice_slot_container
-        ::diagonal_slice_slot_container_container_creator_pack;
-    using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::diagonal_slice_slot_container
-        ::diagonal_slice_slot_container_heap_container_creator_pack;
-    using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::diagonal_slice_slot_container
-        ::diagonal_slice_slot_container_stack_container_creator_pack;
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::resident_slot_container
         ::resident_slot_with_node;
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::resident_slot_container
@@ -57,128 +50,26 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
     using offbynull::concepts::unqualified_value_type;
 
 
-
-
-    template<
-        typename T,
-        typename N,
-        typename E,
-        typename ED
-    >
-    concept forward_walker_container_creator_pack =
-        unqualified_value_type<T>
-        && backtrackable_node<N>
-        && backtrackable_edge<E>
-        && weight<ED>
-        && requires(const T t) {
-            {
-                t.create_diagional_slice_slot_container_container_creator_pack()
-            } -> diagonal_slice_slot_container_container_creator_pack<E, ED>;
-            { t.create_resident_slot_container_container_creator_pack() } -> resident_slot_container_container_creator_pack<N, E, ED>;
-        };
-
     template<
         bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight ED,
-        bool minimize_allocations
-    >
-    struct forward_walker_heap_container_creator_pack {
-        diagonal_slice_slot_container_heap_container_creator_pack<
-            debug_mode,
-            E,
-            ED
-        > create_diagonal_slice_slot_container_container_creator_pack() const {
-            return {};
-        }
-
-        resident_slot_container_heap_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            ED,
-            minimize_allocations
-        > create_resident_slot_container_container_creator_pack() const {
-            return {};
-        }
-    };
-
-    template<
-        bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight ED,
-        std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt,
-        std::size_t grid_depth_cnt,
-        std::size_t resident_nodes_capacity
-    >
-    struct forward_walker_stack_container_creator_pack {
-        diagonal_slice_slot_container_stack_container_creator_pack<
-            debug_mode,
-            E,
-            ED,
-            grid_down_cnt,
-            grid_right_cnt,
-            grid_depth_cnt
-        > create_diagonal_slice_slot_container_container_creator_pack() const {
-            return {};
-        }
-
-        resident_slot_container_stack_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            ED,
-            resident_nodes_capacity
-        > create_resident_slot_container_container_creator_pack() const {
-            return {};
-        }
-    };
-
-
-
-
-    template<
-        backtrackable_node N,
-        backtrackable_edge E,
+        widenable_to_size_t INDEX,
         weight WEIGHT
     >
-    struct slice_entry {
-        N node;
-        slot<E, WEIGHT>* slot_ptr;
+    struct diagonal_segment {
+        std::pair<INDEX, INDEX> grid_start;
+        std::pair<INDEX, INDEX> grid_stop; // inclusive
+        std::shared_mutex grid_stop_rw_mutex;
 
-        slice_entry()
-        : node {}
-        , slot_ptr { nullptr } {}
+        diagonal_segment()
+        : grid_start { grid_start }
+        , grid_stop { grid_stop }
+        , grid_stop_rw_mutex {} {}
     };
 
 
     template<
         bool debug_mode,
         readable_multithreaded_sliceable_pairwise_alignment_graph G
-    >
-    struct pending_subtask {
-        diagonal_segment_walker<debug_mode, G>;
-        std::future<std::any> result;
-    };
-
-
-    template<
-        bool debug_mode,
-        readable_multithreaded_sliceable_pairwise_alignment_graph G,
-        forward_walker_container_creator_pack<
-            typename G::N,
-            typename G::E,
-            typename G::ED
-        > CONTAINER_CREATOR_PACK = forward_walker_heap_container_creator_pack<
-            debug_mode,
-            typename G::N,
-            typename G::E,
-            typename G::ED,
-            true
-        >
     >
     class forward_walker_task {
     private:
@@ -188,14 +79,9 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         using ED = typename G::ED;
         using INDEX = typename G::INDEX;
 
-        using SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK =
-            decltype(std::declval<CONTAINER_CREATOR_PACK>().create_slice_slot_container_container_creator_pack());
-        using RESIDENT_SLOT_CONTAINER_CONTAINER_CREATOR_PACK =
-            decltype(std::declval<CONTAINER_CREATOR_PACK>().create_resident_slot_container_container_creator_pack());
-
         const G& g;
-        resident_slot_container<debug_mode, G, RESIDENT_SLOT_CONTAINER_CONTAINER_CREATOR_PACK> resident_slots;
-        diagonal_slice_slot_container_triplet<debug_mode, G, SLICE_SLOT_CONTAINER_CONTAINER_CREATOR_PACK> slice_slots;
+        resident_slot_container<debug_mode, G> resident_slots;
+        diagonal_slice_slot_container_triplet<debug_mode, G> slice_slots;
 
 
     public:

@@ -104,10 +104,10 @@ TODO:
   * option 1: multithreaded pairwise_alignment_graph_backtracker that breaks up the graph into chunks and process each chunk in a different thread (taking dependency order of the chunks into account)
   * option 2: singlethreaded sliceable_pairwise_alignment_graph_backtracker finds points in the graph at regular intervals, then multithreaded pairwise_alignment_graph_backtracker fills in between those intervals
   * ~~generic_row_nodes()~~
-  * generic_diagonal_nodes_segmented() CONTINUE TESTING
+  * ~~generic_diagonal_nodes_segmented() CONTINUE TESTING~~
   * UPDATE GRAPH IMPLEMENTATIONS:
     * row_nodes() grid_down param should be relative to root_node parameter, not graph's actual root node
-    * segmented_diagonal_node's grid_axis_position parma should be relative to root_node parameter, not graph's actual root node 
+    * ~~segmented_diagonal_node's grid_axis_position parma should be relative to root_node parameter, not graph's actual root node~~ 
   * CONTINUE IMPLEMENTING DIAGONAL_FORWARDWALKER ONCE generic_diagonal_nodes_segmented() READY
 
 * Update get_in_degree() / get_out_degree() functions to calculate directly

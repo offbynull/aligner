@@ -182,6 +182,7 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::endl': 'ostream',
     'std::istringstream': 'sstream',
     'std::ios::binary': 'ios',
+    'std::shared_mutex': 'shared_mutex',
     'std::mutex': 'mutex',
     'std::unique_lock': 'mutex',
     'std::condition_variable': 'condition_variable',

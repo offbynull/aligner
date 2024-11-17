@@ -62,7 +62,7 @@ namespace {
         using N = typename decltype(g)::N;
 
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 0u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 0u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DIAGONAL, 0zu, 0zu }
@@ -70,7 +70,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 1u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 1u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 1zu, 0zu },
@@ -81,7 +81,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 0u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 0u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 1zu, 0zu },
@@ -92,7 +92,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 1u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 1u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 1zu, 1zu },
@@ -104,7 +104,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 2u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 2u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 1zu, 2zu },
@@ -144,7 +144,7 @@ namespace {
         using N = typename decltype(g)::N;
 
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 0u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 0u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DIAGONAL, 0zu, 0zu }
@@ -152,7 +152,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 1u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 1u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 1zu, 0zu },
@@ -163,7 +163,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 2u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 2u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 2zu, 0zu },
@@ -177,7 +177,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 0u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 0u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 2zu, 0zu },
@@ -191,7 +191,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 1u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 1u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 2zu, 1zu },
@@ -206,7 +206,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 2u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 2u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 2zu, 2zu },
@@ -221,7 +221,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 3u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 3u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 2zu, 3zu },
@@ -234,7 +234,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 4u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 4u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 2zu, 4zu },
@@ -274,7 +274,7 @@ namespace {
         using N = typename decltype(g)::N;
 
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 0u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 0u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DIAGONAL, 0zu, 0zu }
@@ -282,7 +282,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 1u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 1u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 1zu, 0zu },
@@ -293,7 +293,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 2u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 2u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 2zu, 0zu },
@@ -307,7 +307,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 3u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 3u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 3zu, 0zu },
@@ -322,7 +322,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 4u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::DOWN_FROM_TOP_LEFT, 4u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 4zu, 0zu },
@@ -337,7 +337,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 0u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 0u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 4zu, 0zu },
@@ -352,7 +352,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 1u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 1u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 4zu, 1zu },
@@ -365,7 +365,7 @@ namespace {
             })
         );
         EXPECT_EQ(
-            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 2u, 1zu))),
+            (to_vector_of_vector(generic_segmented_diagonal_nodes<is_debug_mode()>(g, axis::RIGHT_FROM_BOTTOM_LEFT, 2u, 1zu).segments)),
             (std::vector<std::vector<N>> {
                 {
                     N { node_layer::DOWN, 4zu, 2zu },
@@ -413,7 +413,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 3zu, 6zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -430,7 +430,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 3zu, 6zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -450,7 +450,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 3zu, 6zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -473,7 +473,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 3zu, 6zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -496,7 +496,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 3zu, 6zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -520,7 +520,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 3zu, 6zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -544,7 +544,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 3zu, 6zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -566,7 +566,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 3zu, 6zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -615,7 +615,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 5zu, 4zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -632,7 +632,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 5zu, 4zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -652,7 +652,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 5zu, 4zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -675,7 +675,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 5zu, 4zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -699,7 +699,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 5zu, 4zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -723,7 +723,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 5zu, 4zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -747,7 +747,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 5zu, 4zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -769,7 +769,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 5zu, 4zu },
                     1zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -818,7 +818,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -835,7 +835,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -857,7 +857,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -884,7 +884,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -916,7 +916,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -949,7 +949,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -985,7 +985,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1026,7 +1026,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1070,7 +1070,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1118,7 +1118,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1153,7 +1153,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1187,7 +1187,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1216,7 +1216,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1240,7 +1240,7 @@ namespace {
                     N { node_layer::DIAGONAL, 1zu, 2zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1289,7 +1289,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1306,7 +1306,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1328,7 +1328,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1355,7 +1355,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1387,7 +1387,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1420,7 +1420,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1456,7 +1456,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1497,7 +1497,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1541,7 +1541,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1589,7 +1589,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1624,7 +1624,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1658,7 +1658,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1687,7 +1687,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {
@@ -1711,7 +1711,7 @@ namespace {
                     N { node_layer::DIAGONAL, 2zu, 1zu },
                     N { node_layer::DIAGONAL, 16zu, 16zu },
                     4zu
-                )
+                ).segments
             )),
             (std::vector<std::vector<N>> {
                 {

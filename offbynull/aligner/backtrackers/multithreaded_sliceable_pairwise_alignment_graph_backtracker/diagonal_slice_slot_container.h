@@ -76,11 +76,17 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
     >
     struct diagonal_slice_slot_container_heap_container_creator_pack {
         std::vector<slot<E, ED>> create_slot_container(
+            std::size_t segment_cnt,
             std::size_t grid_down_cnt,
             std::size_t grid_right_cnt,
             std::size_t grid_depth_cnt
         ) const {
-            std::size_t cnt { std::min(grid_down_cnt, grid_right_cnt) * grid_depth_cnt };
+            auto diagonal_len { std::min(grid_down_cnt, grid_right_cnt) };
+            auto nodes_per_segment { diagonal_len / segment_cnt };
+            if (diagonal_len % segment_cnt != 0u) {
+                ++nodes_per_segment;
+            }
+            std::size_t cnt { nodes_per_segment *  * grid_depth_cnt };
             return std::vector<slot<E, ED>>(cnt);
         }
     };

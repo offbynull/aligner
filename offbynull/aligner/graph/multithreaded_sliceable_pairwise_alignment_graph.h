@@ -8,20 +8,37 @@
 #include <utility>
 #include <tuple>
 #include <algorithm>
+#include <concepts>
 #include "offbynull/concepts.h"
 #include "offbynull/helpers/join_bidirectional_view.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
+#include "offbynull/aligner/backtrackers//multithreaded_sliceable_pairwise_alignment_graph_backtracker/concepts.h"
 
 namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph {
     using offbynull::concepts::bidirectional_range_of_bidirectional_range_of_one_of;
     using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::widenable_to_size_t;
     using offbynull::helpers::join_bidirectional_view::join_bidirectional_view_adaptor;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
 
     enum class axis : std::uint8_t {
         DOWN_FROM_TOP_LEFT = 0u,
         RIGHT_FROM_BOTTOM_LEFT = 1u
     };
+
+    template <
+        typename T,
+        typename N,
+        typename INDEX
+    >
+    concept diagonal_segments =
+        backtrackable_node<N>
+        && widenable_to_size_t<INDEX>
+        && requires(T obj) {
+            { obj.len_per_segment } -> std::same_as<INDEX>;
+            { obj.segments } -> bidirectional_range_of_bidirectional_range_of_one_of<N, const N&>;
+        };
 
     template <typename G>
     concept readable_multithreaded_sliceable_pairwise_alignment_graph =
@@ -34,14 +51,23 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
             typename G::INDEX axis_position,
             std::size_t max_segments
         ) {
-            { g.segmented_diagonal_nodes(axis_, axis_position, max_segments) }
-                -> bidirectional_range_of_bidirectional_range_of_one_of<typename G::N, const typename G::N&>;
+            { g.segmented_diagonal_nodes(axis_, axis_position, max_segments) } -> diagonal_segments<typename G::N, typename G::INDEX>;
             { g.segmented_diagonal_nodes(axis_, axis_position, node, node, max_segments) }
-                -> bidirectional_range_of_bidirectional_range_of_one_of<typename G::N, const typename G::N&>;
+                -> diagonal_segments<typename G::N, typename G::INDEX>;
         };
 
 
 
+
+    template <
+        backtrackable_node N,
+        widenable_to_size_t INDEX,
+        bidirectional_range_of_bidirectional_range_of_one_of<N, const N&> SEGMENTS
+    >
+    struct generic_diagonal_segments {
+        INDEX len_per_segment;
+        SEGMENTS segments;
+    };
 
     // Reference implementation for segmented_diagonal_nodes()
     // -------------------------------------------------------
@@ -53,7 +79,7 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
         bool debug_mode,
         typename G  /* Should be readable_multithreaded_sliceable_pairwise_alignment_graph, but can't do this because of cyclic dep. */
     >
-    std::ranges::bidirectional_range auto generic_segmented_diagonal_nodes(
+    auto generic_segmented_diagonal_nodes(
         const G& g,
         axis axis_,
         typename G::INDEX axis_position,
@@ -143,18 +169,18 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
         // 1 isn't added, any remainder gets pushed to the last worker (code further below). For example, imagine that ...
         //
         // * isolated_diagonal_len == 4 and isolated_segments == 4, 4/4 == 1, the workload will break down be as [*] [*] [*] [*]
-        // * isolated_diagonal_len == 5 and isolated_segments == 4, 4/5 == 1, the workload will break down be as [*] [*] [*] [**]
-        // * isolated_diagonal_len == 6 and isolated_segments == 4, 4/6 == 1, the workload will break down be as [*] [*] [*] [***]
-        // * isolated_diagonal_len == 7 and isolated_segments == 4, 4/7 == 1, the workload will break down be as [*] [*] [*] [****]
-        // * isolated_diagonal_len == 8 and isolated_segments == 4, 4/8 == 2, the workload will break down be as [**] [**] [**] [**]
+        // * isolated_diagonal_len == 5 and isolated_segments == 4, 5/4 == 1, the workload will break down be as [*] [*] [*] [**]
+        // * isolated_diagonal_len == 6 and isolated_segments == 4, 6/4 == 1, the workload will break down be as [*] [*] [*] [***]
+        // * isolated_diagonal_len == 7 and isolated_segments == 4, 7/4 == 1, the workload will break down be as [*] [*] [*] [****]
+        // * isolated_diagonal_len == 8 and isolated_segments == 4, 8/4 == 2, the workload will break down be as [**] [**] [**] [**]
         //
         // With this change, nodes are more evenly distributed between segments. For example, imagine that ...
         //
         // * isolated_diagonal_len == 4 and isolated_segments == 4, 4/4+0 == 1, the workload will break down be as [*] [*] [*] [*]
-        // * isolated_diagonal_len == 5 and isolated_segments == 4, 4/5+1 == 2, the workload will break down be as [**] [**] [*] []
-        // * isolated_diagonal_len == 6 and isolated_segments == 4, 4/6+1 == 2, the workload will break down be as [**] [**] [**] []
-        // * isolated_diagonal_len == 7 and isolated_segments == 4, 4/7+1 == 2, the workload will break down be as [**] [**] [**] [*]
-        // * isolated_diagonal_len == 8 and isolated_segments == 4, 4/8+0 == 2, the workload will break down be as [**] [**] [**] [**]
+        // * isolated_diagonal_len == 5 and isolated_segments == 4, 5/4+1 == 2, the workload will break down be as [**] [**] [*] []
+        // * isolated_diagonal_len == 6 and isolated_segments == 4, 6/4+1 == 2, the workload will break down be as [**] [**] [**] []
+        // * isolated_diagonal_len == 7 and isolated_segments == 4, 7/4+1 == 2, the workload will break down be as [**] [**] [**] [*]
+        // * isolated_diagonal_len == 8 and isolated_segments == 4, 8/4+0 == 2, the workload will break down be as [**] [**] [**] [**]
         //
         // The idea is that each segment is processed by a single core (4 segments = 4 cores processing in parallel). As such, the total
         // processing time should be only as long as the longest segment. When one of the segments is lop-sided (as in the example where 1
@@ -170,7 +196,7 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
                 isolated_diagonal_len / isolated_nodes_per_segment + (extra_segment ? 1u : 0u)
             );
         }
-        return
+        auto segments {
             std::views::iota(0zu, isolated_segments)
             | std::views::transform(
                 [
@@ -224,14 +250,19 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
                             }
                         );
                 }
-            );
+            )
+        };
+        return generic_diagonal_segments<N, INDEX, decltype(segments)> {
+            isolated_nodes_per_segment,
+            std::move(segments)
+        };
     }
 
     template<
         bool debug_mode,
         typename G  /* Should be readable_multithreaded_sliceable_pairwise_alignment_graph, but can't do this because of cyclic dep. */
     >
-    std::ranges::bidirectional_range auto generic_segmented_diagonal_nodes(
+    auto generic_segmented_diagonal_nodes(
         const G& g,
         axis axis_,
         typename G::INDEX axis_position,
