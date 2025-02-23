@@ -10,6 +10,8 @@
 
 /**
  * Common concepts.
+ *
+ * @author Kasra Faghihi
  */
 namespace offbynull::concepts {
     /**
@@ -18,7 +20,7 @@ namespace offbynull::concepts {
      * @tparam T Type to check.
      */
     template<typename T>
-    concept unqualified_value_type = !std::is_void_v<T> && std::is_same_v<T, std::remove_cvref_t<T>>;
+    concept unqualified_object_type = !std::is_void_v<T> && std::is_same_v<T, std::remove_cvref_t<T>>;
 
     /**
      * Concept that's satisfied if `T` is implicitly convertible to an @ref offbynull::concepts::unqualified_value_type.
@@ -26,7 +28,7 @@ namespace offbynull::concepts {
      * @tparam T Type to check.
      */
     template<typename T>
-    concept convertible_to_unqualified_value_type= !std::is_void_v<T> && std::is_convertible_v<T, std::remove_cvref_t<T>>;
+    concept convertible_to_unqualified_object_type= !std::is_void_v<T> && std::is_convertible_v<T, std::remove_cvref_t<T>>;
 
     /**
      * Concept that's satisfied if `T` satisfies `std::ranges::random_access_range` and `T`'s element type matches `V`.

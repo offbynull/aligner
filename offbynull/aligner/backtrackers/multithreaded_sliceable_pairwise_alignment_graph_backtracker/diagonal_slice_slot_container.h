@@ -24,7 +24,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::random_access_range_of_type;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
     using offbynull::utils::static_vector_typer;
 
 
@@ -63,7 +63,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         typename ED
     >
     concept diagonal_slice_slot_container_container_creator_pack =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && backtrackable_edge<E>
         && weight<ED>
         && requires(const T t, std::size_t segment_cnt, std::size_t items_per_segment, std::size_t grid_depth_cnt) {

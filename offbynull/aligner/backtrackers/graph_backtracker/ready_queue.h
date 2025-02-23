@@ -10,7 +10,7 @@
 namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue {
     using offbynull::aligner::graph::graph::readable_graph;
     using offbynull::concepts::random_access_range_of_type;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
 
 
 
@@ -19,7 +19,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue {
         typename T
     >
     concept ready_queue_container_creator_pack =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && requires(const T t) {
             { t.create_queue_container() } -> random_access_range_of_type<std::size_t>;
         };

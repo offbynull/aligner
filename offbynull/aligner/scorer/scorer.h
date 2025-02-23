@@ -12,11 +12,11 @@
 namespace offbynull::aligner::scorer::scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
 
     template<typename T, typename EDGE, typename DOWN_ELEM, typename RIGHT_ELEM, typename WEIGHT>
     concept scorer =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && requires(
             T t,
             const EDGE& edge,
@@ -31,7 +31,7 @@ namespace offbynull::aligner::scorer::scorer {
 
     template<typename T, typename EDGE, typename DOWN_ELEM, typename RIGHT_ELEM>
     concept scorer_without_explicit_weight =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && requires(
             T t,
             const EDGE& edge,

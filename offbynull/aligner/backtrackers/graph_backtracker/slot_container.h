@@ -19,7 +19,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::random_access_range_of_type;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
     using offbynull::aligner::graph::graph::readable_graph;
     using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_edge;
@@ -76,7 +76,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
         typename WEIGHT
     >
     concept slot_container_container_creator_pack =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && backtrackable_node<N>
         && backtrackable_edge<E>
         && weight<WEIGHT>

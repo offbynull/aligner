@@ -37,7 +37,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::random_access_range_of_type;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
     using offbynull::utils::static_vector_typer;
 
 
@@ -52,7 +52,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         typename SLOT_INDEX
     >
     concept backtracker_container_creator_pack =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && backtrackable_node<N>
         && backtrackable_edge<E>
         && weight<ED>

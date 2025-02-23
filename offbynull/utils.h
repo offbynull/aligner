@@ -33,9 +33,11 @@ static_assert(false, "Struct packing not supported by compiler. Turn off OBN_PAC
 
 /**
  * Utility / helper functions.
+ *
+ * @author Kasra Faghihi
  */
 namespace offbynull::utils {
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
 
     /**
      * Unimplemented class template used as a hack to determine what some unknown type `T` is. Because this class template remains

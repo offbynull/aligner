@@ -13,7 +13,7 @@
 namespace offbynull::aligner::sequences::sliding_window_sequence {
     using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::random_access_range_of_type;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
 
 
 
@@ -22,7 +22,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
         typename E
     >
     concept sliding_window_sequence_container_creator_pack =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && requires(const T t, std::size_t reserve_len) {
             { t.create_result_container(reserve_len) } -> random_access_range_of_type<E>;
         };

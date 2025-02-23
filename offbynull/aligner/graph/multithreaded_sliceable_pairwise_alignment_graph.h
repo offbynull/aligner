@@ -16,7 +16,7 @@
 
 namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph {
     using offbynull::concepts::bidirectional_range_of_bidirectional_range_of_one_of;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::helpers::join_bidirectional_view::join_bidirectional_view_adaptor;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
@@ -33,7 +33,7 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
         typename INDEX
     >
     concept diagonal_segments =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && backtrackable_node<N>
         && widenable_to_size_t<INDEX>
         && requires(T obj) {
@@ -43,7 +43,7 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
 
     template <typename G>
     concept readable_multithreaded_sliceable_pairwise_alignment_graph =
-        unqualified_value_type<G>
+        unqualified_object_type<G>
         && readable_sliceable_pairwise_alignment_graph<G>
         && requires(
             G g,

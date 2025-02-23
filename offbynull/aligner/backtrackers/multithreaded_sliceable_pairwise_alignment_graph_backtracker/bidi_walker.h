@@ -39,7 +39,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
     using offbynull::helpers::forkable_thread_pool::forkable_thread_pool;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
     using offbynull::utils::static_vector_typer;
 
 
@@ -52,7 +52,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         typename ED
     >
     concept bidi_walker_container_creator_pack =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && backtrackable_node<N>
         && backtrackable_edge<E>
         && weight<ED>

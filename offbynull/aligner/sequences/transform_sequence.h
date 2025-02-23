@@ -10,13 +10,13 @@
 namespace offbynull::aligner::sequences::transform_sequence {
     using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
 
     template<typename T, typename INPUT>
     concept transformer =
         // leave out unqualified_value_type<T> because it won't pass if T is a function pointer? or maybe it will?
         requires(const T t, INPUT input) {
-            { t(input) } -> unqualified_value_type;
+            { t(input) } -> unqualified_object_type;
         };
 
 

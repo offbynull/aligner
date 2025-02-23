@@ -47,7 +47,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
 
 
     template<

@@ -14,13 +14,13 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
     using offbynull::concepts::one_of;
     using offbynull::concepts::range_of_one_of;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::graph::graph::readable_graph;
 
     template <typename G>
     concept readable_pairwise_alignment_graph =
-        unqualified_value_type<G>
+        unqualified_object_type<G>
         && readable_graph<G>
         && widenable_to_size_t<typename G::INDEX>
         && weight<typename G::ED>

@@ -24,7 +24,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::random_access_range_of_type;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
     using offbynull::utils::static_vector_typer;
 
     PACK_STRUCT_START
@@ -89,7 +89,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
         typename ED
     >
     concept resident_slot_container_container_creator_pack =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && backtrackable_node<N>
         && backtrackable_edge<E>
         && weight<ED>

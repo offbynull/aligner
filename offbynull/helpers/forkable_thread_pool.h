@@ -88,7 +88,7 @@ namespace offbynull::helpers::forkable_thread_pool {
          * @tparam TASK Type of task to be executed.
          * @param task Task to be executed.
          * @return An optional holding an `std::future<TASK_RESULT>` which will contain the `task`'s result once it executes, or
-         * @ref std::nullopt if this thread pool has closed.
+         * `std::nullopt` if this thread pool has closed.
          */
         template<typename TASK>
         requires requires(TASK t, forkable_thread_pool<debug_mode, TASK_RESULT>& owner) {

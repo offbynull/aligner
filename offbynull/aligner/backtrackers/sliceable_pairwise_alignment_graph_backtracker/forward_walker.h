@@ -43,7 +43,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
 
 
 
@@ -55,7 +55,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         typename ED
     >
     concept forward_walker_container_creator_pack =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && backtrackable_node<N>
         && backtrackable_edge<E>
         && weight<ED>

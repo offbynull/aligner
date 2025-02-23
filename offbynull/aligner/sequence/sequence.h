@@ -7,15 +7,31 @@
 #include <type_traits>
 #include "offbynull/concepts.h"
 
+/**
+ * Sequence interface.
+ *
+ * @author Kasra Faghihi
+ */
 namespace offbynull::aligner::sequence::sequence {
-    using offbynull::concepts::convertible_to_unqualified_value_type;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::convertible_to_unqualified_object_type;
+    using offbynull::concepts::unqualified_object_type;
 
+    /**
+     * Concept that's satisfied if `T` has the traits of a sequence. A sequence is an ordered collection that's randomly accessible.
+     *
+     * * Must allow access to the total number of elements it contains via the `size()` function.
+     * * Must allow access to its elements via the `[]` operator.
+     *   * `[]` operator's return type must be copyable and [regular](https://en.cppreference.com/w/cpp/concepts/regular).
+     *
+     * Common STL types such as `std::vector` and `std::string` satisfy this concept.
+     *
+     * @tparam T Type to check.
+     */
     template<typename T>
     concept sequence =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && requires(T t) {
-            { t[0zu] } -> convertible_to_unqualified_value_type;  // Returns unqualified value type or convertable to one (copy constructor)
+            { t[0zu] } -> convertible_to_unqualified_object_type;  // unqualified object type or convertible to one (copy constructor)
             { t.size() } -> std::same_as<std::size_t>;
         }
         && std::regular<

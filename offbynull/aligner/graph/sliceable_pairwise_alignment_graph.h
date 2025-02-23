@@ -12,13 +12,13 @@
 
 namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
     using offbynull::concepts::range_of_one_of;
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
     using offbynull::helpers::join_bidirectional_view::join_bidirectional_view_adaptor;
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
 
     template <typename G>
     concept readable_sliceable_pairwise_alignment_graph =
-        unqualified_value_type<G>
+        unqualified_object_type<G>
         && readable_pairwise_alignment_graph<G>
         && requires(
             G g,

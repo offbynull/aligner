@@ -5,14 +5,14 @@
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::backtrackers::graph_backtracker::concepts {
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
 
 
 
 
     template<typename N>
     concept backtrackable_node =
-        unqualified_value_type<N>
+        unqualified_object_type<N>
         && std::regular<N>
         && requires(N n) {
             { n < n } -> std::same_as<bool>;
@@ -20,7 +20,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::concepts {
 
     template<typename E>
     concept backtrackable_edge =
-        unqualified_value_type<E>
+        unqualified_object_type<E>
         && std::regular<E>;
 }
 

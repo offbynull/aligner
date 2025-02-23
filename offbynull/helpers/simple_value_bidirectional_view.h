@@ -14,17 +14,17 @@
  * @author Kasra Faghihi
  */
 namespace offbynull::helpers::simple_value_bidirectional_view {
-    using offbynull::concepts::unqualified_value_type;
+    using offbynull::concepts::unqualified_object_type;
 
     /**
-     * Simplified analog to the STL bidirectional iterator. Note that, while normal C++ iterators can return values or references, this
-     * iterator only ever returns values (copies).
+     * Concept that's satisfied if `T` has the traits of a simplified bidirectional iterator. Note that, while normal C++ iterators can
+     * return values or references, this iterator only ever returns values (copies).
      *
      * @tparam T Type to check.
      */
     template<typename T>
     concept state =
-        unqualified_value_type<T>
+        unqualified_object_type<T>
         && std::semiregular<T>
         && requires(T self, const T const_self) {
             // Move internal pointer back by one element. Moving back before the first element is undefined.
@@ -32,7 +32,7 @@ namespace offbynull::helpers::simple_value_bidirectional_view {
             // Move internal pointer forward by one element. Moving forward 1 past the last element is undefined (1 past last = end marker).
             { self.to_next() } -> std::same_as<void>;
             // Get copy of value at internal pointer.
-            { const_self.value() } -> unqualified_value_type;
+            { const_self.value() } -> unqualified_object_type;
         };
 
     /**
