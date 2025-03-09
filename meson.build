@@ -114,14 +114,8 @@ tests_src = [
 #        'offbynull/aligner/scorers/levenshtein_scorer_test.cpp',
 #        'offbynull/aligner/scorers/substitution_map_scorer_test.cpp',
 #        'offbynull/aligner/scorers/single_character_substitution_matrix_scorer_test.cpp',
-#        'offbynull/aligner/scorers/blosum45_scorer_test.cpp',
-#        'offbynull/aligner/scorers/blosum50_scorer_test.cpp',
-#        'offbynull/aligner/scorers/blosum62_scorer_test.cpp',
-#        'offbynull/aligner/scorers/blosum80_scorer_test.cpp',
-#        'offbynull/aligner/scorers/blosum90_scorer_test.cpp',
-#        'offbynull/aligner/scorers/pam30_scorer_test.cpp',
-#        'offbynull/aligner/scorers/pam70_scorer_test.cpp',
-#        'offbynull/aligner/scorers/pam250_scorer_test.cpp',
+#        'offbynull/aligner/scorers/blosum_scorer_test.cpp',
+#        'offbynull/aligner/scorers/pam_scorer_test.cpp',
 #        'offbynull/aligner/scorers/qwerty_scorer_test.cpp',
 ##        'offbynull/aligner/aligner_test.cpp'
 ]
