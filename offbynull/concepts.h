@@ -23,7 +23,7 @@ namespace offbynull::concepts {
     concept unqualified_object_type = !std::is_void_v<T> && std::is_same_v<T, std::remove_cvref_t<T>>;
 
     /**
-     * Concept that's satisfied if `T` is implicitly convertible to an @ref offbynull::concepts::unqualified_value_type.
+     * Concept that's satisfied if `T` is implicitly convertible to an @ref offbynull::concepts::unqualified_object_type.
      *
      * @tparam T Type to check.
      */

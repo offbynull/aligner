@@ -12,42 +12,66 @@
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/scorers/single_character_substitution_matrix_scorer.h"
 
+/**
+ * @ref offbynull::aligner::scorer::scorer::scorer which scores printable ASCII characters via their distance from each other on a typical
+ * QWERTY-layout keyboard.
+ *
+ * @author Kasra Faghihi
+ */
 namespace offbynull::aligner::scorers::qwerty_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
     using offbynull::aligner::scorers::single_character_substitution_matrix_scorer::single_character_substitution_matrix_scorer;
 
+    /** 2D point. */
     struct point {
         double x;
         double y;
     };
 
+    /** 2D horizontal line. */
     struct horizontal_line {
         double x_left;
         double x_right;
         double y;
     };
 
+    /**
+     * @ref offbynull::aligner::scorer::scorer::scorer which scores printable ASCII characters via their distance from each other on a
+     * typical QWERTY-layout keyboard.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam WEIGHT Type of alignment graph's edge weights.
+     */
     template<bool debug_mode, weight WEIGHT>
     class qwerty_scorer : public single_character_substitution_matrix_scorer<debug_mode, WEIGHT, 95zu> {
     public:
-        // Why not compute create_qwerty_distance_matrix() at compile-time via constexpr/consteval? It seems to cause
-        // an error on std::lower_bound(): ‘constexpr’ evaluation operation count exceeds limit of 33554432
+        /**
+         * Construct an @ref offbynull::aligner::scorers::qwerty_scorer::qwerty_scorer instance.
+         */
+        // Why not force computing create_qwerty_distance_matrix() at compile-time via consteval? It seems g++ (and other compilers) limit
+        // the amount of work that can happen during compile-time evaluation. Too much work results in ...
+        //
+        //     evaluation operation count exceeds limit of 33554432 (use ‘-fconstexpr-ops-limit=’ to increase the limit)
+        //
+        // As such, this computation is being performed at run-time.
+        //
+        // TODO: Force evaluation offline and directly embed the resulting array rather than relying on consteval?
         qwerty_scorer()
         : qwerty_scorer { create_qwerty_distance_matrix() } {}
 
     private:
-        qwerty_scorer(std::pair<std::array<char, 95zu>, std::array<WEIGHT, 95zu*95zu>> sorted_alphabet_and_weights)
+        qwerty_scorer(const std::pair<std::array<char, 95zu>, std::array<WEIGHT, 95zu*95zu>>& sorted_alphabet_and_weights)
         : single_character_substitution_matrix_scorer<debug_mode, WEIGHT, 95zu> {
             std::get<0>(sorted_alphabet_and_weights),
             std::get<1>(sorted_alphabet_and_weights)
         } {}
 
-        static auto distance_(const point& p1, const point& p2) {
+        static constexpr auto distance_(const point& p1, const point& p2) {
             return std::hypot(p2.x - p1.x, p2.y - p1.y);
         }
 
-        static auto distance_(const point& p1, const horizontal_line& l2) {
+        static constexpr auto distance_(const point& p1, const horizontal_line& l2) {
             if (p1.x < l2.x_left) {
                 return distance_(p1, point { l2.x_left, l2.y });
             } else if (p1.x > l2.x_right) {
@@ -58,7 +82,7 @@ namespace offbynull::aligner::scorers::qwerty_scorer {
             std::unreachable();
         }
 
-        static auto distance_(const horizontal_line& l1, const horizontal_line& l2) {
+        static constexpr auto distance_(const horizontal_line& l1, const horizontal_line& l2) {
             if (l1.x_left >= l2.x_left && l1.x_left <= l2.x_right) {
                 return std::abs(l2.y - l1.y);
             } else if (l1.x_right >= l2.x_left && l1.x_right <= l2.x_right) {
@@ -71,7 +95,7 @@ namespace offbynull::aligner::scorers::qwerty_scorer {
             std::unreachable();
         }
 
-        static auto distance(
+        static constexpr auto distance(
             const std::variant<point, horizontal_line>& item1,
             const std::variant<point, horizontal_line>& item2
         ) {
@@ -96,7 +120,7 @@ namespace offbynull::aligner::scorers::qwerty_scorer {
         }
 
 
-        static std::pair<std::array<char, 95zu>, std::array<WEIGHT, 95zu*95zu>> create_qwerty_distance_matrix(
+        static constexpr std::pair<std::array<char, 95zu>, std::array<WEIGHT, 95zu*95zu>> create_qwerty_distance_matrix(
             WEIGHT dist_offset = static_cast<WEIGHT>(1.9)
         ) {
             struct entry {

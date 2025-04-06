@@ -205,7 +205,7 @@ namespace offbynull::helpers::join_bidirectional_view {
          *
          * @param outer_it_begin Beginning iterator of outer range.
          * @param outer_it_end Ending iterator of outer range.
-         * @return Newly created @ref offbynull::helpers::join_bidirectional_view::inner_pack pointing at the end, or @ref std:nullopt if
+         * @return Newly created @ref offbynull::helpers::join_bidirectional_view::inner_pack pointing at the end, or \c std::nullopt if
          * the outer range is empty.
          */
         static std::optional<inner_pack> from_end(OUTER_IT outer_it_begin, OUTER_IT outer_it_end) {

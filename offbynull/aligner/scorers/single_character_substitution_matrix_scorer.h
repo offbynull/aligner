@@ -17,15 +17,27 @@
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/utils.h"
 
+/**
+ * @ref offbynull::aligner::scorer::scorer::scorer which scores single character elements based on a space-delimited ASCII table.
+ *
+ * @author Kasra Faghihi
+ */
 namespace offbynull::aligner::scorers::single_character_substitution_matrix_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
     using offbynull::utils::type_displayer;
 
-    template<bool debug_mode, weight WEIGHT, std::size_t ALPHABET_SIZE>
+    /**
+     * @ref offbynull::aligner::scorer::scorer::scorer which scores single character elements based on a space-delimited ASCII table.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam WEIGHT Type of alignment graph's edge weights.
+     * @tparam alphabet_size Number of characters (must be <= 255).
+     */
+    template<bool debug_mode, weight WEIGHT, std::size_t alphabet_size>
     class single_character_substitution_matrix_scorer {
     private:
-        static_assert(ALPHABET_SIZE <= 255zu, "Alphabet greater than 255 symbols");
+        static_assert(alphabet_size <= 255zu, "Alphabet greater than 255 symbols");
 
         static auto trim_whitespace(const auto& text) {
             auto leading_trimmed {
@@ -93,7 +105,7 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             return ret;
         }
 
-        static std::array<char, ALPHABET_SIZE> extract_sorted_alphabet(const std::string_view& text) {
+        static std::array<char, alphabet_size> extract_sorted_alphabet(const std::string_view& text) {
             // split test line-by-line
             auto lines { split_lines_and_words(text) };
             auto lines_it { lines.begin() };
@@ -102,13 +114,13 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             // set alphabet
             if constexpr (debug_mode) {
                 auto size { std::ranges::distance(header_words) };
-                if (size != ALPHABET_SIZE) {
+                if (size != alphabet_size) {
                     throw std::runtime_error { "Unexpected number of characters" };
                 }
             }
-            std::array<char, ALPHABET_SIZE> ret {};
+            std::array<char, alphabet_size> ret {};
             auto header_words_it { header_words.begin() };
-            for (std::size_t i { 0zu }; i < ALPHABET_SIZE; i++) {
+            for (std::size_t i { 0zu }; i < alphabet_size; i++) {
                 ret[i] = extract_symbol(*header_words_it);
                 ++header_words_it;
             }
@@ -117,7 +129,7 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
         }
 
         static std::size_t to_weights_idx(
-            const std::array<char, ALPHABET_SIZE> sorted_alphabet,
+            const std::array<char, alphabet_size> sorted_alphabet,
             const char down_elem,
             const char right_elem
         ) {
@@ -135,11 +147,11 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             }
             std::size_t down_idx { static_cast<std::size_t>(down_it - sorted_alphabet.begin()) };
             std::size_t right_idx { static_cast<std::size_t>(right_it - sorted_alphabet.begin()) };
-            return down_idx * ALPHABET_SIZE + right_idx;
+            return down_idx * alphabet_size + right_idx;
         }
 
-        static std::array<WEIGHT, ALPHABET_SIZE * ALPHABET_SIZE> extract_sorted_weights(const std::string_view& text) {
-            const std::array<char, ALPHABET_SIZE> sorted_alphabet { extract_sorted_alphabet(text) };
+        static std::array<WEIGHT, alphabet_size * alphabet_size> extract_sorted_weights(const std::string_view& text) {
+            const std::array<char, alphabet_size> sorted_alphabet { extract_sorted_alphabet(text) };
             // split test line-by-line
             auto lines { split_lines_and_words(text) };
             auto lines_it { lines.begin() };
@@ -147,7 +159,7 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             auto header_words { *lines_it };
             ++lines_it;
             // pull out rows
-            std::array<WEIGHT, ALPHABET_SIZE * ALPHABET_SIZE> ret {};
+            std::array<WEIGHT, alphabet_size * alphabet_size> ret {};
             while (lines_it != lines.end()) {
                 auto row_words { *lines_it };
                 ++lines_it;
@@ -181,23 +193,63 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
             return ret;
         }
 
-        const std::array<char, ALPHABET_SIZE> alphabet;
-        const std::array<WEIGHT, ALPHABET_SIZE * ALPHABET_SIZE> weights;
+        const std::array<char, alphabet_size> alphabet;
+        const std::array<WEIGHT, alphabet_size * alphabet_size> weights;
 
     public:
+        /**
+         * Construct an @ref
+         * offbynull::aligner::scorers::single_character_substitution_matrix_scorer::single_character_substitution_matrix_scorer
+         * instance from a text table. A text table is a space-separated table where ...
+         *
+         *  * the first row contains ASCII characters, representing the first element being compared.
+         *  * the first columns contains ASCII characters, representing the second element being compared.
+         *  * each cell (not including first row and column) is a score for the two characters corresponding to the cell's position within
+         *    the first row and first column.
+         *
+         * For example, the following text table scores \code (A,C) \endcode as -1.
+         *
+         * \code
+         *    A  C  T  G
+         * A  1 -1 -1 -1
+         * C -1  1 -1  0
+         * T -1 -1  1 -1
+         * G -1  0 -1  1
+         * \endcode
+         *
+         * @param text_table Text table.
+         */
         single_character_substitution_matrix_scorer(
             const std::string_view& text_table
         )
         : alphabet { std::move(extract_sorted_alphabet(text_table)) }
         , weights { std::move(extract_sorted_weights(text_table)) } {}
 
+        /**
+         * Construct an @ref
+         * offbynull::aligner::scorers::single_character_substitution_matrix_scorer::single_character_substitution_matrix_scorer
+         * instance from an array of characters and scores.
+         *
+         * @param alphabet_ ASCII characters, representing elements being compared. Must be sorted.
+         * @param weights_ Scores for a 2-tuple containing an element from \c alphabet_ at each position. Must be sorted by the 2-tuple pair
+         *     the score is for. For example, if \code alphabet_="ABC" \endcode, then the order of scores must be such that that the score
+         *     for \code (A,A) \endcode appears first, followed by \code (A,B) \endcode, followed by \code (A,C) \endcode, etc... Must be
+         *     sized \code alphabet_.size()*alphabet_.size() \endcode.
+         */
         single_character_substitution_matrix_scorer(
-            const std::array<char, ALPHABET_SIZE>& alphabet_,  // must be sorted
-            const std::array<WEIGHT, ALPHABET_SIZE * ALPHABET_SIZE>& weights_  // must be sorted (based on alphabet pair)
+            const std::array<char, alphabet_size>& alphabet_,  // must be sorted
+            const std::array<WEIGHT, alphabet_size * alphabet_size>& weights_  // must be sorted (based on alphabet pair)
         )
         : alphabet { alphabet_ }
         , weights { weights_ } {}
 
+        /**
+         * Score edge.
+         *
+         * @param down_elem Downward element.
+         * @param right_elem Rightward element.
+         * @return Score for edge (edge weight).
+         */
         WEIGHT operator()(
             const auto& /*edge*/,
             const std::optional<std::reference_wrapper<const char>> down_elem,

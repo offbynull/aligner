@@ -7,17 +7,31 @@
 #include "offbynull/aligner/scorers/single_character_substitution_matrix_scorer.h"
 #include "offbynull/aligner/concepts.h"
 
+/**
+ * PAM @ref offbynull::aligner::scorer::scorer::scorer.
+ *
+ * @author Kasra Faghihi
+ */
 namespace offbynull::aligner::scorers::pam_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
     using offbynull::aligner::scorers::single_character_substitution_matrix_scorer::single_character_substitution_matrix_scorer;
 
+    /**
+     * PAM distances.
+     */
     enum class distance {
+        /** PAM 30. */
         _30 = 30,
+        /** PAM 70. */
         _70 = 70,
+        /** PAM 250. */
         _250 = 250,
     };
 
+    /**
+     * PAM 30 matrix.
+     */
     constexpr char text_table_30[] {
         R"(
     A   R   N   D   C   Q   E   G   H   I   L   K   M   F   P   S   T   W   Y   V   B   J   Z   X   *
@@ -49,6 +63,9 @@ X  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -
         )"
     };
 
+    /**
+     * PAM 70 matrix.
+     */
     constexpr char text_table_70[] {
         R"(
     A   R   N   D   C   Q   E   G   H   I   L   K   M   F   P   S   T   W   Y   V   B   J   Z   X   *
@@ -80,6 +97,9 @@ X  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -
         )"
     };
 
+    /**
+     * PAM 250 matrix.
+     */
     constexpr char text_table_250[] {
         R"(
    A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  J  Z  X  *
@@ -111,13 +131,23 @@ X -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -8
         )"
     };
 
+    /**
+     * PAM @ref offbynull::aligner::scorer::scorer::scorer targeting various distances.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam distance_ PAM distance.
+     * @tparam WEIGHT Type of alignment graph's edge weights.
+     */
     template<bool debug_mode, distance distance_, weight WEIGHT>
     class pam_scorer : public single_character_substitution_matrix_scorer<debug_mode, WEIGHT, 25zu> {
     public:
+        /**
+         * Construct an @ref offbynull::aligner::scorers::pam_scorer::pam_scorer::pam_scorer instance.
+         */
         pam_scorer()
         : single_character_substitution_matrix_scorer<debug_mode, WEIGHT, 25zu> { pick_text_table() } {}
     private:
-        static constexpr auto pick_text_table() {
+        static consteval auto pick_text_table() {
             switch (distance_) {
                 case distance::_30:
                     return text_table_30;

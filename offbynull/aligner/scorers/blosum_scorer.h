@@ -8,19 +8,35 @@
 #include "offbynull/aligner/concepts.h"
 
 
+/**
+ * BLOSUM @ref offbynull::aligner::scorer::scorer::scorer.
+ *
+ * @author Kasra Faghihi
+ */
 namespace offbynull::aligner::scorers::blosum_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
     using offbynull::aligner::scorers::single_character_substitution_matrix_scorer::single_character_substitution_matrix_scorer;
 
+    /**
+     * BLOSUM thresholds.
+     */
     enum class threshold {
+        /** BLOSUM 45. */
         _45 = 45,
+        /** BLOSUM 50. */
         _50 = 50,
+        /** BLOSUM 62. */
         _62 = 62,
+        /** BLOSUM 80. */
         _80 = 80,
+        /** BLOSUM 90. */
         _90 = 90,
     };
 
+    /**
+     * BLOSUM 45 matrix.
+     */
     constexpr char text_table_45[] {
         R"(
    A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  J  Z  X  *
@@ -52,6 +68,9 @@ X -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -5
         )"
     };
 
+    /**
+     * BLOSUM 50 matrix.
+     */
     constexpr char text_table_50[] {
         R"(
    A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  J  Z  X  *
@@ -83,6 +102,9 @@ X -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -5
         )"
     };
 
+    /**
+     * BLOSUM 62 matrix.
+     */
     constexpr char text_table_62[] {
         R"(
    A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  J  Z  X  *
@@ -114,6 +136,9 @@ X -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -4
         )"
     };
 
+    /**
+     * BLOSUM 80 matrix.
+     */
     constexpr char text_table_80[] {
         R"(
    A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  J  Z  X  *
@@ -145,6 +170,9 @@ X -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -6
         )"
     };
 
+    /**
+     * BLOSUM 90 matrix.
+     */
     constexpr char text_table_90[] {
         R"(
    A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  J  Z  X  *
@@ -176,13 +204,23 @@ X -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -6
         )"
     };
 
+    /**
+     * BLOSUM @ref offbynull::aligner::scorer::scorer::scorer targeting various thresholds.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam threshold_ BLOSUM threshold.
+     * @tparam WEIGHT Type of alignment graph's edge weights.
+     */
     template<bool debug_mode, threshold threshold_, weight WEIGHT>
     class blosum_scorer : public single_character_substitution_matrix_scorer<debug_mode, WEIGHT, 25zu> {
     public:
+        /**
+         * Construct an @ref offbynull::aligner::scorers::blosum_scorer::blosum_scorer::blosum_scorer instance.
+         */
         blosum_scorer()
         : single_character_substitution_matrix_scorer<debug_mode, WEIGHT, 25zu> { pick_text_table() } {}
     private:
-        static constexpr auto pick_text_table() {
+        static consteval auto pick_text_table() {
             switch (threshold_) {
                 case threshold::_45:
                     return text_table_45;

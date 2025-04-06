@@ -20,7 +20,7 @@ namespace offbynull::aligner::scorer::scorer {
     using offbynull::concepts::unqualified_object_type;
 
     /**
-     * Concept that's satisfied if `T` has the traits of a scorer. A scorer is a callable that scores an alignment graph's edge.
+     * Concept that's satisfied if \c T has the traits of a scorer. A scorer is a callable that scores an alignment graph's edge.
      *
      * @tparam T Type to check.
      * @tparam EDGE Type of alignment graph's edge identifiers.
