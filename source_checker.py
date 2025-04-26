@@ -267,6 +267,8 @@ def check_line_length(path: Path, content: str):
     result = CheckResult.SUCCESS
     for line in content_lines:
         if len(line) > 140:
+            if line.strip().startswith('/** @copydoc'):
+                continue
             print(f'{path}: line exceeds 140 chars')
             result = CheckResult.FAIL
     return result

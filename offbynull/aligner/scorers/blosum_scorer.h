@@ -8,11 +8,6 @@
 #include "offbynull/aligner/concepts.h"
 
 
-/**
- * BLOSUM @ref offbynull::aligner::scorer::scorer::scorer.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::scorers::blosum_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;

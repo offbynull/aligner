@@ -8,9 +8,6 @@
 #include "pairwise_alignment_graph.h"
 #include "offbynull/aligner/graph/graph.h"
 
-/**
- * Utilities for @ref offbynull::aligner::graph::graph::readable_graph and its derivatives.
- */
 namespace offbynull::aligner::graph::utils {
     using offbynull::aligner::graph::graph::readable_graph;
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
@@ -19,7 +16,7 @@ namespace offbynull::aligner::graph::utils {
      * Escape an identifier for inclusion into GraphViz script.
      *
      * @param in Identifier.
-     * @return \c in escaped for inclusion into dot script.
+     * @return `in` escaped for inclusion into dot script.
      */
     inline std::string escape_identifier_for_graphviz(const std::string& in) {
         std::string ret { "_" };
@@ -38,7 +35,7 @@ namespace offbynull::aligner::graph::utils {
      * Escape a string for inclusion into GraphViz script.
      *
      * @param in String.
-     * @return \c in escaped for inclusion into dot script.
+     * @return `in` escaped for inclusion into dot script.
      */
     inline std::string escape_string_for_graphviz(const std::string& in) {
         std::string ret {};
@@ -62,12 +59,12 @@ namespace offbynull::aligner::graph::utils {
 
     /**
      * Convert an @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph to a GraphViz script. Each
-     * node is converted to a string via \c n_encoder and placed into the GraphViz script at its position within \c g multiplied by
-     * \c spacing and offset by \c depth*depth_offset. For example, given an invocation with \c scaling=10 and \c depth_offset=2, the node
+     * node is converted to a string via `n_encoder` and placed into the GraphViz script at its position within `g` multiplied by
+     * `spacing` and offset by `depth*depth_offset`. For example, given an invocation with `scaling=10` and `depth_offset=2`, the node
      * at ...
      *
-     *  * grid offset \code (1, 6) \endcode and depth of \c 0 would show up in the GraphViz script at \code (10*1+0*2, 10*6+0*2) \endcode .
-     *  * grid offset \code (1, 6) \endcode and depth of \c 1 would show up in the GraphViz script at \code (10*1+1*2, 10*6+1*2) \endcode .
+     *  * grid offset `(1, 6)` and depth of `0` would show up in the GraphViz script at `(10*1+0*2, 10*6+0*2)`.
+     *  * grid offset `(1, 6)` and depth of `1` would show up in the GraphViz script at `(10*1+1*2, 10*6+1*2)`.
      *  * ...
      *
      * @tparam G Graph type.
@@ -75,7 +72,7 @@ namespace offbynull::aligner::graph::utils {
      * @param g Graph.
      * @param n_encoder Function used to convert a node ID to a GraphViz identifier.
      * @param spacing Scaling factor to apply to each node's position when inserting into GraphViz.
-     * @param depth_offset Scaling factor to apply to each node's depth (after applying by \c spacing) when inserting into GraphViz.
+     * @param depth_offset Scaling factor to apply to each node's depth (after applying by `spacing`) when inserting into GraphViz.
      * @return GraphViz script.
      */
     template<readable_pairwise_alignment_graph G, typename N_ENCODER>
@@ -122,18 +119,18 @@ namespace offbynull::aligner::graph::utils {
 
     /**
      * Convert an @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph to a GraphViz script. Each
-     * node is converted to a string via \c std::format and placed into the GraphViz script at its position within \c g multiplied by
-     * \c spacing and offset by \c depth*depth_offset. For example, given an invocation with \c scaling=10 and \c depth_offset=2, the node
+     * node is converted to a string via `std::format` and placed into the GraphViz script at its position within `g` multiplied by
+     * `spacing` and offset by `depth*depth_offset`. For example, given an invocation with `scaling=10` and `depth_offset=2`, the node
      * at ...
      *
-     *  * grid offset \code (1, 6) \endcode and depth of \c 0 would show up in the GraphViz script at \code (10*1+0*2, 10*6+0*2) \endcode.
-     *  * grid offset \code (1, 6) \endcode and depth of \c 1 would show up in the GraphViz script at \code (10*1+1*2, 10*6+1*2) \endcode.
+     *  * grid offset `(1, 6)` and depth of `0` would show up in the GraphViz script at `(10*1+0*2, 10*6+0*2)`.
+     *  * grid offset `(1, 6)` and depth of `1` would show up in the GraphViz script at `(10*1+1*2, 10*6+1*2)`.
      *  * ...
      *
      * @tparam G Graph type.
      * @param g Graph.
      * @param spacing Scaling factor to apply to each node's position when inserting into GraphViz.
-     * @param depth_offset Scaling factor to apply to each node's depth (after applying by \c spacing) when inserting into GraphViz.
+     * @param depth_offset Scaling factor to apply to each node's depth (after applying by `spacing`) when inserting into GraphViz.
      * @return GraphViz script.
      */
     template<readable_pairwise_alignment_graph G>
@@ -161,11 +158,12 @@ namespace offbynull::aligner::graph::utils {
 
     /**
      * Convert an @ref offbynull::aligner::graph::graph::readable_graph to a GraphViz script. Each node is converted to a
-     * string via \c n_encoder and placed into the GraphViz script at whatever position the dot layout engine deems best.
+     * string via `n_encoder` and placed into the GraphViz script at whatever position the dot layout engine deems best.
      *
      * @tparam G Graph type.
-     * @tparam N_ENCODER Type of function which encodes node IDs to a GraphViz identifier.
+     * @tparam N_ENCODER Type of callable which encodes node IDs to a GraphViz identifier.
      * @param g Graph.
+     * @param n_encoder Node ID encoder callable.
      * @return GraphViz script.
      */
     template<readable_graph G, typename N_ENCODER>
@@ -206,7 +204,7 @@ namespace offbynull::aligner::graph::utils {
 
     /**
      * Convert an @ref offbynull::aligner::graph::graph::readable_graph to a GraphViz script. Each node is converted to a
-     * string via \c std::format and placed into the GraphViz script at whatever position the dot layout engine deems best.
+     * string via `std::format` and placed into the GraphViz script at whatever position the dot layout engine deems best.
      *
      * @tparam G Graph type.
      * @param g Graph.

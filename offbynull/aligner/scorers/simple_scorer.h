@@ -9,12 +9,6 @@
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/concepts.h"
 
-/**
- * @ref offbynull::aligner::scorer::scorer::scorer which returns a score depending on the presence of an edge's elements and whether those
- * elements match (does not factor in the content of the elements).
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::scorers::simple_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
@@ -151,15 +145,13 @@ namespace offbynull::aligner::scorers::simple_scorer {
             };
         }
 
+        // This must be operator()() - if you do operator(), doxygen won't recognize it. This isn't the case with other functions (if you
+        // leave out the parenthesis, doxygen copies the documentation just fine).
         /**
-         * Score edge.
-         *
-         * @param down_elem Downward element.
-         * @param right_elem Rightward element.
-         * @return Score for edge (edge weight).
+         * @copydoc offbynull::aligner::scorer::scorer::unimplemented_scorer::operator()()
          */
         WEIGHT operator()(
-            const auto& /*edge*/,
+            [[maybe_unused]] const auto& edge,
             const std::optional<std::reference_wrapper<const DOWN_ELEM>> down_elem,
             const std::optional<std::reference_wrapper<const RIGHT_ELEM>> right_elem
         ) const {

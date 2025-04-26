@@ -86,6 +86,26 @@ TODO:
 * ~~std::optional.value() to using * operator -- no bounds checking done on * operator~~
 
 * doxygen documentation
+  * ~~directed_graph.h~~
+  * ~~grid_graph.h~~
+  * ~~pairwise_extended_gap_alignment_graph.h~~
+  * ~~pairwise_fitting_alignment_graph.h~~
+  * ~~pairwise_global_alignment_graph.h~~
+  * ~~pairwise_local_alignment_graph.h~~
+  * ~~pairwise_overlap_alignment_graph.h~~
+  * ~~prefix_sliceable_pairwise_alignment_graph.h~~
+  * ~~reversed_sliceable_pairwise_alignment_graph.h~~
+  * ~~middle_sliceable_pairwise_alignment_graph.h~~
+  * ~~suffix_sliceable_pairwise_alignment_graph.h~~
+  * document backtrackers
+* Add element index to scorer invocation
+* remove "readable_" from readable_graph and other graph concept names
+* ~~auto grid_offset_to_nodes(INDEX down_idx, INDEX right_idx) const  CHANGE down_idx->grid_down right_idx->grid_right~~
+* remove references to "sequence 1" and "sequence 2" in documentation - use only downward/rightward sequence
+* instance of resident_nodes_capacity - turn to constexpr if possible?
+* in constructor of pairwise graphs, if constexpr check that sequence isn't too long for INDEX type?
+* Rename debug_mode to safe_mode, change wording that mention that guardrails are put in place
+
 * run profiler and optimize functions (some local alignment functions may be doing a ton of unneeded work -- e.g. get_outputs_full)
   * did this but didn't bother going too deep into the flame graph -- make sure to turn off D_GLIBCXX_DEBUG to get true results
 * ~~fix compiler warnings~~

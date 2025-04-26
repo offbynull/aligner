@@ -7,11 +7,6 @@
 #include <string>
 #include <boost/iostreams/device/mapped_file.hpp>
 
-/**
- * @ref offbynull::aligner::sequence::sequence::sequence backed by a mmap'd file.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::sequences::mmap_sequence {
     using offbynull::aligner::sequence::sequence::sequence;
     using boost::iostreams::mapped_file_source;
@@ -45,10 +40,7 @@ namespace offbynull::aligner::sequences::mmap_sequence {
         }
 
         /**
-         * Get element at index `index`.
-         *
-         * @param index Index of element.
-         * @return Value at `index`.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::operator[]
          */
         char operator[](std::size_t index) const {
             const char* ptr { file.data() + index };
@@ -56,9 +48,7 @@ namespace offbynull::aligner::sequences::mmap_sequence {
         }
 
         /**
-         * Get number of elements.
-         *
-         * @return Number of elements.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::size()
          */
         std::size_t size() const {
             return file.size();

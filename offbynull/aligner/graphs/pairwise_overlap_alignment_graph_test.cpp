@@ -12,7 +12,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::axis;
+    using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::graphs::pairwise_overlap_alignment_graph::pairwise_overlap_alignment_graph;
     using offbynull::aligner::graphs::pairwise_overlap_alignment_graph::create_pairwise_overlap_alignment_graph;
     using offbynull::aligner::graphs::pairwise_overlap_alignment_graph::edge;
@@ -571,34 +571,34 @@ namespace {
         using E = typename decltype(g)::E;
 
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 0u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 0u, 1u))),
             (std::vector<N> {
                 N { 0zu, 0zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 1u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 1u, 1u))),
             (std::vector<N> {
                 N { 1zu, 0zu },
                 N { 0zu, 1zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 0u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 0u, 1u))),
             (std::vector<N> {
                 N { 1zu, 0zu },
                 N { 0zu, 1zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 1u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 1u, 1u))),
             (std::vector<N> {
                 N { 1zu, 1zu },
                 N { 0zu, 2zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 2u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 2u, 1u))),
             (std::vector<N> {
                 N { 1zu, 2zu }
             })
@@ -629,34 +629,34 @@ namespace {
         using E = typename decltype(g)::E;
 
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 0u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 0u, 1u))),
             (std::vector<N> {
                 N { 0zu, 0zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 1u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 1u, 1u))),
             (std::vector<N> {
                 N { 1zu, 0zu },
                 N { 0zu, 1zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 2u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 2u, 1u))),
             (std::vector<N> {
                 N { 2zu, 0zu },
                 N { 1zu, 1zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 0u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 0u, 1u))),
             (std::vector<N> {
                 N { 2zu, 0zu },
                 N { 1zu, 1zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 1u))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 1u, 1u))),
             (std::vector<N> {
                 N { 2zu, 1zu }
             })
@@ -687,34 +687,34 @@ namespace {
         using E = typename decltype(g)::E;
 
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 1u, N { 1u, 1u}, N { 3u, 2u }))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 1u, N { 1u, 1u}, N { 3u, 2u }, 1u))),
             (std::vector<N> {
                 N { 1zu, 1zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 2u, N { 1u, 1u}, N { 3u, 2u }))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 2u, N { 1u, 1u}, N { 3u, 2u }, 1u))),
             (std::vector<N> {
                 N { 2zu, 1zu },
                 N { 1zu, 2zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 3u, N { 1u, 1u}, N { 3u, 2u }))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::DOWN_FROM_TOP_LEFT, 3u, N { 1u, 1u}, N { 3u, 2u }, 1u))),
             (std::vector<N> {
                 N { 3zu, 1zu },
                 N { 2zu, 2zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 1u, N { 1u, 1u}, N { 3u, 2u }))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 1u, N { 1u, 1u}, N { 3u, 2u }, 1u))),
             (std::vector<N> {
                 N { 3zu, 1zu },
                 N { 2zu, 2zu },
             })
         );
         EXPECT_EQ(
-            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 2u, N { 1u, 1u}, N { 3u, 2u }))),
+            (copy_to_vector(g.segmented_diagonal_nodes(axis::RIGHT_FROM_BOTTOM_LEFT, 2u, N { 1u, 1u}, N { 3u, 2u }, 1u))),
             (std::vector<N> {
                 N { 3zu, 2zu }
             })

@@ -11,11 +11,6 @@
 #include <utility>
 #include <stdexcept>
 
-/**
- * Chunked @ref offbynull::aligner::sequence::sequence::sequence.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::sequences::chunk_sequence {
     using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::random_access_range_of_type;
@@ -141,10 +136,7 @@ namespace offbynull::aligner::sequences::chunk_sequence {
         , container_creator_pack { container_creator_pack_ } {}
 
         /**
-         * Get element (chunk) at index `index`.
-         *
-         * @param index Index of chunk.
-         * @return Chunk at `index`.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::operator[]
          */
         CHUNK_CONTAINER operator[](std::size_t index) const {
             std::size_t offset { index * chunk_length };
@@ -156,9 +148,7 @@ namespace offbynull::aligner::sequences::chunk_sequence {
         }
 
         /**
-         * Get number of elements (chunks).
-         *
-         * @return Number of chunks.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::size
          */
         std::size_t size() const {
             return seq.size() / chunk_length;

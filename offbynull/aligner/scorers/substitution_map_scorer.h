@@ -9,17 +9,12 @@
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/concepts.h"
 
-/**
- * @ref offbynull::aligner::scorer::scorer::scorer which scores elements using a \code std::map \endcode.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::scorers::substitution_map_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
 
     /**
-     * @ref offbynull::aligner::scorer::scorer::scorer which scores elements using a \code std::map \endcode.
+     * @ref offbynull::aligner::scorer::scorer::scorer which scores elements using a `std::map`.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam DOWN_ELEM Type of alignment graph's downward elements.
@@ -56,17 +51,13 @@ namespace offbynull::aligner::scorers::substitution_map_scorer {
         )
         : data { std::move(data_) } {}
 
+        // This must be operator()() - if you do operator(), doxygen won't recognize it. This isn't the case with other functions (if you
+        // leave out the parenthesis, doxygen copies the documentation just fine).
         /**
-         * Score edge.
-         *
-         * If no score exists for \code (down_elem, right_elem) \endcode, the behavior is undefined.
-         *
-         * @param down_elem Downward element.
-         * @param right_elem Rightward element.
-         * @return Score for edge (edge weight).
+         * @copydoc offbynull::aligner::scorer::scorer::unimplemented_scorer::operator()()
          */
         WEIGHT operator()(
-            const auto& /*edge*/,
+            [[maybe_unused]] const auto& edge,
             const std::optional<std::reference_wrapper<const DOWN_ELEM>> down_elem,
             const std::optional<std::reference_wrapper<const RIGHT_ELEM>> right_elem
         ) const {

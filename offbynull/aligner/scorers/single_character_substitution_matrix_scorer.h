@@ -17,11 +17,6 @@
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/utils.h"
 
-/**
- * @ref offbynull::aligner::scorer::scorer::scorer which scores single character elements based on a space-delimited ASCII table.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::scorers::single_character_substitution_matrix_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
@@ -207,15 +202,15 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
          *  * each cell (not including first row and column) is a score for the two characters corresponding to the cell's position within
          *    the first row and first column.
          *
-         * For example, the following text table scores \code (A,C) \endcode as -1.
+         * For example, the following text table scores `(A,C)` as -1.
          *
-         * \code
+         * ```
          *    A  C  T  G
          * A  1 -1 -1 -1
          * C -1  1 -1  0
          * T -1 -1  1 -1
          * G -1  0 -1  1
-         * \endcode
+         * ```
          *
          * @param text_table Text table.
          */
@@ -231,10 +226,10 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
          * instance from an array of characters and scores.
          *
          * @param alphabet_ ASCII characters, representing elements being compared. Must be sorted.
-         * @param weights_ Scores for a 2-tuple containing an element from \c alphabet_ at each position. Must be sorted by the 2-tuple pair
-         *     the score is for. For example, if \code alphabet_="ABC" \endcode, then the order of scores must be such that that the score
-         *     for \code (A,A) \endcode appears first, followed by \code (A,B) \endcode, followed by \code (A,C) \endcode, etc... Must be
-         *     sized \code alphabet_.size()*alphabet_.size() \endcode.
+         * @param weights_ Scores for a 2-tuple containing an element from `alphabet_` at each position. Must be sorted by the 2-tuple pair
+         *     the score is for. For example, if `alphabet_="ABC"`, then the order of scores must be such that the score
+         *     for `(A,A)` appears first, followed by `(A,B)`, followed by `(A,C)`, etc... Must be
+         *     sized `alphabet_.size()*alphabet_.size()`.
          */
         single_character_substitution_matrix_scorer(
             const std::array<char, alphabet_size>& alphabet_,  // must be sorted
@@ -243,15 +238,13 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
         : alphabet { alphabet_ }
         , weights { weights_ } {}
 
+        // This must be operator()() - if you do operator(), doxygen won't recognize it. This isn't the case with other functions (if you
+        // leave out the parenthesis, doxygen copies the documentation just fine).
         /**
-         * Score edge.
-         *
-         * @param down_elem Downward element.
-         * @param right_elem Rightward element.
-         * @return Score for edge (edge weight).
+         * @copydoc offbynull::aligner::scorer::scorer::unimplemented_scorer::operator()()
          */
         WEIGHT operator()(
-            const auto& /*edge*/,
+            [[maybe_unused]] const auto& edge,
             const std::optional<std::reference_wrapper<const char>> down_elem,
             const std::optional<std::reference_wrapper<const char>> right_elem
         ) const {

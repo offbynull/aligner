@@ -9,14 +9,10 @@
 #include <string>
 #include "offbynull/concepts.h"
 
-/**
- * Sequence interface.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::sequence::sequence {
     using offbynull::concepts::convertible_to_unqualified_object_type;
     using offbynull::concepts::unqualified_object_type;
+    using offbynull::concepts::widenable_to_size_t;
 
     /**
      * Concept that's satisfied if `T` has the traits of a sequence. A sequence is an ordered collection that's randomly accessible.
@@ -41,6 +37,29 @@ namespace offbynull::aligner::sequence::sequence {
                 decltype(std::declval<T>()[0zu])
             >
         >;
+
+    /**
+     * Unimplemented @ref offbynull::aligner::sequence::sequence::sequence, intended for documentation.
+     *
+     * @tparam I Type of integer.
+     */
+    template<widenable_to_size_t I>
+    struct unimplemented_sequence {
+        /**
+         * Get element at index `index`.
+         *
+         * @param index Index of element.
+         * @return Value at `index`.
+         */
+        I operator[](std::size_t index) const;
+
+        /**
+         * Get number of elements.
+         *
+         * @return Number of elements.
+         */
+        std::size_t size() const;
+    };
 }
 
 #endif //OFFBYNULL_ALIGNER_SEQUENCE_SEQUENCE_H

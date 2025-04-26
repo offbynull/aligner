@@ -7,11 +7,6 @@
 #include "offbynull/aligner/scorers/single_character_substitution_matrix_scorer.h"
 #include "offbynull/aligner/concepts.h"
 
-/**
- * PAM @ref offbynull::aligner::scorer::scorer::scorer.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::scorers::pam_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;

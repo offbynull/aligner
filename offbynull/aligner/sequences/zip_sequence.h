@@ -9,11 +9,6 @@
 #include <type_traits>
 #include <utility>
 
-/**
- * Zip @ref offbynull::aligner::sequence::sequence::sequence.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::sequences::zip_sequence {
     using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::widenable_to_size_t;
@@ -73,10 +68,7 @@ namespace offbynull::aligner::sequences::zip_sequence {
         , size_ { min_size(std::numeric_limits<std::size_t>::max(), seqs_...) } {}
 
         /**
-         * Get element at index `index`. Each element is a tuple containing the elements within the underlying sequences at `index`.
-         *
-         * @param index Index of element.
-         * @return Element at `index`.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::operator[]
          */
         auto operator[](std::size_t index) const {
             auto params {
@@ -92,9 +84,7 @@ namespace offbynull::aligner::sequences::zip_sequence {
         }
 
         /**
-         * Get number of elements, which is the minimum `size()` across all underlying sequences.
-         *
-         * @return Number of elements.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::size()
          */
         std::size_t size() const {
             return size_;

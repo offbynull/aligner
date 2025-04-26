@@ -10,11 +10,6 @@
 #include <type_traits>
 #include <stdexcept>
 
-/**
- * Sliding window @ref offbynull::aligner::sequence::sequence::sequence.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::sequences::sliding_window_sequence {
     using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::random_access_range_of_type;
@@ -131,10 +126,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
         }
 
         /**
-         * Get element (chunk) at index `index`.
-         *
-         * @param index Index of chunk.
-         * @return Chunk at `index`.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::operator[]
          */
         RESULT_CONTAINER operator[](std::size_t index) const {
             RESULT_CONTAINER ret { container_creator_pack.create_result_container(window_length) };
@@ -145,9 +137,7 @@ namespace offbynull::aligner::sequences::sliding_window_sequence {
         }
 
         /**
-         * Get number of elements (chunks).
-         *
-         * @return Number of chunks.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::size()
          */
         std::size_t size() const {
             return seq.size() - window_length + 1zu;

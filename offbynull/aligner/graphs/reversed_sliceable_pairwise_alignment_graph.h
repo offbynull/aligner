@@ -17,35 +17,61 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
     using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::concepts::weight;
 
+    /**
+     * View into an existing
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph, where the view
+     * reverses all edges (root node becomes leaf node and vice versa).
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Backing graph type.
+     */
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G
     >
     class reversed_sliceable_pairwise_alignment_graph {
     public:
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::INDEX */
         using INDEX = typename G::INDEX;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::N */
         using N = typename G::N;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::E */
         using E = typename G::E;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::ED */
         using ED = typename G::ED;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::ND */
         using ND = typename G::ND;
 
     private:
         const G& g;
 
     public:
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::grid_down_cnt */
         const INDEX grid_down_cnt;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::grid_right_cnt */
         const INDEX grid_right_cnt;
-        const INDEX grid_depth_cnt;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::grid_depth_cnt */
+        static constexpr INDEX grid_depth_cnt { G::grid_depth_cnt };
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::resident_nodes_capacity */
         const std::size_t resident_nodes_capacity;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::path_edge_capacity */
         const std::size_t path_edge_capacity;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::node_incoming_edge_capacity */
         const std::size_t node_incoming_edge_capacity;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::node_outgoing_edge_capacity */
         const std::size_t node_outgoing_edge_capacity;
 
+        /**
+         * Construct an
+         * @ref offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph
+         * instance.
+         *
+         * @param g_ Backing graph.
+         */
         reversed_sliceable_pairwise_alignment_graph(const G& g_)
         : g { g_ }
         , grid_down_cnt { g.grid_down_cnt }
         , grid_right_cnt { g.grid_right_cnt }
-        , grid_depth_cnt { g.grid_depth_cnt }
         , resident_nodes_capacity { g.resident_nodes_capacity }
         , path_edge_capacity { g.path_edge_capacity }
         , node_incoming_edge_capacity { g.node_outgoing_edge_capacity }
@@ -61,94 +87,116 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
         // Decided not to do this. No pairwise graph type uses ND&/ED&/N&/E&, so just go ahead and return concrete
         // object.
 
-        ND get_node_data(const N& node) const {
-            return g.get_node_data(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_node_data */
+        ND get_node_data(const N& n) const {
+            return g.get_node_data(n);
         }
 
-        ED get_edge_data(const E& edge) const {
-            return g.get_edge_data(edge);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edge_data */
+        ED get_edge_data(const E& e) const {
+            return g.get_edge_data(e);
         }
 
-        N get_edge_from(const E& edge) const {
-            return g.get_edge_to(edge);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edge_from */
+        N get_edge_from(const E& e) const {
+            return g.get_edge_to(e);
         }
 
-        N get_edge_to(const E& edge) const {
-            return g.get_edge_from(edge);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edge_to */
+        N get_edge_to(const E& e) const {
+            return g.get_edge_from(e);
         }
 
-        std::tuple<N, N, ED> get_edge(const E& edge) const {
-            return g.get_edge(edge);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edge */
+        std::tuple<N, N, ED> get_edge(const E& e) const {
+            return g.get_edge(e);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_root_nodes */
         auto get_root_nodes() const {
             return g.get_leaf_nodes();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_root_node */
         N get_root_node() const {
             return g.get_leaf_node();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_leaf_nodes */
         auto get_leaf_nodes() const {
             return g.get_root_nodes();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_leaf_node */
         N get_leaf_node() const {
             return g.get_root_node();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_nodes */
         auto get_nodes() const {
             return g.get_nodes();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edges */
         auto get_edges() const {
             return g.get_edges();
         }
 
-        bool has_node(const N& node) const {
-            return g.has_node(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::has_node */
+        bool has_node(const N& n) const {
+            return g.has_node(n);
         }
 
-        bool has_edge(const E& edge) const {
-            return g.has_edge(edge);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::has_edge */
+        bool has_edge(const E& e) const {
+            return g.has_edge(e);
         }
 
-        auto get_outputs_full(const N& node) const {
-            return g.get_inputs_full(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_outputs_full */
+        auto get_outputs_full(const N& n) const {
+            return g.get_inputs_full(n);
         }
 
-        auto get_inputs_full(const N& node) const {
-            return g.get_outputs_full(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_inputs_full */
+        auto get_inputs_full(const N& n) const {
+            return g.get_outputs_full(n);
         }
 
-        auto get_outputs(const N& node) const {
-            return g.get_inputs(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_outputs */
+        auto get_outputs(const N& n) const {
+            return g.get_inputs(n);
         }
 
-        auto get_inputs(const N& node) const {
-            return g.get_outputs(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_inputs */
+        auto get_inputs(const N& n) const {
+            return g.get_outputs(n);
         }
 
-        bool has_outputs(const N& node) const {
-            return g.has_inputs(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::has_outputs */
+        bool has_outputs(const N& n) const {
+            return g.has_inputs(n);
         }
 
-        bool has_inputs(const N& node) const {
-            return g.has_outputs(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::has_inputs */
+        bool has_inputs(const N& n) const {
+            return g.has_outputs(n);
         }
 
-        std::size_t get_out_degree(const N& node) const {
-            return g.get_in_degree(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_out_degree */
+        std::size_t get_out_degree(const N& n) const {
+            return g.get_in_degree(n);
         }
 
-        std::size_t get_in_degree(const N& node) const {
-            return g.get_out_degree(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_in_degree */
+        std::size_t get_in_degree(const N& n) const {
+            return g.get_out_degree(n);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::edge_to_element_offsets */
         std::optional<std::pair<std::optional<INDEX>, std::optional<INDEX>>> edge_to_element_offsets(
-            const E& edge
+            const E& e
         ) const {
-            auto offset { g.edge_to_element_offsets(edge) };
+            auto offset { g.edge_to_element_offsets(e) };
             if (!offset.has_value()) {
                 return std::nullopt;
             }
@@ -162,11 +210,13 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
             return offset;
         }
 
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offset(const N& node) const {
-            const auto& [grid_down, grid_right, depth] { g.node_to_grid_offset(node) };
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::node_to_grid_offset */
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offset(const N& n) const {
+            const auto& [grid_down, grid_right, depth] { g.node_to_grid_offset(n) };
             return { grid_down_cnt - grid_down - 1u, grid_right_cnt - grid_right - 1u, depth };
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::grid_offset_to_nodes */
         auto grid_offset_to_nodes(INDEX grid_down, INDEX grid_right) const {
             if constexpr (debug_mode) {
                 if (grid_down >= grid_down_cnt || grid_right >= grid_right_cnt) {
@@ -176,10 +226,12 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
             return g.grid_offset_to_nodes(grid_down_cnt - grid_down - 1u, grid_right_cnt - grid_right - 1u);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::row_nodes */
         auto row_nodes(INDEX grid_down) const {
             return g.row_nodes(grid_down_cnt - grid_down - 1u) | std::views::reverse;
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::row_nodes */
         auto row_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
             return g.row_nodes(grid_down_cnt - grid_down - 1u, leaf_node, root_node) | std::views::reverse;
         }
@@ -204,24 +256,36 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
                 | std::views::reverse;
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::is_reachable */
         bool is_reachable(const N& n1, const N& n2) const {
             return g.is_reachable(n2, n1);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::resident_nodes */
         auto resident_nodes() const {
             return g.resident_nodes();
         }
 
-        auto outputs_to_residents(const N& node) const {
-            return g.inputs_from_residents(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::outputs_to_residents */
+        auto outputs_to_residents(const N& n) const {
+            return g.inputs_from_residents(n);
         }
 
-        auto inputs_from_residents(const N& node) const {
-            return g.outputs_to_residents(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::inputs_from_residents */
+        auto inputs_from_residents(const N& n) const {
+            return g.outputs_to_residents(n);
         }
     };
 
 
+    /**
+     * Create @ref offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph
+     * instance, where template parameters are deduced / inferred from arguments passed in.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @return New @ref offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph::reversed_sliceable_pairwise_alignment_graph
+     *      instance.
+     */
     template<
         bool debug_mode
     >

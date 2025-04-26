@@ -30,7 +30,7 @@
 namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::graphs::grid_graph::grid_graph;
-    using offbynull::aligner::graphs::grid_graph::empty_type;
+    using offbynull::aligner::graphs::grid_graph::empty_node_data;
     using offbynull::aligner::graphs::grid_graph::edge;
     using offbynull::aligner::graphs::grid_graph::node;
     using offbynull::aligner::concepts::weight;
@@ -41,30 +41,63 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     using offbynull::helpers::concat_bidirectional_view::concat_bidirectional_view;
     using offbynull::helpers::blankable_bidirectional_view::blankable_bidirectional_view;
     using offbynull::utils::static_vector_typer;
+    using offbynull::concepts::unqualified_object_type;
 
+    /**
+     * @ref offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph's edge type.
+     */
     enum class edge_type : std::uint8_t {
+        /** Free-ride edge. */
         FREE_RIDE,
+        /** Normal edge (indel or gap). */
         NORMAL
     };
 
     PACK_STRUCT_START
+    /**
+     * Edge ID type for @ref offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph.
+     *
+     * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
+     *
+     * @tparam INDEX Node coordinate type.
+     */
     template<widenable_to_size_t INDEX>
     struct local_edge {
     public:
+        /** Edge type. */
         edge_type type;
+        /**
+         * Edge source and destination nodes. Note that the type here is the backing
+         * @ref offbynull::aligner::graphs::grid_graph::grid_graph's edge ID type, which is comprised of a source node ID and a destination
+         * node ID.
+         */
         edge<INDEX> inner_edge;
+        /** Enable spaceship operator. */
         std::strong_ordering operator<=>(const local_edge& rhs) const = default;
     }
     PACK_STRUCT_STOP;
 
     // A scorer that translates calls from the grid_graph backing the pairwise_local_alignment_graph, such that the edge type becomes the
     // edge type of pairwise_local_alignment_graph.
+    /**
+     * Pipes offbynull::aligner::scorer::scorer::scorer invocations from
+     * @ref offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph to its backing
+     * @ref offbynull::aligner::graphs::grid_graph::grid_graph instance. Used only for
+     * @ref offbynull::aligner::graphs::pairwise_local_alignment_graph::edge_type::NORMAL edge types.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam INDEX Node coordinate type.
+     * @tparam DOWN_ELEM Downward sequence type's element.
+     * @tparam RIGHT_ELEM Rightward sequence type's element.
+     * @tparam WEIGHT Edge weight type.
+     * @tparam GRID_GRAPH_SCORER Backing scorer type.
+     */
     template<
         bool debug_mode,
         widenable_to_size_t INDEX,
-        typename DOWN_ELEM,
-        typename RIGHT_ELEM,
-        typename WEIGHT,
+        unqualified_object_type DOWN_ELEM,
+        unqualified_object_type RIGHT_ELEM,
+        weight WEIGHT,
         scorer<
             local_edge<INDEX>,
             DOWN_ELEM,
@@ -76,11 +109,24 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     private:
         GRID_GRAPH_SCORER grid_graph_scorer;
     public:
+        /**
+         * Construct an @ref offbynull::aligner::graphs::pairwise_local_alignment_graph::grid_scorer_to_local_scorer_proxy instance.
+         *
+         * @param grid_graph_scorer_ Backing @ref offbynull::aligner::scorer::scorer::scorer.
+         */
         grid_scorer_to_local_scorer_proxy(
             const GRID_GRAPH_SCORER& grid_graph_scorer_
         )
         : grid_graph_scorer { grid_graph_scorer_ } {}
 
+        /**
+         * Score edge.
+         *
+         * @param edge Edge.
+         * @param down_elem_ref_opt Downward element associated with `edge`, if any.
+         * @param right_elem_ref_opt Rightward element associated with `edge`, if any.
+         * @return Score for edge (edge weight).
+         */
         WEIGHT operator()(
             const edge<INDEX>& edge,
             const std::optional<std::reference_wrapper<const DOWN_ELEM>> down_elem_ref_opt,
@@ -94,6 +140,19 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         }
     };
 
+    /**
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph implementation of a
+     * pairwise local sequence alignment graph.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam INDEX_ Node coordinate type.
+     * @tparam WEIGHT Edge weight type.
+     * @tparam DOWN_SEQ Downward sequence type.
+     * @tparam RIGHT_SEQ Rightward sequence type.
+     * @tparam SUBSTITUTION_SCORER Scorer type used to score sequence alignment substitutions.
+     * @tparam GAP_SCORER Scorer type to score for sequence alignment gaps (indels).
+     * @tparam FREERIDE_SCORER Scorer type to score for sequence alignment free rides.
+     */
     template<
         bool debug_mode,
         widenable_to_size_t INDEX_,
@@ -121,12 +180,19 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
     >
     class pairwise_local_alignment_graph {
     public:
+        /** Element object type of downward sequence (CV-qualification and references removed). */
         using DOWN_ELEM = std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0u])>;
+        /** Element object type of rightward sequence (CV-qualification and references removed). */
         using RIGHT_ELEM = std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0u])>;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::INDEX */
         using INDEX = INDEX_;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::N */
         using N = node<INDEX>;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::E */
         using E = local_edge<INDEX>;
-        using ND = empty_type;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::ND */
+        using ND = empty_node_data;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::ED */
         using ED = WEIGHT;
 
     private:
@@ -142,17 +208,33 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         const FREERIDE_SCORER freeride_scorer;
 
     public:
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::grid_down_cnt */
         const INDEX grid_down_cnt;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::grid_right_cnt */
         const INDEX grid_right_cnt;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::grid_depth_cnt */
         static constexpr INDEX grid_depth_cnt { decltype(g)::grid_depth_cnt };
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::resident_nodes_capacity */
         const std::size_t resident_nodes_capacity;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::path_edge_capacity */
         const std::size_t path_edge_capacity;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::node_incoming_edge_capacity */
         const std::size_t node_incoming_edge_capacity;
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::node_outgoing_edge_capacity */
         const std::size_t node_outgoing_edge_capacity;
 
         // Scorer params are not being made into universal references because there's a high chance of enabling a subtle bug: There's a
         // non-trivial possibility that the user will submit the same object for both scorers, and so if the universal reference ends up
         // being an rvalue reference it'll try to move the same object twice.
+        /**
+         * Construct an @ref offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph instance.
+         *
+         * @param down_seq_ Downward sequence.
+         * @param right_seq_ Rightward sequence.
+         * @param substitution_scorer_ Scorer for sequence alignment substitutions.
+         * @param gap_scorer_ Scorer for sequence alignment gaps (indels).
+         * @param freeride_scorer_ Score for sequence alignment freerides.
+         */
         pairwise_local_alignment_graph(
             const DOWN_SEQ& down_seq_,
             const RIGHT_SEQ& right_seq_,
@@ -174,56 +256,67 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         , node_incoming_edge_capacity { g.node_incoming_edge_capacity + (grid_down_cnt * grid_right_cnt) - 1zu }
         , node_outgoing_edge_capacity { g.node_outgoing_edge_capacity + (grid_down_cnt * grid_right_cnt) - 1zu } {}
 
-        ND get_node_data(const N& node) const {
-            return g.get_node_data(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_node_data */
+        ND get_node_data(const N& n) const {
+            return g.get_node_data(n);
         }
 
-        ED get_edge_data(const E& edge) const {
-            return std::get<2>(get_edge(edge));
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edge_data */
+        ED get_edge_data(const E& e) const {
+            return std::get<2>(get_edge(e));
         }
 
-        N get_edge_from(const E& edge) const {
-            return std::get<0>(get_edge(edge));
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edge_from */
+        N get_edge_from(const E& e) const {
+            return std::get<0>(get_edge(e));
         }
 
-        N get_edge_to(const E& edge) const {
-            return std::get<1>(get_edge(edge));
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edge_to */
+        N get_edge_to(const E& e) const {
+            return std::get<1>(get_edge(e));
         }
 
-        std::tuple<N, N, ED> get_edge(const E& edge) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edge */
+        std::tuple<N, N, ED> get_edge(const E& e) const {
             if constexpr (debug_mode) {
-                if (!has_edge(edge)) {
+                if (!has_edge(e)) {
                     throw std::runtime_error { "Edge doesn't exist" };
                 }
             }
-            if (edge.type == edge_type::FREE_RIDE) {
-                const auto& [n1, n2] { edge.inner_edge };
-                return std::tuple<N, N, ED> { n1, n2, freeride_scorer(edge, { std::nullopt }, { std::nullopt }) };
+            if (e.type == edge_type::FREE_RIDE) {
+                const auto& [n1, n2] { e.inner_edge };
+                return std::tuple<N, N, ED> { n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
             } else {
-                return g.get_edge(edge.inner_edge);
+                return g.get_edge(e.inner_edge);
             }
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_root_nodes */
         auto get_root_nodes() const {
             return g.get_root_nodes();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_root_node */
         N get_root_node() const {
             return g.get_root_node();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_leaf_nodes */
         auto get_leaf_nodes() const {
             return g.get_leaf_nodes();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_leaf_node */
         N get_leaf_node() const {
             return g.get_leaf_node();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_nodes */
         auto get_nodes() const {
             return g.get_nodes();
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_edges */
         auto get_edges() const {
             auto from_src_range {
                 std::views::cartesian_product(
@@ -268,15 +361,17 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             };
         }
 
-        bool has_node(const N& node) const {
-            return g.has_node(node);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::has_node */
+        bool has_node(const N& n) const {
+            return g.has_node(n);
         }
 
-        bool has_edge(const E& edge) const {
-            if (edge.type == edge_type::NORMAL) {
-                return g.has_edge(edge.inner_edge);
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::has_edge */
+        bool has_edge(const E& e) const {
+            if (e.type == edge_type::NORMAL) {
+                return g.has_edge(e.inner_edge);
             } else {
-                const auto & [n1, n2] { edge.inner_edge };
+                const auto & [n1, n2] { e.inner_edge };
                 const auto & [n1_grid_down, n1_grid_right] { n1 };
                 const auto & [n2_grid_down, n2_grid_right] { n2 };
                 if (n1_grid_down == 0u && n1_grid_right == 0u) {
@@ -301,9 +396,10 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             }
         }
 
-        auto get_outputs_full(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_outputs_full */
+        auto get_outputs_full(const N& n) const {
             auto standard_outputs {
-                g.get_outputs_full(node)
+                g.get_outputs_full(n)
                 | std::views::transform([this](const auto& raw_full_edge) {
                     N n1 { std::get<1>(raw_full_edge) };
                     N n2 { std::get<2>(raw_full_edge) };
@@ -311,17 +407,17 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                     return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
                 })
             };
-            bool has_freeride_to_leaf { node != get_leaf_node() };
+            bool has_freeride_to_leaf { n != get_leaf_node() };
             blankable_bidirectional_view freeride_set_1 {
                 has_freeride_to_leaf,  // passthru if condition is met, otherwise blank
                 std::views::single(get_leaf_node())
-                | std::views::transform([node, this](const N& n2) {
-                    N n1 { node };
+                | std::views::transform([n, this](const N& n2) {
+                    N n1 { n };
                     E e { edge_type::FREE_RIDE, { n1, n2 } };
                     return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
                 })
             };
-            bool has_freeride_from_root { node == get_root_node() };
+            bool has_freeride_from_root { n == get_root_node() };
             blankable_bidirectional_view freeride_set_2 {
                 has_freeride_from_root,  // passthru if condition is met, otherwise blank
                 std::views::cartesian_product(
@@ -346,9 +442,10 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             };
         }
 
-        auto get_inputs_full(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_inputs_full */
+        auto get_inputs_full(const N& n) const {
             auto standard_inputs {
-                g.get_inputs_full(node)
+                g.get_inputs_full(n)
                 | std::views::transform([this](const auto& raw_full_edge) {
                     N n1 { std::get<1>(raw_full_edge) };
                     N n2 { std::get<2>(raw_full_edge) };
@@ -356,7 +453,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                     return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
                 })
             };
-            bool has_freeride_to_leaf { node == get_leaf_node() };
+            bool has_freeride_to_leaf { n == get_leaf_node() };
             blankable_bidirectional_view freeride_set_1 {
                 has_freeride_to_leaf,
                 std::views::cartesian_product(
@@ -372,12 +469,12 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                     return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
                 })
             };
-            bool has_freeride_from_root { node != get_root_node() };
+            bool has_freeride_from_root { n != get_root_node() };
             blankable_bidirectional_view freeride_set_2 {
                 has_freeride_from_root,
                 std::views::single(get_root_node())
-                | std::views::transform([node, this](const N& n1) {
-                    N n2 { node };
+                | std::views::transform([n, this](const N& n1) {
+                    N n2 { n };
                     E e { edge_type::FREE_RIDE, { n1, n2 } };
                     return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
                 })
@@ -391,84 +488,91 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             };
         }
 
-        auto get_outputs(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_outputs */
+        auto get_outputs(const N& n) const {
             if constexpr (debug_mode) {
-                if (!has_node(node)) {
+                if (!has_node(n)) {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            return get_outputs_full(node)
+            return get_outputs_full(n)
                 | std::views::transform([this](auto v) -> E { return std::get<0>(v); });
         }
 
-        auto get_inputs(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_inputs */
+        auto get_inputs(const N& n) const {
             if constexpr (debug_mode) {
-                if (!has_node(node)) {
+                if (!has_node(n)) {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            return this->get_inputs_full(node)
+            return this->get_inputs_full(n)
                 | std::views::transform([this](auto v) -> E { return std::get<0>(v); });
         }
 
-        bool has_outputs(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::has_outputs */
+        bool has_outputs(const N& n) const {
             if constexpr (debug_mode) {
-                if (!has_node(node)) {
+                if (!has_node(n)) {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            auto outputs { this->get_outputs(node) };
+            auto outputs { this->get_outputs(n) };
             return outputs.begin() != outputs.end();
         }
 
-        bool has_inputs(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::has_inputs */
+        bool has_inputs(const N& n) const {
             if constexpr (debug_mode) {
-                if (!has_node(node)) {
+                if (!has_node(n)) {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            auto inputs { this->get_inputs(node) };
+            auto inputs { this->get_inputs(n) };
             return inputs.begin() != inputs.end();
         }
 
-        std::size_t get_out_degree(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_out_degree */
+        std::size_t get_out_degree(const N& n) const {
             if constexpr (debug_mode) {
-                if (!has_node(node)) {
+                if (!has_node(n)) {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            auto outputs { std::ranges::common_view { this->get_outputs(node) } };
+            auto outputs { std::ranges::common_view { this->get_outputs(n) } };
             auto dist { std::ranges::distance(outputs) };
             return static_cast<std::size_t>(dist);
         }
 
-        std::size_t get_in_degree(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_in_degree */
+        std::size_t get_in_degree(const N& n) const {
             if constexpr (debug_mode) {
-                if (!has_node(node)) {
+                if (!has_node(n)) {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            auto inputs { std::ranges::common_view { this->get_inputs(node) } };
+            auto inputs { std::ranges::common_view { this->get_inputs(n) } };
             auto dist { std::ranges::distance(inputs) };
             return static_cast<std::size_t>(dist);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::edge_to_element_offsets */
         auto edge_to_element_offsets(
-            const E& edge
+            const E& e
         ) const {
             if constexpr (debug_mode) {
-                if (!has_edge(edge)) {
+                if (!has_edge(e)) {
                     throw std::runtime_error { "Edge doesn't exist" };
                 }
             }
             using OPT_INDEX = std::optional<INDEX>;
             using RET = std::optional<std::pair<OPT_INDEX, OPT_INDEX>>;
 
-            if (edge.type == edge_type::FREE_RIDE) {
+            if (e.type == edge_type::FREE_RIDE) {
                 // Returning nullopt directly means a conversion to RET happens behind the scene, and that makes the concept check fail.
                 return RET { std::nullopt };
             }
-            const auto& [n1, n2] { edge.inner_edge };
+            const auto& [n1, n2] { e.inner_edge };
             const auto& [n1_grid_down, n1_grid_right] { n1 };
             const auto& [n2_grid_down, n2_grid_right] { n2 };
             if (n1_grid_down + 1u == n2_grid_down && n1_grid_right + 1u == n2_grid_right) {
@@ -484,30 +588,27 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             std::unreachable();
         }
 
-        constexpr static std::size_t max_grid_depth(
-            INDEX grid_down_cnt_,
-            INDEX grid_right_cnt_
-        ) {
-            return decltype(g)::max_grid_depth(grid_down_cnt_, grid_right_cnt_);
-        }
-
-        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offset(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::node_to_grid_offset */
+        std::tuple<INDEX, INDEX, std::size_t> node_to_grid_offset(const N& n) const {
             if constexpr (debug_mode) {
-                if (!has_node(node)) {
+                if (!has_node(n)) {
                     throw std::runtime_error { "Node doesn't exist" };
                 }
             }
-            return g.node_to_grid_offset(node);
+            return g.node_to_grid_offset(n);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::grid_offset_to_nodes */
         auto grid_offset_to_nodes(INDEX grid_down, INDEX grid_right) const {
             return g.grid_offset_to_nodes(grid_down, grid_right);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::row_nodes */
         auto row_nodes(INDEX grid_down) const {
             return g.row_nodes(grid_down);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::row_nodes */
         auto row_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const {
             return g.row_nodes(grid_down, root_node, leaf_node);
         }
@@ -526,49 +627,66 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             return g.segmented_diagonal_nodes(grid_axis, grid_axis_position, root_node, leaf_node, max_segment_cnt);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::is_reachable */
         bool is_reachable(const N& n1, const N& n2) const {
             return g.is_reachable(n1, n2);
         }
 
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::resident_nodes */
         auto resident_nodes() const {
             return std::array<N, 2u> { g.get_root_node(), g.get_leaf_node() };
         }
 
-        auto outputs_to_residents(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::outputs_to_residents */
+        auto outputs_to_residents(const N& n) const {
             using CONTAINER = static_vector_typer<debug_mode, E, 2zu>::type;
             CONTAINER ret {};
             const N& leaf_node { get_leaf_node() };
-            if (node != leaf_node) {
-                ret.push_back(E { edge_type::FREE_RIDE, { node, leaf_node } });
+            if (n != leaf_node) {
+                ret.push_back(E { edge_type::FREE_RIDE, { n, leaf_node } });
             }
             const auto& [leaf_grid_down, leaf_grid_right] { leaf_node };
-            const auto& [grid_down, grid_right] { node };
+            const auto& [grid_down, grid_right] { n };
             if ((grid_down + 1u == leaf_grid_down && grid_right + 1u == leaf_grid_right)
                     || (grid_down == leaf_grid_down && grid_right + 1u == leaf_grid_right)
                     || (grid_down + 1u == leaf_grid_down && grid_right == leaf_grid_right)) {
-                ret.push_back(E { edge_type::NORMAL, { node, leaf_node } });
+                ret.push_back(E { edge_type::NORMAL, { n, leaf_node } });
             }
             return ret;
         }
 
-        auto inputs_from_residents(const N& node) const {
+        /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::inputs_from_residents */
+        auto inputs_from_residents(const N& n) const {
             using CONTAINER = static_vector_typer<debug_mode, E, 2zu>::type;
             CONTAINER ret {};
             const N& root_node { get_root_node() };
-            if (node != root_node) {
-                ret.push_back(E { edge_type::FREE_RIDE, { root_node, node } });
+            if (n != root_node) {
+                ret.push_back(E { edge_type::FREE_RIDE, { root_node, n } });
             }
             const auto& [root_grid_down, root_grid_right] { root_node };
-            const auto& [grid_down, grid_right] { node };
+            const auto& [grid_down, grid_right] { n };
             if ((grid_down - 1u == root_grid_down && grid_right - 1u == root_grid_right)
                     || (grid_down - 1u == root_grid_down && grid_right == root_grid_right)
                     || (grid_down == root_grid_down && grid_right - 1u == root_grid_right)) {
-                ret.push_back(E { edge_type::NORMAL, { root_node, node } });
+                ret.push_back(E { edge_type::NORMAL, { root_node, n } });
             }
             return ret;
         }
     };
 
+    /**
+     * Create @ref offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph instance, where template
+     * parameters are deduced / inferred from arguments passed in.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam INDEX Node coordinate type.
+     * @param down_seq Downward sequence.
+     * @param right_seq Rightward sequence.
+     * @param substitution_scorer Scorer for sequence alignment substitutions.
+     * @param gap_scorer Scorer for sequence alignment gaps (indels).
+     * @param freeride_scorer Score for sequence alignment freerides.
+     * @return New @ref offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph instance.
+     */
     template<
         bool debug_mode,
         widenable_to_size_t INDEX

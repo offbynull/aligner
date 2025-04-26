@@ -7,11 +7,6 @@
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/concepts.h"
 
-/**
- * @ref offbynull::aligner::scorer::scorer::scorer which returns a constant score, regardless of edge.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::scorers::constant_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
@@ -38,15 +33,15 @@ namespace offbynull::aligner::scorers::constant_scorer {
         constant_scorer(WEIGHT weight_)
         : weight { weight_ } {}
 
+        // This must be operator()() - if you do operator(), doxygen won't recognize it. This isn't the case with other functions (if you
+        // leave out the parenthesis, doxygen copies the documentation just fine).
         /**
-         * Score edge.
-         *
-         * @return Score for edge (edge weight).
+         * @copydoc offbynull::aligner::scorer::scorer::unimplemented_scorer::operator()()
          */
         WEIGHT operator()(
-            const auto& /*edge*/,
-            const std::optional<std::reference_wrapper<const DOWN_ELEM>> /*down_elem*/,
-            const std::optional<std::reference_wrapper<const RIGHT_ELEM>> /*right_elem*/
+            [[maybe_unused]] const auto& edge,
+            [[maybe_unused]] const std::optional<std::reference_wrapper<const DOWN_ELEM>> down_elem,
+            [[maybe_unused]] const std::optional<std::reference_wrapper<const RIGHT_ELEM>> right_elem
         ) const {
             return weight;
         }

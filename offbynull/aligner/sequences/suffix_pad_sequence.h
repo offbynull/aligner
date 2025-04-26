@@ -7,11 +7,6 @@
 #include <utility>
 #include <type_traits>
 
-/**
- * Suffix padded @ref offbynull::aligner::sequence::sequence::sequence.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::sequences::suffix_pad_sequence {
     using offbynull::aligner::sequence::sequence::sequence;
 
@@ -51,10 +46,7 @@ namespace offbynull::aligner::sequences::suffix_pad_sequence {
         , pad_count { pad_count_ } {}
 
         /**
-         * Get element at index `index`.
-         *
-         * @param index Index of element.
-         * @return Value at `index`.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::operator[]
          */
         SEQ_ELEM operator[](std::size_t index) const {
             if (index >= seq.size()) {
@@ -64,9 +56,7 @@ namespace offbynull::aligner::sequences::suffix_pad_sequence {
         }
 
         /**
-         * Get number of elements.
-         *
-         * @return Number of elements.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::size()
          */
         std::size_t size() const {
             return seq.size() + pad_count;

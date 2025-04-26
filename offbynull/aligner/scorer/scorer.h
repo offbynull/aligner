@@ -4,23 +4,17 @@
 #include <concepts>
 #include <optional>
 #include <functional>
-#include <type_traits>
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
 
-/**
- * Scorer interface.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::scorer::scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::concepts::unqualified_object_type;
 
     /**
-     * Concept that's satisfied if \c T has the traits of a scorer. A scorer is a callable that scores an alignment graph's edge.
+     * Concept that's satisfied if `T` has the traits of a scorer. A scorer is a callable that scores an alignment graph's edge.
      *
      * @tparam T Type to check.
      * @tparam EDGE Type of alignment graph's edge identifiers.
@@ -39,8 +33,8 @@ namespace offbynull::aligner::scorer::scorer {
         ) {
             { t(edge, down_elem_ref_opt, right_elem_ref_opt) } -> std::same_as<WEIGHT>;
         }
-        && std::is_same_v<std::remove_cvref_t<DOWN_ELEM>, DOWN_ELEM>  // make sure no refs / cv-qualifiers
-        && std::is_same_v<std::remove_cvref_t<RIGHT_ELEM>, RIGHT_ELEM>  // make sure no refs / cv-qualifiers
+        && unqualified_object_type<DOWN_ELEM>
+        && unqualified_object_type<RIGHT_ELEM>
         && weight<WEIGHT>;
 
     /**
@@ -62,8 +56,48 @@ namespace offbynull::aligner::scorer::scorer {
         ) {
             { t(edge, down_elem_ref_opt, right_elem_ref_opt) } -> weight;
         }
-        && std::is_same_v<std::remove_cvref_t<DOWN_ELEM>, DOWN_ELEM>  // make sure no refs / cv-qualifiers
-        && std::is_same_v<std::remove_cvref_t<RIGHT_ELEM>, RIGHT_ELEM>;  // make sure no refs / cv-qualifiers
+        && unqualified_object_type<DOWN_ELEM>
+        && unqualified_object_type<RIGHT_ELEM>;
+
+
+    /**
+     * Unimplemented @ref offbynull::aligner::scorer::scorer::scorer, intended for documentation.
+     *
+     * @tparam DOWN_ELEM Type of alignment graph's downward elements.
+     * @tparam RIGHT_ELEM Type of alignment graph's rightward elements.
+     * @tparam WEIGHT Type of alignment graph's edge weights.
+     */
+    template<typename DOWN_ELEM, typename RIGHT_ELEM, weight WEIGHT>
+    requires requires (const DOWN_ELEM down_elem, const RIGHT_ELEM right_elem) {
+        { down_elem == right_elem } -> std::same_as<bool>;
+    }
+    struct unimplemented_scorer {
+        /**
+         * Score edge.
+         *
+         *  * When `edge` is a freeride, both `down_elem` and `right_elem` are unassigned.
+         *  * When `edge` is an indel, either `down_elem` or `right_elem` is assigned.
+         *  * When `edge` is a substitution, both `down_elem` and `right_elem` are assigned.
+         *
+         * @param edge Edge.
+         * @param down_elem Downward sequence's element assigned to `edge` (`std::nullopt` if unassigned).
+         * @param right_elem Rightward sequence's element assigned to `edge`  (`std::nullopt` if unassigned).
+         * @return Score for edge (edge weight).
+         */
+        WEIGHT operator()(
+            const auto& edge,
+            const std::optional<std::reference_wrapper<const DOWN_ELEM>> down_elem,
+            const std::optional<std::reference_wrapper<const RIGHT_ELEM>> right_elem
+        ) const;
+    };
+    static_assert(
+        scorer_without_explicit_weight<
+            unimplemented_scorer<char, char, int>,
+            int,
+            char,
+            char
+        >
+    );
 }
 
 #endif //OFFBYNULL_ALIGNER_SCORER_SCORER_H

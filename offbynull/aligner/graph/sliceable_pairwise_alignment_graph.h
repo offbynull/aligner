@@ -8,17 +8,19 @@
 #include <stdexcept>
 #include "offbynull/concepts.h"
 #include "offbynull/helpers/join_bidirectional_view.h"
+#include "offbynull/aligner/graph/graph.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 
-/**
- * Pairwise sequence alignment graph interface, structured for use by the divide-and-conquer pairwise sequence alignment algorithm.
- */
 namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
     using offbynull::concepts::range_of_one_of;
     using offbynull::concepts::bidirectional_range_of_one_of;
+    using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::unqualified_object_type;
     using offbynull::helpers::join_bidirectional_view::join_bidirectional_view_adaptor;
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::pairwise_alignment_graph::unimplemented_pairwise_alignment_graph;
+    using offbynull::aligner::graph::graph::node;
+    using offbynull::aligner::graph::graph::edge;
 
     /**
      * An @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph extended to support the
@@ -32,7 +34,7 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
      *  * the same slice.
      *  * the slice directly above it.
      *
-     * @code
+     * ```
      *         global alignment
      *         "CAT" vs "TAGG"
      *
@@ -50,7 +52,7 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
      * T  |  '. |  '. |  '. |  '. |
      *    v    vv    vv    vv    vv
      *    *---->*---->*---->*---->*    slice 3
-     * @endcode
+     * ```
      *
      * Because the only dependencies are on the current slice and the slice above it, the entire process is much more memory efficient.
      *
@@ -69,70 +71,11 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
      * full explanation of is out of scope (if interested, see
      * https://offbynull.com/docs/data/learn/Bioinformatics/output/output.html#H_Divide-and-Conquer%20Algorithm).
      *
-     * `G` must provide several members. Given a background in graph theory and alignment graphs, most of these should be self-explanatory
-     * just from the name and concept restrictions. Note that, although many member variables / functions seem useless, those member
-     * variables are required for certain high-performance algorithms.
-     *
-     * @section Members
-     *
-     * **[[ `resident_nodes_capacity` ]]**
-     *
-     * Maximum number of resident nodes.
-     *
-     * **[[ `resident_nodes()` ]]**
-     *
-     * List all resident nodes.
-     *
-     *  * Return: Resident nodes. This range may be lazily evaluated, meaning the behavior of this range becomes undefined once this graph
-     *        is modified in any way.
-     *
-     * **[[ `row_nodes(INDEX grid_down)` ]]**
-     *
-     * List nodes in a slice (row). The behavior of this function is undefined if `grid_down` extends past the number of slices (rows)
-     * within this graph's grid layout.
-     *
-     *  * Param `grid_down`: Slice (row) to iterator over.
-     *  * Return: Nodes within `grid_down` slice. This range may be lazily evaluated, meaning the behavior of this range becomes undefined
-     *        once this graph is modified in any way.
-     *
-     * **[[ `row_nodes(INDEX grid_down, N root_node, N leaf_node)` ]]**
-     *
-     * List nodes in a slice (row) as if this graph's root node and leaf node are actually `root_node` and `leaf_node` respectively. That
-     * means, for a node to be returned, it must be reachable from `root_node` and reachable to `leaf_node`.
-     *
-     * The behavior of this function is undefined if ...
-     *
-     *  * `grid_down` extends past the number of slices (rows) within this graph.
-     *  * `n1` or `n2` doesn't exist within this graph.
-     *  * `n2` isn't reachable from `n1`.
-     *
-     *  * Param `grid_down`: Slice (row) to iterator over.
-     *  * Param `root_node`: Root node override. When iterating nodes, it'll be as if graph's root node is actually this node.
-     *  * Param `leaf_node`: Leaf node override. When iterating nodes, it'll be as if graph's leaf node is actually this node.
-     *  * Return: Nodes within `grid_down` slice. This range may be lazily evaluated, meaning the behavior of this range becomes undefined
-     *        once this graph is modified in any way.
-     *
-     * **[[ `is_reachable(N n1, N n2)` ]]**
-     *
-     * Test if `n2` is reachable from `n1`.
-     *
-     * * Return: `true` if `n2` is reachable from `n1`, `false` otherwise.
-     *
-     * **[[ `outputs_to_residents(N n)` ]]**
-     *
-     * List outgoing edges from `n` to resident nodes. If `n` doesn't exist within this graph, the behavior of this function is undefined.
-     *
-     *  * Param `n`: Node ID.
-     *  * Return: Edges from `n` to resident nodes. This range may be lazily evaluated, meaning the behavior of this range becomes undefined
-     *        once this graph is modified in any way.
-     *
-     * **[[ `inputs_from_residents(N n)` ]]**
-     *
-     * List incoming edges from resident nodes to `n`. If `n` doesn't exist within this graph, the behavior of this function is undefined.
-     *
-     *  * Param `n`: Node ID.
-     *  * Return: Edges from resident nodes to `n`. This range may be lazily evaluated, meaning the behavior of this range becomes undefined
-     *        once this graph is modified in any way.
+     * `G` must provide several members (see
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph). Given a
+     * background in graph theory and alignment graphs, most of these should be self-explanatory just from the name and concept
+     * restrictions. Note that, although many member variables / functions seem useless, those member variables are required for certain
+     * high-performance algorithms.
      *
      * @tparam G Type to check.
      */
@@ -155,7 +98,101 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
             { g.inputs_from_residents(node) } -> range_of_one_of<typename G::E, const typename G::E&>;
         };
 
+    /**
+     * Unimplemented @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph,
+     * intended for documentation.
+     *
+     * @tparam N_ Node identifier type, used to lookup nodes.
+     * @tparam ND_ Node data type, used to associated data with nodes.
+     * @tparam E_ Edge identifier type, used to lookup edges.
+     * @tparam ED_ Edge data type, used to associated data with edges.
+     * @tparam INDEX_ Node coordinate type.
+     */
+    template<
+        node N_,
+        unqualified_object_type ND_,
+        edge E_,
+        unqualified_object_type ED_,
+        widenable_to_size_t INDEX_
+    >
+    struct unimplemented_sliceable_pairwise_alignment_graph : unimplemented_pairwise_alignment_graph<N_, ND_, E_, ED_, INDEX_> {
+        /** @copydoc offbynull::aligner::graph::graph::unimplemented_graph::N */
+        using N = N_;
+        /** @copydoc offbynull::aligner::graph::graph::unimplemented_graph::ND */
+        using ND = ND_;
+        /** @copydoc offbynull::aligner::graph::graph::unimplemented_graph::E */
+        using E = E_;
+        /** @copydoc offbynull::aligner::graph::graph::unimplemented_graph::ED */
+        using ED = ED_;
+        /** @copydoc offbynull::aligner::graph::pairwise_alignment_graph::unimplemented_pairwise_alignment_graph::INDEX */
+        using INDEX = INDEX_;
 
+        /** Maximum number of resident nodes. */
+        static constexpr std::size_t resident_nodes_capacity { 0zu };
+
+        /**
+         * List nodes in a slice (row). The behavior of this function is undefined if `grid_down` extends past the number of slices (rows)
+         * within this graph's grid layout.
+         *
+         * @param grid_down Slice (row) to iterator over.
+         * @return Nodes within `grid_down` slice. This range may be lazily evaluated, meaning the behavior of this range becomes undefined
+         *     once this graph is modified in any way.
+         */
+        auto row_nodes(INDEX grid_down) const;
+
+        /**
+         * List nodes in a slice (row) as if this graph's root node and leaf node are actually `root_node` and `leaf_node` respectively.
+         * That means, for a node to be returned, it must be reachable from `root_node` and reachable to `leaf_node`.
+         *
+         * The behavior of this function is undefined if ...
+         *
+         *  * `grid_down` extends past the number of slices (rows) within this graph.
+         *  * `n1` or `n2` doesn't exist within this graph.
+         *  * `n2` isn't reachable from `n1`.
+         *
+         * @param grid_down Slice (row) to iterator over.
+         * @param root_node Root node override. When iterating nodes, it'll be as if graph's root node is actually this node.
+         * @param leaf_node Leaf node override. When iterating nodes, it'll be as if graph's leaf node is actually this node.
+         * @return Nodes within `grid_down` slice. This range may be lazily evaluated, meaning the behavior of this range becomes undefined
+         *     once this graph is modified in any way.
+         */
+        auto row_nodes(INDEX grid_down, const N& root_node, const N& leaf_node) const;
+
+        /**
+         * Test if `n2` is reachable from `n1`.
+         *
+         * @return `true` if `n2` is reachable from `n1`, `false` otherwise.
+         */
+        bool is_reachable(const N& n1, const N& n2) const;
+
+        /**
+         * List all resident nodes.
+         *
+         * @return Resident nodes. This range may be lazily evaluated, meaning the behavior of this range becomes undefined once this graph
+         *     is modified in any way.
+         */
+        auto resident_nodes() const;
+
+        /**
+         * List outgoing edges from `n` to resident nodes. If `n` doesn't exist within this graph, the behavior of this function is
+         * undefined.
+         *
+         * @param n Node ID.
+         * @return Edges from `n` to resident nodes. This range may be lazily evaluated, meaning the behavior of this range becomes
+         *     undefined once this graph is modified in any way.
+         */
+        auto outputs_to_residents(const N& n) const;
+
+        /**
+         * List incoming edges from resident nodes to `n`. If `n` doesn't exist within this graph, the behavior of this function is
+         * undefined.
+         *
+         * @param n Node ID.
+         * @return Edges from resident nodes to `n`. This range may be lazily evaluated, meaning the behavior of this range becomes
+         *     undefined once this graph is modified in any way.
+         */
+        auto inputs_from_residents(const N& n) const;
+    };
 
 
     // Reference implementation for row_nodes()

@@ -44,11 +44,11 @@ namespace offbynull::utils {
      * unimplemented for every `T`, declaring it a variable of type `type_displayer<T>` will result in a compiler error that explicitly
      * states what `T` is.
      *
-     * @code{.cpp}
+     * ```cpp
      * void my_func(const auto& x) {
      *     type_displayer<decltype(x)> unused;  // error: 'type_displayer<const int&> unused' has incomplete type
      * }
-     * @endcode
+     * ```
      *
      * @tparam T Type to display.
      */
@@ -60,7 +60,7 @@ namespace offbynull::utils {
      * `boost::container::static_vector<ELEM, cnt>` under the name `type`. The `debug_mode` parameter controls whether the resulting type
      * has debug features enabled or disabled (e.g. bounds-checking).
      *
-     * @tparam debug_mode Vector debug features enabled if \c true, otherwise disables them.
+     * @tparam debug_mode Vector debug features enabled if `true`, otherwise disables them.
      * @tparam ELEM Type of element held by vector.
      * @tparam cnt Maximum number of elements vector can hold.
      */
@@ -172,7 +172,8 @@ namespace offbynull::utils {
 
     PACK_STRUCT_START
     /**
-     * Analog to `std::optional`, but memory layout is packed when `OBN_PACK_STRUCTS` macro is defined.
+     * Analog to `std::optional`, but memory layout is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct
+     * packing).
      *
      * @tparam T Type to hold.
      */

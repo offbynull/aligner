@@ -6,11 +6,6 @@
 #include <stdexcept>
 #include <type_traits>
 
-/**
- * Clipped @ref offbynull::aligner::sequence::sequence::sequence.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::sequences::substring_sequence {
     using offbynull::aligner::sequence::sequence::sequence;
 
@@ -50,10 +45,7 @@ namespace offbynull::aligner::sequences::substring_sequence {
         }
 
         /**
-         * Get element at index `index`.
-         *
-         * @param index Index of element.
-         * @return Value at `index`.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::operator[]
          */
         decltype(seq[0zu]) operator[](std::size_t index) const {
             if constexpr (debug_mode) {
@@ -65,9 +57,7 @@ namespace offbynull::aligner::sequences::substring_sequence {
         }
 
         /**
-         * Get number of elements.
-         *
-         * @return Number of elements.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::size()
          */
         std::size_t size() const {
             return length;

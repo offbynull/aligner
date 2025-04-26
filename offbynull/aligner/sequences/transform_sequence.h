@@ -7,11 +7,6 @@
 #include <type_traits>
 #include <utility>
 
-/**
- * @ref offbynull::aligner::sequence::sequence::sequence that applies a transformation to each element.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::sequences::transform_sequence {
     using offbynull::aligner::sequence::sequence::sequence;
     using offbynull::concepts::widenable_to_size_t;
@@ -68,10 +63,7 @@ namespace offbynull::aligner::sequences::transform_sequence {
         , transformer { transformer_ } {}
 
         /**
-         * Get element at index `index`.
-         *
-         * @param index Index of element.
-         * @return Value at `index`.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::operator[]
          */
         OUTPUT operator[](std::size_t index) const {
             INPUT input { seq[index] };
@@ -79,9 +71,7 @@ namespace offbynull::aligner::sequences::transform_sequence {
         }
 
         /**
-         * Get number of elements.
-         *
-         * @return Number of elements.
+         * @copydoc offbynull::aligner::sequence::sequence::unimplemented_sequence::size
          */
         std::size_t size() const {
             return seq.size();

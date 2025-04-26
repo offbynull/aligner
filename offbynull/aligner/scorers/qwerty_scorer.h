@@ -12,12 +12,6 @@
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/scorers/single_character_substitution_matrix_scorer.h"
 
-/**
- * @ref offbynull::aligner::scorer::scorer::scorer which scores printable ASCII characters via their distance from each other on a typical
- * QWERTY-layout keyboard.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::scorers::qwerty_scorer {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::scorer::scorer::scorer;
