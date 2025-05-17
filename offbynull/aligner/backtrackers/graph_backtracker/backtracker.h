@@ -15,8 +15,15 @@
 #include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/concepts.h"
-#include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue.h"
-#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_heap_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_stack_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container_heap_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container_stack_container_creator_pack.h"
 #include "offbynull/aligner/graph/graph.h"
 #include "offbynull/concepts.h"
 
@@ -25,28 +32,52 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_edge;
-    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot;
-    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container;
-    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack;
-    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_heap_container_creator_pack;
-    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_stack_container_creator_pack;
-    using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue;
-    using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_container_creator_pack;
-    using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_heap_container_creator_pack;
-    using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_stack_container_creator_pack;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container::slot_container;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack
+        ::slot_container_container_creator_pack;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_heap_container_creator_pack
+        ::slot_container_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_stack_container_creator_pack
+        ::slot_container_stack_container_creator_pack;
+    using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue::ready_queue;
+    using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_container_creator_pack
+        ::ready_queue_container_creator_pack;
+    using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_heap_container_creator_pack
+        ::ready_queue_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_stack_container_creator_pack
+        ::ready_queue_stack_container_creator_pack;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::unqualified_object_type;
 
 
-    BEGIN DOCUMENTATION - PULL OUT CREATOR PACK ENTITIES INTO THEIR OWN HEADER FILES TO SIMPLIFY THINGS
-    BEGIN DOCUMENTATION - PULL OUT CREATOR PACK ENTITIES INTO THEIR OWN HEADER FILES TO SIMPLIFY THINGS
-    BEGIN DOCUMENTATION - PULL OUT CREATOR PACK ENTITIES INTO THEIR OWN HEADER FILES TO SIMPLIFY THINGS
-    BEGIN DOCUMENTATION - PULL OUT CREATOR PACK ENTITIES INTO THEIR OWN HEADER FILES TO SIMPLIFY THINGS
-    BEGIN DOCUMENTATION - PULL OUT CREATOR PACK ENTITIES INTO THEIR OWN HEADER FILES TO SIMPLIFY THINGS
-    BEGIN DOCUMENTATION - PULL OUT CREATOR PACK ENTITIES INTO THEIR OWN HEADER FILES TO SIMPLIFY THINGS
-    BEGIN DOCUMENTATION - PULL OUT CREATOR PACK ENTITIES INTO THEIR OWN HEADER FILES TO SIMPLIFY THINGS
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
+
 
 
     template<

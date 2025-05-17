@@ -1,5 +1,5 @@
-#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_H
-#define OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_H
+#ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_SLOT_CONTAINER_H
+#define OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_SLOT_CONTAINER_H
 
 #include <cstddef>
 #include <ranges>
@@ -9,114 +9,27 @@
 #include <limits>
 #include <utility>
 #include <stdexcept>
-#include <boost/container/small_vector.hpp>
 #include "offbynull/aligner/backtrackers/graph_backtracker/concepts.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
-#include "offbynull/utils.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_comparator.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container_heap_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container_stack_container_creator_pack.h"
 
-namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
+namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container {
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::concepts::random_access_range_of_type;
-    using offbynull::concepts::unqualified_object_type;
     using offbynull::aligner::graph::graph::readable_graph;
     using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_edge;
-
-    PACK_STRUCT_START
-    template<backtrackable_node N, backtrackable_edge E, weight WEIGHT>
-    struct slot {
-        N node;
-        std::size_t unwalked_parent_cnt;
-        E backtracking_edge;
-        WEIGHT backtracking_weight;
-
-        slot(N node_, std::size_t unwalked_parent_cnt_)
-        : node { node_ }
-        , unwalked_parent_cnt { unwalked_parent_cnt_ }
-        , backtracking_edge {}
-        , backtracking_weight {} {}
-
-        slot()
-        : node {}
-        , unwalked_parent_cnt {}
-        , backtracking_edge {}
-        , backtracking_weight {} {}
-    }
-    PACK_STRUCT_STOP;
-
-    template<
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight WEIGHT
-    >
-    struct slots_comparator {
-        bool operator()(const slot<N, E, WEIGHT>& lhs, const slot<N, E, WEIGHT>& rhs) const {
-            return lhs.node < rhs.node;
-        }
-
-        bool operator()(const slot<N, E, WEIGHT>& lhs, const N& rhs) const {
-            return lhs.node < rhs;
-        }
-
-        bool operator()(const N& lhs, const slot<N, E, WEIGHT>& rhs) const {
-            return lhs < rhs.node;
-        }
-    };
-
-
-
-
-
-    template<
-        typename T,
-        typename N,
-        typename E,
-        typename WEIGHT
-    >
-    concept slot_container_container_creator_pack =
-        unqualified_object_type<T>
-        && backtrackable_node<N>
-        && backtrackable_edge<E>
-        && weight<WEIGHT>
-        && requires(const T t, std::vector<slot<N, E, WEIGHT>> fake_range) {
-            { t.create_slot_container(fake_range.begin(), fake_range.end()) } -> random_access_range_of_type<slot<N, E, WEIGHT>>;
-        };
-
-    template<
-        bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight WEIGHT
-    >
-    struct slot_container_heap_container_creator_pack {
-        std::vector<
-            slot<N, E, WEIGHT>
-        > create_slot_container(auto begin, auto end) const {
-            return std::vector<slot<N, E, WEIGHT>>(begin, end);
-        }
-    };
-
-    template<
-        bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight WEIGHT,
-        std::size_t heap_escape_size = 100zu
-    >
-    struct slot_container_stack_container_creator_pack {
-        boost::container::small_vector<
-            slot<N, E, WEIGHT>,
-            heap_escape_size
-        > create_slot_container(auto begin, auto end) const {
-            return boost::container::small_vector<slot<N, E, WEIGHT>, heap_escape_size>(begin, end);
-        }
-    };
-
-
-
-
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_comparator::slot_comparator;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack
+        ::slot_container_container_creator_pack;
+    using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_heap_container_creator_pack
+        ::slot_container_heap_container_creator_pack;
 
     template<
         bool debug_mode,
@@ -166,17 +79,17 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
             std::ranges::sort(
                 slots.begin(),
                 slots.end(),
-                slots_comparator<N, E, WEIGHT> {}
+                slot_comparator<N, E, WEIGHT> {}
             );
         }
 
         std::size_t find_idx(const N& node) {
-            auto it { std::lower_bound(slots.begin(), slots.end(), node, slots_comparator<N, E, WEIGHT> {}) };
+            auto it { std::lower_bound(slots.begin(), slots.end(), node, slot_comparator<N, E, WEIGHT> {}) };
             return it - slots.begin();
         }
 
         slot<N, E, WEIGHT>& find_ref(const N& node) {
-            auto it { std::lower_bound(slots.begin(), slots.end(), node, slots_comparator<N, E, WEIGHT> {}) };
+            auto it { std::lower_bound(slots.begin(), slots.end(), node, slot_comparator<N, E, WEIGHT> {}) };
             return *it;
         }
 
@@ -185,7 +98,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
         }
 
         std::pair<std::size_t, slot<N, E, WEIGHT>&> find(const N& node) {
-            auto it { std::lower_bound(slots.begin(), slots.end(), node, slots_comparator<N, E, WEIGHT> {}) };
+            auto it { std::lower_bound(slots.begin(), slots.end(), node, slot_comparator<N, E, WEIGHT> {}) };
             auto dist_from_beginning { std::ranges::distance(slots.begin(), it) };
             // It may be that dist_from_beginning is signed, in which case the widenable_to_size_t test below fails (it tests for
             // unsignedness in addition testing to see if widenable). If it is signed, the test checkd the max value of both types. If
@@ -205,4 +118,4 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container {
     };
 }
 
-#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_H
+#endif //OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_SLOT_CONTAINER_H
