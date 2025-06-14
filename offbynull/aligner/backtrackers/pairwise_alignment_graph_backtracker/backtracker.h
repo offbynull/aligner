@@ -4,153 +4,37 @@
 #include <cstddef>
 #include <ranges>
 #include <algorithm>
-#include <vector>
 #include <utility>
 #include <functional>
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
-#include "offbynull/aligner/concepts.h"
-#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/concepts.h"
-#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/ready_queue.h"
-#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/slot_container.h"
+#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/backtrackable_node.h"
+#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/backtrackable_edge.h"
+#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/backtracker_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/backtracker_heap_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/backtracker_stack_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/ready_queue/ready_queue.h"
+#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/slot_container/slot.h"
+#include "offbynull/aligner/backtrackers/pairwise_alignment_graph_backtracker/slot_container/slot_container.h"
 #include "offbynull/aligner/graph/pairwise_alignment_graph.h"
 #include "offbynull/concepts.h"
-#include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker {
     using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
-    using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container_container_creator_pack;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container
-        ::slot_container_heap_container_creator_pack;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container
-        ::slot_container_stack_container_creator_pack;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue_container_creator_pack;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue_heap_container_creator_pack;
-    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue_stack_container_creator_pack;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtrackable_node::backtrackable_node;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtrackable_edge::backtrackable_edge;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker_container_creator_pack
+        ::backtracker_container_creator_pack;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker_heap_container_creator_pack
+        ::backtracker_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker_stack_container_creator_pack
+        ::backtracker_stack_container_creator_pack;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot::slot;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container::slot_container;
+    using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue::ready_queue;
     using offbynull::concepts::range_of_type;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::concepts::random_access_range_of_type;
-    using offbynull::concepts::unqualified_object_type;
-    using offbynull::utils::static_vector_typer;
-
-
-
-
-    template<
-        typename T,
-        typename N,
-        typename E,
-        typename ED,
-        typename PARENT_COUNT,
-        typename SLOT_INDEX
-    >
-    concept backtracker_container_creator_pack =
-        unqualified_object_type<T>
-        && backtrackable_node<N>
-        && backtrackable_edge<E>
-        && weight<ED>
-        && widenable_to_size_t<PARENT_COUNT>
-        && widenable_to_size_t<SLOT_INDEX>
-        && requires(const T t, std::size_t path_edge_capacity) {
-            { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<N, E, ED, PARENT_COUNT>;
-            { t.create_ready_queue_container_creator_pack() } -> ready_queue_container_creator_pack<SLOT_INDEX>;
-            { t.create_path_container(path_edge_capacity) } -> random_access_range_of_type<E>;
-        };
-
-    template<
-        bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight ED,
-        widenable_to_size_t PARENT_COUNT,
-        widenable_to_size_t SLOT_INDEX,
-        bool minimize_allocations
-    >
-    struct backtracker_heap_container_creator_pack {
-        slot_container_heap_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            ED,
-            PARENT_COUNT
-        > create_slot_container_container_creator_pack() const {
-            return {};
-        }
-
-        ready_queue_heap_container_creator_pack<
-            debug_mode,
-            SLOT_INDEX,
-            minimize_allocations
-        > create_ready_queue_container_creator_pack() const {
-            return {};
-        }
-
-        std::vector<E> create_path_container(std::size_t path_edge_capacity) const {
-            std::vector<E> ret {};
-            if constexpr (minimize_allocations) {
-                ret.reserve(path_edge_capacity);
-            }
-            return ret;
-        }
-    };
-
-    template<
-        bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight ED,
-        widenable_to_size_t PARENT_COUNT,
-        widenable_to_size_t SLOT_INDEX,
-        std::size_t grid_down_cnt,
-        std::size_t grid_right_cnt,
-        std::size_t grid_depth_cnt,
-        std::size_t path_edge_capacity
-    >
-    struct backtracker_stack_container_creator_pack {
-        slot_container_stack_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            ED,
-            PARENT_COUNT,
-            grid_down_cnt,
-            grid_right_cnt,
-            grid_depth_cnt
-        > create_slot_container_container_creator_pack() const {
-            return {};
-        }
-
-        ready_queue_stack_container_creator_pack<
-            debug_mode,
-            SLOT_INDEX,
-            grid_down_cnt,
-            grid_right_cnt,
-            grid_depth_cnt
-        > create_ready_queue_container_creator_pack() const {
-            return {};
-        }
-
-        using PATH_CONTAINER_TYPE = typename static_vector_typer<debug_mode, E, path_edge_capacity>::type;
-        PATH_CONTAINER_TYPE create_path_container(std::size_t path_edge_capacity_) const {
-            if constexpr (debug_mode) {
-                if (path_edge_capacity != path_edge_capacity_) {
-                    throw std::runtime_error { "Size mismatch" };
-                }
-            }
-            return {};
-        }
-    };
-
-
-
-
 
     template<
         bool debug_mode,

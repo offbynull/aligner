@@ -2,7 +2,8 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_SLOT_CONTAINER_CONTAINER_CREATOR_PACK_H
 
 #include <vector>
-#include "offbynull/aligner/backtrackers/graph_backtracker/concepts.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtrackable_node.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtrackable_edge.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot.h"
@@ -12,8 +13,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::unqualified_object_type;
-    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_node;
-    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_edge;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_node::backtrackable_node;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot;
 
     template<

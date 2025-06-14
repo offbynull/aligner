@@ -4,17 +4,20 @@
 #include <cstddef>
 #include <functional>
 #include <ranges>
-#include <vector>
 #include <utility>
 #include <limits>
 #include <algorithm>
 #include <stdexcept>
-#include <concepts>
 #include <type_traits>
-#include <boost/container/small_vector.hpp>
 #include "offbynull/aligner/graphs/pairwise_extended_gap_alignment_graph.h"
 #include "offbynull/aligner/concepts.h"
-#include "offbynull/aligner/backtrackers/graph_backtracker/concepts.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/edge_weight_accessor.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/edge_weight_accessor_without_explicit_weight.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtrackable_node.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtrackable_edge.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtracker_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtracker_heap_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtracker_stack_container_creator_pack.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_container_creator_pack.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_heap_container_creator_pack.h"
@@ -30,8 +33,16 @@
 namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
     using offbynull::aligner::graph::graph::readable_graph;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_node;
-    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_edge;
+    using offbynull::aligner::backtrackers::graph_backtracker::edge_weight_accessor::edge_weight_accessor;
+    using offbynull::aligner::backtrackers::graph_backtracker::edge_weight_accessor_without_explicit_weight
+        ::edge_weight_accessor_without_explicit_weight;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_node::backtrackable_node;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_edge::backtrackable_edge;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtracker_container_creator_pack::backtracker_container_creator_pack;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtracker_heap_container_creator_pack
+        ::backtracker_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtracker_stack_container_creator_pack
+        ::backtracker_stack_container_creator_pack;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container::slot_container;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack
@@ -51,145 +62,6 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::unqualified_object_type;
-
-
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-MOVE OUT EACH ENTITY INTO ITS OWN FILE AND DOCUMENT
-
-
-
-    template<
-        typename T,
-        typename N,
-        typename E,
-        typename WEIGHT
-    >
-    concept backtracker_container_creator_pack =
-        unqualified_object_type<T>
-        && backtrackable_node<N>
-        && backtrackable_edge<E>
-        && weight<WEIGHT>
-        && requires(const T t) {
-            { t.create_slot_container_container_creator_pack() } -> slot_container_container_creator_pack<N, E, WEIGHT>;
-            { t.create_ready_queue_container_creator_pack() } -> ready_queue_container_creator_pack<>;
-            { t.create_path_container() } -> random_access_range_of_type<E>;
-        };
-
-    template<
-        bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight WEIGHT
-    >
-    struct backtracker_heap_container_creator_pack {
-        slot_container_heap_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            WEIGHT
-        > create_slot_container_container_creator_pack() const {
-            return {};
-        }
-
-        ready_queue_heap_container_creator_pack<
-            debug_mode
-        > create_ready_queue_container_creator_pack() const {
-            return {};
-        }
-
-        std::vector<E> create_path_container() const {
-            return {};
-        }
-    };
-
-    template<
-        bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight WEIGHT,
-        std::size_t slot_container_heap_escape_size = 100zu,
-        std::size_t ready_queue_heap_escape_size = 100zu,
-        std::size_t path_container_heap_escape_size = 10zu
-    >
-    struct backtracker_stack_container_creator_pack {
-        slot_container_stack_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            WEIGHT,
-            slot_container_heap_escape_size
-        > create_slot_container_container_creator_pack() const {
-            return {};
-        }
-
-        ready_queue_stack_container_creator_pack<
-            debug_mode,
-            ready_queue_heap_escape_size
-        > create_ready_queue_container_creator_pack() const {
-            return {};
-        }
-
-        boost::container::small_vector<
-            E,
-            path_container_heap_escape_size
-        > create_path_container() const {
-            return {};
-        }
-    };
-
-
-
-
-
-
-    template<
-        typename T,
-        typename E,
-        typename WEIGHT
-    >
-    concept edge_weight_accessor =
-        // leave out unqualified_value_type<T> because it won't pass if T is a function pointer? or maybe it will?
-        backtrackable_edge<E>
-        && weight<WEIGHT>
-        && requires(const T t, const E& e) {
-            { t(e) } -> std::same_as<WEIGHT>;
-        };
-
-    template<
-        typename T,
-        typename E
-    >
-    concept edge_weight_accessor_without_explicit_weight =
-        // leave out unqualified_value_type<T> because it won't pass if T is a function pointer? or maybe it will?
-        backtrackable_edge<E>
-        && requires(const T t, const E& e) {
-            { t(e) } -> weight;
-        };
-
-
-
 
     template<
         bool debug_mode,

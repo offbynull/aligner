@@ -2,16 +2,18 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_BACKTRACKER_H
 
 #include <algorithm>
-#include <vector>
 #include <cstddef>
 #include <utility>
 #include <variant>
 #include <type_traits>
 #include <stdexcept>
-#include "path_container.h"
-#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/concepts.h"
-#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_segmenter.h"
-#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_subdivider.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_node.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_edge.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker_heap_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker_stack_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_segmenter/resident_segmenter.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_subdivider/sliced_subdivider.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/prefix_sliceable_pairwise_alignment_graph.h"
@@ -23,35 +25,20 @@
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::hop;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::resident_segmenter;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter
-        ::resident_segmenter_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter
-        ::resident_segmenter_heap_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter
-        ::resident_segmenter_stack_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::hop::hop;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment::segment;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::resident_segmenter
+        ::resident_segmenter;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider
-        ::sliced_subdivider;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider
-        ::sliced_subdivider_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider
-        ::sliced_subdivider_heap_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider
-        ::sliced_subdivider_stack_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::slot;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::element;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container
-        ::path_container_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container
-        ::path_container_heap_container_creator_pack;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container
-        ::path_container_stack_container_creator_pack;
+        ::sliced_subdivider::sliced_subdivider;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtrackable_node::backtrackable_node;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtrackable_edge::backtrackable_edge;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker_container_creator_pack
+        ::backtracker_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker_heap_container_creator_pack
+        ::backtracker_heap_container_creator_pack;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker_stack_container_creator_pack
+        ::backtracker_stack_container_creator_pack;
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph;
@@ -61,113 +48,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::unqualified_object_type;
     using offbynull::utils::static_vector_typer;
-
-
-
-
-
-    template<
-        typename T,
-        typename N,
-        typename E,
-        typename ED
-    >
-    concept backtracker_container_creator_pack =
-        unqualified_object_type<T>
-        && backtrackable_node<N>
-        && backtrackable_edge<E>
-        && weight<ED>
-        && requires(T t, std::size_t path_edge_capacity) {
-            { t.create_resident_segmenter_container_creator_pack() } -> resident_segmenter_container_creator_pack<N, E, ED>;
-            { t.create_sliced_subdivider_container_creator_pack() } -> sliced_subdivider_container_creator_pack<N, E, ED>;
-            { t.create_path_container(path_edge_capacity) } -> random_access_range_of_type<E>;
-        };
-
-    template<
-        bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight ED,
-        bool minimize_allocations
-    >
-    struct backtracker_heap_container_creator_pack {
-        resident_segmenter_heap_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            ED,
-            minimize_allocations
-        > create_resident_segmenter_container_creator_pack() {
-            return {};
-        }
-
-        sliced_subdivider_heap_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            ED
-        > create_sliced_subdivider_container_creator_pack() {
-            return {};
-        }
-
-        std::vector<E> create_path_container(std::size_t path_edge_capacity) {
-            std::vector<E> ret {};
-            if constexpr (minimize_allocations) {
-                ret.reserve(path_edge_capacity);
-            }
-            return ret;
-        }
-    };
-
-    template<
-        bool debug_mode,
-        backtrackable_node N,
-        backtrackable_edge E,
-        weight ED,
-        std::size_t grid_right_cnt,
-        std::size_t grid_depth_cnt,
-        std::size_t resident_nodes_capacity,
-        std::size_t path_edge_capacity
-    >
-    struct backtracker_stack_container_creator_pack {
-        resident_segmenter_stack_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            ED,
-            grid_right_cnt,
-            grid_depth_cnt,
-            resident_nodes_capacity
-        > create_resident_segmenter_container_creator_pack() {
-            return {};
-        }
-
-        sliced_subdivider_stack_container_creator_pack<
-            debug_mode,
-            N,
-            E,
-            ED,
-            grid_right_cnt,
-            grid_depth_cnt,
-            path_edge_capacity
-        > create_sliced_subdivider_container_creator_pack() {
-            return {};
-        }
-
-        using CONTAINER_TYPE = typename static_vector_typer<debug_mode, E, path_edge_capacity>::type;
-        CONTAINER_TYPE create_path_container(std::size_t path_edge_capacity_) const  {
-            if constexpr (debug_mode) {
-                if (path_edge_capacity != path_edge_capacity_) {
-                    throw std::runtime_error { "Size mismatch" };
-                }
-            }
-            return {};
-        }
-    };
-
-
-
-
 
     template<
         bool debug_mode,

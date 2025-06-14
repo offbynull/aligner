@@ -2,15 +2,16 @@
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_GRAPH_BACKTRACKER_SLOT_CONTAINER_SLOT_CONTAINER_HEAP_CONTAINER_CREATOR_PACK_H
 
 #include <vector>
-#include "offbynull/aligner/backtrackers/graph_backtracker/concepts.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtrackable_node.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtrackable_edge.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container_container_creator_pack.h"
 
 namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_heap_container_creator_pack {
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_node;
-    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_edge;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_node::backtrackable_node;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack
         ::slot_container_container_creator_pack;

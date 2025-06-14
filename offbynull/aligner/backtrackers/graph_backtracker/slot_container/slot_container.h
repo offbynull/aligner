@@ -9,7 +9,8 @@
 #include <limits>
 #include <utility>
 #include <stdexcept>
-#include "offbynull/aligner/backtrackers/graph_backtracker/concepts.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtrackable_node.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/backtrackable_edge.h"
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/concepts.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot.h"
@@ -22,8 +23,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::aligner::graph::graph::readable_graph;
-    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_node;
-    using offbynull::aligner::backtrackers::graph_backtracker::concepts::backtrackable_edge;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_node::backtrackable_node;
+    using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_comparator::slot_comparator;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack

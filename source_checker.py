@@ -266,6 +266,9 @@ def check_line_length(path: Path, content: str):
     content_lines = [line for line in content.splitlines(keepends=False) if line]
     result = CheckResult.SUCCESS
     for line in content_lines:
+        if line.startswith('#include ') or line.startswith('#ifdef ') or line.startswith('#ifndef ') or line.startswith('#endif ') \
+                or line.startswith('#define '):
+            continue
         if len(line) > 140:
             if line.strip().startswith('/** @copydoc'):
                 continue
