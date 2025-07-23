@@ -8,6 +8,7 @@
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/unimplemented_slot_container_container_creator_pack.h"
 
 namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_stack_container_creator_pack {
     using offbynull::aligner::concepts::weight;
@@ -17,6 +18,17 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack
         ::slot_container_container_creator_pack;
 
+    /**
+     * @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack::slot_container_container_creator_pack
+     * that allocates its containers on the heap.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam N Graph node type.
+     * @tparam E Graph edge type.
+     * @tparam WEIGHT Graph edge's weight type.
+     * @tparam heap_escape_size For a container created via `create_slot_container()`, the maximum number of slots allowed on the stack
+     *     before escaping to heap.
+     */
     template<
         bool debug_mode,
         backtrackable_node N,
@@ -25,6 +37,9 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
         std::size_t heap_escape_size = 100zu
     >
     struct slot_container_stack_container_creator_pack {
+        /**
+         * @copydoc offbynull::aligner::backtrackers::graph_backtracker::slot_container::unimplemented_slot_container_container_creator_pack::unimplemented_slot_container_container_creator_pack::create_slot_container
+         */
         boost::container::small_vector<
             slot<N, E, WEIGHT>,
             heap_escape_size

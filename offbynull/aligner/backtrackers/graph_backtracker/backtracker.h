@@ -63,6 +63,26 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::unqualified_object_type;
 
+    /**
+     * Backtracker for @ref offbynull::aligner::graph::graph::readable_graph implementations. A backtracker's purpose is to find the
+     * maximally weighted path (path with the highest sum of edge weights) between some directed graph's root node and leaf node, picking an
+     * arbitrary one if there are multiple such paths. For a detailed explanation of the backtracking algorithm, see
+     * https://offbynull.com/docs/data/learn/Bioinformatics/output/output.html#H_Backtrack%20Algorithm.
+     *
+     * Note that, although @ref offbynull::aligner::graph::graph::readable_graph doesn't place restrictions on the directed graph's
+     * structure, this backtracker implementation assumes that the directed graph it's operating on ...
+     *
+     *  * is acyclic.
+     *  * is not empty.
+     *  * has exactly one root node.
+     *  * has exactly one leaf node.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam WEIGHT Graph edge's weight type.
+     * @tparam EDGE_WEIGHT_ACCESSOR Graph edge weight extractor type.
+     * @tparam CONTAINER_CREATOR_PACK Container factory type.
+     */
     template<
         bool debug_mode,
         readable_graph G,
@@ -83,26 +103,95 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
         backtrackable_edge<typename G::E>
     class backtracker {
     public:
+        /** `G`'s node type. */
         using N = typename G::N;
+        /** `G`'s edge type. */
         using E = typename G::E;
 
+        /**
+         * @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container::slot_container container factory type
+         * used by this backtracker implementation.
+         */
         using SLOT_CONTAINER_CONTAINER_CREATOR_PACK =
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_slot_container_container_creator_pack());
+        /**
+         * @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container::slot_container type used by this
+         * backtracker implementation.
+         */
+        using SLOT_CONTAINER = slot_container<debug_mode, G, WEIGHT, SLOT_CONTAINER_CONTAINER_CREATOR_PACK>;
+        /**
+         * @ref offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue::ready_queue container factory type used by
+         * this backtracker implementation.
+         */
         using READY_QUEUE_CONTAINER_CREATOR_PACK =
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_ready_queue_container_creator_pack());
+        /**
+         * @ref offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue::ready_queue type used by this backtracker
+         * implementation.
+         */
+        using READY_QUEUE = ready_queue<debug_mode, G, READY_QUEUE_CONTAINER_CREATOR_PACK>;
+        /**
+         * Path container type used by this backtracker implementation.
+         */
         using PATH_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container());
 
-        using slot_container_t = slot_container<debug_mode, G, WEIGHT, SLOT_CONTAINER_CONTAINER_CREATOR_PACK>;
-        using ready_queue_t = ready_queue<debug_mode, G, READY_QUEUE_CONTAINER_CREATOR_PACK>;
-
+        /**
+         * Container factory.
+         */
         CONTAINER_CREATOR_PACK container_creator_pack;
 
+        /**
+         * Construct an @ref offbynull::aligner::backtrackers::graph_backtracker::backtracker::backtracker instance.
+         *
+         * @param container_creator_pack_ Container factory.
+         */
         backtracker(
             CONTAINER_CREATOR_PACK container_creator_pack_ = {}
         )
         : container_creator_pack { container_creator_pack_ } {}
 
-        slot_container_t populate_weights_and_backtrack_pointers(
+        /**
+         * For each node N within a directed graph, find the incoming edge into N where that edge is a part of the maximally weighted path
+         * (path with the highest sum of edge weights) connecting the root node to N. In other words, unless N is the root node, there
+         * exists at least one maximally weighted path from the root node to N. This function finds the last edge in that path (one of N's
+         * incoming edges), referred to as N's backtracking edge.
+         *
+         * For example, the directed graph below has the following backtracking edges:
+         *
+         * ```
+         *                     4
+         *            .------------------.
+         *            |                  |
+         *      1     |   1         2    v
+         *   A -----> B -----> C ------> E
+         *            |        |         ^
+         *            |        | 0       |
+         *            |        v         |
+         *            '------> D --------'
+         *                2         2
+         * ```
+         *
+         *  * A has no backtracking edge - A is the root node.
+         *  * B has the backtracking edge A⟶B - weight of maximal path from A (root) to B is 1: A⟶B.
+         *  * C has the backtracking edge B⟶C - weight of maximal path from A (root) to C is 2: A⟶B⟶C.
+         *  * D has the backtracking edge B⟶D - weight of maximal path from A (root) to D is 3: A⟶B⟶D.
+         *  * E has the backtracking edge B⟶E or D⟶E - weight of maximal path from A (root) to E is 5: A⟶B⟶E or A⟶B⟶D⟶E.
+         *
+         * Note that when a node has multiple options for a backtracking edge (as in the case of node E in the above example), one will be
+         * arbitrarily chosen.
+         *
+         * The behavior of this function is undefined if any of the following conditions are met:
+         *
+         *  * `g` is empty.
+         *  * `g` contains more than one root node.
+         *  * `g` contains more than one leaf node.
+         *  * `g` contains cycles.
+         *
+         * @param g Directed graph.
+         * @param edge_weight_accessor Edge weight accessor for `g` (maps each edge to its weight).
+         * @return For each node N within `g`, N's backtracking edge and the weight for the maximally weighted path from root to N.
+         */
+        SLOT_CONTAINER populate_weights_and_backtrack_pointers(
             const G& g,
             const EDGE_WEIGHT_ACCESSOR& edge_weight_accessor
         ) {
@@ -126,7 +215,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
                     })
                 )
             };
-            slot_container_t slots {
+            SLOT_CONTAINER slots {
                 g,
                 slots_lazy.begin(),
                 slots_lazy.end(),
@@ -134,11 +223,11 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
             };
             // Create "ready_idxes" queue
             // --------------------------
-            // The "ready_idxes" queue contains indicies within "slots" that are ready-to-process (node in that slot has had all
+            // The "ready_idxes" queue contains indices within "slots" that are ready-to-process (node in that slot has had all
             // parents processed, and so it can be processed). Since root nodes have no parents, they are ready-to-process from
             // the get-go. As such, the "ready_idxes" queue is primed with the "slots" indices for root nodes (of which there
             // should be only one).
-            ready_queue_t ready_idxes {
+            READY_QUEUE ready_idxes {
                 container_creator_pack.create_ready_queue_container_creator_pack()
             };
             const N& root_node { g.get_root_node() };
@@ -213,9 +302,50 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
             return slots;
         }
 
-        range_of_type<E> auto backtrack(
+        /**
+         * Utilize the output of `populate_weights_and_backtrack_pointers(g)` to determine the maximally weighted path (path with the
+         * highest sum of edge weights) from `g`'s root node to `g`'s leaf node.
+         *
+         * For example, the directed graph below has the following backtracking edges:
+         *
+         * ```
+         *                     4
+         *            .------------------.
+         *            |                  |
+         *      1     |   1         2    v
+         *   A -----> B -----> C ------> E
+         *            |        |         ^
+         *            |        | 0       |
+         *            |        v         |
+         *            '------> D --------'
+         *                2         2
+         * ```
+         *
+         *  * A has no backtracking edge - A is the root node.
+         *  * B has the backtracking edge A⟶B.
+         *  * C has the backtracking edge B⟶C.
+         *  * D has the backtracking edge B⟶D.
+         *  * E has the backtracking edge D⟶E - Note that E's backtracking edge could also be B⟶E, but for the purposes of this example it's
+         *    assumed that `populate_weights_and_backtrack_pointers(g)` selected D⟶E.
+         *
+         * Walking backwards from the leaf node's backtracking edge (E's backtracking edge), the backtracking edges comprise the maximally
+         * weighted path between root node (A) to leaf node (E): D⟶E, B⟶D, and A⟶B. The maximally weighted path is A⟶B⟶D⟶E.
+         *
+         * The behavior of this function is undefined if any of the following conditions are met:
+         *
+         *  * `g` is empty.
+         *  * `g` contains more than one root node.
+         *  * `g` contains more than one leaf node.
+         *  * `g` contains cycles.
+         *
+         * @param g Directed graph.
+         * @param slots `populate_weights_and_backtrack_pointers(g)`'s output.
+         * @param end_node Node to backtrack from, which almost always should be `g`'s leaf node.
+         * @return Maximally weighted path from `g`'s root node to `g`'s leaf node.
+         */
+        auto backtrack(
                 const G& g,
-                slot_container_t& slots,
+                SLOT_CONTAINER& slots,
                 const N& end_node
         ) {
             auto next_node { end_node };
@@ -237,18 +367,35 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
             return path;
         }
 
+        // TODO: Should the above two functions be private? They aren't used outside this class?
+
+        /**
+         * Determine the maximally weighted path (path with the highest sum of edge weights) connecting a directed graph's root node and
+         * leaf node.
+         *
+         * The behavior of this function is undefined if any of the following conditions are met:
+         *
+         *  * `g` is empty.
+         *  * `g` contains more than one root node.
+         *  * `g` contains more than one leaf node.
+         *  * `g` contains cycles.
+         *
+         * @param g Directed graph.
+         * @param edge_weight_accessor Edge weight accessor for `g` (maps each edge to its weight).
+         * @return Maximally weighted path from `g`'s root node to `g`'s leaf node.
+         */
         auto find_max_path(
-                const G& graph,
+                const G& g,
                 const EDGE_WEIGHT_ACCESSOR& edge_weight_accessor
         ) {
             auto slots {
                 populate_weights_and_backtrack_pointers(
-                    graph,
+                    g,
                     edge_weight_accessor
                 )
             };
-            const auto& end_node { graph.get_leaf_node() };
-            const auto& path { backtrack(graph, slots, end_node) };
+            const auto& end_node { g.get_leaf_node() };
+            const auto& path { backtrack(g, slots, end_node) };
             const auto& weight { slots.find_ref(end_node).backtracking_weight };
             return std::make_pair(path, weight);
         }
@@ -256,6 +403,17 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
 
 
 
+    // TODO: Move these helper/factory functions to backtracker_utils.h and nest them inside a class?
+
+    /**
+     * Helper function that constructs an @ref offbynull::aligner::backtrackers::graph_backtracker::backtracker::backtracker instance
+     * utilizing the heap for storage / computations and invokes `find_max_path(g, edge_weight_accessor_)` on it.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @param g Directed graph.
+     * @param edge_weight_accessor_ Edge weight accessor for `g` (maps each edge to its weight).
+     * @return `find_max_path(g, edge_weight_accessor_)` result.
+     */
     template<bool debug_mode>
     auto heap_find_max_path(
         const readable_graph auto& g,
@@ -268,6 +426,23 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
         return backtracker<debug_mode, G, WEIGHT, EDGE_WEIGHT_ACCESSOR> {}.find_max_path(g, edge_weight_accessor_);
     }
 
+    /**
+     * Helper function that constructs an @ref offbynull::aligner::backtrackers::graph_backtracker::backtracker::backtracker instance
+     * utilizing the stack for storage / computations and invokes `find_max_path(g, edge_weight_accessor_)` on it.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam slot_container_heap_escape_size Maximum number of
+     *     @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container::slot_container slots allowed on the
+     *     stack before escaping to heap.
+     * @tparam ready_queue_heap_escape_size Maximum number of
+     *     @ref offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue::ready_queue queue elements allowed on the
+     *     stack before escaping to heap.
+     * @tparam path_container_heap_escape_size Maximum number of edges allowed on the stack before escaping
+     *     to heap (in a container holding a path) .
+     * @param g Directed graph.
+     * @param edge_weight_accessor_ Edge weight accessor for `g` (maps each edge to its weight).
+     * @return `find_max_path(g, edge_weight_accessor_)` result.
+     */
     template<
         bool debug_mode,
         std::size_t slot_container_heap_escape_size = 100zu,

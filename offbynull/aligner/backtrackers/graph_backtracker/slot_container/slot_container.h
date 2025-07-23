@@ -32,6 +32,14 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_heap_container_creator_pack
         ::slot_container_heap_container_creator_pack;
 
+    /**
+     * Container that tracks the backtracking algorithm's status for each node within a graph.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam WEIGHT Graph edge's weight type.
+     * @tparam CONTAINER_CREATOR_PACK Container factory type.
+     */
     template<
         bool debug_mode,
         readable_graph G,
@@ -69,6 +77,22 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
         // concepts checking to make sure things are default constructible / ::value_type isn't making it through?
         //
         // https://www.reddit.com/r/cpp_questions/comments/1d5z7sh/bizarre_requirement_of_stdinput_iterator/
+        /**
+         * Construct an @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container::slot_container instance.
+         *
+         * The behavior of this function is undefined if any of the following conditions are met:
+         *
+         *  * `begin` and `end` aren't from the same owner.
+         *  * `begin > end`.
+         *  * slots returned by `begin` / `end` point to nodes in some graph other than `g_`.
+         *
+         * @param g_ Graph.
+         * @param begin Start iterator containing slots for `g_` (elements must be initialized to each node within `g_`, where no node's
+         *     parents have been walked yet).
+         * @param end End iterator containing slots for `g_` (elements must be initialized to each node within `g_`, where no node's parents
+         *     have been walked yet).
+         * @param container_creator_pack Container factory.
+         */
         slot_container(
             const G& g_,
             /*input_iterator_of_type<slot<N, E, COUNT, WEIGHT>>*/ auto begin,
@@ -84,20 +108,54 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
             );
         }
 
+        // TODO: Instead of passing start and end iterators in the constructor above, directly initialize from g_?
+
+        /**
+         * Get index of slot assigned to some node.
+         *
+         * If no slot exists for `node`, the behavior of this function is undefined.
+         *
+         * @param node Node to find.
+         * @return Index of slot assigned to `node`.
+         */
         std::size_t find_idx(const N& node) {
             auto it { std::lower_bound(slots.begin(), slots.end(), node, slot_comparator<N, E, WEIGHT> {}) };
             return it - slots.begin();
         }
 
+        /**
+         * Get reference to slot assigned to some node.
+         *
+         * If no slot exists for `node`, the behavior of this function is undefined.
+         *
+         * @param node Node to find.
+         * @return Reference to slot assigned to `node`.
+         */
         slot<N, E, WEIGHT>& find_ref(const N& node) {
             auto it { std::lower_bound(slots.begin(), slots.end(), node, slot_comparator<N, E, WEIGHT> {}) };
             return *it;
         }
 
+        /**
+         * Get reference to slot at some index.
+         *
+         * If `idx`, the behaviour of this function undefined.
+         *
+         * @param idx Index of slot
+         * @return Reference to slot at `idx`.
+         */
         slot<N, E, WEIGHT>& at_idx(const std::size_t idx) {
             return slots[idx];
         }
 
+        /**
+         * Get index of and reference to slot assigned to some node.
+         *
+         * If no slot exists for `node`, the behavior of this function is undefined.
+         *
+         * @param node Node to find.
+         * @return Index of and reference to slot assigned to `node`.
+         */
         std::pair<std::size_t, slot<N, E, WEIGHT>&> find(const N& node) {
             auto it { std::lower_bound(slots.begin(), slots.end(), node, slot_comparator<N, E, WEIGHT> {}) };
             auto dist_from_beginning { std::ranges::distance(slots.begin(), it) };

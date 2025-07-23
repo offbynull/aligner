@@ -8,6 +8,15 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::edge_weight_acces
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_edge::backtrackable_edge;
 
+    /**
+     * Concept that's satisfied if `T` is a callable that accesses the weight of some graph edge (accepts a graph edge as its first/only
+     * argument and returns the weight of that edge). Similar to
+     * @ref offbynull::aligner::backtrackers::graph_backtracker::edge_weight_accessor::edge_weight_accessor but weight type is not strictly
+     * enforced.
+     *
+     * @tparam T Type to check.
+     * @tparam E Graph edge type.
+     */
     template<
         typename T,
         typename E

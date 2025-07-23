@@ -7,6 +7,12 @@
 namespace offbynull::aligner::backtrackers::graph_backtracker::backtrackable_node {
     using offbynull::concepts::unqualified_object_type;
 
+    /**
+     * Concept that's satisfied if `N` has the traits of graph node (as expected by the backtracking algorithm) and is an unqualified object
+     * type.
+     *
+     * @tparam N Type to check.
+     */
     template<typename N>
     concept backtrackable_node =
         unqualified_object_type<N>

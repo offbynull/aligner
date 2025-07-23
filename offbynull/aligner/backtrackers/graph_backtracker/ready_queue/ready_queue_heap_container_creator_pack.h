@@ -4,16 +4,26 @@
 #include <cstddef>
 #include <vector>
 #include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/unimplemented_ready_queue_container_creator_pack.h"
 
 namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_heap_container_creator_pack {
     using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_container_creator_pack
         ::ready_queue_container_creator_pack;
 
 
+    /**
+     * @ref offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_container_creator_pack::ready_queue_container_creator_pack
+     * that allocates its containers on the heap.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     */
     template<
         bool debug_mode
     >
     struct ready_queue_heap_container_creator_pack {
+        /**
+         * @copydoc offbynull::aligner::backtrackers::graph_backtracker::ready_queue::unimplemented_ready_queue_container_creator_pack::unimplemented_ready_queue_container_creator_pack::create_queue_container
+         */
         std::vector<std::size_t> create_queue_container() const {
             return {};
         }

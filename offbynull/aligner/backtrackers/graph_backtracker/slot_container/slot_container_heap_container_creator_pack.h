@@ -7,6 +7,7 @@
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/slot_container_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/graph_backtracker/slot_container/unimplemented_slot_container_container_creator_pack.h"
 
 namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_heap_container_creator_pack {
     using offbynull::aligner::concepts::weight;
@@ -16,6 +17,15 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack
         ::slot_container_container_creator_pack;
 
+    /**
+     * @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container_container_creator_pack::slot_container_container_creator_pack
+     * that allocates its containers on the heap.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam N Graph node type.
+     * @tparam E Graph edge type.
+     * @tparam WEIGHT Graph edge's weight type.
+     */
     template<
         bool debug_mode,
         backtrackable_node N,
@@ -23,6 +33,9 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
         weight WEIGHT
     >
     struct slot_container_heap_container_creator_pack {
+        /**
+         * @copydoc offbynull::aligner::backtrackers::graph_backtracker::slot_container::unimplemented_slot_container_container_creator_pack::unimplemented_slot_container_container_creator_pack::create_slot_container
+         */
         std::vector<
             slot<N, E, WEIGHT>
         > create_slot_container(auto begin, auto end) const {

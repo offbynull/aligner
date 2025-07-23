@@ -171,6 +171,7 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::variant': 'variant',
     'std::get_if': 'variant',
     'std::holds_alternative': 'variant',
+    'std::visit': 'variant',
     'std::strong_ordering': 'compare',
     'std::vector': 'vector',
     'std::deque': 'deque',
@@ -270,7 +271,7 @@ def check_line_length(path: Path, content: str):
                 or line.startswith('#define '):
             continue
         if len(line) > 140:
-            if line.strip().startswith('/** @copydoc'):
+            if line.strip().startswith('/** @copydoc') or line.strip().startswith('* @copydoc') or line.strip().startswith('* @ref'):
                 continue
             print(f'{path}: line exceeds 140 chars')
             result = CheckResult.FAIL

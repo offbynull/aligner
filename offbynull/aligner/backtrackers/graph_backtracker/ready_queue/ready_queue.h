@@ -3,22 +3,10 @@
 
 #include <cstddef>
 #include <utility>
+#include <stdexcept>
 #include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_container_creator_pack.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_heap_container_creator_pack.h"
 #include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_stack_container_creator_pack.h"
-
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
-START DOCUMENTING
 
 namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue {
     using offbynull::aligner::graph::graph::readable_graph;
@@ -29,7 +17,13 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue::read
     using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_stack_container_creator_pack
         ::ready_queue_stack_container_creator_pack;
 
-
+    /**
+     * Queue of nodes ready for processing (all parents have been processed).
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam CONTAINER_CREATOR_PACK Container factory type.
+     */
     template<
         bool debug_mode,
         readable_graph G,
@@ -42,20 +36,46 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue::read
         QUEUE_CONTAINER queue;
 
     public:
+        /**
+         * Construct an @ref offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue::ready_queue instance.
+         *
+         * @param container_creator_pack Container factory.
+         */
         ready_queue(
             CONTAINER_CREATOR_PACK container_creator_pack = {}
         )
         : queue { container_creator_pack.create_queue_container() } {}
 
+        /**
+         * Test if this queue is empty.
+         *
+         * @return `true` if empty, `false` otherwise.
+         */
         bool empty() {
             return queue.empty();
         }
 
+        /**
+         * Push node index (index that node resides in within the backtracker's container). A node should only be pushed once it's ready for
+         * processing (once all its parents have been processed).
+         *
+         * @param idx Node index.
+         */
         void push(std::size_t idx) {
             queue.push_back(idx);
         }
 
+        /**
+         * Pop node index. If this queue is empty, this function's behavior is undefined.
+         *
+         * @return Node index.
+         */
         std::size_t pop() {
+            if constexpr (debug_mode) {
+                if (queue.empty()) {
+                    throw std::runtime_error { "Queue empty" };
+                }
+            }
             auto ret { queue.back() };
             queue.pop_back();
             return ret;
