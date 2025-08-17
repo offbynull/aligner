@@ -9,7 +9,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::u
      */
     struct unimplemented_slot_container_container_creator_pack {
         /**
-         * Create random access container used to store slot elements.
+         * Create random access container used to store slots.
          *
          * The behavior of this function is undefined if `begin` and `end` aren't from the same owner or if `begin > end`.
          *

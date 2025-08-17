@@ -7,6 +7,7 @@
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/row_slot_container/slot.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_edge.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/row_slot_container/unimplemented_row_slot_container_container_creator_pack.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container
         ::row_slot_container_stack_container_creator_pack {
@@ -15,6 +16,16 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::concepts::weight;
     using offbynull::utils::static_vector_typer;
 
+    /**
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container_container_creator_pack::row_slot_container_container_creator_pack
+     * that allocates its containers on the stack.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam E Graph edge type.
+     * @tparam ED Graph edge data type (edge weight).
+     * @tparam grid_right_cnt Expected right dimension of the underlying sliceable pairwise alignment graph instance.
+     * @tparam grid_depth_cnt Expected depth dimension of the underlying sliceable pairwise alignment graph instance.
+     */
     template<
         bool debug_mode,
         backtrackable_edge E,
@@ -23,13 +34,20 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         std::size_t grid_depth_cnt
     >
     struct row_slot_container_stack_container_creator_pack {
+    private:
         static constexpr std::size_t max_elem_cnt { grid_right_cnt * grid_depth_cnt };
+
         using SEGMENT_CONTAINER_TYPE = typename static_vector_typer<
             debug_mode,
             slot<E, ED>,
             max_elem_cnt
         >::type;
-        SEGMENT_CONTAINER_TYPE create_slot_container(std::size_t grid_right_cnt_, std::size_t grid_depth_cnt_) const {
+
+    public:
+        /**
+         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::unimplemented_row_slot_container_container_creator_pack::unimplemented_row_slot_container_container_creator_pack
+         */
+        auto create_slot_container(std::size_t grid_right_cnt_, std::size_t grid_depth_cnt_) const {
             std::size_t cnt { grid_right_cnt_ * grid_depth_cnt_ };
             if constexpr (debug_mode) {
                 if (cnt > max_elem_cnt) {

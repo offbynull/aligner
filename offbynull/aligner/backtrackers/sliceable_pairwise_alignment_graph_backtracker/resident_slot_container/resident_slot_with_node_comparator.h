@@ -14,12 +14,29 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::concepts::weight;
 
+    /**
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_with_node::resident_slot_with_node
+     * comparator that compares the nodes of two slots against each other using the less-than operator.
+     *
+     * @tparam N Graph node type.
+     * @tparam E Graph edge type.
+     * @tparam WEIGHT Graph edge's weight type.
+     */
     template<
         backtrackable_node N,
         backtrackable_edge E,
         weight WEIGHT
     >
     struct resident_slot_with_node_comparator {
+        /**
+         * Compare two
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_with_node::resident_slot_with_node "slot"'s
+         * by applying the less-than operator on their nodes.
+         *
+         * @param lhs Left-hand side.
+         * @param rhs Right-hand side.
+         * @return `lhs.node < rhs.node`
+         */
         bool operator()(
             const resident_slot_with_node<N, E, WEIGHT>& lhs,
             const resident_slot_with_node<N, E, WEIGHT>& rhs
@@ -27,6 +44,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return lhs.node < rhs.node;
         }
 
+        /**
+         * Compare an
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_with_node::resident_slot_with_node "slot"'s
+         * node against a node object, by applying the less-than operator.
+         *
+         * @param lhs Left-hand side.
+         * @param rhs Right-hand side.
+         * @return `lhs.node < rhs`
+         */
         bool operator()(
             const resident_slot_with_node<N, E, WEIGHT>& lhs,
             const N& rhs
@@ -34,6 +60,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return lhs.node < rhs;
         }
 
+        /**
+         * Compare an
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_with_node::resident_slot_with_node "slot"'s
+         * node against a node object, by applying the less-than operator.
+         *
+         * @param lhs Left-hand side.
+         * @param rhs Right-hand side.
+         * @return `lhs < rhs.node`
+         */
         bool operator()(
             const N& lhs,
             const resident_slot_with_node<N, E, WEIGHT>& rhs

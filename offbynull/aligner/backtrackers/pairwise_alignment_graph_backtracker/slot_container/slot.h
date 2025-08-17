@@ -24,7 +24,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      * @link offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker backtracking algorithm's @endlink
      * status for that node: Either the backtracking algorithm has parent nodes that need to be processed before it can process this node,
      * or the backtracking algorithm has processed all parent nodes and this node as well (holding on to the incoming edge with the highest
-     * weight).
+     * accumulated weight).
      *
      * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
      *
@@ -42,9 +42,13 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         widenable_to_size_t PARENT_COUNT
     >
     struct slot {
+        /** Graph node this `slot` is assigned to. */
         N node;
+        /** Number of `node` parents that have yet to be walked. */
         PARENT_COUNT unwalked_parent_cnt;
+        /** Backtracking edge (value is valid only if `unwalked_parent_cnt == 0`). */
         E backtracking_edge;
+        /** Backtracking weight (value is valid only if `unwalked_parent_cnt == 0`). */
         ED backtracking_weight;
 
         /**

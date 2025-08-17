@@ -27,7 +27,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
     >
     struct slot_comparator {
         /**
-         * Compare two @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot "slot"'s by applying the
+         * Compare two @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot "slot"s by applying the
          * less-than operator on their nodes.
          *
          * @param lhs Left-hand side.

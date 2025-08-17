@@ -9,6 +9,7 @@
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_node.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_edge.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_slot_container/resident_slot_with_node.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_slot_container/unimplemented_resident_slot_container_container_creator_pack.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container
         ::resident_slot_container_heap_container_creator_pack {
@@ -19,6 +20,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::range_of_type;
 
+    /**
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container_container_creator_pack::row_slot_container_container_creator_pack
+     * that allocates its containers on the heap.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam N Graph node type.
+     * @tparam E Graph edge type.
+     * @tparam ED Graph edge data type (edge weight).
+     * @tparam minimize_allocations `true` to force `create_slot_container()` to immediately reserve the exact amount of memory needed for
+     *     the returned container, thereby removing/reducing the need for adhoc reallocations.
+     */
     template<
         bool debug_mode,
         backtrackable_node N,
@@ -27,6 +39,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         bool minimize_allocations
     >
     struct resident_slot_container_heap_container_creator_pack {
+        /**
+         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::unimplemented_resident_slot_container_container_creator_pack::unimplemented_resident_slot_container_container_creator_pack
+         */
         std::vector<resident_slot_with_node<N, E, ED>> create_slot_container(
             range_of_type<resident_slot_with_node<N, E, ED>> auto&& r
         ) const {

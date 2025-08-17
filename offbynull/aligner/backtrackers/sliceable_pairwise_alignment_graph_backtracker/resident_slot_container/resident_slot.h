@@ -11,12 +11,25 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::concepts::weight;
 
     PACK_STRUCT_START
+    /**
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::slot::slot for a node
+     * that's always required to be tracked by the
+     * @link offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker backtracking algorithm @endlink,
+     * referred to as a resident node.
+     *
+     * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
+     *
+     * @tparam E Graph edge type.
+     * @tparam WEIGHT Graph edge data type (edge weight).
+     */
     template<
         backtrackable_edge E,
         weight WEIGHT
     >
     struct resident_slot {
+        /** `true` if `slot_` has a valid value, `false` otherwise. */
         bool initialized;
+        /** Slot. */
         slot<E, WEIGHT> slot_;
     }
     PACK_STRUCT_STOP;

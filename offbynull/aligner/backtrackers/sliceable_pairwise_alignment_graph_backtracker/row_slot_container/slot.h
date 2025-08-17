@@ -9,16 +9,44 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::concepts::weight;
     using offbynull::utils::packable_optional;
 
+    // TODO: Change WEIGHT to ED? Everything else seems to be ED.
+
     PACK_STRUCT_START
+    /**
+     * Element within
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container::row_slot_container.
+     * A slot tracks the
+     * @link offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker backtracking algorithm's @endlink
+     * status for some node, holding on to the incoming edge with the highest accumulated weight.
+     *
+     * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
+     *
+     * @tparam E Graph edge type.
+     * @tparam WEIGHT Graph edge data type (edge weight).
+     */
     template<typename E, weight WEIGHT>
     struct slot {
+        /** Backtracking edge. */
         packable_optional<E> backtracking_edge;
+        /** Backtracking weight (value is valid only if `backtracking_edge` has a value). */
         WEIGHT backtracking_weight;
 
+        /**
+         * Construct an
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::slot::slot instance.
+         *
+         * @param backtracking_edge_ Backtracking edge.
+         * @param backtracking_weight_ Backtracking weight.
+         */
         slot(E backtracking_edge_, WEIGHT backtracking_weight_)
         : backtracking_edge { backtracking_edge_ }
         , backtracking_weight { backtracking_weight_ } {}
 
+        /**
+         * Construct an
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::slot::slot instance
+         * with default values. Unusable in this state, but useful in certain circumstances where a default constructor is needed.
+         */
         slot()
         : backtracking_edge { std::nullopt }
         , backtracking_weight {} {}

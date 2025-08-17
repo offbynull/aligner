@@ -168,7 +168,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         /**
          * Get reference to slot at some index.
          *
-         * If `idx`, the behaviour of this function undefined.
+         * If `idx`is out of bounds, the behaviour of this function undefined.
          *
          * @param idx Index of slot
          * @return Reference to slot at `idx`.
@@ -180,7 +180,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         /**
          * Get reference to slot at some index.
          *
-         * If `idx`, the behaviour of this function undefined.
+         * If `idx` is out of bounds, the behaviour of this function undefined.
          *
          * @param idx Index of slot
          * @return Reference to slot at `idx`.

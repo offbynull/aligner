@@ -6,6 +6,7 @@
 #include "offbynull/aligner/concepts.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/row_slot_container/slot.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_edge.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/row_slot_container/unimplemented_row_slot_container_container_creator_pack.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container
         ::row_slot_container_heap_container_creator_pack {
@@ -13,12 +14,23 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::concepts::weight;
 
+    /**
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container_container_creator_pack::row_slot_container_container_creator_pack
+     * that allocates its containers on the heap.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam E Graph edge type.
+     * @tparam ED Graph edge data type (edge weight).
+     */
     template<
         bool debug_mode,
         backtrackable_edge E,
         weight ED
     >
     struct row_slot_container_heap_container_creator_pack {
+        /**
+         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::unimplemented_row_slot_container_container_creator_pack::unimplemented_row_slot_container_container_creator_pack
+         */
         std::vector<slot<E, ED>> create_slot_container(std::size_t grid_right_cnt, std::size_t grid_depth_cnt) const {
             std::size_t cnt { grid_right_cnt * grid_depth_cnt };
             return std::vector<slot<E, ED>>(cnt);

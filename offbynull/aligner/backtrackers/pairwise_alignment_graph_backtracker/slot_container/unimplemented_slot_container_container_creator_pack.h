@@ -12,7 +12,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      */
     struct unimplemented_slot_container_container_creator_pack {
         /**
-         * Create random access container used to store slot elements.
+         * Create random access container used to store slots.
          *
          * @param grid_down_cnt Down dimension of the underlying pairwise alignment graph instance.
          * @param grid_right_cnt Right dimension of the underlying pairwise alignment graph instance.

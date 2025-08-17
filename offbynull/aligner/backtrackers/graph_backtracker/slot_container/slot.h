@@ -22,7 +22,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
      * @link offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker backtracking algorithm's @endlink status for that
      * node: Either the backtracking algorithm has parent nodes that need to be processed before it can process this node, or the
      * backtracking algorithm has processed all parent nodes and this node as well (holding on to the incoming edge with the highest
-     * weight).
+     * accumulated weight).
      *
      * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
      *

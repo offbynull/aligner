@@ -31,7 +31,7 @@ namespace offbynull::aligner::scorer::scorer {
             const std::optional<std::reference_wrapper<const DOWN_ELEM>> down_elem_ref_opt,
             const std::optional<std::reference_wrapper<const RIGHT_ELEM>> right_elem_ref_opt
         ) {
-            { t(edge, down_elem_ref_opt, right_elem_ref_opt) } -> std::same_as<WEIGHT>;
+            { t(edge, down_elem_ref_opt, right_elem_ref_opt) } -> std::same_as<WEIGHT>;  // TODO: Update to include sequence index
         }
         && unqualified_object_type<DOWN_ELEM>
         && unqualified_object_type<RIGHT_ELEM>

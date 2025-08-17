@@ -112,7 +112,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 g_,
                 container_creator_pack_
             };
-            while (ret.row_slots.grid_down_offset != target_row || ret.row_it != ret.row.end()) {
+            while (ret.row_slots.down_offset() != target_row || ret.row_it != ret.row.end()) {
                 ret.step_forward();
             }
             return ret;
@@ -153,11 +153,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 row_entry_.node = *row_it;
                 row_entry_.slot_ptr = &find(row_entry_.node);
             } else {
-                if (row_slots.grid_down_offset == g.grid_down_cnt - 1u) {
+                if (row_slots.down_offset() == g.grid_down_cnt - 1u) {
                     return;
                 }
                 row_slots.move_down();
-                row = g.row_nodes(row_slots.grid_down_offset);
+                row = g.row_nodes(row_slots.down_offset());
                 row_it = row.begin();
                 row_entry_.node = *row_it;
                 row_entry_.slot_ptr = &find(row_entry_.node);

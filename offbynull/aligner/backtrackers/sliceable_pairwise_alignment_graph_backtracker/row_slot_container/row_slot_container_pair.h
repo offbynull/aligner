@@ -18,6 +18,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container
         ::row_slot_container_heap_container_creator_pack::row_slot_container_heap_container_creator_pack;
 
+    /**
+     * Pair of
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container::row_slot_container
+     * instances, where containers are tracking adjacent rows.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam ROW_SLOT_CONTAINER_CONTAINER_CREATOR_PACK Container factory type (for internal
+     *      @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container::row_slot_container
+     *      instances).
+     */
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
@@ -31,6 +42,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         >
     >
     struct row_slot_container_pair {
+    private:
         using N = typename G::N;
         using E = typename G::E;
         using ND = typename G::ND;
@@ -43,12 +55,25 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         row_slot_container<debug_mode, G, ROW_SLOT_CONTAINER_CONTAINER_CREATOR_PACK>* current_slots;  // current row
         INDEX grid_down_offset;
 
+    public:
+        /**
+         * Construct an
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container_pair::row_slot_container_pair
+         * instance.
+         *
+         * Defaults to tracking nodes within first 2 rows of `g`. See `move_down()` to change tracked rows.
+         *
+         * @param g Graph.
+         * @param row_slot_container_creator_pack Container factory (for internal
+         *      @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container::row_slot_container
+         *      instances).
+         */
         row_slot_container_pair(
             const G& g,
-            ROW_SLOT_CONTAINER_CONTAINER_CREATOR_PACK container_creator_pack = {}
+            ROW_SLOT_CONTAINER_CONTAINER_CREATOR_PACK row_slot_container_creator_pack = {}
         )
-        : slots1 { g, container_creator_pack }
-        , slots2 { g, container_creator_pack }
+        : slots1 { g, row_slot_container_creator_pack }
+        , slots2 { g, row_slot_container_creator_pack }
         , previous_slots { &slots1 }
         , current_slots { &slots2 }
         , grid_down_offset { 0u } {}
@@ -56,6 +81,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         // Custom copy/move/copy assignment/move assigned because this class has raw pointer types as members. The default copy/assignment
         // will do a SHALLOW copy of these pointers, meaning they won't be pointing into the copy'd element_container (they'll instead be
         // pointing into the original element_container).
+        //
+        // No point in adding doxygen comments for these as it's obvious what they do.
         row_slot_container_pair(const row_slot_container_pair& other)
         : slots1 { other.slots1 }
         , slots2 { other.slots2 }
@@ -92,6 +119,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return *this;
         }
 
+        /**
+         * Move container pair down by 1 row. For example, if the current rows being tracked are 1 and 2, they'll be updated to rows 2 and 3
+         * after invoking this function.
+         *
+         * Once invoked, references to slots returned by `find()` are invalid for the lesser row (e.g. if moved from rows 1 and 2 to rows 2
+         * and 3, any references for row 1 will be invalid).
+         */
         void move_down() {
             ++grid_down_offset;
 
@@ -102,16 +136,31 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             current_slots->reset(grid_down_offset);
         }
 
+        /**
+         * Get reference to slot assigned to some node. Reference may become invalid once `move_down()` invoked.
+         *
+         * @param node Node to find.
+         * @return Reference to slot assigned to `node` if found, otherwise `std::nullopt`.
+         */
         std::optional<std::reference_wrapper<slot<E, ED>>> find(const N& node) {
             auto found_lower { current_slots->find(node) };
             if (found_lower.has_value()) {
-                return { found_lower };
+                return { found_lower };  // TODO: found_lower is already optional? Remove the braces here?
             }
             auto found_upper { previous_slots->find(node) };
             if (found_upper.has_value()) {
-                return { found_upper };
+                return { found_upper };  // TODO: found_upper is already optional? Remove the braces here?
             }
-            return { std::nullopt };
+            return { std::nullopt };  // TODO: braces needed here?
+        }
+
+        /**
+         * Get the lesser row index being tracked. For example, if the current rows being tracked are 1 and 2, this function returns 1.
+         *
+         * @return Lesser row index being tracked.
+         */
+        INDEX down_offset() const {
+            return grid_down_offset;
         }
     };
 }

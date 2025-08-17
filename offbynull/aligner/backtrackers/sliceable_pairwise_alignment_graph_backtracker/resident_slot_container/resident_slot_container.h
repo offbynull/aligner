@@ -28,6 +28,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container
         ::resident_slot::resident_slot;
 
+    /**
+     * Container of
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot::resident_slot "resident slots",
+     * used by
+     * @link offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker @endlink to track the
+     * backtracking state of nodes within graph which need their backtracking state constantly available.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam CONTAINER_CREATOR_PACK Container factory type.
+     */
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
@@ -59,6 +70,14 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         SLOT_CONTAINER slots;
 
     public:
+        /**
+         * Construct an
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_container::resident_slot_container
+         * instance.
+         *
+         * @param g Graph.
+         * @param container_creator_pack Container factory.
+         */
         resident_slot_container(
             const G& g,
             CONTAINER_CREATOR_PACK container_creator_pack = {}
@@ -77,6 +96,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             std::ranges::sort(slots.begin(), slots.end(), resident_slot_with_node_comparator<N, E, ED> {});
         }
 
+        /**
+         * Get reference to slot assigned to some node.
+         *
+         * @param node Node to find.
+         * @return Reference to slot assigned to `node` if found, otherwise `std::nullopt`.
+         */
         std::optional<std::reference_wrapper<resident_slot<E, ED>>> find(const N& node) {
             auto it {
                 std::lower_bound(

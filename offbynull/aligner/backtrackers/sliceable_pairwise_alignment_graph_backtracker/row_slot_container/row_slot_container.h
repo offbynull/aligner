@@ -29,6 +29,16 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::unqualified_object_type;
     using offbynull::utils::static_vector_typer;
 
+    /**
+     * Container of @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::slot "slots",
+     * used by
+     * @link offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker @endlink to track the
+     * backtracking state of each node within a specific row of a graph.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam CONTAINER_CREATOR_PACK Container factory type.
+     */
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
@@ -55,9 +65,19 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         INDEX grid_down;
 
     public:
+        /**
+         * Construct an
+         * @ref offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container::row_slot_container
+         * instance.
+         *
+         * Defaults to tracking nodes within first row of `g`. See `reset()` to change tracked row.
+         *
+         * @param g_ Graph.
+         * @param container_creator_pack Container factory.
+         */
         row_slot_container(
             const G& g_,
-            CONTAINER_CREATOR_PACK container_creator_pack= {}
+            CONTAINER_CREATOR_PACK container_creator_pack = {}
         )
         : g { g_ }
         , slots {
@@ -68,6 +88,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         }
         , grid_down {} {}
 
+        // TODO: Is it safe to assume this'll always return something valid? So we can skip the check and std::optional wrapper (or make the
+        //       check debug_mode constexpr)
+
+        /**
+         * Get reference to slot assigned to some node. Reference becomes invalid once `reset()` invoked.
+         *
+         * @param node Node to find.
+         * @return Reference to slot assigned to `node` if found, otherwise `std::nullopt`.
+         */
         std::optional<std::reference_wrapper<slot<E, ED>>> find(const N& node) {
             const auto& [down_offset, right_offset, depth] { g.node_to_grid_offset(node) };
             if (grid_down != down_offset) {
@@ -77,6 +106,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return { { slots[idx] } };
         }
 
+        /**
+         * Change tracked row to a different row within the same graph. Once invoked, references to slots returned by `find()` are invalid.
+         *
+         * If `grid_down_`is out of bounds, the behaviour of this function undefined.
+         *
+         * @param grid_down_ Row index.
+         */
         void reset(INDEX grid_down_) {
             this->grid_down = grid_down_;
         }
