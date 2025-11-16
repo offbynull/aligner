@@ -16,6 +16,16 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::unqualified_object_type;
 
+    /**
+    * Concept that's satisfied if `T` has the traits for creating the containers required by
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker,
+     * referred to as a container creator pack.
+     *
+     * @tparam T Type to check.
+     * @tparam N Graph node type.
+     * @tparam E Graph edge type.
+     * @tparam ED Graph edge data type (edge weight).
+     */
     template<
         typename T,
         typename N,

@@ -6,6 +6,7 @@
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_node.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_edge.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/forward_walker/forward_walker_stack_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/bidi_walker/unimplemented_bidi_walker_container_creator_pack.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker
         ::bidi_walker_stack_container_creator_pack {
@@ -15,6 +16,19 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         ::forward_walker_stack_container_creator_pack::forward_walker_stack_container_creator_pack;
     using offbynull::aligner::concepts::weight;
 
+    /**
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker_container_creator_pack::bidi_walker_container_creator_pack
+     * that allocates its containers on the stack.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam N Graph node type.
+     * @tparam E Graph edge type.
+     * @tparam ED Graph edge data type (edge weight).
+     * @tparam grid_right_cnt Expected right dimension of the underlying sliceable pairwise alignment graph instance.
+     * @tparam grid_depth_cnt Expected depth dimension of the underlying sliceable pairwise alignment graph instance.
+     * @tparam resident_nodes_capacity Of all nodes within the underlying pairwise alignment graph, the maximum number of nodes that are
+     *      resident nodes (can be higher than the maximum, but not lower).
+     */
     template<
         bool debug_mode,
         backtrackable_node N,
@@ -25,6 +39,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         std::size_t resident_nodes_capacity
     >
     struct bidi_walker_stack_container_creator_pack {
+        /**
+         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::unimplemented_bidi_walker_container_creator_pack::unimplemented_bidi_walker_container_creator_pack::create_forward_walker_container_creator_pack.
+         */
         forward_walker_stack_container_creator_pack<
             debug_mode,
             N,
@@ -37,6 +54,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return {};
         }
 
+        /**
+         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::unimplemented_bidi_walker_container_creator_pack::unimplemented_bidi_walker_container_creator_pack::create_backward_walker_container_creator_pack.
+         */
         forward_walker_stack_container_creator_pack<
             debug_mode,
             N,

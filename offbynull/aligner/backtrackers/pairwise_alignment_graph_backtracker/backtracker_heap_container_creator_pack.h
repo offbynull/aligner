@@ -35,7 +35,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      * @tparam SLOT_INDEX Slot indexer type. Must be wide enough to hold the value `grid_down_cnt * grid_right_cnt * grid_depth_cnt`
      *     (variables being multiplied are the dimensions of the underlying graph).
      * @tparam minimize_allocations `true` to force `create_ready_queue_container_creator_pack()` to create
-     *     @ref offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue::ready_queue` that's primed
+     *     @ref offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue::ready_queue that's primed
      *     with `grid_down_cnt * grid_right_cnt * grid_depth_cnt` reserved elements (variables being multiplied are the dimensions of the
      *     underlying pairwise alignment graph instance), thereby removing/reducing the need for adhoc reallocations.
      */

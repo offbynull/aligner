@@ -62,6 +62,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::unqualified_object_type;
 
+    /**
+     * Forward walker for @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph
+     * implementations. A forward walker walks the graph from the root node to some destination node, calculating the weight of the
+     * maximally-weighted path between those two nodes (path with the highest sum of edge weights).
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam CONTAINER_CREATOR_PACK Container factory type.
+     */
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
@@ -98,6 +107,19 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         row_entry<N, E, ED> row_entry_;
 
     public:
+        /**
+         * Create an @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker
+         * instance targeted at nodes within a specific row of the graph. For example, consider a scenario where `target_row` is 5. For each
+         * node N in `g`'s 5th row, the returned object will have the weight of the maximally-weighted path between the root node and N.
+         *
+         * The behavior of this function is undefined if `target_row` is past the final row within `g`.
+         *
+         * @param g_ Graph.
+         * @param target_row Row within `g`.
+         * @param container_creator_pack_ Container factory.
+         * @return @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker
+         *     instance primed to `g`'s `target_row` row.
+         */
         static forward_walker create_and_initialize(
             const G& g_,
             const INDEX target_row,
@@ -118,6 +140,19 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return ret;
         }
 
+        /**
+         * For the maximally-weighted path from the root node to `node` (path with the highest sum of edge weights), get the final edge of
+         * that path (last edge before reaching `node`) as well as the weight of that path.
+         *
+         * The behavior of this function is undefined if ...
+         *
+         *  * `node` doesn't exist within `g`.
+         *  * `node` is neither a node in the row targeted nor a resident node before the row targeted.
+         *
+         * @param node Node within graph. This node must be either a non-resident node within the row targeted or a resident node leading up
+         *     to the row targeted.
+         * @return Final edge within path and overall path weight (of maximally-weighted path between the root node and `node`).
+         */
         slot<E, ED>& find(const N& node) {
             auto found_resident { resident_slots.find(node) };
             if (found_resident.has_value()) {

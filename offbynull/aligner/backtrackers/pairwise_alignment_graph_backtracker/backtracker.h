@@ -39,21 +39,10 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
     /**
      * Backtracker for @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph implementations. A
-     * backtracker's purpose is to find the maximally weighted path (path with the highest sum of edge weights) between some directed
+     * backtracker's purpose is to find the maximally-weighted path (path with the highest sum of edge weights) between some directed
      * graph's root node and leaf node, picking an arbitrary one if there are multiple such paths. For a detailed explanation of the
      * backtracking algorithm, see
      * https://offbynull.com/docs/data/learn/Bioinformatics/output/output.html#H_Backtrack%20Algorithm.
-     *
-     * Note that @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph implementations are expected to
-     * restrict their structure (structure of directed graph). Specifically, the structure is expected ...
-     *
-     *  * to be acyclic.
-     *  * to be not empty.
-     *  * to have exactly one root node.
-     *  * to have exactly one leaf node.
-     *  * to be **grid-based** - nodes are positioned on a grid, where each node has a coordinate/position (X, Y, Z).
-     *
-     * This backtracker implementation assumes that the directed graph it's operating on meets the above expectations.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam G Graph type.
@@ -141,19 +130,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         : container_creator_pack { container_creator_pack_ } {}
 
         /**
-         * Determine the maximally weighted path (path with the highest sum of edge weights) connecting a directed graph's root node and
-         * leaf node.
-         *
-         * Note that @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph implementations are
-         * expected to restrict their structure (structure of directed graph). Specifically, the structure is expected ...
-         *
-         *  * to be acyclic.
-         *  * to be not empty.
-         *  * to have exactly one root node.
-         *  * to have exactly one leaf node.
-         *  * to be **grid-based** - nodes are positioned on a grid, where each node has a coordinate/position (X, Y, Z).
-         *
-         * The behavior of this function is undefined if `g` does not meet the above expectations.
+         * Determine the maximally-weighted path (path with the highest sum of edge weights) connecting a pairwise alignment graph's root
+         * node and leaf node.
          *
          * @param g Directed graph.
          * @return Maximally weighted path from `g`'s root node to `g`'s leaf node.

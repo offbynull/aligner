@@ -54,6 +54,15 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
      * sequence alignment is out of scope (if interested, see
      * https://offbynull.com/docs/data/learn/Bioinformatics/output/output.html#H_Sequence%20Alignment).
      *
+     * `G` must restrict its structure (structure of directed graph) to meet the restrictions of a pairwise alignment graph. Specifically,
+     * the graph must ...
+     *
+     *  * be acyclic.
+     *  * have at least one node (not empty).
+     *  * have exactly one root node.
+     *  * have exactly one leaf node.
+     *  * be **grid-based** - nodes are positioned on a grid, where each node has a coordinate/position (X, Y, Z).
+     *
      * `G` must provide several members (see @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph).
      * Given a background in graph theory and alignment graphs, most of these should be self-explanatory just from the name and concept
      * restrictions. Note that, although many member variables seem useless, those member variables are ...
