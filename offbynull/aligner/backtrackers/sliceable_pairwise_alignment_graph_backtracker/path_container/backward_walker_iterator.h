@@ -7,18 +7,25 @@
 #include <iterator>
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::backward_walker_iterator {
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::element::element;
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
 
-    template<readable_sliceable_pairwise_alignment_graph G>
+    /**
+     * Iterator that walks the edges of an
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container::path_container
+     * in reverse.
+     *
+     * @tparam E Graph edge type.
+     */
+    template<backtrackable_edge E>
     class backward_walker_iterator {
     private:
-        using N = typename G::N;
-        using E = typename G::E;
-
         element<E>* current;
 
     public:
+        // No point in documenting anything here. This is the interface for a forward iterator?
+
         using difference_type = std::ptrdiff_t;
         using value_type = E;
         using pointer = value_type*;

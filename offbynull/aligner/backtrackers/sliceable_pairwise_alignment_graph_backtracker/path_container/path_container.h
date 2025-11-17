@@ -1,7 +1,6 @@
 #ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_PATH_CONTAINER_PATH_CONTAINER_H
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_PATH_CONTAINER_PATH_CONTAINER_H
 
-#include "offbynull/utils.h"
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/element.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/backward_walker_range.h"
@@ -22,6 +21,14 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container
         ::path_container_heap_container_creator_pack::path_container_heap_container_creator_pack;
 
+    /**
+     * Path within an
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam CONTAINER_CREATOR_PACK Container factory type.
+     */
     template<
         bool debug_mode,
         readable_sliceable_pairwise_alignment_graph G,
@@ -44,6 +51,14 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         std::size_t next_idx;
 
     public:
+        /**
+         * Construct an
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container::path_container
+         * object primed with an empty path.
+         *
+         * @param g Graph.
+         * @param container_creator_pack Container factory.
+         */
         path_container(
             const G& g,
             CONTAINER_CREATOR_PACK container_creator_pack = {}
@@ -58,6 +73,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         // Custom copy/move/copy assignment/move assigned because this class has raw pointer types as members. The default copy/assignment
         // will do a SHALLOW copy of these pointers, meaning they won't be pointing into the copy'd element_container (they'll instead be
         // pointing into the original element_container).
+
+        // No doxygen docs for function below as it's self-explanatory (e.g., move constructor, copy constructor, move assignment...).
         path_container(const path_container& other)
         : element_container { other.element_container }
         , head { other.head == nullptr ? nullptr : &element_container[other.head - &(other.element_container[0zu])] }
@@ -72,6 +89,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             }
         }
 
+        // No doxygen docs for function below as it's self-explanatory (e.g., move constructor, copy constructor, move assignment...).
         path_container(path_container&& other) noexcept
         : element_container { other.element_container }
         , head { other.head == nullptr ? nullptr : &element_container[other.head - &(other.element_container[0zu])] }
@@ -89,6 +107,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             other.next_idx = 0zu;
         }
 
+        // No doxygen docs for function below as it's self-explanatory (e.g., move constructor, copy constructor, move assignment...).
         path_container& operator=(const path_container& other) {
             if (this != &other) { // guard against self-assignment
                 element_container = other.element_container;
@@ -106,6 +125,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return *this;
         }
 
+        // No doxygen docs for function below as it's self-explanatory (e.g., move constructor, copy constructor, move assignment...).
         path_container& operator=(path_container&& other) noexcept {
             if (this != &other) { // guard against self-assignment
                 element_container = other.element_container;
@@ -126,6 +146,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return *this;
         }
 
+        /**
+         * Insert the first edge into this path container.
+         *
+         * The behavior of this function is undefined if ...
+         *
+         *  * this path container already contains edges.
+         *  * the number of edges this path container can hold is 0.
+         *
+         * @param backtracking_edge Graph edge.
+         * @return This path container's element for representing `backtracking_edge`.
+         */
         element<E>* initialize(const E& backtracking_edge) {
             if constexpr (debug_mode) {
                 if (next_idx != 0zu) {
@@ -144,6 +175,19 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return entry;
         }
 
+        /**
+         * Insert an edge before `entry`.
+         *
+         * The behavior of this function is undefined if ...
+         *
+         *  * this path container has not been initialized.
+         *  * this path container already contains the maximum number of edges that it can hold.
+         *  * `entry` belongs to some other path container.
+         *
+         * @param entry Existing edge element in this path container.
+         * @param backtracking_edge Edge to inject before `entry`.
+         * @return This path container's element for representing `backtracking_edge`.
+         */
         element<E>* push_prefix(element<E>* entry, const E& backtracking_edge) {
             if constexpr (debug_mode) {
                 if (next_idx == 0zu) {
@@ -170,6 +214,19 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return prefix_entry;
         }
 
+        /**
+         * Insert an edge after `entry`.
+         *
+         * The behavior of this function is undefined if ...
+         *
+         *  * this path container has not been initialized.
+         *  * this path container already contains the maximum number of edges that it can hold.
+         *  * `entry` belongs to some other path container.
+         *
+         * @param entry Existing edge element in this path container.
+         * @param backtracking_edge Edge to inject before `entry`.
+         * @return This path container's element for representing `backtracking_edge`.
+         */
         element<E>* push_suffix(element<E>* entry, const E& backtracking_edge) {
             if constexpr (debug_mode) {
                 if (next_idx == 0zu) {
@@ -196,8 +253,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return suffix_entry;
         }
 
+        /**
+         * Get range that walks the edges contained in this path container, in reverse.
+         *
+         * @return Range that walks stored edges in reverse.
+         */
         std::ranges::forward_range auto walk_path_backward() {
-            return backward_walker_range<G> { head, tail };
+            return backward_walker_range<E> { head, tail };
         }
     };
 }

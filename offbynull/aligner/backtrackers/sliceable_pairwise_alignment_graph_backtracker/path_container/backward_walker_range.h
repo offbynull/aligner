@@ -6,20 +6,32 @@
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/backward_walker_iterator.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::backward_walker_range {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::element::element;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::backward_walker_iterator
         ::backward_walker_iterator;
 
-    template<readable_sliceable_pairwise_alignment_graph G>
+    /**
+     * Range exposing the edges of an
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container::path_container
+     * in reverse.
+     *
+     * @tparam E Graph edge type.
+     */
+    template<backtrackable_edge E>
     struct backward_walker_range {
     private:
-        using E = typename G::E;
-
         element<E>* head;
         element<E>* tail;
 
     public:
+        /**
+         * Construct an
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::backward_walker_range::backward_walker_range.
+         *
+         * @param head_ First element (edge) in the path container.
+         * @param tail_ Last element (edge) in the same path container as `head_`.
+         */
         backward_walker_range(
             element<E>* head_,
             element<E>* tail_
@@ -27,12 +39,14 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         : head { head_ }
         , tail { tail_ } {}
 
-        backward_walker_iterator<G> begin() const {
-            return backward_walker_iterator<G> { tail };
+        // No point in documenting anything below here. These are the barebones functions required by a range?
+
+        backward_walker_iterator<E> begin() const {
+            return backward_walker_iterator<E> { tail };
         }
 
-        backward_walker_iterator<G> end() const {
-            return backward_walker_iterator<G> { nullptr };
+        backward_walker_iterator<E> end() const {
+            return backward_walker_iterator<E> { nullptr };
         }
     };
 }
