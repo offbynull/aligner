@@ -17,13 +17,13 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::unqualified_object_type;
     using offbynull::helpers::join_bidirectional_view::join_bidirectional_view_adaptor;
-    using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph;
     using offbynull::aligner::graph::pairwise_alignment_graph::unimplemented_pairwise_alignment_graph;
     using offbynull::aligner::graph::graph::node;
     using offbynull::aligner::graph::graph::edge;
 
     /**
-     * An @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph extended to support the
+     * An @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph extended to support the
      * divide-and-conquer pairwise sequence alignment algorithm. The divide-and-conquer algorithm reduces memory usage at the expense of
      * increased computation (some calculations are repeated multiple times). The general idea is to recursively subdivide the alignment
      * graph, re-walking ever smaller portions of the graph, until the entire alignment path is retrieved.
@@ -80,9 +80,9 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
      * @tparam G Type to check.
      */
     template <typename G>
-    concept readable_sliceable_pairwise_alignment_graph =
+    concept sliceable_pairwise_alignment_graph =
         unqualified_object_type<G>
-        && readable_pairwise_alignment_graph<G>
+        && pairwise_alignment_graph<G>
         && requires(
             G g,
             typename G::N node,
@@ -99,7 +99,7 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
         };
 
     /**
-     * Unimplemented @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph,
+     * Unimplemented @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph,
      * intended for documentation.
      *
      * @tparam N_ Node identifier type, used to lookup nodes.
@@ -198,8 +198,8 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
     // Reference implementation for row_nodes()
     // ----------------------------------------
     // You can either ...
-    // 1. have the readable_sliceable_pairwise_alignment_graph's row_nodes() function call into this function
-    // 2. write a custom implementation for the readable_sliceable_pairwise_alignment_graph's row_nodes() (typically more optimized than)
+    // 1. have the sliceable_pairwise_alignment_graph's row_nodes() function call into this function
+    // 2. write a custom implementation for the sliceable_pairwise_alignment_graph's row_nodes() (typically more optimized than)
     //    and test against this to ensure things are working correctly.
     /**
      * List nodes in a slice (row) as if this `g`'s root node and leaf node are actually `root_node` and `leaf_node` respectively. That
@@ -217,7 +217,7 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
      */
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        sliceable_pairwise_alignment_graph G
     >
     std::ranges::bidirectional_range auto generic_row_nodes(
         const G& g,
@@ -260,7 +260,7 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
      */
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        sliceable_pairwise_alignment_graph G
     >
     std::ranges::bidirectional_range auto generic_row_nodes(
         const G& g,

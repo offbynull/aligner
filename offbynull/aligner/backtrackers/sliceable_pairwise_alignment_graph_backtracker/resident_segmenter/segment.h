@@ -10,7 +10,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     PACK_STRUCT_START
     /**
-     * A segment of an @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph which
+     * A segment of an @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph which
      * is uninterrupted by connections from / to resident nodes. That is, ...
      *
      *  * the segment's root node can have incoming edges from resident nodes, but not outgoing edges to resident nodes.

@@ -26,7 +26,7 @@
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker
         ::forward_walker_container_creator_pack::forward_walker_container_creator_pack;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker
@@ -63,7 +63,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::unqualified_object_type;
 
     /**
-     * Forward walker for @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph
+     * Forward walker for @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph
      * implementations. A forward walker walks the graph from the root node to some destination node, calculating the weight of the
      * maximally-weighted path between those two nodes (path with the highest sum of edge weights).
      *
@@ -73,7 +73,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      */
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
+        sliceable_pairwise_alignment_graph G,
         forward_walker_container_creator_pack<
             typename G::N,
             typename G::E,

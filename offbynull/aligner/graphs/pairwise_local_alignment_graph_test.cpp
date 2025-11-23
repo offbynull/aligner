@@ -39,8 +39,8 @@ namespace {
             decltype(gap_scorer),
             decltype(freeride_scorer)
         >;
-        static_assert(offbynull::aligner::graph::graph::readable_graph<G>);
-        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph<G>);
+        static_assert(offbynull::aligner::graph::graph::graph<G>);
+        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph<G>);
     }
 
     TEST(OAGPairwiseLocalAlignmentGraphTest, ListNodes) {

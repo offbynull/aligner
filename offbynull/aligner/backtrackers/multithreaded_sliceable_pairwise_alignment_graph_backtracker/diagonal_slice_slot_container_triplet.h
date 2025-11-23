@@ -14,7 +14,7 @@
 
 namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker
         ::diagonal_slice_slot_container_triplet {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::slot::slot;
@@ -50,7 +50,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
+        sliceable_pairwise_alignment_graph G,
         diagonal_slice_slot_container_container_creator_pack<
             typename G::E,
             typename G::ED

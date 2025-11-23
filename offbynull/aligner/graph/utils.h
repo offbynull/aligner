@@ -9,8 +9,8 @@
 #include "offbynull/aligner/graph/graph.h"
 
 namespace offbynull::aligner::graph::utils {
-    using offbynull::aligner::graph::graph::readable_graph;
-    using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::graph::graph;
+    using offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph;
 
     /**
      * Escape an identifier for inclusion into GraphViz script.
@@ -58,7 +58,7 @@ namespace offbynull::aligner::graph::utils {
     }
 
     /**
-     * Convert an @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph to a GraphViz script. Each
+     * Convert an @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph to a GraphViz script. Each
      * node is converted to a string via `n_encoder` and placed into the GraphViz script at its position within `g` multiplied by
      * `spacing` and offset by `depth*depth_offset`. For example, given an invocation with `scaling=10` and `depth_offset=2`, the node
      * at ...
@@ -75,7 +75,7 @@ namespace offbynull::aligner::graph::utils {
      * @param depth_offset Scaling factor to apply to each node's depth (after applying by `spacing`) when inserting into GraphViz.
      * @return GraphViz script.
      */
-    template<readable_pairwise_alignment_graph G, typename N_ENCODER>
+    template<pairwise_alignment_graph G, typename N_ENCODER>
     requires requires(const N_ENCODER& n_encoder, const typename G::N& n) {
         { n_encoder(n) } -> std::convertible_to<std::string>;
     }
@@ -118,7 +118,7 @@ namespace offbynull::aligner::graph::utils {
     }
 
     /**
-     * Convert an @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph to a GraphViz script. Each
+     * Convert an @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph to a GraphViz script. Each
      * node is converted to a string via `std::format` and placed into the GraphViz script at its position within `g` multiplied by
      * `spacing` and offset by `depth*depth_offset`. For example, given an invocation with `scaling=10` and `depth_offset=2`, the node
      * at ...
@@ -133,7 +133,7 @@ namespace offbynull::aligner::graph::utils {
      * @param depth_offset Scaling factor to apply to each node's depth (after applying by `spacing`) when inserting into GraphViz.
      * @return GraphViz script.
      */
-    template<readable_pairwise_alignment_graph G>
+    template<pairwise_alignment_graph G>
     requires requires(const typename G::N& n) {
         { std::format("{}", n) } -> std::convertible_to<std::string>;
     }
@@ -157,7 +157,7 @@ namespace offbynull::aligner::graph::utils {
     }
 
     /**
-     * Convert an @ref offbynull::aligner::graph::graph::readable_graph to a GraphViz script. Each node is converted to a
+     * Convert an @ref offbynull::aligner::graph::graph::graph to a GraphViz script. Each node is converted to a
      * string via `n_encoder` and placed into the GraphViz script at whatever position the dot layout engine deems best.
      *
      * @tparam G Graph type.
@@ -166,7 +166,7 @@ namespace offbynull::aligner::graph::utils {
      * @param n_encoder Node ID encoder callable.
      * @return GraphViz script.
      */
-    template<readable_graph G, typename N_ENCODER>
+    template<graph G, typename N_ENCODER>
     requires requires(const N_ENCODER& n_encoder, const typename G::N& n) {
         { n_encoder(n) } -> std::convertible_to<std::string>;
     }
@@ -203,14 +203,14 @@ namespace offbynull::aligner::graph::utils {
     }
 
     /**
-     * Convert an @ref offbynull::aligner::graph::graph::readable_graph to a GraphViz script. Each node is converted to a
+     * Convert an @ref offbynull::aligner::graph::graph::graph to a GraphViz script. Each node is converted to a
      * string via `std::format` and placed into the GraphViz script at whatever position the dot layout engine deems best.
      *
      * @tparam G Graph type.
      * @param g Graph.
      * @return GraphViz script.
      */
-    template<readable_graph G>
+    template<graph G>
     std::string graph_to_graphviz(
         const G &g
     ) {

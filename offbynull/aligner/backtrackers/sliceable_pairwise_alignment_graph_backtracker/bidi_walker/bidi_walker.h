@@ -15,7 +15,7 @@
 #include "offbynull/aligner/graphs/reversed_sliceable_pairwise_alignment_graph.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtrackable_node::backtrackable_node;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker
@@ -28,7 +28,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     /**
      * Bidirectional walker for
-     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph implementations. A
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph implementations. A
      * bidirectional walker walks the graph in two directions, converging on some node N:
      *
      *  * Walk from the root node to N.
@@ -43,7 +43,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      */
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
+        sliceable_pairwise_alignment_graph G,
         bidi_walker_container_creator_pack<
             typename G::N,
             typename G::E,

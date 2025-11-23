@@ -16,13 +16,13 @@
 namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph {
     using offbynull::aligner::graphs::prefix_sliceable_pairwise_alignment_graph::prefix_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graphs::suffix_sliceable_pairwise_alignment_graph::suffix_sliceable_pairwise_alignment_graph;
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::concepts::weight;
 
     /**
      * View into an existing
-     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph, where the view
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph, where the view
      * is isolated to some portion starting from some arbitrary node and ending at some other arbitrary node that's further down (or the
      * same as the starting node).
      *
@@ -31,7 +31,7 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
      */
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        sliceable_pairwise_alignment_graph G
     >
     class middle_sliceable_pairwise_alignment_graph {
     public:
@@ -289,7 +289,7 @@ namespace offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph 
         bool debug_mode
     >
     auto create_middle_sliceable_pairwise_alignment_graph(
-        const readable_sliceable_pairwise_alignment_graph auto& g,
+        const sliceable_pairwise_alignment_graph auto& g,
         const typename std::remove_cvref_t<decltype(g)>::N& new_root_node,
         const typename std::remove_cvref_t<decltype(g)>::N& new_leaf_node
     ) {

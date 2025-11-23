@@ -22,7 +22,7 @@
 namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container {
     using offbynull::aligner::concepts::weight;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::aligner::graph::graph::readable_graph;
+    using offbynull::aligner::graph::graph::graph;
     using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_node::backtrackable_node;
     using offbynull::aligner::backtrackers::graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot;
@@ -44,7 +44,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
      */
     template<
         bool debug_mode,
-        readable_graph G,
+        graph G,
         weight WEIGHT,
         slot_container_container_creator_pack<
             typename G::N,

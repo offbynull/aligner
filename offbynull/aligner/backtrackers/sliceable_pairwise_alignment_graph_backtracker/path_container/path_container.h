@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::element::element;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::backward_walker_range
         ::backward_walker_range;
@@ -23,7 +23,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     /**
      * Path within an
-     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph.
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam G Graph type.
@@ -31,7 +31,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      */
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
+        sliceable_pairwise_alignment_graph G,
         path_container_container_creator_pack<
             typename G::E
         > CONTAINER_CREATOR_PACK = path_container_heap_container_creator_pack<

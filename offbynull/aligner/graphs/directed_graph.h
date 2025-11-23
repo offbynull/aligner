@@ -18,7 +18,7 @@ namespace offbynull::aligner::graphs::directed_graph {
     using offbynull::concepts::unqualified_object_type;
 
     /**
-     * @ref offbynull::aligner::graph::graph::readable_graph implementation that is *not immutable* (can be modified).
+     * @ref offbynull::aligner::graph::graph::graph implementation that is *not immutable* (can be modified).
      * 
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam N_ Node identifier type, used to lookup nodes.

@@ -24,8 +24,8 @@ namespace offbynull::aligner::aligner {
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::backtrack::backtrack::backtracker;
     using offbynull::aligner::backtrack::slot_container::slot;
-    using offbynull::aligner::graph::graph::readable_graph;
-    using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::graph::graph;
+    using offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph;
     using offbynull::aligner::graphs::pairwise_global_alignment_graph::pairwise_global_alignment_graph;
     using offbynull::aligner::graphs::pairwise_local_alignment_graph::pairwise_local_alignment_graph;
     using offbynull::aligner::graphs::pairwise_fitting_alignment_graph::pairwise_fitting_alignment_graph;
@@ -44,7 +44,7 @@ namespace offbynull::aligner::aligner {
         bool debug_mode
     >
     auto align_heap(
-        readable_pairwise_alignment_graph auto& graph,
+        pairwise_alignment_graph auto& graph,
         std::ranges::random_access_range auto&& v,
         std::ranges::random_access_range auto&& w
     ) {
@@ -330,7 +330,7 @@ namespace offbynull::aligner::aligner {
         bool debug_mode
     >
     auto align_stack(
-        readable_pairwise_alignment_graph auto& graph,
+        pairwise_alignment_graph auto& graph,
         std::ranges::random_access_range auto&& v,
         std::ranges::random_access_range auto&& w
     ) {

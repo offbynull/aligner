@@ -61,8 +61,8 @@ namespace {
 
     TEST(OAGReversedSliceablePairwiseAlignmentGraphTest, ConceptCheck) {
         using G = decltype(graph_bundle { "a", "ac" }.reversed_g);
-        static_assert(offbynull::aligner::graph::graph::readable_graph<G>);
-        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph<G>);
+        static_assert(offbynull::aligner::graph::graph::graph<G>);
+        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph<G>);
     }
 
     TEST(OAGReversedSliceablePairwiseAlignmentGraphTest, ListNodes) {

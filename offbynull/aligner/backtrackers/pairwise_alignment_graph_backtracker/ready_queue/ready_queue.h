@@ -12,7 +12,7 @@
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue {
-    using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue_container_creator_pack
         ::ready_queue_container_creator_pack;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue_heap_container_creator_pack
@@ -26,7 +26,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
     /**
      * Queue of node positions within an
-     * @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph::readable_pairwise_alignment_graph,
+     * @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph::pairwise_alignment_graph,
      * referred to as a "ready queue" because it's used by the
      * @link offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker backtracking algorithm @endlink
      * to track which nodes withing a graph are ready for processing (a node is ready for processing once all of its parents have been
@@ -40,7 +40,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      */
     template<
         bool debug_mode,
-        readable_pairwise_alignment_graph G,
+        pairwise_alignment_graph G,
         widenable_to_size_t SLOT_INDEX,
         ready_queue_container_creator_pack<
             SLOT_INDEX

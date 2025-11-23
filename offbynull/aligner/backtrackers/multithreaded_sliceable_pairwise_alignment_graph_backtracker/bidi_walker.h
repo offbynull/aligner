@@ -20,7 +20,7 @@
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::bidi_walker {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker;
@@ -130,7 +130,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
+        sliceable_pairwise_alignment_graph G,
         bidi_walker_container_creator_pack<
             typename G::N,
             typename G::E,

@@ -25,7 +25,7 @@ diagonal_slice_slot_container_triplet.h"
 namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::forward_walker {
     using offbynull::helpers::forkable_thread_pool::forkable_thread_pool;
     using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph
-        ::readable_multithreaded_sliceable_pairwise_alignment_graph;
+        ::multithreaded_sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_edge;
@@ -69,7 +69,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
 
     template<
         bool debug_mode,
-        readable_multithreaded_sliceable_pairwise_alignment_graph G
+        multithreaded_sliceable_pairwise_alignment_graph G
     >
     class forward_walker_task {
     private:
@@ -151,7 +151,7 @@ namespace offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_ali
 
     template<
         bool debug_mode,
-        readable_multithreaded_sliceable_pairwise_alignment_graph G,
+        multithreaded_sliceable_pairwise_alignment_graph G,
         forward_walker_container_creator_pack<
             typename G::N,
             typename G::E,

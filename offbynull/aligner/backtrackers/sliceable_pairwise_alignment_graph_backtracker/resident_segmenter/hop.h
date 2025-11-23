@@ -11,7 +11,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     /**
      * An edge connecting two
      * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment::segment "segments"
-     * within the same @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph. The
+     * within the same @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph. The
      * edge making up a hop has at least one of its nodes as a resident node. That is, ...
      *
      *  * either the source node is a resident node.

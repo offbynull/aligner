@@ -23,7 +23,7 @@
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::hop::hop;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment::segment;
@@ -51,7 +51,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
+        sliceable_pairwise_alignment_graph G,
         backtracker_container_creator_pack<
             typename G::N,
             typename G::E,
@@ -147,7 +147,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         bool minimize_allocations
     >
     auto heap_find_max_path(
-        const readable_sliceable_pairwise_alignment_graph auto& g,
+        const sliceable_pairwise_alignment_graph auto& g,
         typename std::remove_cvref_t<decltype(g)>::ED final_weight_comparison_tolerance
     ) {
         using G = std::remove_cvref_t<decltype(g)>;
@@ -172,7 +172,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         std::size_t path_edge_capacity
     >
     auto stack_find_max_path(
-        const readable_sliceable_pairwise_alignment_graph auto& g,
+        const sliceable_pairwise_alignment_graph auto& g,
         typename std::remove_cvref_t<decltype(g)>::ED final_weight_comparison_tolerance
     ) {
         using G = std::remove_cvref_t<decltype(g)>;

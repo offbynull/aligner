@@ -27,7 +27,7 @@
 #include "offbynull/utils.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::resident_segmenter {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::hop::hop;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment::segment;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter
@@ -57,7 +57,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::utils::static_vector_typer;
 
     /**
-     * Splits an @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph into
+     * Splits an @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph into
      * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment::segment "segments"
      * and @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::hop::hop "hops". A ...
      *
@@ -65,7 +65,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      *  * hop is an edge connecting two segments, where one or both ends of the edge are resident nodes.
      *
      * A maximally-weighted path through the
-     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph is guaranteed to
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph is guaranteed to
      * travel through the combination of segments and hops found by this class.
      *
      * ```
@@ -115,7 +115,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      */
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G,
+        sliceable_pairwise_alignment_graph G,
         resident_segmenter_container_creator_pack<
             typename G::N,
             typename G::E,

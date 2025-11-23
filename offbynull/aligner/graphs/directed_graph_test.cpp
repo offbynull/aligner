@@ -13,7 +13,7 @@ namespace {
 
     TEST(OAGDirectedGraphTest, ConceptCheck) {
         using G = directed_graph<is_debug_mode(), std::string, std::string, std::string, std::string>;
-        static_assert(offbynull::aligner::graph::graph::readable_graph<G>);
+        static_assert(offbynull::aligner::graph::graph::graph<G>);
     }
 
     TEST(OAGDirectedGraphTest, InsertNodesAndEdges) {

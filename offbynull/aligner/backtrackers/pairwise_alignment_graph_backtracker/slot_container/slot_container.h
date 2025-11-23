@@ -21,7 +21,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     using offbynull::concepts::random_access_range_of_type;
     using offbynull::concepts::unqualified_object_type;
     using offbynull::concepts::widenable_to_size_t;
-    using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot::slot;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container_container_creator_pack
         ::slot_container_container_creator_pack;
@@ -41,7 +41,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      */
     template<
         bool debug_mode,
-        readable_pairwise_alignment_graph G,
+        pairwise_alignment_graph G,
         widenable_to_size_t PARENT_COUNT,
         slot_container_container_creator_pack<
             typename G::N,

@@ -13,13 +13,13 @@
 #include "offbynull/aligner/concepts.h"
 
 namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_graph {
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_graph::axis;
     using offbynull::aligner::concepts::weight;
 
     /**
      * View into an existing
-     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph, where the view
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph, where the view
      * reverses all edges (root node becomes leaf node and vice versa).
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
@@ -27,7 +27,7 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
      */
     template<
         bool debug_mode,
-        readable_sliceable_pairwise_alignment_graph G
+        sliceable_pairwise_alignment_graph G
     >
     class reversed_sliceable_pairwise_alignment_graph {
     public:
@@ -290,7 +290,7 @@ namespace offbynull::aligner::graphs::reversed_sliceable_pairwise_alignment_grap
         bool debug_mode
     >
     auto create_reversed_sliceable_pairwise_alignment_graph(
-        const readable_sliceable_pairwise_alignment_graph auto& g
+        const sliceable_pairwise_alignment_graph auto& g
     ) {
         using G = std::remove_cvref_t<decltype(g)>;
         return reversed_sliceable_pairwise_alignment_graph<debug_mode, G> { g };

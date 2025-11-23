@@ -22,7 +22,7 @@
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker {
-    using offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtrackable_node::backtrackable_node;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtrackable_edge::backtrackable_edge;
     using offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::backtracker_container_creator_pack
@@ -38,7 +38,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     using offbynull::concepts::widenable_to_size_t;
 
     /**
-     * Backtracker for @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph implementations. A
+     * Backtracker for @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph implementations. A
      * backtracker's purpose is to find the maximally-weighted path (path with the highest sum of edge weights) between some directed
      * graph's root node and leaf node, picking an arbitrary one if there are multiple such paths. For a detailed explanation of the
      * backtracking algorithm, see
@@ -55,7 +55,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      */
     template<
         bool debug_mode,
-        readable_pairwise_alignment_graph G,
+        pairwise_alignment_graph G,
         widenable_to_size_t PARENT_COUNT,
         widenable_to_size_t SLOT_INDEX,
         backtracker_container_creator_pack<
@@ -307,7 +307,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         bool minimize_allocations
     >
     auto heap_find_max_path(
-        const readable_pairwise_alignment_graph auto& g
+        const pairwise_alignment_graph auto& g
     ) {
         using G = std::remove_cvref_t<decltype(g)>;
         return backtracker<
@@ -355,7 +355,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         std::size_t path_edge_capacity
     >
     auto stack_find_max_path(
-        const readable_pairwise_alignment_graph auto& g
+        const pairwise_alignment_graph auto& g
     ) {
         using G = std::remove_cvref_t<decltype(g)>;
         using N = typename G::N;

@@ -10,7 +10,7 @@
 
 namespace offbynull::aligner::scorer::scorer {
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::concepts::unqualified_object_type;
 
     /**

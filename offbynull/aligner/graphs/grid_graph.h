@@ -74,7 +74,7 @@ namespace offbynull::aligner::graphs::grid_graph {
     PACK_STRUCT_STOP;
 
     /**
-     * @ref offbynull::aligner::graph::graph::readable_graph implementation comprising the grid-like structure of a pairwise global sequence
+     * @ref offbynull::aligner::graph::graph::graph implementation comprising the grid-like structure of a pairwise global sequence
      * alignment graph, intended to be used as a base for other more complex pairwise alignment graphs.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.

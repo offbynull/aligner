@@ -9,7 +9,7 @@
 #include "offbynull/aligner/backtrackers/graph_backtracker/ready_queue/ready_queue_stack_container_creator_pack.h"
 
 namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue {
-    using offbynull::aligner::graph::graph::readable_graph;
+    using offbynull::aligner::graph::graph::graph;
     using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_container_creator_pack
         ::ready_queue_container_creator_pack;
     using offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue_heap_container_creator_pack
@@ -19,7 +19,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue::read
 
     /**
      * Queue of node positions within an
-     * @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph::readable_pairwise_alignment_graph,
+     * @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph::pairwise_alignment_graph,
      * referred to as a "ready queue" because it's used by
      * @link offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker backtracking algorithm @endlink to track which
      * nodes within a graph are ready for processing (a node is ready for processing once all of its parents have been processed).
@@ -30,7 +30,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue::read
      */
     template<
         bool debug_mode,
-        readable_graph G,
+        graph G,
         ready_queue_container_creator_pack CONTAINER_CREATOR_PACK = ready_queue_heap_container_creator_pack<debug_mode>
     >
     class ready_queue {

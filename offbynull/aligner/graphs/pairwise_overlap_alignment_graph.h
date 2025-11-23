@@ -139,7 +139,7 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
     };
 
     /**
-     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph implementation of a
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph implementation of a
      * pairwise overlap sequence alignment graph.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.

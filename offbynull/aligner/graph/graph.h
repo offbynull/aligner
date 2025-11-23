@@ -13,7 +13,7 @@ namespace offbynull::aligner::graph::graph {
 
     /**
      * Concept that's satisfied if `N` is an object type (e.g. not a reference, not CV-qualified) and has the traits of an
-     * @ref offbynull::aligner::graph::graph::readable_graph's node:
+     * @ref offbynull::aligner::graph::graph::graph's node:
      *
      *  * Must be copyable / moveable.
      *  * Must be comparable using equality and inequality (`==` and `!=` operators).
@@ -25,7 +25,7 @@ namespace offbynull::aligner::graph::graph {
 
     /**
      * Concept that's satisfied if `E` is an object type (not a reference, not CV-qualified) and has the traits of an
-     * @ref offbynull::aligner::graph::graph::readable_graph's edge:
+     * @ref offbynull::aligner::graph::graph::graph's edge:
      *
      *  * Must be copyable / moveable.
      *  * Must be comparable using equality and inequality (`==` and `!=` operators).
@@ -52,7 +52,7 @@ namespace offbynull::aligner::graph::graph {
      * @tparam G Type to check.
      */
     template <typename G>
-    concept readable_graph =
+    concept graph =
         unqualified_object_type<G>
         && requires(G g, typename G::N n, typename G::E e) {
             typename G::N;
@@ -100,7 +100,7 @@ namespace offbynull::aligner::graph::graph {
         };
 
     /**
-     * Unimplemented @ref offbynull::aligner::graph::graph::readable_graph, intended for documentation.
+     * Unimplemented @ref offbynull::aligner::graph::graph::graph, intended for documentation.
      *
      * @tparam N_ Node identifier type, used to lookup nodes.
      * @tparam ND_ Node data type, used to associated data with nodes.

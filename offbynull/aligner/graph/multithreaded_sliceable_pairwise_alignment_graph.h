@@ -19,7 +19,7 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
     using offbynull::concepts::unqualified_object_type;
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::helpers::join_bidirectional_view::join_bidirectional_view_adaptor;
-    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph;
+    using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::multithreaded_sliceable_pairwise_alignment_graph_backtracker::concepts::backtrackable_node;
 
     enum class axis : std::uint8_t {
@@ -42,9 +42,9 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
         };
 
     template <typename G>
-    concept readable_multithreaded_sliceable_pairwise_alignment_graph =
+    concept multithreaded_sliceable_pairwise_alignment_graph =
         unqualified_object_type<G>
-        && readable_sliceable_pairwise_alignment_graph<G>
+        && sliceable_pairwise_alignment_graph<G>
         && requires(
             G g,
             typename G::N node,
@@ -73,12 +73,12 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
     // Reference implementation for segmented_diagonal_nodes()
     // -------------------------------------------------------
     // You can either ...
-    // 1. have the readable_sliceable_pairwise_alignment_graph's segmented_diagonal_nodes() function call into this function
-    // 2. write a custom implementation for the readable_sliceable_pairwise_alignment_graph's segmented_diagonal_nodes() (typically more
+    // 1. have the sliceable_pairwise_alignment_graph's segmented_diagonal_nodes() function call into this function
+    // 2. write a custom implementation for the sliceable_pairwise_alignment_graph's segmented_diagonal_nodes() (typically more
     //    optimized than) and test against this to ensure things are working correctly.
     template<
         bool debug_mode,
-        typename G  /* Should be readable_multithreaded_sliceable_pairwise_alignment_graph, but can't do this because of cyclic dep. */
+        typename G  /* Should be multithreaded_sliceable_pairwise_alignment_graph, but can't do this because of cyclic dep. */
     >
     auto generic_segmented_diagonal_nodes(
         const G& g,
@@ -261,7 +261,7 @@ namespace offbynull::aligner::graph::multithreaded_sliceable_pairwise_alignment_
 
     template<
         bool debug_mode,
-        typename G  /* Should be readable_multithreaded_sliceable_pairwise_alignment_graph, but can't do this because of cyclic dep. */
+        typename G  /* Should be multithreaded_sliceable_pairwise_alignment_graph, but can't do this because of cyclic dep. */
     >
     auto generic_segmented_diagonal_nodes(
         const G& g,

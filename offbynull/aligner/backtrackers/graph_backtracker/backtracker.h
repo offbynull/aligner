@@ -31,7 +31,7 @@
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
-    using offbynull::aligner::graph::graph::readable_graph;
+    using offbynull::aligner::graph::graph::graph;
     using offbynull::aligner::concepts::weight;
     using offbynull::aligner::backtrackers::graph_backtracker::edge_weight_accessor::edge_weight_accessor;
     using offbynull::aligner::backtrackers::graph_backtracker::edge_weight_accessor_without_explicit_weight
@@ -64,12 +64,12 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
     using offbynull::concepts::unqualified_object_type;
 
     /**
-     * Backtracker for @ref offbynull::aligner::graph::graph::readable_graph implementations. A backtracker's purpose is to find the
+     * Backtracker for @ref offbynull::aligner::graph::graph::graph implementations. A backtracker's purpose is to find the
      * maximally weighted path (path with the highest sum of edge weights) between some directed graph's root node and leaf node, picking an
      * arbitrary one if there are multiple such paths. For a detailed explanation of the backtracking algorithm, see
      * https://offbynull.com/docs/data/learn/Bioinformatics/output/output.html#H_Backtrack%20Algorithm.
      *
-     * Note that, although @ref offbynull::aligner::graph::graph::readable_graph doesn't place restrictions on the directed graph's
+     * Note that, although @ref offbynull::aligner::graph::graph::graph doesn't place restrictions on the directed graph's
      * structure, this backtracker implementation assumes that the directed graph it's operating on ...
      *
      *  * is acyclic.
@@ -85,7 +85,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
      */
     template<
         bool debug_mode,
-        readable_graph G,
+        graph G,
         weight WEIGHT,
         edge_weight_accessor<typename G::E, WEIGHT> EDGE_WEIGHT_ACCESSOR,
         backtracker_container_creator_pack<
@@ -416,7 +416,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
      */
     template<bool debug_mode>
     auto heap_find_max_path(
-        const readable_graph auto& g,
+        const graph auto& g,
         const edge_weight_accessor_without_explicit_weight<typename std::remove_cvref_t<decltype(g)>::E> auto& edge_weight_accessor_
     ) {
         using G = std::remove_cvref_t<decltype(g)>;
@@ -450,7 +450,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
         std::size_t path_container_heap_escape_size = 10zu
     >
     auto stack_find_max_path(
-        const readable_graph auto& g,
+        const graph auto& g,
         const edge_weight_accessor_without_explicit_weight<typename std::remove_cvref_t<decltype(g)>::E> auto& edge_weight_accessor_
     ) {
         using G = std::remove_cvref_t<decltype(g)>;

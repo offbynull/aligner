@@ -28,7 +28,7 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
     using offbynull::concepts::widenable_to_size_t;
 
     /**
-     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::readable_sliceable_pairwise_alignment_graph implementation of a
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph implementation of a
      * pairwise global sequence alignment graph.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.

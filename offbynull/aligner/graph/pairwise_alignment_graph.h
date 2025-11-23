@@ -19,14 +19,14 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::unqualified_object_type;
     using offbynull::aligner::concepts::weight;
-    using offbynull::aligner::graph::graph::readable_graph;
+    using offbynull::aligner::graph::graph::graph;
     using offbynull::aligner::graph::graph::node;
     using offbynull::aligner::graph::graph::edge;
     using offbynull::aligner::graph::graph::unimplemented_graph;
     using offbynull::utils::compile_time_constant;
 
     /**
-     * An @ref offbynull::aligner::graph::graph::readable_graph extended / constrained to support the grid-like graphs required by pairwise
+     * An @ref offbynull::aligner::graph::graph::graph extended / constrained to support the grid-like graphs required by pairwise
      * sequence alignment algorithms. A pairwise sequence alignment algorithm maps out the minimum number of changes required to transform
      * one sequence into another, where a "change" is typically either means an addition, a deletion, or a swap. To do this, the algorithm
      * explodes out all possible changes between the two sequences as a grid-like directed graph:
@@ -63,7 +63,7 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
      *  * have exactly one leaf node.
      *  * be **grid-based** - nodes are positioned on a grid, where each node has a coordinate/position (X, Y, Z).
      *
-     * `G` must provide several members (see @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph).
+     * `G` must provide several members (see @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph).
      * Given a background in graph theory and alignment graphs, most of these should be self-explanatory just from the name and concept
      * restrictions. Note that, although many member variables seem useless, those member variables are ...
      *
@@ -73,9 +73,9 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
      * @tparam G Type to check.
      */
     template <typename G>
-    concept readable_pairwise_alignment_graph =
+    concept pairwise_alignment_graph =
         unqualified_object_type<G>
-        && readable_graph<G>
+        && graph<G>
         && widenable_to_size_t<typename G::INDEX>
         && weight<typename G::ED>
         && requires(
@@ -110,7 +110,7 @@ namespace offbynull::aligner::graph::pairwise_alignment_graph {
         };
 
     /**
-     * Unimplemented @ref offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph, intended for
+     * Unimplemented @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph, intended for
      * documentation.
      *
      * @tparam N_ Node identifier type, used to lookup nodes.

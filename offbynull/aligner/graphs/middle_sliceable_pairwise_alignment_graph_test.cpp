@@ -64,8 +64,8 @@ namespace {
 
     TEST(OAGMiddleSliceablePairwiseAlignmentGraphTest, ConceptCheck) {
         using G = decltype(graph_bundle { "abc", "acc", { 1zu, 1zu }, { 2zu, 2zu } }.middle_g);
-        static_assert(offbynull::aligner::graph::graph::readable_graph<G>);
-        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::readable_pairwise_alignment_graph<G>);
+        static_assert(offbynull::aligner::graph::graph::graph<G>);
+        static_assert(offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph<G>);
     }
 
     TEST(OAGMiddleSliceablePairwiseAlignmentGraphTest, ListNodes) {
