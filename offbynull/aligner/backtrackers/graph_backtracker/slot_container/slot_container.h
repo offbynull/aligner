@@ -34,8 +34,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
 
     /**
      * Container of @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot "slots", used by
-     * @link offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker @endlink to track the backtracking state of each
-     * node within a graph.
+     * @ref offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker to track the backtracking state of each  node
+     * within a graph.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam G Graph type.
@@ -122,6 +122,11 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
          */
         std::size_t find_idx(const N& node) {
             auto it { std::lower_bound(slots.begin(), slots.end(), node, slot_comparator<N, E, WEIGHT> {}) };
+            if constexpr (debug_mode) {
+                if (it == slots.end() || (*it).node != node) {
+                    throw std::runtime_error { "Not found" };
+                }
+            }
             return it - slots.begin();
         }
 
@@ -135,18 +140,28 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
          */
         slot<N, E, WEIGHT>& find_ref(const N& node) {
             auto it { std::lower_bound(slots.begin(), slots.end(), node, slot_comparator<N, E, WEIGHT> {}) };
+            if constexpr (debug_mode) {
+                if (it == slots.end() || (*it).node != node) {
+                    throw std::runtime_error { "Not found" };
+                }
+            }
             return *it;
         }
 
         /**
          * Get reference to slot at some index.
          *
-         * If `idx`, the behaviour of this function undefined.
+         * If `idx` is out of bounds, the behaviour of this function undefined.
          *
          * @param idx Index of slot
          * @return Reference to slot at `idx`.
          */
         slot<N, E, WEIGHT>& at_idx(const std::size_t idx) {
+            if constexpr (debug_mode) {
+                if (idx >= slots.size()) {
+                    throw std::runtime_error { "Out of bounds" };
+                }
+            }
             return slots[idx];
         }
 
@@ -160,6 +175,11 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
          */
         std::pair<std::size_t, slot<N, E, WEIGHT>&> find(const N& node) {
             auto it { std::lower_bound(slots.begin(), slots.end(), node, slot_comparator<N, E, WEIGHT> {}) };
+            if constexpr (debug_mode) {
+                if (it == slots.end() || (*it).node != node) {
+                    throw std::runtime_error { "Not found" };
+                }
+            }
             auto dist_from_beginning { std::ranges::distance(slots.begin(), it) };
             // It may be that dist_from_beginning is signed, in which case the widenable_to_size_t test below fails (it tests for
             // unsignedness in addition testing to see if widenable). If it is signed, the test checkd the max value of both types. If

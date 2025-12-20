@@ -18,9 +18,16 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         ::row_slot_container_heap_container_creator_pack::row_slot_container_heap_container_creator_pack;
     using offbynull::aligner::concepts::weight;
 
+    /**
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider::sliced_subdivider_container_creator_pack::sliced_subdivider_container_creator_pack
+     * that allocates its containers on the heap.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam E Graph edge type.
+     * @tparam ED Graph edge data type (edge weight).
+     */
     template<
         bool debug_mode,
-        backtrackable_node N,
         backtrackable_edge E,
         weight ED
     >

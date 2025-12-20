@@ -125,6 +125,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          *
          * Once invoked, references to slots returned by `find()` are invalid for the lesser row (e.g. if moved from rows 1 and 2 to rows 2
          * and 3, any references for row 1 will be invalid).
+         *
+         * If this object is already at the last row o the graph, the havior of this function is undefined.
          */
         void move_down() {
             ++grid_down_offset;

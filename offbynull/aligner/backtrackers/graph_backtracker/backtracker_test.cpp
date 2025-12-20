@@ -144,7 +144,7 @@ namespace {
         using E = decltype(g)::E;
 
         const auto& [path, weight] {
-            stack_find_max_path<is_debug_mode()>(
+            stack_find_max_path<is_debug_mode(), 1000zu, 1000zu, 1000zu>(
                 g,
                 [&g](const E& edge) { return g.get_edge_data(edge); }
             )

@@ -107,6 +107,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
         using N = typename G::N;
         /** `G`'s edge type. */
         using E = typename G::E;
+        /** `G`'s edge data type. */
+        using ED = typename G::ED;
 
         /**
          * @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container::slot_container container factory type
@@ -135,11 +137,13 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
          */
         using PATH_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container());
 
+    private:
         /**
          * Container factory.
          */
         CONTAINER_CREATOR_PACK container_creator_pack;
 
+    public:
         /**
          * Construct an @ref offbynull::aligner::backtrackers::graph_backtracker::backtracker::backtracker instance.
          *
@@ -186,8 +190,9 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
          *  * `g` contains more than one root node.
          *  * `g` contains more than one leaf node.
          *  * `g` contains cycles.
+          *  * `g` contains edges with non-finite weights.
          *
-         * @param g Directed graph.
+         * @param g Graph.
          * @param edge_weight_accessor Edge weight accessor for `g` (maps each edge to its weight).
          * @return For each node N within `g`, N's backtracking edge and the weight for the maximally weighted path from root to N.
          */
@@ -288,12 +293,12 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
                     const auto& dst_node { g.get_edge_to(edge) };
                     const auto& [dst_slot_idx, dst_slot] { slots.find(dst_node) };
                     if constexpr (debug_mode) {
-                        if (dst_slot.unwalked_parent_cnt == 0u) {
+                        if (dst_slot.unwalked_parent_cnt == 0zu) {
                             throw std::runtime_error { "Invalid number of unprocessed parents" };
                         }
                     }
-                    dst_slot.unwalked_parent_cnt = static_cast<std::size_t>(dst_slot.unwalked_parent_cnt - 1u);
-                    if (dst_slot.unwalked_parent_cnt == 0u) {
+                    dst_slot.unwalked_parent_cnt = static_cast<std::size_t>(dst_slot.unwalked_parent_cnt - 1zu);
+                    if (dst_slot.unwalked_parent_cnt == 0zu) {
                         ready_idxes.push(dst_slot_idx);
                     }
                 }
@@ -337,17 +342,26 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
          *  * `g` contains more than one root node.
          *  * `g` contains more than one leaf node.
          *  * `g` contains cycles.
+         *  * `g` contains edges with non-finite weights.
+         *  * `end_node` does not exist within `g`.
+         *  * `slots` is not the output of `populate_weights_and_backtrack_pointers(g)` (or if g has been modified since `slots` was
+         *    generated).
          *
-         * @param g Directed graph.
+         * @param g Graph.
          * @param slots `populate_weights_and_backtrack_pointers(g)`'s output.
          * @param end_node Node to backtrack from, which almost always should be `g`'s leaf node.
-         * @return Maximally weighted path from `g`'s root node to `g`'s leaf node.
+         * @return Maximally weighted path from `g`'s root node to `end_node`.
          */
         auto backtrack(
                 const G& g,
                 SLOT_CONTAINER& slots,
                 const N& end_node
         ) {
+            if constexpr (debug_mode) {
+                if (!g.has_node(end_node)) {
+                    throw std::runtime_error { "End node does not exist" };
+                }
+            }
             auto next_node { end_node };
             PATH_CONTAINER path {
                 container_creator_pack.create_path_container()
@@ -379,12 +393,13 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
          *  * `g` contains more than one root node.
          *  * `g` contains more than one leaf node.
          *  * `g` contains cycles.
+         *  * `g` contains edges with non-finite weights.
          *
-         * @param g Directed graph.
+         * @param g Graph.
          * @param edge_weight_accessor Edge weight accessor for `g` (maps each edge to its weight).
-         * @return Maximally weighted path from `g`'s root node to `g`'s leaf node.
+         * @return Maximally weighted path from `g`'s root node to `g`'s leaf node, along with that path's weight.
          */
-        auto find_max_path(
+        std::pair<PATH_CONTAINER, ED> find_max_path(
                 const G& g,
                 const EDGE_WEIGHT_ACCESSOR& edge_weight_accessor
         ) {
@@ -397,7 +412,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
             const auto& end_node { g.get_leaf_node() };
             const auto& path { backtrack(g, slots, end_node) };
             const auto& weight { slots.find_ref(end_node).backtracking_weight };
-            return std::make_pair(path, weight);
+            return { path, weight };
         }
     };
 
@@ -410,7 +425,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
      * utilizing the heap for storage / computations and invokes `find_max_path(g, edge_weight_accessor_)` on it.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
-     * @param g Directed graph.
+     * @param g Graph.
      * @param edge_weight_accessor_ Edge weight accessor for `g` (maps each edge to its weight).
      * @return `find_max_path(g, edge_weight_accessor_)` result.
      */
@@ -431,23 +446,22 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
      * utilizing the stack for storage / computations and invokes `find_max_path(g, edge_weight_accessor_)` on it.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
-     * @tparam slot_container_heap_escape_size Maximum number of
+     * @tparam max_slot_container_elems Maximum number of
      *     @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container::slot_container slots allowed on the
-     *     stack before escaping to heap.
-     * @tparam ready_queue_heap_escape_size Maximum number of
+     *     stack.
+     * @tparam max_ready_queue_elems Maximum number of
      *     @ref offbynull::aligner::backtrackers::graph_backtracker::ready_queue::ready_queue::ready_queue queue elements allowed on the
-     *     stack before escaping to heap.
-     * @tparam path_container_heap_escape_size Maximum number of edges allowed on the stack before escaping
-     *     to heap (in a container holding a path) .
-     * @param g Directed graph.
+     *     stack.
+     * @tparam max_path_elems Maximum number of edges allowed on the stack (in a container holding a path).
+     * @param g Graph.
      * @param edge_weight_accessor_ Edge weight accessor for `g` (maps each edge to its weight).
      * @return `find_max_path(g, edge_weight_accessor_)` result.
      */
     template<
         bool debug_mode,
-        std::size_t slot_container_heap_escape_size = 100zu,
-        std::size_t ready_queue_heap_escape_size = 100zu,
-        std::size_t path_container_heap_escape_size = 10zu
+        std::size_t max_slot_container_elems,
+        std::size_t max_ready_queue_elems,
+        std::size_t max_path_elems
     >
     auto stack_find_max_path(
         const graph auto& g,
@@ -468,9 +482,9 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
                 N,
                 E,
                 WEIGHT,
-                slot_container_heap_escape_size,
-                ready_queue_heap_escape_size,
-                path_container_heap_escape_size
+                max_slot_container_elems,
+                max_ready_queue_elems,
+                max_path_elems
             >
         > {}.find_max_path(g, edge_weight_accessor_);
     }

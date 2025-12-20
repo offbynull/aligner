@@ -32,8 +32,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
     /**
      * Container of @ref offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot::slot "slots", used by
-     * @link offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker @endlink to track the
-     * backtracking state of each node within a graph.
+     * @ref offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker to track the backtracking state
+     * of each node within a graph.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam G Graph type.
@@ -134,13 +134,20 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          */
         std::size_t find_idx(const N& node) const {
             const auto& [down_offset, right_offset, depth] { g.node_to_grid_offset(node) };
-            return (g.grid_depth_cnt * ((down_offset * g.grid_right_cnt) + right_offset)) + depth;
+            std::size_t ret { (g.grid_depth_cnt * ((down_offset * g.grid_right_cnt) + right_offset)) + depth };
+            if constexpr (debug_mode) {
+                if (ret >= slots.size()) {
+                    throw std::runtime_error { "Out of bounds" };
+                }
+            }
+            return ret;
         }
 
         /**
          * Get reference to slot assigned to some node.
          *
-         * If no slot exists for `node`, the behavior of this function is undefined.
+         * If no slot exists for `node` (e.g., `node` does not belong to this container's graph), the behavior of this function is
+         * undefined.
          *
          * @param node Node to find.
          * @return Reference to slot assigned to `node`.
@@ -154,7 +161,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         /**
          * Get reference to slot assigned to some node.
          *
-         * If no slot exists for `node`, the behavior of this function is undefined.
+         * If no slot exists for `node` (e.g., `node` does not belong to this container's graph), the behavior of this function is
+         * undefined.
          *
          * @param node Node to find.
          * @return Reference to slot assigned to `node`.
@@ -174,6 +182,11 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          * @return Reference to slot at `idx`.
          */
         slot<N, E, ED, PARENT_COUNT>& at_idx(const std::size_t idx) {
+            if constexpr (debug_mode) {
+                if (idx >= slots.size()) {
+                    throw std::runtime_error { "Out of bounds" };
+                }
+            }
             return slots[idx];
         }
 
@@ -186,13 +199,19 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          * @return Reference to slot at `idx`.
          */
         const slot<N, E, ED, PARENT_COUNT>& at_idx(const std::size_t idx) const {
+            if constexpr (debug_mode) {
+                if (idx >= slots.size()) {
+                    throw std::runtime_error { "Out of bounds" };
+                }
+            }
             return slots[idx];
         }
 
         /**
          * Get index of and reference to slot assigned to some node.
          *
-         * If no slot exists for `node`, the behavior of this function is undefined.
+         * If no slot exists for `node` (e.g., `node` does not belong to this container's graph), the behavior of this function is
+         * undefined.
          *
          * @param node Node to find.
          * @return Index of and reference to slot assigned to `node`.
@@ -206,7 +225,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         /**
          * Get index of and reference to slot assigned to some node.
          *
-         * If no slot exists for `node`, the behavior of this function is undefined.
+         * If no slot exists for `node` (e.g., `node` does not belong to this container's graph), the behavior of this function is
+         * undefined.
          *
          * @param node Node to find.
          * @return Index of and reference to slot assigned to `node`.

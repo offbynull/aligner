@@ -31,7 +31,6 @@ namespace offbynull::aligner::sequences::substring_sequence {
          * @param seq_ Underlying sequence.
          * @param offset_ Index within `seq_` to start from.
          * @param length_ Number of elements within this sequence.
-         * @throws std::runtime_error If `debug_mode && seq_.length() - offset_ < length_` (extends past end of `seq_`).
          */
         substring_sequence(const SEQ& seq_, std::size_t offset_, std::size_t length_)
         : seq { seq_ }
@@ -72,7 +71,6 @@ namespace offbynull::aligner::sequences::substring_sequence {
      * @param offset Index within `seq_` to start from.
      * @param length Number of elements within this sequence.
      * @return Newly created @ref offbynull::aligner::sequences::substring_sequence::substring_sequence instance.
-     * @throws std::runtime_error If `debug_mode && seq.length() - offset < length` (extends past end of `seq`).
      */
     template<bool debug_mode>
     auto create_substring_sequence(

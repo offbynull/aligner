@@ -19,10 +19,9 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
     /**
      * Element within @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot_container::slot_container. Each slot is
      * for a single node in the graph, tracking the
-     * @link offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker backtracking algorithm's @endlink status for that
-     * node: Either the backtracking algorithm has parent nodes that need to be processed before it can process this node, or the
-     * backtracking algorithm has processed all parent nodes and this node as well (holding on to the incoming edge with the highest
-     * accumulated weight).
+     * @ref offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker "backtracking algorithm's" status for that node:
+     * Either the backtracking algorithm has parent nodes that need to be processed before it can process this node, or the backtracking
+     * algorithm has processed all parent nodes and this node as well (holding on to the incoming edge with the highest accumulated weight).
      *
      * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
      *

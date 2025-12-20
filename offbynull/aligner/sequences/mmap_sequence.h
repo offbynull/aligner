@@ -26,7 +26,6 @@ namespace offbynull::aligner::sequences::mmap_sequence {
          * Construct an offbynull::aligner::sequences::mmap_sequence::mmap_sequence instance.
          *
          * @param path Path of file to be mmap'd.
-         * @throws std::runtime_error If `debug_mode` and problems mmap'ing `path`.
          */
         mmap_sequence(
             const std::string& path
@@ -65,7 +64,6 @@ namespace offbynull::aligner::sequences::mmap_sequence {
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @param path Path of file to be mmap'd.
      * @return Newly created @ref offbynull::aligner::sequences::mmap_sequence::mmap_sequence instance.
-     * @throws std::runtime_error If `debug_mode` and problems mmap'ing `path`.
      */
     template<bool debug_mode>
     auto create_mmap_sequence(

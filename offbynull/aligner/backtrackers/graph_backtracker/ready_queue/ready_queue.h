@@ -21,8 +21,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::ready_queue::read
      * Queue of node positions within an
      * @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph::pairwise_alignment_graph,
      * referred to as a "ready queue" because it's used by
-     * @link offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker backtracking algorithm @endlink to track which
-     * nodes within a graph are ready for processing (a node is ready for processing once all of its parents have been processed).
+     * @ref offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker "backtracking algorithm" to track which nodes
+     * within a graph are ready for processing (a node is ready for processing once all of its parents have been processed).
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam G Graph type.

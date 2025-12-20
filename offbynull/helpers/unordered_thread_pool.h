@@ -85,7 +85,6 @@ namespace offbynull::helpers::unordered_thread_pool {
          * Construct an @ref offbynull::helpers::unordered_thread_pool::unordered_thread_pool instance.
          *
          * @param concurrency_ Number of threads to launch.
-         * @throws std::runtime_error If `debug_mode == true && concurrency_ == 0zu`.
          */
         unordered_thread_pool(std::size_t concurrency_)
         : concurrency { concurrency_ }

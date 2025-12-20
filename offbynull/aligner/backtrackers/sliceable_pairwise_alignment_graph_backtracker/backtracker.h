@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
+#include <cmath>
 #include <utility>
 #include <variant>
 #include <type_traits>
@@ -49,6 +51,17 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::unqualified_object_type;
     using offbynull::utils::static_vector_typer;
 
+    /**
+     * Backtracker for @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph
+     * implementations. A backtracker's purpose is to find the maximally-weighted path (path with the highest sum of edge weights) between
+     * some directed graph's root node and leaf node, picking an arbitrary one if there are multiple such paths. For a detailed explanation
+     * of the backtracking algorithm, see
+     * https://offbynull.com/docs/data/learn/Bioinformatics/output/output.html#H_Divide-and-Conquer%20Algorithm.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam CONTAINER_CREATOR_PACK Container factory type.
+     */
     template<
         bool debug_mode,
         sliceable_pairwise_alignment_graph G,
@@ -67,31 +80,77 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     requires backtrackable_node<typename G::N> &&
         backtrackable_edge<typename G::E>
     class backtracker {
-    private:
+    public:
+        /** `G`'s node type. */
         using N = typename G::N;
+        /** `G`'s edge type. */
         using E = typename G::E;
+        /** `G`'s node data type. */
         using ND = typename G::ND;
+        /** `G`'s edge data type. */
         using ED = typename G::ED;
+        /** `G`'s grid coordinate type. For example, `std::uint8_t` will allow up to 255 nodes on both the down and right axis. */
         using INDEX = typename G::INDEX;
 
+        /**
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::resident_segmenter::resident_segmenter
+         * container factory type used by this backtracker implementation.
+         */
         using RESIDENT_SEGMENTER_CONTAINER_CREATOR_PACK =
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_resident_segmenter_container_creator_pack());
+        /**
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider::sliced_subdivider::sliced_subdivider
+         * container factory type used by this backtracker implementation.
+         */
         using SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK =
             decltype(std::declval<CONTAINER_CREATOR_PACK>().create_sliced_subdivider_container_creator_pack());
+        /**
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container::path_container
+         * type used by this backtracker implementation.
+         */
         using PATH_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container(0zu));
 
+    private:
+        /**
+         * Container factory.
+         */
         CONTAINER_CREATOR_PACK container_creator_pack;
 
     public:
+        /**
+         * Construct an @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker
+         * instance.
+         *
+         * @param container_creator_pack_ Container factory.
+         */
         backtracker(
             CONTAINER_CREATOR_PACK container_creator_pack_ = {}
         )
         : container_creator_pack { container_creator_pack_ } {}
 
-        auto find_max_path(
+        /**
+         * Determine the maximally-weighted path (path with the highest sum of edge weights) connecting a sliceable pairwise alignment
+         * graph's root node and leaf node.
+         *
+         * If `max_path_weight_comparison_tolerance` is not a finite value (e.g., NaN or inf), the behavior of this function is
+         * undefined.
+         *
+         * @param g Graph.
+         * @param max_path_weight_comparison_tolerance Tolerance used when testing for weight for equality. This may need to be non-zero
+         *     when the type used for edge weights is a floating point type (must be finite). It helps mitigate floating point rounding
+         *     errors when `g` is large / has large magnitude differences across `g`'s edge weights. The value this should be set to depends
+         *     on multiple factors (e.g., which floating point type is used, expected graph size, expected magnitudes, etc..).
+         * @return Maximally weighted path from `g`'s root node to `g`'s leaf node, along with that path's weight.
+         */
+        std::pair<PATH_CONTAINER, ED> find_max_path(
             const G& g,
-            const ED final_weight_comparison_tolerance
+            const ED max_path_weight_comparison_tolerance
         ) {
+            if constexpr (debug_mode) {
+                if (!std::isfinite(max_path_weight_comparison_tolerance)) {
+                    throw std::runtime_error { "Tolerance not finite" };
+                }
+            }
             resident_segmenter<
                 debug_mode,
                 G,
@@ -101,7 +160,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             };
             using hop_ = hop<E>;
             using segment_ = segment<N>;
-            const auto& [parts, final_weight] { resident_segmenter_.backtrack_segmentation_points(g, final_weight_comparison_tolerance) };
+            const auto& [parts, final_weight] {
+                resident_segmenter_.backtrack_segmentation_points(g, max_path_weight_comparison_tolerance)
+            };
             PATH_CONTAINER path {
                 container_creator_pack.create_path_container(
                     g.path_edge_capacity
@@ -137,18 +198,31 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     throw std::runtime_error { "This should never happen" };
                 }
             }
-            return std::make_pair(path, final_weight);
+            return { path, final_weight };
         }
     };
 
-
+    /**
+     * Helper function that constructs an
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker instance utilizing
+     * the heap for storage / computations and invokes `find_max_path(g)` on it.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam minimize_allocations Primes certain containers with enough capacity such that adhoc reallocations aren't needed.
+     * @param g Graph.
+     * @param max_path_weight_comparison_tolerance Tolerance used when testing for weight for equality. This may need to be non-zero when
+     *     the type used for edge weights is a floating point type (must be finite). It helps mitigate floating point rounding errors when
+     *     `g` is large / has large magnitude differences across `g`'s edge weights. The value this should be set to depends on multiple
+     *     factors (e.g., which floating point type is used, expected graph size, expected magnitudes, etc..).
+     * @return `find_max_path(g)` result.
+     */
     template<
         bool debug_mode,
         bool minimize_allocations
     >
     auto heap_find_max_path(
         const sliceable_pairwise_alignment_graph auto& g,
-        typename std::remove_cvref_t<decltype(g)>::ED final_weight_comparison_tolerance
+        typename std::remove_cvref_t<decltype(g)>::ED max_path_weight_comparison_tolerance
     ) {
         using G = std::remove_cvref_t<decltype(g)>;
         return backtracker<
@@ -161,9 +235,28 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 typename G::ED,
                 minimize_allocations
             >
-        > {}.find_max_path(g, final_weight_comparison_tolerance);
+        > {}.find_max_path(g, max_path_weight_comparison_tolerance);
     }
 
+    /**
+     * Helper function that constructs an
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker instance utilizing
+     * the stack for storage / computations and invokes `find_max_path(g)` on it.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam grid_right_cnt Expected right dimension of the underlying pairwise alignment graph instance.
+     * @tparam grid_depth_cnt Expected depth dimension of the underlying pairwise alignment graph instance.
+     * @tparam resident_nodes_capacity Of all nodes within the underlying pairwise alignment graph, the maximum number of nodes that are
+     *     resident nodes (can be higher than the maximum, but not lower).
+     * @tparam path_edge_capacity Of all paths between root and leaf within the underlying pairwise alignment graph, the maximum number of
+     *     edges.
+     * @param g Graph.
+     * @param max_path_weight_comparison_tolerance Tolerance used when testing for weight for equality. This may need to be non-zero when
+     *     the type used for edge weights is a floating point type (must be finite). It helps mitigate floating point rounding errors when
+     *     `g` is large / has large magnitude differences across `g`'s edge weights. The value this should be set to depends on multiple
+     *     factors (e.g., which floating point type is used, expected graph size, expected magnitudes, etc..).
+     * @return `find_max_path(g)` result.
+     */
     template<
         bool debug_mode,
         std::size_t grid_right_cnt,
@@ -173,7 +266,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     >
     auto stack_find_max_path(
         const sliceable_pairwise_alignment_graph auto& g,
-        typename std::remove_cvref_t<decltype(g)>::ED final_weight_comparison_tolerance
+        typename std::remove_cvref_t<decltype(g)>::ED max_path_weight_comparison_tolerance
     ) {
         using G = std::remove_cvref_t<decltype(g)>;
         using N = typename G::N;
@@ -200,7 +293,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 resident_nodes_capacity,
                 path_edge_capacity
             >
-        > {}.find_max_path(g, final_weight_comparison_tolerance);
+        > {}.find_max_path(g, max_path_weight_comparison_tolerance);
     }
 }
 

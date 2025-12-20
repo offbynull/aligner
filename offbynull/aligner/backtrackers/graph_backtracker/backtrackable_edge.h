@@ -9,8 +9,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtrackable_edg
 
     /**
      * Concept that's satisfied if `E` has the traits of graph edge (as expected by the
-     * @link offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker backtracking algorithm @endlink) and is an
-     * unqualified object type.
+     * @ref offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker "backtracking algorithm") and is an unqualified
+     * object type.
      *
      * @tparam E Type to check.
      */

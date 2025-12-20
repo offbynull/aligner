@@ -28,7 +28,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      * Queue of node positions within an
      * @ref offbynull::aligner::graph::pairwise_alignment_graph::pairwise_alignment_graph::pairwise_alignment_graph,
      * referred to as a "ready queue" because it's used by the
-     * @link offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker backtracking algorithm @endlink
+     * @ref offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker "backtracking algorithm"
      * to track which nodes withing a graph are ready for processing (a node is ready for processing once all of its parents have been
      * processed).
      *

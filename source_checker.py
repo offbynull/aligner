@@ -123,6 +123,7 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::uniform_real_distribution': 'random',
     'std::abs': 'cmath',
     'std::hypot': 'cmath',
+    'std::isfinite': 'cmath',
     'std::size_t': 'cstddef',
     'std::int8_t': 'cstdint',
     'std::int16_t': 'cstdint',

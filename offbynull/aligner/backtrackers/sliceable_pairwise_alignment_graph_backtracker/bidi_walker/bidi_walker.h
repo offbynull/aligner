@@ -116,7 +116,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
         /**
          * Result of
-         * @link offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker::find @endlink.
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker::find.
          */
         struct find_result {
             /** Forward walk final path edge and overall path weight (of maximally-weighted path between the root node and `node`). */
@@ -162,11 +162,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         };
 
         /**
-         * @link offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker::find @endlink
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker::find
          * invoked on all nodes within the target row.
          *
          * @return Range, where each element contains the node and result of
-         *     @link offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker::find @endlink
+         *     @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker::find
          *     for that node.
          */
         auto list() {
@@ -231,16 +231,21 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          * multiple maximally-weighted paths between `g`'s root node and leaf node. As long as `node` sits within one of them, this function
          * returns `true`.
          *
-         * The behavior of this function is undefined if `node` doesn't exist within `g`.
+         * The behavior of this function is undefined if ...
+         *
+         *  * `node` doesn't exist within `g`.
+         *  * `g` contains edges with non-finite weights.
+         *  * `max_path_weight_comparison_tolerance` is not a finite value.
+         *  * `max_path_weight` is not a finite value.
          *
          * @param g Graph.
          * @param node Node within `g`.
-         * @param max_path_weight Weight of the maximally-weighted path between `g`'s root node and leaf node. If there are multiple, they
-         *     all should be the ame weight.
+         * @param max_path_weight Weight of the maximally-weighted path between `g`'s root node and leaf node (must be finite). If there are
+         *     multiple, they all should be the same weight.
          * @param max_path_weight_comparison_tolerance Tolerance used when testing for weight for equality. This may need to be non-zero
-         *     when the type used for edge weights is a floating point type. It helps mitigate floating point rounding errors when `g` is
-         *     large / has large magnitude differences across `g`'s edge weights. The value this should be set to depends on multiple
-         *     factors (e.g., which floating point type is used, expected graph size, expected magnitudes, etc..).
+         *     when the type used for edge weights is a floating point type (must be finite). It helps mitigate floating point rounding
+         *     errors when `g` is large / has large magnitude differences across `g`'s edge weights. The value this should be set to depends
+         *     on multiple factors (e.g., which floating point type is used, expected graph size, expected magnitudes, etc..).
          * @return `true` if `node` sits on any of the maximally-weighted path between `g`'s root node and leaf node, `false` otherwise.
          */
         static bool is_node_on_max_path(
@@ -249,6 +254,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             const ED max_path_weight,
             const ED max_path_weight_comparison_tolerance
         ) {
+            if constexpr (debug_mode) {
+                if (!std::isfinite(max_path_weight)) {
+                    throw std::runtime_error { "Max weight not finite" };
+                }
+                if (!std::isfinite(max_path_weight_comparison_tolerance)) {
+                    throw std::runtime_error { "Tolerance not finite" };
+                }
+            }
+
             const auto& [down, right, depth] { g.node_to_grid_offset(node) };
 
             bidi_walker bidi_walker_ { bidi_walker::create_and_initialize(g, down) };

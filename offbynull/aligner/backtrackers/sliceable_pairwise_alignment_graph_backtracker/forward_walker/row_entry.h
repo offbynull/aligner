@@ -16,7 +16,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
     /**
      * Current node / slot being walked by an
-     * @link offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker::forward_walker @endlink.
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker::forward_walker.
      *
      * @tparam N Graph node type.
      * @tparam E Graph edge type.

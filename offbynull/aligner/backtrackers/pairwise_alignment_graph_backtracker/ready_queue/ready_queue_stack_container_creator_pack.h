@@ -32,9 +32,11 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     struct ready_queue_stack_container_creator_pack {
     private:
         static constexpr std::size_t ELEM_COUNT { grid_down_cnt * grid_right_cnt * grid_depth_cnt };
-        using CONTAINER_TYPE = typename static_vector_typer<debug_mode, SLOT_INDEX, ELEM_COUNT>::type;
 
     public:
+        /** `create_queue_container()` return type. */
+        using CONTAINER_TYPE = typename static_vector_typer<debug_mode, SLOT_INDEX, ELEM_COUNT>::type;
+
         /**
          * @copydoc offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::unimplemented_ready_queue_container_creator_pack::unimplemented_ready_queue_container_creator_pack::create_queue_container
          */

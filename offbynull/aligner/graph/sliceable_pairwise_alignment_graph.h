@@ -213,7 +213,6 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
      * @param leaf_node Leaf node override. When iterating nodes, it'll be as if `g`'s leaf node is actually this node.
      * @return Range of nodes. This range may be lazily evaluated, meaning the behavior of this range becomes undefined once `g` is modified
      *     in any way.
-     * @throws std::runtime_error If `debug_mode` and either `root_node` and / or `leaf_node` are missing from the graph.
      */
     template<
         bool debug_mode,

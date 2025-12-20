@@ -8,6 +8,7 @@
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_edge.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_segmenter/resident_segmenter_stack_container_creator_pack.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/sliced_subdivider/sliced_subdivider_stack_container_creator_pack.h"
+#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/unimplemented_backtracker_container_creator_pack.h"
 #include "offbynull/aligner/concepts.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker_stack_container_creator_pack {
@@ -20,6 +21,21 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         ::sliced_subdivider_stack_container_creator_pack::sliced_subdivider_stack_container_creator_pack;
     using offbynull::utils::static_vector_typer;
 
+    /**
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker_container_creator_pack::backtracker_container_creator_pack
+     * that allocates its containers on the stack.
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam N Graph node type.
+     * @tparam E Graph edge type.
+     * @tparam ED Graph edge data type (edge weight).
+     * @tparam grid_right_cnt Expected right dimension of the underlying pairwise alignment graph instance.
+     * @tparam grid_depth_cnt Expected depth dimension of the underlying pairwise alignment graph instance.
+     * @tparam resident_nodes_capacity Of all nodes within the underlying pairwise alignment graph, the maximum number of nodes that are
+     *     resident nodes (can be higher than the maximum, but not lower).
+     * @tparam path_edge_capacity Of all paths between root and leaf within the underlying pairwise alignment graph, the maximum number of
+     *     edges.
+     */
     template<
         bool debug_mode,
         backtrackable_node N,
@@ -31,6 +47,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         std::size_t path_edge_capacity
     >
     struct backtracker_stack_container_creator_pack {
+        /**
+         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::unimplemented_backtracker_container_creator_pack::unimplemented_backtracker_container_creator_pack::create_resident_segmenter_container_creator_pack
+         */
         resident_segmenter_stack_container_creator_pack<
             debug_mode,
             N,
@@ -43,6 +62,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return {};
         }
 
+        /**
+         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::unimplemented_backtracker_container_creator_pack::unimplemented_backtracker_container_creator_pack::create_sliced_subdivider_container_creator_pack
+         */
         sliced_subdivider_stack_container_creator_pack<
             debug_mode,
             N,
@@ -55,8 +77,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return {};
         }
 
-        using CONTAINER_TYPE = typename static_vector_typer<debug_mode, E, path_edge_capacity>::type;
-        CONTAINER_TYPE create_path_container(std::size_t path_edge_capacity_) const  {
+        /** `create_path_container()` return type. */
+        using PATH_CONTAINER_TYPE = typename static_vector_typer<debug_mode, E, path_edge_capacity>::type;
+
+        /**
+         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::unimplemented_backtracker_container_creator_pack::unimplemented_backtracker_container_creator_pack::create_path_container
+         */
+        PATH_CONTAINER_TYPE create_path_container(std::size_t path_edge_capacity_) const  {
             if constexpr (debug_mode) {
                 if (path_edge_capacity != path_edge_capacity_) {
                     throw std::runtime_error { "Size mismatch" };

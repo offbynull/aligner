@@ -41,7 +41,6 @@ namespace offbynull::aligner::sequences::iota_sequence {
          *
          * @param offset_ Range start.
          * @param bound_ Range end (inclusive).
-         * @throws std::runtime_error If `debug_mode && offset_ > bound_`.
          */
         iota_sequence(I offset_, I bound_)
         : offset { offset_ }
@@ -73,7 +72,6 @@ namespace offbynull::aligner::sequences::iota_sequence {
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @return Newly created @ref offbynull::aligner::sequences::iota_sequence::iota_sequence instance.
-     * @throws std::runtime_error If `debug_mode && offset_ > bound_`.
      */
     template<bool debug_mode>
     auto create_iota_sequence(

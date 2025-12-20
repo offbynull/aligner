@@ -16,7 +16,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * Element within
      * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::row_slot_container::row_slot_container.
      * A slot tracks the
-     * @link offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker backtracking algorithm's @endlink
+     * @ref offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker "backtracking algorithm's"
      * status for some node, holding on to the incoming edge with the highest accumulated weight.
      *
      * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).

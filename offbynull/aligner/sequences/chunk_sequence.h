@@ -76,7 +76,6 @@ namespace offbynull::aligner::sequences::chunk_sequence {
          *
          * @param chunk_len_ Number of elements in chunk (must match `chunk_len`)
          * @return New container.
-         * @throws std::runtime_error If `debug_mode && chunk_len != chunk_len_`.
          */
         std::array<E, chunk_len> create_chunk_container(std::size_t chunk_len_) const {
             if constexpr (debug_mode) {

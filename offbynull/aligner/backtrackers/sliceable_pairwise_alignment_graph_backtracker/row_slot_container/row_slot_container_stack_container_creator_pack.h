@@ -37,13 +37,14 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     private:
         static constexpr std::size_t max_elem_cnt { grid_right_cnt * grid_depth_cnt };
 
+    public:
+        /** `create_slot_container()` return type. */
         using SEGMENT_CONTAINER_TYPE = typename static_vector_typer<
             debug_mode,
             slot<E, ED>,
             max_elem_cnt
         >::type;
 
-    public:
         /**
          * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::unimplemented_row_slot_container_container_creator_pack::unimplemented_row_slot_container_container_creator_pack
          */

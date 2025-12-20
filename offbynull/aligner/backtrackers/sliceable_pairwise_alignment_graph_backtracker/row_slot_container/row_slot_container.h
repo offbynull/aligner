@@ -32,7 +32,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     /**
      * Container of @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::row_slot_container::slot "slots",
      * used by
-     * @link offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker @endlink to track the
+     * @ref offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker to track the
      * backtracking state of each node within a specific row of a graph.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.

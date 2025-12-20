@@ -32,7 +32,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * Container of
      * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot::resident_slot "resident slots",
      * used by
-     * @link offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker @endlink to track the
+     * @ref offbynull::aligner:backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker::backtracker to track the
      * backtracking state of nodes within graph which need their backtracking state constantly available.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.

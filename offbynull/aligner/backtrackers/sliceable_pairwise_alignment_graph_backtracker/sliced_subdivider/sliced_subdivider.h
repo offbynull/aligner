@@ -44,6 +44,64 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::unqualified_object_type;
 
+    /**
+     * Sliced subdivider finds a maximally-weighted path through a
+     * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph "sliceable pairwise alignment
+     * graph"'s
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment::segment "segment"
+     * by recursively
+     * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker
+     * "walking" and bisecting that segment. At each recursive step, the process walks the middle row of the segment to identify the edge
+     * converging to the greatest weight. The segment is then split on that edge and the process is re-applied to the two new segments.
+     *
+     * ```
+     *         original                      original split                original.top split                 original.top.top split
+     * *---->*---->*---->*---->*         *---->*                           *---->*                            *---->*
+     * |'.   |'.   |'.   |'.   |         |'.   |                           |'.   |                                  |
+     * |  '. |  '. |  '. |  '. |         |  '. |                           |  '. |                                  |
+     * v    vv    vv    vv    vv         v    vv                           v    vv                                  v
+     * *---->*---->*---->*---->*         *---->*                           *---->*                                  *
+     * |'.   |'.   |'.   |'.   |         |'.   |                                 |
+     * |  '. |  '. |  '. |  '. |         |  '. |                                 |
+     * v    vv    vv    vv    vv         v    vv                                 v
+     * *---->*---->*---->*---->*         *---->*                                 *
+     * |'.   |'.   |'.   |'.   |                '.
+     * |  '. |  '. |  '. |  '. |                  '.
+     * v    vv    vv    vv    vv                    v                           original.bottom split         original.bottom.bottom split
+     * *---->*---->*---->*---->*                     *---->*---->*                      *---->*---->*                       *
+     * |'.   |'.   |'.   |'.   |                     |'.   |'.   |                            |'.   |                        '.
+     * |  '. |  '. |  '. |  '. |                     |  '. |  '. |                            |  '. |                          '.
+     * v    vv    vv    vv    vv                     v    vv    vv                            v    vv                            v
+     * *---->*---->*---->*---->*                     *---->*---->*                            *---->*                             *
+     * ```
+     *
+     * The converging / bisecting edges form a maximally-weighted path through the segment.
+     *
+     *```
+     *    maximally-weighted path
+     * *---->*
+     *       |
+     *       |
+     *       v
+     *       *
+     *       |
+     *       |
+     *       v
+     *       *
+     *        '.
+     *          '.
+     *            v
+     *             *---->*
+     *                    '.
+     *                      '.
+     *                        v
+     *                         *
+     * ```
+     *
+     * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
+     * @tparam G Graph type.
+     * @tparam CONTAINER_CREATOR_PACK Container factory type.
+     */
     template<
         bool debug_mode,
         sliceable_pairwise_alignment_graph G,
@@ -53,7 +111,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             typename G::ED
         > CONTAINER_CREATOR_PACK = sliced_subdivider_heap_container_creator_pack<
             debug_mode,
-            typename G::N,
             typename G::E,
             typename G::ED
         >
@@ -84,6 +141,23 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         };
 
     public:
+        /**
+         * Construct an
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::sliced_subdivider::sliced_subdivider::sliced_subdivider
+         * object.
+         *
+         * Although the algorithm is intended to operate on a
+         * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment::segment
+         * "segment" of a @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph "sliceable
+         * pairwise alignment graph", it can technically work on any
+         * @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph "sliceable pairwise
+         * alignment graph" so long as it doesn't contain resident nodes. When passing in a segment, the typical workflow is to create a
+         * view of the graph isolated to the segment (see
+         * @ref offbynull::aligner::graphs::middle_sliceable_pairwise_alignment_graph::middle_sliceable_pairwise_alignment_graph).
+         *
+         * @param g Graph (view of a segment).
+         * @param container_creator_pack_ Container factory.
+         */
         sliced_subdivider(
             const G& g,
             CONTAINER_CREATOR_PACK container_creator_pack_ = {}
@@ -99,6 +173,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             }
         }
 
+        /**
+         * Find maximally-weighted path throughout the graph segment assigned to this object.
+         *
+         * @return Maximally-weighted path through graph segment.
+         */
         path_container<debug_mode, G, PATH_CONTAINER_CONTAINER_CREATOR_PACK> subdivide() {
             path_container<debug_mode, G, PATH_CONTAINER_CONTAINER_CREATOR_PACK> path_container_ {
                 whole_graph,
@@ -116,6 +195,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return path_container_;
         }
 
+    private:
         ED subdivide(
             path_container<debug_mode, G, PATH_CONTAINER_CONTAINER_CREATOR_PACK>& path_container_,
             element<E>* parent_element,

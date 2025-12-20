@@ -15,9 +15,6 @@ TODO:
   * make it so backward_walker can move backward, so if you're at slice n, you can subtract your way back to slice n+1
   * make it so bidiwalker can move at will (making use of both points above)
 
-* doxygen documentation
-  * document sliced subdividers
-
 * Add element index to scorer invocation
 * remove references to "sequence 1" and "sequence 2" in documentation - use only downward/rightward sequence
 * instance of resident_nodes_capacity - turn to constexpr if possible?

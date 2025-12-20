@@ -21,7 +21,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      * Element within
      * @ref offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot_container::slot_container. Each
      * slot is for a single node in the graph, tracking the
-     * @link offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker backtracking algorithm's @endlink
+     * @ref offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker "backtracking algorithm's"
      * status for that node: Either the backtracking algorithm has parent nodes that need to be processed before it can process this node,
      * or the backtracking algorithm has processed all parent nodes and this node as well (holding on to the incoming edge with the highest
      * accumulated weight).

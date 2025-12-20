@@ -9,8 +9,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
 
     /**
      * Concept that's satisfied if `N` has the traits of graph node (as expected by the
-     * @link offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker backtracking algorithm @endlink)
-     * and is an unqualified object type.
+     * @ref offbynull::aligner:backtrackers::pairwise_alignment_graph_backtracker::backtracker::backtracker "backtracking algorithm") and is
+     * an unqualified object type.
      *
      * @tparam N Type to check.
      */

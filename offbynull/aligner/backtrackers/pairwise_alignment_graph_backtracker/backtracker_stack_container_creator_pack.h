@@ -83,7 +83,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             return {};
         }
 
-        /** `create_path_container()`'s return type. */
+        /** `create_path_container()` return type. */
         using PATH_CONTAINER_TYPE = typename static_vector_typer<debug_mode, E, path_edge_capacity>::type;
 
         /**

@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <utility>
 #include <variant>
+#include <cmath>
+#include <stdexcept>
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_node.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_edge.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/resident_segmenter/hop.h"
@@ -59,7 +61,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     /**
      * Splits an @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph into
      * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::segment::segment "segments"
-     * and @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::hop::hop "hops". A ...
+     * and @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::hop::hop "hops", where
+     * the split points are resident nodes. A ...
      *
      *  * segment is a contiguous parts of the graph that's uninterrupted by connections from / to resident nodes.
      *  * hop is an edge connecting two segments, where one or both ends of the edge are resident nodes.
@@ -170,11 +173,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         /**
          * Find a segment-hop chain within `g` for which a maximally-weighted path travels through.
          *
+         * If `max_path_weight_comparison_tolerance` is not a finite value (e.g., NaN or inf), the behavior of this function is
+         * undefined.
+         *
          * @param g Graph.
          * @param max_path_weight_comparison_tolerance Tolerance used when testing for weight for equality. This may need to be non-zero
-         *     when the type used for edge weights is a floating point type. It helps mitigate floating point rounding errors when `g` is
-         *     large / has large magnitude differences across `g`'s edge weights. The value this should be set to depends on multiple
-         *     factors (e.g., which floating point type is used, expected graph size, expected magnitudes, etc..).
+         *     when the type used for edge weights is a floating point type (must be finite). It helps mitigate floating point rounding
+         *     errors when `g` is large / has large magnitude differences across `g`'s edge weights. The value this should be set to depends
+         *     on multiple factors (e.g., which floating point type is used, expected graph size, expected magnitudes, etc..).
+         * @return `true` if `node` sits on any of the maximally-weighted path between `g`'s root node and leaf node, `false` otherwise.
          * @return A pair where the first element is a container holding the segment-hop chain and the second element is the weight of the
          *     maximally-weighted path identified.
          */
@@ -182,6 +189,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             const G& g,
             const ED max_path_weight_comparison_tolerance
         ) {
+            if constexpr (debug_mode) {
+                if (!std::isfinite(max_path_weight_comparison_tolerance)) {
+                    throw std::runtime_error { "Tolerance not finite" };
+                }
+            }
+
             ED max_path_weight {
                 bidi_walker<
                     debug_mode,

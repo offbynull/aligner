@@ -63,6 +63,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return {};
         }
 
+        /** `create_resident_node_container()` return type. */
         using RESIDENT_NODE_CONTAINER_TYPE = typename static_vector_typer<debug_mode, N, resident_nodes_capacity>::type;
 
         /**
@@ -72,6 +73,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return RESIDENT_NODE_CONTAINER_TYPE(resident_nodes.begin(), resident_nodes.end());
         }
 
+        /** `create_resident_edge_container()` return type. */
         using RESIDENT_EDGE_CONTAINER_TYPE = typename static_vector_typer<debug_mode, E, resident_nodes_capacity>::type;
 
         /**
@@ -88,9 +90,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
 
         static constexpr std::size_t max_segment_cnt { resident_nodes_capacity * 2zu + 1zu };
 
-        /**
-         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::unimplemented_resident_segmenter_container_creator_pack::unimplemented_resident_segmenter_container_creator_pack::create_segment_hop_chain_container
-         */
+        /** `create_segment_hop_chain_container()` return type. */
         using SEGMENT_HOP_CHAIN_CONTAINER_TYPE = typename static_vector_typer<
             debug_mode,
             std::variant<
@@ -99,6 +99,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             >,
             max_segment_cnt
         >::type;
+
+        /**
+         * @copydoc offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::unimplemented_resident_segmenter_container_creator_pack::unimplemented_resident_segmenter_container_creator_pack::create_segment_hop_chain_container
+         */
         SEGMENT_HOP_CHAIN_CONTAINER_TYPE create_segment_hop_chain_container(std::size_t resident_nodes_cnt_) const {
             if constexpr (debug_mode) {
                 if (resident_nodes_cnt_ * 2zu + 1zu > max_segment_cnt) {

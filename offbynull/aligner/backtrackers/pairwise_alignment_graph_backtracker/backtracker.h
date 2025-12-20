@@ -77,7 +77,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
     requires backtrackable_node<typename G::N> &&
         backtrackable_edge<typename G::E>
     class backtracker {
-    public:
+    private:
         /** `G`'s node type. */
         using N = typename G::N;
         /** `G`'s edge type. */
@@ -114,11 +114,13 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          */
         using PATH_CONTAINER = decltype(std::declval<CONTAINER_CREATOR_PACK>().create_path_container(0zu));
 
+    private:
         /**
          * Container factory.
          */
         CONTAINER_CREATOR_PACK container_creator_pack;
 
+    public:
         /**
          * Construct an @ref offbynull::aligner::pairwise_alignment_backtrackers::graph_backtracker::backtracker::backtracker instance.
          *
@@ -133,17 +135,19 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          * Determine the maximally-weighted path (path with the highest sum of edge weights) connecting a pairwise alignment graph's root
          * node and leaf node.
          *
-         * @param g Directed graph.
-         * @return Maximally weighted path from `g`'s root node to `g`'s leaf node.
+         * If `g` contains edges with non-finite weights, the behavior of this function is undefined.
+         *
+         * @param g Graph.
+         * @return Maximally weighted path from `g`'s root node to `g`'s leaf node, along with that path's weight.
          */
-        auto find_max_path(
+        std::pair<PATH_CONTAINER, ED> find_max_path(
             const G& g
         ) {
             auto slots { populate_weights_and_backtrack_pointers(g) };
             const auto& path { backtrack(g, slots) };
             const auto& leaf_node { g.get_leaf_node() };
             const auto& weight { slots.find_ref(leaf_node).backtracking_weight };
-            return std::make_pair(path, weight);
+            return { path, weight };
         }
 
     private:
@@ -239,12 +243,12 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                     const auto& dst_node { g.get_edge_to(edge) };
                     const auto& [dst_slot_idx, dst_slot] { slots.find(dst_node) };
                     if constexpr (debug_mode) {
-                        if (dst_slot.unwalked_parent_cnt == 0u) {
+                        if (dst_slot.unwalked_parent_cnt == 0zu) {
                             throw std::runtime_error { "Invalid number of unprocessed parents" };
                         }
                     }
-                    dst_slot.unwalked_parent_cnt = dst_slot.unwalked_parent_cnt - 1u;
-                    if (dst_slot.unwalked_parent_cnt == 0u) {
+                    dst_slot.unwalked_parent_cnt = dst_slot.unwalked_parent_cnt - 1zu;
+                    if (dst_slot.unwalked_parent_cnt == 0zu) {
                         ready_idxes.push(dst_slot_idx);
                     }
                 }
@@ -297,7 +301,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      *     @ref offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::ready_queue::ready_queue::ready_queue` to prime with
      *     `grid_down_cnt * grid_right_cnt * grid_depth_cnt` reserved elements (variables being multiplied are the dimensions of `g`),
      *     thereby removing/reducing the need for adhoc reallocations.
-     * @param g Directed graph.
+     * @param g Graph.
      * @return `find_max_path(g)` result.
      */
     template<
@@ -342,7 +346,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      * @tparam grid_right_cnt `g`'s right dimension of the underlying pairwise alignment graph instance.
      * @tparam grid_depth_cnt `g'`s depth dimension of the underlying pairwise alignment graph instance.
      * @tparam path_edge_capacity Of all paths between root and leaf within `g`, the maximum number of edges.
-     * @param g Directed graph.
+     * @param g Graph.
      * @return `find_max_path(g)` result.
      */
     template<
