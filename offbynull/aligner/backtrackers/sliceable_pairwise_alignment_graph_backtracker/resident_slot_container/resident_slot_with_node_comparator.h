@@ -20,12 +20,12 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      *
      * @tparam N Graph node type.
      * @tparam E Graph edge type.
-     * @tparam WEIGHT Graph edge's weight type.
+     * @tparam ED Graph edge data type (edge weight).
      */
     template<
         backtrackable_node N,
         backtrackable_edge E,
-        weight WEIGHT
+        weight ED
     >
     struct resident_slot_with_node_comparator {
         /**
@@ -38,8 +38,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          * @return `lhs.node < rhs.node`
          */
         bool operator()(
-            const resident_slot_with_node<N, E, WEIGHT>& lhs,
-            const resident_slot_with_node<N, E, WEIGHT>& rhs
+            const resident_slot_with_node<N, E, ED>& lhs,
+            const resident_slot_with_node<N, E, ED>& rhs
         ) const {
             return lhs.node < rhs.node;
         }
@@ -54,7 +54,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          * @return `lhs.node < rhs`
          */
         bool operator()(
-            const resident_slot_with_node<N, E, WEIGHT>& lhs,
+            const resident_slot_with_node<N, E, ED>& lhs,
             const N& rhs
         ) const {
             return lhs.node < rhs;
@@ -71,7 +71,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          */
         bool operator()(
             const N& lhs,
-            const resident_slot_with_node<N, E, WEIGHT>& rhs
+            const resident_slot_with_node<N, E, ED>& rhs
         ) const {
             return lhs < rhs.node;
         }

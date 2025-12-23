@@ -22,14 +22,14 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
      *
      * @tparam E Graph edge type.
-     * @tparam WEIGHT Graph edge data type (edge weight).
+     * @tparam ED Graph edge data type (edge weight).
      */
-    template<typename E, weight WEIGHT>
+    template<typename E, weight ED>
     struct slot {
         /** Backtracking edge. */
         packable_optional<E> backtracking_edge;
         /** Backtracking weight (value is valid only if `backtracking_edge` has a value). */
-        WEIGHT backtracking_weight;
+        ED backtracking_weight;
 
         /**
          * Construct an
@@ -38,7 +38,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          * @param backtracking_edge_ Backtracking edge.
          * @param backtracking_weight_ Backtracking weight.
          */
-        slot(E backtracking_edge_, WEIGHT backtracking_weight_)
+        slot(E backtracking_edge_, ED backtracking_weight_)
         : backtracking_edge { backtracking_edge_ }
         , backtracking_weight { backtracking_weight_ } {}
 

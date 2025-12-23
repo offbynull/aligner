@@ -23,18 +23,18 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      *
      * @tparam N Graph node type.
      * @tparam E Graph edge type.
-     * @tparam WEIGHT Graph edge data type (edge weight).
+     * @tparam ED Graph edge data type (edge weight).
      */
     template<
         backtrackable_node N,
         backtrackable_edge E,
-        weight WEIGHT
+        weight ED
     >
     struct resident_slot_with_node {
         /** Node tracked by `slot_`. */
         N node;
         /** Resident slot. */
-        resident_slot<E, WEIGHT> slot_;
+        resident_slot<E, ED> slot_;
     }
     PACK_STRUCT_STOP;
 }
