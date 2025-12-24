@@ -25,13 +25,13 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
      *
      * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
      *
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam WEIGHT Graph edge's weight type.
      */
     template<backtrackable_node N, backtrackable_edge E, weight WEIGHT>
     struct slot {
-        /** Node assigned to this slot. */
+        /** Identifier of node assigned to this slot. */
         N node;
         /** Of all incoming edges into `node`, the number of parents left to be processed by the owning backtracker. */
         std::size_t unwalked_parent_cnt;
@@ -44,7 +44,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
         /**
          * Construct an @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot instance.
          *
-         * @param node_ Node assigned to be assigned to this slot.
+         * @param node_ Identifier of node to be assigned to this slot.
          * @param unwalked_parent_cnt_ `node_`'s incoming edge count, assumed to all be unprocessed by the owning backtracker at time of
          *     creation.
          */

@@ -17,14 +17,14 @@ namespace offbynull::aligner::scorer::scorer {
     using offbynull::concepts::widenable_to_size_t;
 
     /**
-     * Concept that's satisfied if `T` has the traits of a scorer. A scorer is a callable that scores an alignment graph's edge.
+     * Concept that's satisfied if `T` has the traits of a scorer. A scorer is a callable that scores a pairwise alignment graph's edge.
      *
      * @tparam T Type to check.
-     * @tparam E Alignment graph's edge identifier type.
-     * @tparam SEQ_INDEX Alignment graph's sequence indexer type.
-     * @tparam DOWN_ELEM Alignment graph's downward sequence element type.
-     * @tparam RIGHT_ELEM Alignment graph's rightward sequence element type.
-     * @tparam WEIGHT Alignment graph's edge weight type.
+     * @tparam E Pairwise alignment graph's edge identifier type.
+     * @tparam SEQ_INDEX Pairwise alignment graph's sequence indexer type.
+     * @tparam DOWN_ELEM Pairwise alignment graph's downward sequence element type.
+     * @tparam RIGHT_ELEM Pairwise alignment graph's rightward sequence element type.
+     * @tparam WEIGHT Pairwise alignment graph's edge data type (edge's weight).
      */
     template<typename T, typename E, typename SEQ_INDEX, typename DOWN_ELEM, typename RIGHT_ELEM, typename WEIGHT>
     concept scorer =
@@ -56,10 +56,10 @@ namespace offbynull::aligner::scorer::scorer {
      * Equivalent to @ref offbynull::aligner::scorer::scorer::scorer, but doesn't enforce an exact type for the callable's return value.
      *
      * @tparam T Type to check.
-     * @tparam E Alignment graph's edge identifier type.
-     * @tparam SEQ_INDEX Alignment graph's sequence indexer type.
-     * @tparam DOWN_ELEM Alignment graph's downward sequence element type.
-     * @tparam RIGHT_ELEM Alignment graph's rightward sequence element type.
+     * @tparam E Pairwise alignment graph's edge identifier type.
+     * @tparam SEQ_INDEX Pairwise alignment graph's sequence indexer type.
+     * @tparam DOWN_ELEM Pairwise alignment graph's downward sequence element type.
+     * @tparam RIGHT_ELEM Pairwise alignment graph's rightward sequence element type.
      */
     template<typename T, typename E, typename SEQ_INDEX, typename DOWN_ELEM, typename RIGHT_ELEM>
     concept scorer_without_explicit_weight =
@@ -90,9 +90,9 @@ namespace offbynull::aligner::scorer::scorer {
     /**
      * Unimplemented @ref offbynull::aligner::scorer::scorer::scorer, intended for documentation.
      *
-     * @tparam SEQ_INDEX Alignment graph's sequence indexer type.
-     * @tparam DOWN_ELEM Alignment graph's downward sequence element type.
-     * @tparam RIGHT_ELEM Alignment graph's rightward sequence element type.
+     * @tparam SEQ_INDEX Pairwise alignment graph's sequence indexer type.
+     * @tparam DOWN_ELEM Pairwise alignment graph's downward sequence element type.
+     * @tparam RIGHT_ELEM Pairwise alignment graph's rightward sequence element type.
      */
     template<typename SEQ_INDEX, typename DOWN_ELEM, typename RIGHT_ELEM, weight WEIGHT>
     requires requires (const DOWN_ELEM down_elem, const RIGHT_ELEM right_elem) {
@@ -106,10 +106,10 @@ namespace offbynull::aligner::scorer::scorer {
          *  * When `edge` is an indel, either `down_elem` or `right_elem` is assigned.
          *  * When `edge` is a substitution, both `down_elem` and `right_elem` are assigned.
          *
-         * @param edge Edge.
+         * @param edge Edge identifier.
          * @param down_elem Downward sequence's element assigned to `edge` (`std::nullopt` if unassigned).
          * @param right_elem Rightward sequence's element assigned to `edge`  (`std::nullopt` if unassigned).
-         * @return Score for edge (edge weight).
+         * @return Score for `edge` (edge weight).
          */
         WEIGHT operator()(
             const auto& edge,

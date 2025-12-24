@@ -150,8 +150,8 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
          *  * `n2` isn't reachable from `n1`.
          *
          * @param grid_down Slice (row) to iterator over.
-         * @param root_node Root node override. When iterating nodes, it'll be as if graph's root node is actually this node.
-         * @param leaf_node Leaf node override. When iterating nodes, it'll be as if graph's leaf node is actually this node.
+         * @param root_node Root node identifier override. When iterating nodes, it'll be as if graph's root node is actually this node.
+         * @param leaf_node Leaf node identifier override. When iterating nodes, it'll be as if graph's leaf node is actually this node.
          * @return Nodes within `grid_down` slice. This range may be lazily evaluated, meaning the behavior of this range becomes undefined
          *     once this graph is modified in any way.
          */
@@ -208,8 +208,8 @@ namespace offbynull::aligner::graph::sliceable_pairwise_alignment_graph {
      * @tparam G Graph type.
      * @param g Graph.
      * @param grid_down Slice (row) to iterator over.
-     * @param root_node Root node override. When iterating nodes, it'll be as if `g`'s root node is actually this node.
-     * @param leaf_node Leaf node override. When iterating nodes, it'll be as if `g`'s leaf node is actually this node.
+     * @param root_node Root node identifier override. When iterating nodes, it'll be as if `g`'s root node is actually this node.
+     * @param leaf_node Leaf node identifier  override. When iterating nodes, it'll be as if `g`'s leaf node is actually this node.
      * @return Range of nodes. This range may be lazily evaluated, meaning the behavior of this range becomes undefined once `g` is modified
      *     in any way.
      */

@@ -31,7 +31,7 @@ namespace offbynull::aligner::scorers::single_character_substitution_matrix_scor
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam alphabet_size Number of characters (must be <= 255).
      * @tparam SEQ_INDEX Sequence indexer type.
-     * @tparam WEIGHT Alignment graph's edge weight type.
+     * @tparam WEIGHT Pairwise alignment graph's edge data type (edge's weight).
      */
     template<bool debug_mode, std::size_t alphabet_size, widenable_to_size_t SEQ_INDEX, weight WEIGHT>
     class single_character_substitution_matrix_scorer {

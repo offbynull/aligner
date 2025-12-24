@@ -54,11 +54,11 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      *                                              *---->*---->*---->*-
      * ```
      *
-     * @tparam E Graph edge type.
+     * @tparam E Graph edge identifier type.
      */
     template<backtrackable_edge E>
     struct hop {
-        /** Edge connecting two segments. */
+        /** Identifier of edge connecting two segments. */
         E edge;
     }
     PACK_STRUCT_STOP;

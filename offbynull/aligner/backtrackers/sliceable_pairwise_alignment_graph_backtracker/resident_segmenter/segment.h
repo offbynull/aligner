@@ -37,7 +37,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      *  *---->*---->*---->*---->*
      * ```
      *
-     * @tparam N Graph node type.
+     * @tparam N Graph node identifier type.
      */
     template<backtrackable_node N>
     struct segment {

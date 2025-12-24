@@ -31,8 +31,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * that allocates its containers on the heap.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam ED Graph edge data type (edge weight).
      * @tparam minimize_allocations `true` to force created containers to prime with the exact number of elements needed, thereby
      *     removing/reducing the need for adhoc reallocations.

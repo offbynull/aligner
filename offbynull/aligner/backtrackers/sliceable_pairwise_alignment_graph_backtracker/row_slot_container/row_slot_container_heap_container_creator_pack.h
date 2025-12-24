@@ -19,7 +19,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * that allocates its containers on the heap.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
-     * @tparam E Graph edge type.
+     * @tparam E Graph edge identifier type.
      * @tparam ED Graph edge data type (edge weight).
      */
     template<

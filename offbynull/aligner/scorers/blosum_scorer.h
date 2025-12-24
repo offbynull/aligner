@@ -208,7 +208,7 @@ X -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -6
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam threshold_ BLOSUM threshold.
      * @tparam SEQ_INDEX Sequence indexer type.
-     * @tparam WEIGHT Alignment graph's edge weight type.
+     * @tparam WEIGHT Pairwise alignment graph's edge data type (edge's weight).
      */
     template<bool debug_mode, threshold threshold_, widenable_to_size_t SEQ_INDEX, weight WEIGHT>
     class blosum_scorer : public single_character_substitution_matrix_scorer<debug_mode, 25zu, SEQ_INDEX, WEIGHT> {

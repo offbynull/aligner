@@ -154,7 +154,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          *  * this path container already contains edges.
          *  * the number of edges this path container can hold is 0.
          *
-         * @param backtracking_edge Graph edge.
+         * @param backtracking_edge Graph edge identifier.
          * @return This path container's element for representing `backtracking_edge`.
          */
         element<E>* initialize(const E& backtracking_edge) {

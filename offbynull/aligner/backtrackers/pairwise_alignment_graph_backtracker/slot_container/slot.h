@@ -28,11 +28,11 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      *
      * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
      *
-     * @tparam N Graph node type.
+     * @tparam N Graph node identifier type.
      * @tparam PARENT_COUNT Graph node incoming edge counter type. Must be wide enough to hold the maximum number of incoming edges across
      *      all nodes in the underlying pairwise alignment graph instance (e.g., across all nodes in any global pairwise alignment graph, a
      *      node can have at most 3 incoming edges).
-     * @tparam E Graph edge type.
+     * @tparam E Graph edge identifier type.
      * @tparam ED Graph edge data type (edge weight).
      */
     template<
@@ -42,7 +42,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         widenable_to_size_t PARENT_COUNT
     >
     struct slot {
-        /** Graph node this `slot` is assigned to. */
+        /** Node identifier this `slot` is assigned to. */
         N node;
         /** Number of `node` parents that have yet to be walked. */
         PARENT_COUNT unwalked_parent_cnt;
@@ -54,7 +54,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
         /**
          * Construct an @ref offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker::slot_container::slot::slot instance.
          *
-         * @param node_ Node assigned to be assigned to this slot.
+         * @param node_ Identifier of node to be assigned to this slot.
          * @param unwalked_parent_cnt_ `node_`'s incoming edge count, assumed to all be unprocessed by the owning backtracker at time of
          *     creation.
          */

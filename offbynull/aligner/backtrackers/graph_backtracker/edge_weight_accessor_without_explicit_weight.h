@@ -15,7 +15,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::edge_weight_acces
      * enforced.
      *
      * @tparam T Type to check.
-     * @tparam E Graph edge type.
+     * @tparam E Graph edge identifier type.
      */
     template<
         typename T,

@@ -23,8 +23,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * that allocates its containers on the heap.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam ED Graph edge data type (edge weight).
      * @tparam minimize_allocations `true` to force `create_resident_slot_container_container_creator_pack()` to create
      *     @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_slot_container::resident_slot_container_heap_container_creator_pack:resident_slot_container_heap_container_creator_pack

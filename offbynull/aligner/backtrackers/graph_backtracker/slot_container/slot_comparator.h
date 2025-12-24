@@ -13,11 +13,11 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
     using offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot;
 
     /**
-     * @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot comparator that compares the nodes of two slots
-     * against each other using the less-than operator.
+     * @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot comparator that compares the node identifiers of
+     * two slots against each other using the less-than operator.
      *
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam WEIGHT Graph edge's weight type.
      */
     template<
@@ -28,7 +28,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
     struct slot_comparator {
         /**
          * Compare two @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot "slot"s by applying the
-         * less-than operator on their nodes.
+         * less-than operator on their node identifiers.
          *
          * @param lhs Left-hand side.
          * @param rhs Right-hand side.
@@ -39,8 +39,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
         }
 
         /**
-         * Compare an @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot "slot"'s node against a node
-         * object, by applying the less-than operator.
+         * Compare an @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot "slot"'s node identifier against
+         * a node identifier, by applying the less-than operator.
          *
          * @param lhs Left-hand side.
          * @param rhs Right-hand side.
@@ -52,8 +52,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
 
 
         /**
-         * Compare an @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot "slot"'s node against a node
-         * object, by applying the less-than operator.
+         * Compare an @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot "slot"'s node identifier against
+         * a node identifier, by applying the less-than operator.
          *
          * @param lhs Left-hand side.
          * @param rhs Right-hand side.

@@ -78,7 +78,7 @@ namespace offbynull::aligner::graphs::directed_graph {
          *
          * If `n` already exists within this graph, the behavior of this function is undefined.
          *
-         * @param n Node ID.
+         * @param n Node identifier.
          * @param data Node data.
          */
         void insert_node(const N& n, ND&& data) {
@@ -97,7 +97,7 @@ namespace offbynull::aligner::graphs::directed_graph {
          *
          * If `n` doesn't exist within this graph, the behavior of this function is undefined.
          *
-         * @param n Node ID.
+         * @param n Node identifier.
          */
         void delete_node(const N& n) {
             if constexpr (debug_mode) {
@@ -129,7 +129,7 @@ namespace offbynull::aligner::graphs::directed_graph {
          *
          * If `n` doesn't exist within this graph, the behavior of this function is undefined.
          *
-         * @param n Node ID.
+         * @param n Node identifier.
          * @param data Updated node data.
          */
         void update_node_data(const N& n, ND&& data) {
@@ -166,12 +166,12 @@ namespace offbynull::aligner::graphs::directed_graph {
          *  * `from_e` already exists with this graph.
          *  * `to_e` already exists with this graph.
          *
-         * @param insert_n Insert node ID.
+         * @param insert_n Insert node identifier.
          * @param insert_n_data Insert node data.
-         * @param existing_e Existing edge ID.
-         * @param from_e Former portion's replacement edge ID (from source node to `insert_n`).
+         * @param existing_e Existing edge identifier.
+         * @param from_e Former portion's replacement edge identifier (from source node to `insert_n`).
          * @param from_e_data Former portion's replacement edge data.
-         * @param to_e Latter portion's replacement edge ID (from `insert_n` to destination node).
+         * @param to_e Latter portion's replacement edge identifier (from `insert_n` to destination node).
          * @param to_e_data Latter portion's replacement edge data.
          */
         void insert_node_between_edge(
@@ -213,9 +213,9 @@ namespace offbynull::aligner::graphs::directed_graph {
          *  * `from_n` doesn't exist within this graph.
          *  * `to_n` doesn't exist within this graph.
          *
-         * @param e Edge ID.
-         * @param from_n Edge's source node.
-         * @param to_n Edge's destination node.
+         * @param e Edge identifier.
+         * @param from_n Identifier of edge's source node.
+         * @param to_n Identifier of edge's destination node.
          * @param data Edge data.
          */
         void insert_edge(const E& e, const N& from_n, const N& to_n, ED&& data) {
@@ -240,7 +240,7 @@ namespace offbynull::aligner::graphs::directed_graph {
          *
          * If `e` doesn't exist within this graph, the behavior of this function is undefined.
          *
-         * @param e Edge ID
+         * @param e Edge identifier.
          * @param remove_from_if_isolated If `true`, `e`'s source node will also be removed provided that no other edges point to it.
          * @param remove_to_if_isolated If `true`, `e`'s destination node will also be removed provided that no other edges point to it.
          */
@@ -287,7 +287,7 @@ namespace offbynull::aligner::graphs::directed_graph {
          *
          * If `e` doesn't exist within this graph, the behavior of this function is undefined.
          *
-         * @param e Edge ID.
+         * @param e Edge identifier.
          * @param data Updated edge data.
          */
         void update_edge_data(const E& e, ED&& data) {

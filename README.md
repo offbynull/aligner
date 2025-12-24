@@ -1,8 +1,6 @@
 TODO:
 
-* update meson based on new cookiecutter templates.
-* @tparam E and anywhere that takes an edge should be "edge identifier"
-* @tparam N and anywhere that takes an edge should be "node identifier"
+* user-friendly entry-points into alignments
 
 * enable struct packing via  a template parameter instead of a define? may cause lots of duplication. 
 

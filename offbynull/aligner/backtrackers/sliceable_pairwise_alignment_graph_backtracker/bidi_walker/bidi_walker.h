@@ -139,9 +139,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          *  * `node` doesn't exist within `g`.
          *  * `node` is neither a node in the row targeted nor a resident node before the row targeted.
          *
-         * @param node Node within graph. This node must be either a non-resident node within the row targeted or a resident node leading up
-         *     to the row targeted.
-         * @return Final edge within path and overall path weight (of maximally-weighted path) to `node`, for both directions.
+         * @param node Node identifier within graph. This node must be either a non-resident node within the row targeted or a resident node
+         *     leading up to the row targeted.
+         * @return Identifier of final edge within path and overall path weight (of maximally-weighted path) to `node`, for both directions.
          */
         find_result find(const N& node) {
             const auto& forward_slot { forward_walker_.find(node) };
@@ -150,13 +150,13 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         }
 
         /**
-         * A node accompanied by the
+         * A node identifier accompanied by the
          * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker::find_result
          * instance for that node.
          */
         struct list_entry {
             /**
-             * Node.
+             * Node identifier.
              */
             N node;
             /**
@@ -170,7 +170,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker::find
          * invoked on all nodes within the target row.
          *
-         * @return Range, where each element contains the node and result of
+         * @return Range, where each element contains the node identifier and result of
          *     @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::bidi_walker::bidi_walker::bidi_walker::find
          *     for that node.
          */
@@ -200,8 +200,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          * The behavior of this function is undefined if `node` doesn't exist within `g`.
          *
          * @param g Graph.
-         * @param node Node within `g`.
-         * @return Final edge within path and overall path weight (of maximally-weighted path) to `node`, for both directions.
+         * @param node Node identifier within `g`.
+         * @return Identifier of final edge within path and overall path weight (of maximally-weighted path) to `node`, for both directions.
          */
         static find_result_copy converge(
             const G& g,
@@ -220,7 +220,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          * The behavior of this function is undefined if `node` doesn't exist within `g`.
          *
          * @param g Graph.
-         * @param node Node within `g`.
+         * @param node Node identifier within `g`.
          * @return Overall path weight (of maximally-weighted path) to `node`, for both directions, summed.
          */
         static ED converge_weight(
@@ -244,7 +244,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          *  * `max_path_weight` is not a finite value.
          *
          * @param g Graph.
-         * @param node Node within `g`.
+         * @param node Node identifier within `g`.
          * @param max_path_weight Weight of the maximally-weighted path between `g`'s root node and leaf node (must be finite). If there are
          *     multiple, they all should be the same weight.
          * @param max_path_weight_comparison_tolerance Tolerance used when testing for weight for equality. This may need to be non-zero

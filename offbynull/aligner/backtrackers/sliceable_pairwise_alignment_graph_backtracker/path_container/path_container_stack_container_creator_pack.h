@@ -18,7 +18,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * that allocates its containers on the stack.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
-     * @tparam E Graph edge type.
+     * @tparam E Graph edge identifier type.
      * @tparam path_edge_capacity Maximum number of elements the container can hold.
      */
     template<

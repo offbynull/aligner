@@ -99,7 +99,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         /**
          * Get reference to slot assigned to some node.
          *
-         * @param node Node to find.
+         * @param node Identifier of node to find.
          * @return Reference to slot assigned to `node` if found, otherwise `std::nullopt`.
          */
         std::optional<std::reference_wrapper<resident_slot<E, ED>>> find(const N& node) {

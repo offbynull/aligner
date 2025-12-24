@@ -35,7 +35,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
 
     /**
      * Container of @ref offbynull::aligner::backtrackers::graph_backtracker::slot_container::slot::slot "slots", used by
-     * @ref offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker to track the backtracking state of each  node
+     * @ref offbynull::aligner:backtrackers::graph_backtracker::backtracker::backtracker to track the backtracking state of each node
      * within a graph.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
@@ -118,7 +118,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
          *
          * If no slot exists for `node`, the behavior of this function is undefined.
          *
-         * @param node Node to find.
+         * @param node Identifier of node to find.
          * @return Index of slot assigned to `node`.
          */
         std::size_t find_idx(const N& node) {
@@ -136,7 +136,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
          *
          * If no slot exists for `node`, the behavior of this function is undefined.
          *
-         * @param node Node to find.
+         * @param node Identifier of node to find.
          * @return Reference to slot assigned to `node`.
          */
         slot<N, E, WEIGHT>& find_ref(const N& node) {
@@ -171,7 +171,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
          *
          * If no slot exists for `node`, the behavior of this function is undefined.
          *
-         * @param node Node to find.
+         * @param node Identifier of node to find.
          * @return Index of and reference to slot assigned to `node`.
          */
         std::pair<std::size_t, slot<N, E, WEIGHT>&> find(const N& node) {

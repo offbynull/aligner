@@ -101,9 +101,9 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
         backtrackable_edge<typename G::E>
     class backtracker {
     public:
-        /** `G`'s node type. */
+        /** `G`'s node identifier type. */
         using N = typename G::N;
-        /** `G`'s edge type. */
+        /** `G`'s edge identifier type. */
         using E = typename G::E;
         /** `G`'s edge data type. */
         using ED = typename G::ED;
@@ -347,7 +347,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker {
          *
          * @param g Graph.
          * @param slots `populate_weights_and_backtrack_pointers(g)`'s output.
-         * @param end_node Node to backtrack from, which almost always should be `g`'s leaf node.
+         * @param end_node Identifier of node to backtrack from, which almost always should be `g`'s leaf node.
          * @return Maximally weighted path from `g`'s root node to `end_node`.
          */
         PATH_CONTAINER backtrack(

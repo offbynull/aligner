@@ -38,7 +38,7 @@ namespace offbynull::aligner::scorers::qwerty_scorer {
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam SEQ_INDEX Sequence indexer type.
-     * @tparam WEIGHT Alignment graph's edge weight type.
+     * @tparam WEIGHT Pairwise alignment graph's edge data type (edge's weight).
      */
     template<bool debug_mode, widenable_to_size_t SEQ_INDEX, weight WEIGHT>
     class qwerty_scorer : public single_character_substitution_matrix_scorer<debug_mode, 95zu, SEQ_INDEX, WEIGHT> {

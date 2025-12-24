@@ -54,7 +54,7 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
 
     PACK_STRUCT_START
     /**
-     * Edge ID type for @ref offbynull::aligner::graphs::pairwise_overlap_alignment_graph::pairwise_overlap_alignment_graph.
+     * Edge identifier type for @ref offbynull::aligner::graphs::pairwise_overlap_alignment_graph::pairwise_overlap_alignment_graph.
      *
      * Struct is packed when `OBN_PACK_STRUCTS` macro is defined (and platform supports struct packing).
      *
@@ -67,8 +67,8 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
         edge_type type;
         /**
          * Edge source and destination nodes. Note that the type here is the backing
-         * @ref offbynull::aligner::graphs::grid_graph::grid_graph's edge ID type, which is comprised of a source node ID and a destination
-         * node ID.
+         * @ref offbynull::aligner::graphs::grid_graph::grid_graph's edge identifier type, which is comprised of a source node identifier
+         * and a destination node identifier.
          */
         edge<INDEX> inner_edge;
         /** Enable spaceship operator. */
@@ -76,8 +76,8 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
     }
     PACK_STRUCT_STOP;
 
-    // A scorer that translates calls from the grid_graph backing the pairwise_overlap_alignment_graph, such that the edge type becomes the
-    // edge type of pairwise_overlap_alignment_graph.
+    // A scorer that translates calls from the grid_graph backing the pairwise_overlap_alignment_graph, such that the edge identifier type
+    // becomes the edge identifier type of pairwise_overlap_alignment_graph.
     /**
      * Pipes offbynull::aligner::scorer::scorer::scorer invocations from
      * @ref offbynull::aligner::graphs::pairwise_overlap_alignment_graph::pairwise_overlap_alignment_graph to its backing
@@ -88,7 +88,7 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
      * @tparam INDEX Node coordinate type.
      * @tparam DOWN_ELEM Downward sequence type's element.
      * @tparam RIGHT_ELEM Rightward sequence type's element.
-     * @tparam WEIGHT Edge weight type.
+     * @tparam WEIGHT Edge data type (edge's weight).
      * @tparam GRID_GRAPH_SCORER Backing scorer type.
      */
     template<
@@ -122,7 +122,7 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
         /**
          * Score edge.
          *
-         * @param edge Edge.
+         * @param edge Edge identifier.
          * @param down_elem Downward element associated with `edge`, if any.
          * @param right_elem Rightward element associated with `edge`, if any.
          * @return Score for edge (edge weight).
@@ -156,7 +156,7 @@ namespace offbynull::aligner::graphs::pairwise_overlap_alignment_graph {
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam INDEX_ Node coordinate type.
-     * @tparam WEIGHT Edge weight type.
+     * @tparam WEIGHT Edge data type (edge's weight).
      * @tparam DOWN_SEQ Downward sequence type.
      * @tparam RIGHT_SEQ Rightward sequence type.
      * @tparam SUBSTITUTION_SCORER Scorer type used to score sequence alignment substitutions.

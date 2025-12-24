@@ -16,7 +16,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container::path_container
      * in reverse.
      *
-     * @tparam E Graph edge type.
+     * @tparam E Graph edge identifier type.
      */
     template<backtrackable_edge E>
     struct backward_walker_range {

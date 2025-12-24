@@ -26,8 +26,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * referred to as a container creator pack.
      *
      * @tparam T Type to check.
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam ED Graph edge data type (edge weight).
      */
     template<

@@ -18,8 +18,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * Current node / slot being walked by an
      * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::forward_walker::forward_walker::forward_walker.
      *
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam ED Graph edge data type (edge weight).
      */
     template<
@@ -28,7 +28,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         weight ED
     >
     struct row_entry {
-        /** Node. */
+        /** Node identifier. */
         N node;
         /** Slot for `node`. */
         slot<E, ED>* slot_ptr;

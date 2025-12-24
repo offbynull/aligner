@@ -16,7 +16,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * @ref offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::resident_segmenter::resident_segmenter_container_creator_pack::resident_segmenter_container_creator_pack,
      * intended for documentation.
      *
-     * @tparam N Graph node type.
+     * @tparam N Graph node identifier type.
      */
     template<
         backtrackable_node N
@@ -36,15 +36,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         /**
          * Create random access container holding resident nodes.
          *
-         * @param resident_nodes Range of resident nodes.
-         * @return Random access container containing the nodes within `resident_nodes`.
+         * @param resident_nodes Range of resident node identifiers.
+         * @return Random access container containing the node identifiers within `resident_nodes`.
          */
         auto create_resident_node_container(forward_range_of_non_cvref<N> auto&& resident_nodes) const;
 
         /**
          * Create random access container used to store edges to/from resident nodes.
          *
-         * @param resident_nodes_capacity Maximum number of resident nodes.
+         * @param resident_nodes_capacity Maximum number of resident node identifiers.
          * @return Empty random access container which can hold at least `resident_nodes_capacity` elements.
          */
         auto create_resident_edge_container(std::size_t resident_nodes_capacity) const;

@@ -53,6 +53,11 @@ namespace offbynull::concepts {
      */
     template <typename T, typename V>
     concept input_iterator_of_exact = std::input_iterator<T> && std::same_as<std::iter_reference_t<T>, V>;
+    // NOTE: It turns out that std::iter_reference_t returns whatever type the iterator deference operation returns. So, for example, if
+    //       dereferencing returns int instead int&, std::iter_reference_t<T> will resolve to int.
+    //
+    // NOTE: std::iter_reference_t<T> works on a broader set of type than std::iterator_traits<T>::reference. When I used the
+    //       std::iterator_traits<T>::reference, it would fail for some of my ranges (resolved to void?).
 
     /**
      * Concept that's satisfied if `T` satisfies `std::input_iterator` and `T` dereferences to `V` once const, volatile,
@@ -75,6 +80,8 @@ namespace offbynull::concepts {
     template<typename T, typename V>
     concept forward_range_of_exact = std::ranges::forward_range<T>
         && std::same_as<std::ranges::range_reference_t<T>, V>;
+    // NOTE: It turns out that std::range_reference_t returns whatever type the range's iterator deference operation returns. So, for
+    //       example, if dereferencing returns int instead int&, std::ranges::range_reference_t<T> will resolve to int.
 
     /**
      * Concept that's satisfied if `T` satisfies `std::ranges::forward_range` and `T`'s iterator dereferences to *exactly* one the types in
@@ -96,6 +103,8 @@ namespace offbynull::concepts {
     template<typename T, typename V>
     concept forward_range_of_non_cvref = std::ranges::forward_range<T>
         && (unqualified_object_type<V> && std::same_as<std::remove_cvref_t<std::ranges::range_reference_t<T>>, V>);
+    // NOTE: It turns out that std::range_reference_t returns whatever type the range's iterator deference operation returns. So, for
+    //       example, if dereferencing returns int instead int&, std::ranges::range_reference_t<T> will resolve to int.
 
     /**
      * Concept that's satisfied if `T` satisfies `std::ranges::bidirectional_range` and `T`'s iterator dereferences to *exactly* `V` (not
@@ -107,6 +116,8 @@ namespace offbynull::concepts {
     template<typename T, typename V>
     concept bidirectional_range_of_exact = std::ranges::bidirectional_range<T>
         && std::same_as<std::ranges::range_reference_t<T>, V>;
+    // NOTE: It turns out that std::range_reference_t returns whatever type the range's iterator deference operation returns. So, for
+    //       example, if dereferencing returns int instead int&, std::ranges::range_reference_t<T> will resolve to int.
 
     /**
      * Concept that's satisfied if `T` satisfies `std::ranges::bidirectional_range` and `T`'s iterator dereferences to *exactly* one the
@@ -128,6 +139,8 @@ namespace offbynull::concepts {
     template<typename T, typename V>
     concept bidirectional_range_of_non_cvref = std::ranges::bidirectional_range<T>
         && (unqualified_object_type<V> && std::same_as<std::remove_cvref_t<std::ranges::range_reference_t<T>>, V>);
+    // NOTE: It turns out that std::range_reference_t returns whatever type the range's iterator deference operation returns. So, for
+    //       example, if dereferencing returns int instead int&, std::ranges::range_reference_t<T> will resolve to int.
 
     /**
      * Concept that's satisfied if `T` satisfies `std::ranges::bidirectional_range` and `T`'s element type satisfies
@@ -149,6 +162,8 @@ namespace offbynull::concepts {
     template<typename T, typename V>
     concept random_access_range_of_exact = std::ranges::random_access_range<T>
         && std::same_as<std::ranges::range_reference_t<T>, V>;
+    // NOTE: It turns out that std::range_reference_t returns whatever type the range's iterator deference operation returns. So, for
+    //       example, if dereferencing returns int instead int&, std::ranges::range_reference_t<T> will resolve to int.
 
     /**
      * Concept that's satisfied if `T` satisfies `std::ranges::random_access_range` and `T`'s iterator dereferences to *exactly* one the
@@ -170,6 +185,8 @@ namespace offbynull::concepts {
     template<typename T, typename V>
     concept random_access_range_of_non_cvref = std::ranges::random_access_range<T>
         && (unqualified_object_type<V> && std::same_as<std::remove_cvref_t<std::ranges::range_reference_t<T>>, V>);
+    // NOTE: It turns out that std::range_reference_t returns whatever type the range's iterator deference operation returns. So, for
+    //       example, if dereferencing returns int instead int&, std::ranges::range_reference_t<T> will resolve to int.
 
     /**
      * Concepts that's satisfied if `T` is similar `std::vector, allowing subscript accessor/mutator, `size()`, and `begin()` / `end()`.

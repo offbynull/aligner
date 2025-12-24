@@ -79,9 +79,9 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         backtrackable_edge<typename G::E>
     class backtracker {
     public:
-        /** `G`'s node type. */
+        /** `G`'s node identifier type. */
         using N = typename G::N;
-        /** `G`'s edge type. */
+        /** `G`'s edge identifier type. */
         using E = typename G::E;
         /** `G`'s node data type. */
         using ND = typename G::ND;

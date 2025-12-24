@@ -23,8 +23,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::slot_container::s
      * creator pack.
      *
      * @tparam T Type to check.
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam WEIGHT Graph edge's weight type.
      */
     template<

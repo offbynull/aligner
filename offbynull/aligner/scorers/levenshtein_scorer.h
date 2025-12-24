@@ -19,9 +19,9 @@ namespace offbynull::aligner::scorers::levenshtein_scorer {
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam SEQ_INDEX Sequence indexer type.
-     * @tparam DOWN_ELEM Alignment graph's downward sequence element type.
-     * @tparam RIGHT_ELEM Alignment graph's rightward sequence element type.
-     * @tparam WEIGHT Alignment graph's edge weight type.
+     * @tparam DOWN_ELEM Pairwise alignment graph's downward sequence element type.
+     * @tparam RIGHT_ELEM Pairwise alignment graph's rightward sequence element type.
+     * @tparam WEIGHT Pairwise alignment graph's edge data type (edge's weight).
      */
     template<bool debug_mode, widenable_to_size_t SEQ_INDEX, typename DOWN_ELEM, typename RIGHT_ELEM, weight WEIGHT>
     class levenshtein_scorer : public simple_scorer<debug_mode, SEQ_INDEX, DOWN_ELEM, RIGHT_ELEM, WEIGHT> {

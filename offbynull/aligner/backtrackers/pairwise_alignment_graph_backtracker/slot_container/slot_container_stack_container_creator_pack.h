@@ -25,8 +25,8 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
      * that allocates its containers on the stack.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam ED Graph edge data type (edge weight).
      * @tparam PARENT_COUNT Graph node incoming edge counter type. Must be wide enough to hold the maximum number of incoming edges across
      *      all nodes in the underlying pairwise alignment graph instance (e.g., across all nodes in any global pairwise alignment graph, a

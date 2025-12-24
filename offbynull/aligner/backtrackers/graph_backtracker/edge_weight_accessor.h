@@ -14,7 +14,7 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::edge_weight_acces
      * argument and returns the weight of that edge).
      *
      * @tparam T Type to check.
-     * @tparam E Graph edge type.
+     * @tparam E Graph edge identifier type.
      * @tparam WEIGHT Graph edge's weight type.
      */
     template<

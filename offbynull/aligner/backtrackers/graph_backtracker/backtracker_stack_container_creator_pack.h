@@ -24,8 +24,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker_stack
      * that allocates its containers on the heap.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam WEIGHT Graph edge's weight type.
      * @tparam max_slot_container_elems For a container created via
      *     `create_slot_container_container_creator_pack().create_slot_container()`, the maximum number of slots allowed on the stack.

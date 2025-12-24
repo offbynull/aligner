@@ -30,8 +30,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
      * that allocates its containers on the stack.
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam ED Graph edge data type (edge weight).
      * @tparam grid_right_cnt Expected right dimension of the underlying sliceable pairwise alignment graph instance.
      * @tparam grid_depth_cnt Expected depth dimension of the underlying sliceable pairwise alignment graph instance.

@@ -34,7 +34,7 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
      *
      * @tparam debug_mode `true` to enable debugging logic, `false` otherwise.
      * @tparam INDEX_ Node coordinate type.
-     * @tparam WEIGHT Edge weight type.
+     * @tparam WEIGHT Edge data type (edge's weight).
      * @tparam DOWN_SEQ Downward sequence type.
      * @tparam RIGHT_SEQ Rightward sequence type.
      * @tparam SUBSTITUTION_SCORER Scorer type used to score sequence alignment substitutions.

@@ -151,9 +151,10 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          *  * `node` doesn't exist within `g`.
          *  * `node` is neither a node in the row targeted nor a resident node before the row targeted.
          *
-         * @param node Node within graph. This node must be either a non-resident node within the row targeted or a resident node leading up
-         *     to the row targeted.
-         * @return Final edge within path and overall path weight (of maximally-weighted path between the root node and `node`).
+         * @param node Idntifier of node within graph. This node must be either a non-resident node within the row targeted or a resident
+         *     node leading up to the row targeted.
+         * @return Identifier of final edge within path and overall path weight (of maximally-weighted path between the root node and
+         *     `node`).
          */
         slot<E, ED>& find(const N& node) {
             auto found_resident { resident_slots.find(node) };

@@ -24,8 +24,8 @@ namespace offbynull::aligner::backtrackers::graph_backtracker::backtracker_conta
      * @ref offbynull::aligner::backtrackers::graph_backtracker::backtracker::backtracker, referred to as a container creator pack.
      *
      * @tparam T Type to check.
-     * @tparam N Graph node type.
-     * @tparam E Graph edge type.
+     * @tparam N Graph node identifier type.
+     * @tparam E Graph edge identifier type.
      * @tparam WEIGHT Graph edge's weight type.
      */
     template<

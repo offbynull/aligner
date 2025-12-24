@@ -132,7 +132,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          *
          * If no slot exists for `node`, the behavior of this function is undefined.
          *
-         * @param node Node to find.
+         * @param node Identifier of node to find.
          * @return Index of slot assigned to `node`.
          */
         std::size_t find_idx(const N& node) const {
@@ -152,7 +152,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          * If no slot exists for `node` (e.g., `node` does not belong to this container's graph), the behavior of this function is
          * undefined.
          *
-         * @param node Node to find.
+         * @param node Identifier of node to find.
          * @return Reference to slot assigned to `node`.
          */
         slot<N, E, ED, PARENT_COUNT>& find_ref(const N& node) {
@@ -167,7 +167,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          * If no slot exists for `node` (e.g., `node` does not belong to this container's graph), the behavior of this function is
          * undefined.
          *
-         * @param node Node to find.
+         * @param node Identifier of node to find.
          * @return Reference to slot assigned to `node`.
          */
         const slot<N, E, ED, PARENT_COUNT>& find_ref(const N& node) const {
@@ -216,7 +216,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          * If no slot exists for `node` (e.g., `node` does not belong to this container's graph), the behavior of this function is
          * undefined.
          *
-         * @param node Node to find.
+         * @param node Identifier of node to find.
          * @return Index of and reference to slot assigned to `node`.
          */
         std::pair<std::size_t, slot<N, E, ED, PARENT_COUNT>&> find(const N& node) {
@@ -231,7 +231,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
          * If no slot exists for `node` (e.g., `node` does not belong to this container's graph), the behavior of this function is
          * undefined.
          *
-         * @param node Node to find.
+         * @param node Identifier of node to find.
          * @return Index of and reference to slot assigned to `node`.
          */
         std::pair<std::size_t, const slot<N, E, ED, PARENT_COUNT>&> find(const N& node) const {
