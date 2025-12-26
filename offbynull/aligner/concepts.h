@@ -26,7 +26,8 @@ namespace offbynull::aligner::concepts {
     concept weight =
         unqualified_object_type<T>
         && requires(T t) {
-            { t + t } -> std::same_as<T>;
+            { t + t } -> std::convertible_to<T>;
+            { t - t } -> std::convertible_to<T>;
             { t < t } -> std::same_as<bool>;
         };
 }

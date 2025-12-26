@@ -187,7 +187,13 @@ gtest = executable(
                 'offbynull/aligner/scorers/single_character_substitution_matrix_scorer_test.cpp',
                 'offbynull/aligner/scorers/blosum_scorer_test.cpp',
                 'offbynull/aligner/scorers/pam_scorer_test.cpp',
-                'offbynull/aligner/scorers/qwerty_scorer_test.cpp'
+                'offbynull/aligner/scorers/qwerty_scorer_test.cpp',
+                'offbynull/aligner/scorers/widening_scorer_test.cpp',
+                'offbynull/aligner/scorers/wrap_callable_scorer_test.cpp',
+                'offbynull/aligner/global_dynamic_programming_heap_aligner_test.cpp',
+                'offbynull/aligner/global_dynamic_programming_stack_aligner_test.cpp',
+                'offbynull/aligner/global_sliced_subdivision_heap_aligner_test.cpp',
+                'offbynull/aligner/global_sliced_subdivision_stack_aligner_test.cpp'
         ],
         source_checker,
         dependencies: dependencies + [gtest_dependency]+ [boost_dep],

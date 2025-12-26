@@ -93,14 +93,12 @@ namespace offbynull::aligner::graphs::grid_graph {
         sequence DOWN_SEQ,
         sequence RIGHT_SEQ,
         scorer<
-            edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
             WEIGHT
         > SUBSTITUTION_SCORER,
         scorer<
-            edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
@@ -208,6 +206,20 @@ namespace offbynull::aligner::graphs::grid_graph {
             }
         }
 
+        // grid_graph(DOWN_SEQ&&, RIGHT_SEQ&&, const SUBSTITUTION_SCORER&, const GAP_SCORER&) = delete;
+        // grid_graph(const DOWN_SEQ&&, RIGHT_SEQ&&, const SUBSTITUTION_SCORER&, const GAP_SCORER&)
+        // grid_graph(DOWN_SEQ&&, const RIGHT_SEQ&&, const SUBSTITUTION_SCORER&, const GAP_SCORER&)
+        // grid_graph(const DOWN_SEQ&&, const RIGHT_SEQ&&, const SUBSTITUTION_SCORER&, const GAP_SCORER&)
+        // TODO: PREVENT CONSTRUCTOR WITH RVALUE SEQS
+        // TODO: PREVENT CONSTRUCTOR WITH RVALUE SEQS
+        // TODO: PREVENT CONSTRUCTOR WITH RVALUE SEQS
+        // TODO: PREVENT CONSTRUCTOR WITH RVALUE SEQS
+        // TODO: PREVENT CONSTRUCTOR WITH RVALUE SEQS
+        // TODO: PREVENT CONSTRUCTOR WITH RVALUE SEQS
+        // TODO: PREVENT CONSTRUCTOR WITH RVALUE SEQS
+        // TODO: PREVENT CONSTRUCTOR WITH RVALUE SEQS
+        // TODO: PREVENT CONSTRUCTOR WITH RVALUE SEQS
+
         /** @copydoc offbynull::aligner::graph::sliceable_pairwise_alignment_graph::unimplemented_sliceable_pairwise_alignment_graph::get_node_data */
         ND get_node_data(const N& n) const {
             if constexpr (debug_mode) {
@@ -229,19 +241,16 @@ namespace offbynull::aligner::graphs::grid_graph {
             const N& n2 { e.destination };
             if (n1.down == n2.down && n1.right + I1 == n2.right) {
                 return gap_scorer(
-                    e,
                     { std::nullopt },
                     { { n1.right, { right_seq[n1.right] } } }
                 );
             } else if (n1.down + I1 == n2.down && n1.right == n2.right) {
                 return gap_scorer(
-                    e,
                     { { n1.down, { down_seq[n1.down] } } },
                     { std::nullopt }
                 );
             } else if (n1.down + I1 == n2.down && n1.right + I1 == n2.right) {
                 return substitution_scorer(
-                    e,
                     { { n1.down, { down_seq[n1.down] } } },
                     { { n1.right, { right_seq[n1.right] } } }
                 );
@@ -568,13 +577,11 @@ namespace offbynull::aligner::graphs::grid_graph {
         const sequence auto& down_seq,
         const sequence auto& right_seq,
         const scorer_without_explicit_weight<
-            edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
         > auto& substitution_scorer,
         const scorer_without_explicit_weight<
-            edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
@@ -586,7 +593,6 @@ namespace offbynull::aligner::graphs::grid_graph {
         using RIGHT_ELEM = std::remove_cvref_t<decltype(right_seq[0zu])>;
         using WEIGHT_1 = decltype(
             substitution_scorer(
-                std::declval<const edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<
@@ -607,7 +613,6 @@ namespace offbynull::aligner::graphs::grid_graph {
         );
         using WEIGHT_2 = decltype(
             gap_scorer(
-                std::declval<const edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<

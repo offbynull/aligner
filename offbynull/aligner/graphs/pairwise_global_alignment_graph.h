@@ -47,14 +47,12 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         sequence DOWN_SEQ,
         sequence RIGHT_SEQ,
         scorer<
-            edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
             WEIGHT
         > SUBSTITUTION_SCORER,
         scorer<
-            edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
@@ -331,13 +329,11 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         const sequence auto& down_seq,
         const sequence auto& right_seq,
         const scorer_without_explicit_weight<
-            edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
         > auto& substitution_scorer,
         const scorer_without_explicit_weight<
-            edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
@@ -349,7 +345,6 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         using RIGHT_ELEM = std::remove_cvref_t<decltype(right_seq[0zu])>;
         using WEIGHT_1 = decltype(
             substitution_scorer(
-                std::declval<const edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<
@@ -370,7 +365,6 @@ namespace offbynull::aligner::graphs::pairwise_global_alignment_graph {
         );
         using WEIGHT_2 = decltype(
             gap_scorer(
-                std::declval<const edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<

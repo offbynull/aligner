@@ -59,7 +59,6 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::ranges::size': 'ranges',
     'std::ranges::distance': 'ranges',
     'std::ranges::sort': 'algorithm',
-    'std::min': 'algorithm',
     'std::ranges::max_element': 'ranges',
     'std::ranges::begin': 'ranges',
     'std::ranges::end': 'ranges',
@@ -122,9 +121,12 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::back_inserter': 'iterator',
     'std::sized_sentinel_for': 'iterator',
     'std::iter_reference_t': 'iterator',
+    'std::iterator_traits': 'iterator',
     'std::lower_bound': 'algorithm',
     'std::reverse': 'algorithm',
     'std::sort': 'algorithm',
+    'std::max': 'algorithm',
+    'std::min': 'algorithm',
     'std::mt19937_64': 'random',
     'std::uniform_int_distribution': 'random',
     'std::uniform_real_distribution': 'random',
@@ -171,6 +173,7 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::move': 'utility',
     'std::unreachable': 'utility',
     'std::tuple': 'tuple',
+    'std::tuple_element_t': 'tuple',
     'std::tuple_size': 'tuple',
     'std::tuple_size_v': 'tuple',
     'std::tuple_cat': 'tuple',
@@ -236,6 +239,7 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'boost::safe_numerics': 'boost/safe_numerics/safe_integer.hpp',
     'boost::safe_numerics::checked::multiply': 'boost/safe_numerics/checked_default.hpp',
     'boost::safe_numerics::safe_numerics_error': 'boost/safe_numerics/safe_integer.hpp',
+    'boost::callable_traits::args_t': 'boost/callable_traits/args.hpp',
 }
 
 

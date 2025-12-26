@@ -1,7 +1,6 @@
 #ifndef OFFBYNULL_ALIGNER_SCORERS_LEVENSHTEIN_SCORER_H
 #define OFFBYNULL_ALIGNER_SCORERS_LEVENSHTEIN_SCORER_H
 
-#include <utility>
 #include <cstddef>
 #include "offbynull/aligner/scorer/scorer.h"
 #include "offbynull/aligner/concepts.h"
@@ -39,7 +38,6 @@ namespace offbynull::aligner::scorers::levenshtein_scorer {
     static_assert(
         scorer<
             simple_scorer<true, std::size_t, char, char, float>,
-            std::pair<int, int>,
             std::size_t,
             char,
             char,

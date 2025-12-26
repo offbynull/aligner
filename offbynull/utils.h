@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <limits>
 #include <iterator>
+#include <cstdint>
 #include <boost/container/static_vector.hpp>
 #include <boost/container/options.hpp>
 #include <boost/safe_numerics/checked_default.hpp>
@@ -44,6 +45,7 @@ static_assert(false, "Struct packing not supported by compiler. Turn off OBN_PAC
 namespace offbynull::utils {
     using offbynull::concepts::unqualified_object_type;
     using offbynull::concepts::widenable_to_size_t;
+    using offbynull::concepts::numeric;
 
     /**
      * Unimplemented class template used as a hack to determine what some unknown type `T` is. Because this class template remains
@@ -385,7 +387,31 @@ namespace offbynull::utils {
     };
 
     /**
-     * Throw exception if a multiplication chain will result in an overflow. The widest possible type is assumed to be std::size_t.
+     * Test if a multiplication chain will result in an overflow.
+     *
+     * @tparam R Result type (must be wide enough to hold the multiplication's output).
+     * @tparam A0 First operands type.
+     * @tparam As Remaining operands types (must all be the same as `A0`).
+     * @param rest Operands.
+     * @return `false` if `operands` multiply to a type that's too wide to be held in `R`, `true` otherwise.
+     */
+    template<std::unsigned_integral R, std::unsigned_integral A0, std::unsigned_integral... As>
+        requires (std::is_same_v<As, A0> && ...)
+    constexpr bool check_multiplication_nonoverflow(const A0 first, const As... rest) {
+        std::uintmax_t limit { first };
+        std::array<std::uintmax_t, sizeof...(rest)> rest_ { rest... };
+        for (const auto n : rest_) {
+            auto res { boost::safe_numerics::checked::multiply<std::uintmax_t>(limit, n) };
+            if (res.exception()) {
+                return false;
+            }
+            limit = static_cast<std::uintmax_t>(res);
+        }
+        return limit <= std::numeric_limits<R>::max();
+    }
+
+    /**
+     * Throw exception if a multiplication chain will result in an overflow.
      *
      * @tparam R Result type (must be wide enough to hold the multiplication's output).
      * @tparam A0 First operands type.
@@ -393,22 +419,91 @@ namespace offbynull::utils {
      * @param rest Operands.
      * @throws std::runtime_error If `operands` multiply to a type that's too wide to be held in `R`.
      */
-    template<widenable_to_size_t R, widenable_to_size_t A0, widenable_to_size_t... As>
+    template<std::unsigned_integral R, std::unsigned_integral A0, std::unsigned_integral... As>
         requires (std::is_same_v<As, A0> && ...)
-    constexpr void check_multiplication_nonoverflow(const A0 first, const As... rest) {
-        std::size_t max_size { first };
-        std::array<A0, sizeof...(rest)> operands_ { rest... };
-        for (const auto op : operands_) {
-            auto res { boost::safe_numerics::checked::multiply<std::size_t>(max_size, op) };
-            if (res.exception()) {
-                throw std::runtime_error { "Type not wide enough" };
-            }
-            max_size = static_cast<std::size_t>(res);
-        }
-        if (std::numeric_limits<R>::max() <= max_size) {
+    constexpr void check_multiplication_nonoverflow_throwable(const A0 first, const As... rest) {
+        if (!check_multiplication_nonoverflow<R, A0, As...>(first, rest...)) {
             throw std::runtime_error { "Type not wide enough" };
         }
     }
+
+    /**
+     * Between two numeric types `T1` and `T2`, select the one that has a larger finite maximum. If `T1` is an integer so must `T2` be an
+     * integer and vice versa. Likewise, if `T1` is a floating point so must `T2` be a floating point and vice versa.
+     *
+     * @tparam T1 Integer or float.
+     * @tparam T2 Integer or float.
+     */
+    template<typename T1, typename T2>
+    requires numeric<T1> && numeric<T2>
+        && ((std::integral<T1> && std::integral<T2>) || (std::floating_point<T1> && std::floating_point<T2>))
+    struct wider_numeric {
+        /** `T1` if `T1`'s finite maximum is > `T2`'s finite maximum, otherwise `T2`. */
+        using type = std::conditional_t<(std::numeric_limits<T1>::max() > std::numeric_limits<T2>::max()), T1, T2>;
+    };
+    // TODO: This test works fine for integers but may not be okay for floating point? For floats, it may be better to test max_exponent,
+    //       min_exponent, and digits (and fail if is_iec559 reports false because then its some other type of number that those measures
+    //       may not accurately capture).
+
+    /**
+     * Between two numeric types `T1` and `T2`, select the one that has a smaller finite maximum. If `T1` is an integer so must `T2` be an
+     * integer and vice versa. Likewise, if `T1` is a floating point so must `T2` be a floating point and vice versa.
+     *
+     * @tparam T1 Integer or float.
+     * @tparam T2 Integer or float.
+     */
+    template<typename T1, typename T2>
+    requires numeric<T1> && numeric<T2>
+        && ((std::integral<T1> && std::integral<T2>) || (std::floating_point<T1> && std::floating_point<T2>))
+    struct narrower_numeric {
+        /** `T1` if `T1`'s finite maximum is < `T2`'s finite maximum, otherwise `T2`. */
+        using type = std::conditional_t<(std::numeric_limits<T1>::max() < std::numeric_limits<T2>::max()), T1, T2>;
+    };
+    // TODO: This test works fine for integers but may not be okay for floating point? For floats, it may be better to test max_exponent,
+    //       min_exponent, and digits (and fail if is_iec559 reports false because then its some other type of number that those measures
+    //       may not accurately capture).
+
+    /**
+     * Specialized type specifically used as a failure marker by @ref narrowest_type_for_indexing. When @ref narrowest_type_for_indexing is
+     * unable to find a suitable type, this type is used so that the compiler error mentions this type's name. The hope is that the user
+     * will be able to pinpoint the issue much quicker once they see this type's name in the error output.
+     */
+    struct narrowest_type_for_indexing_no_type_available {
+        using type = void;
+    };
+
+    /**
+     * Select the narrowest unsigned integer type that will reliably hold a `std::vector`-like container's indexes, based on the upper-limit
+     * of that container's size. For example, imagine having an `std::vector` that never exceeds a size of 200 elements. Since
+     * `std::uint8_t` spans from 0 to 255, indexes within that `std::vector` can be referenced using `std::uint8_t` instead of
+     * `std::size_t`.
+     *
+     * @tparam index_upperbound Upperbound of the index (size - 1).
+     */
+    template<std::size_t index_upperbound>
+    struct narrowest_type_for_indexing {
+        using type = std::conditional_t<
+            (index_upperbound <= std::numeric_limits<std::uint8_t>::max()
+                && std::numeric_limits<std::uint8_t>::max() <= std::numeric_limits<std::size_t>::max()),
+            std::uint8_t,
+            std::conditional_t<
+                (index_upperbound <= std::numeric_limits<std::uint16_t>::max()
+                    && std::numeric_limits<std::uint16_t>::max() <= std::numeric_limits<std::size_t>::max()),
+                std::uint16_t,
+                std::conditional_t<
+                    (index_upperbound <= std::numeric_limits<std::uint32_t>::max()
+                        && std::numeric_limits<std::uint32_t>::max() <= std::numeric_limits<std::size_t>::max()),
+                    std::uint32_t,
+                    std::conditional_t<
+                        (index_upperbound <= std::numeric_limits<std::uint64_t>::max()
+                            && std::numeric_limits<std::uint64_t>::max() <= std::numeric_limits<std::size_t>::max()),
+                        std::uint64_t,
+                        narrowest_type_for_indexing_no_type_available
+                    >
+                >
+            >
+        >;
+    };
 }
 
 #endif //OFFBYNULL_UTILS_H

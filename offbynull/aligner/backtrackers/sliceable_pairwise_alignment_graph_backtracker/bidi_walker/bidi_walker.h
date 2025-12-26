@@ -273,7 +273,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             bidi_walker bidi_walker_ { bidi_walker::create_and_initialize(g, down) };
             for (const auto& entry : bidi_walker_.list()) {
                 ED node_converged_weight { entry.slots.forward_slot.backtracking_weight + entry.slots.backward_slot.backtracking_weight };
-                if (std::abs(node_converged_weight -  max_path_weight) <= max_path_weight_comparison_tolerance) {
+                // Why not use ...
+                //
+                //     if (std::abs(node_converged_weight -  max_path_weight) <= max_path_weight_comparison_tolerance) {
+                //         return true;
+                //     }
+                //
+                // ... instead of the block below? If ED is unsigned, std::abs() doesn't have overloads for unsigned types.
+                auto diff { [](auto a, auto b) { return (a < b) ? (b - a) : (a - b); } };
+                if (diff(node_converged_weight, max_path_weight) <= max_path_weight_comparison_tolerance) {
                     return true;
                 }
             }

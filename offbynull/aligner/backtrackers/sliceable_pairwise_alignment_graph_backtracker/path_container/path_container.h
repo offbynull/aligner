@@ -48,7 +48,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         ELEMENT_CONTAINER element_container;
         element<E>* head;
         element<E>* tail;
-        std::size_t next_idx;
+        std::size_t next_idx;  // TODO: What's the point of this? why not just insert elements instead of preloading and using next_idx?
+                               //       The maximum path length is being preallocated, but that's a waste in most cases? (it'll be less)
 
     public:
         /**

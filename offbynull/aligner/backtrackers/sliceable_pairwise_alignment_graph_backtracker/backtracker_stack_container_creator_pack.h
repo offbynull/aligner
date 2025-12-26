@@ -85,8 +85,8 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
          */
         PATH_CONTAINER_TYPE create_path_container(std::size_t path_edge_capacity_) const  {
             if constexpr (debug_mode) {
-                if (path_edge_capacity != path_edge_capacity_) {
-                    throw std::runtime_error { "Size mismatch" };
+                if (path_edge_capacity_ > path_edge_capacity) {
+                    throw std::runtime_error { "Path edge capacity too large" };
                 }
             }
             return {};

@@ -191,7 +191,7 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                     std::reverse(
                         path.begin() + size_before,
                         path.end()
-                    );
+                    );  // TODO: Wrap as a reversed view and return that instead?
                 } else {
                     throw std::runtime_error { "This should never happen" };
                 }

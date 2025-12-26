@@ -249,7 +249,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
                             throw std::runtime_error { "Invalid number of unprocessed parents" };
                         }
                     }
-                    dst_slot.unwalked_parent_cnt = dst_slot.unwalked_parent_cnt - PC1;
+                    dst_slot.unwalked_parent_cnt = static_cast<PARENT_COUNT>(dst_slot.unwalked_parent_cnt - PC1);
                     if (dst_slot.unwalked_parent_cnt == PC0) {
                         ready_idxes.push(dst_slot_idx);
                     }
@@ -280,7 +280,7 @@ namespace offbynull::aligner::backtrackers::pairwise_alignment_graph_backtracker
             }
             // At this point, path is in reverse order (from last to first). Reverse it to get it into the forward order
             // (from first to last).
-            std::reverse(path.begin(), path.end());
+            std::reverse(path.begin(), path.end());  // TODO: Wrap as a reversed view and return that instead?
             return path;
         }
     };

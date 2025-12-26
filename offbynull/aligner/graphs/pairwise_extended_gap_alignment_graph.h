@@ -128,28 +128,24 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         sequence DOWN_SEQ,
         sequence RIGHT_SEQ,
         scorer<
-            edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
             WEIGHT
         > SUBSTITUTION_SCORER,
         scorer<
-            edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
             WEIGHT
         > INITIAL_GAP_SCORER,
         scorer<
-            edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
             WEIGHT
         > EXTENDED_GAP_SCORER,
         scorer<
-            edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
@@ -272,43 +268,36 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
             const auto& [n2_layer, n2_grid_down, n2_grid_right] { e.destination };
             if (n1_layer == node_layer::DIAGONAL && n2_layer == node_layer::DIAGONAL) {  // match
                 return substitution_scorer(
-                    e,
                     { { n1_grid_down, { down_seq[n1_grid_down] } } },
                     { { n1_grid_right, { right_seq[n1_grid_right] } } }
                 );
             } else if (n1_layer == node_layer::DOWN && n2_layer == node_layer::DOWN) {  // gap
                 return extended_gap_scorer(
-                    e,
                     { { n1_grid_down, { down_seq[n1_grid_down] } } },
                     { std::nullopt }
                 );
             } else if (n1_layer == node_layer::RIGHT && n2_layer == node_layer::RIGHT) {  // gap
                 return extended_gap_scorer(
-                    e,
                     { std::nullopt },
                     { { n1_grid_right, { right_seq[n1_grid_right] } } }
                 );
             } else if (n1_layer == node_layer::DIAGONAL && n2_layer == node_layer::DOWN) {  // indel
                 return initial_gap_scorer(
-                    e,
                     { { n1_grid_down, { down_seq[n1_grid_down] } } },
                     { std::nullopt }
                 );
             } else if (n1_layer == node_layer::DIAGONAL && n2_layer == node_layer::RIGHT) {  // indel
                 return initial_gap_scorer(
-                    e,
                     { std::nullopt },
                     { { n1_grid_right, { right_seq[n1_grid_right] } } }
                 );
             } else if (n1_layer == node_layer::DOWN && n2_layer == node_layer::DIAGONAL) {  // freeride
                 return freeride_scorer(
-                    e,
                     { std::nullopt },
                     { std::nullopt }
                 );
             } else if (n1_layer == node_layer::RIGHT && n2_layer == node_layer::DIAGONAL) {  // freeride
                 return freeride_scorer(
-                    e,
                     { std::nullopt },
                     { std::nullopt }
                 );
@@ -959,25 +948,21 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         const sequence auto& down_seq,
         const sequence auto& right_seq,
         const scorer_without_explicit_weight<
-            edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
         > auto& substitution_scorer,
         const scorer_without_explicit_weight<
-            edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
         > auto& initial_gap_scorer,
         const scorer_without_explicit_weight<
-            edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
         > auto& extended_gap_scorer,
         const scorer_without_explicit_weight<
-            edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
@@ -989,7 +974,6 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         using RIGHT_ELEM = std::remove_cvref_t<decltype(right_seq[0zu])>;
         using WEIGHT_1 = decltype(
             substitution_scorer(
-                std::declval<const edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<
@@ -1010,7 +994,6 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         );
         using WEIGHT_2 = decltype(
             initial_gap_scorer(
-                std::declval<const edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<
@@ -1031,7 +1014,6 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         );
         using WEIGHT_3 = decltype(
             extended_gap_scorer(
-                std::declval<const edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<
@@ -1052,7 +1034,6 @@ namespace offbynull::aligner::graphs::pairwise_extended_gap_alignment_graph {
         );
         using WEIGHT_4 = decltype(
             freeride_scorer(
-                std::declval<const edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<

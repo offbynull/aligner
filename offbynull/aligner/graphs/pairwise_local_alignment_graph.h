@@ -89,7 +89,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
      * @tparam INDEX Node coordinate type.
      * @tparam DOWN_ELEM Downward sequence type's element.
      * @tparam RIGHT_ELEM Rightward sequence type's element.
-     * @tparam WEIGHT Edge data type (edge's weight).
+     * @tparam WEIGHT_ Edge data type (edge's weight).
      * @tparam GRID_GRAPH_SCORER Backing scorer type.
      */
     template<
@@ -97,19 +97,23 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         widenable_to_size_t INDEX,
         unqualified_object_type DOWN_ELEM,
         unqualified_object_type RIGHT_ELEM,
-        weight WEIGHT,
+        weight WEIGHT_,
         scorer<
-            local_edge<INDEX>,
             INDEX,
             DOWN_ELEM,
             RIGHT_ELEM,
-            WEIGHT
+            WEIGHT_
         > GRID_GRAPH_SCORER
     >
     class grid_scorer_to_local_scorer_proxy {
     private:
         GRID_GRAPH_SCORER grid_graph_scorer;
     public:
+        /** @copydoc offbynull::aligner::scorer::scorer::unimplemented_scorer::WEIGHT */
+        using WEIGHT = WEIGHT_;
+        /** @copydoc offbynull::aligner::scorer::scorer::unimplemented_scorer::SEQ_INDEX */
+        using SEQ_INDEX = INDEX;
+
         /**
          * Construct an @ref offbynull::aligner::graphs::pairwise_local_alignment_graph::grid_scorer_to_local_scorer_proxy instance.
          *
@@ -123,13 +127,11 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         /**
          * Score edge.
          *
-         * @param edge Edge identifier.
          * @param down_elem Downward element associated with `edge`, if any.
          * @param right_elem Rightward element associated with `edge`, if any.
          * @return Score for edge (edge weight).
          */
-        WEIGHT operator()(
-            const edge<INDEX>& edge,
+        WEIGHT_ operator()(
             const std::optional<
                 std::pair<
                     INDEX,
@@ -144,7 +146,6 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             > right_elem
         ) const {
             return grid_graph_scorer(
-                local_edge<INDEX> { edge_type::NORMAL, edge },
                 down_elem,
                 right_elem
             );
@@ -171,21 +172,18 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         sequence DOWN_SEQ,
         sequence RIGHT_SEQ,
         scorer<
-            local_edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
             WEIGHT
         > SUBSTITUTION_SCORER,
         scorer<
-            local_edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
             WEIGHT
         > GAP_SCORER,
         scorer<
-            local_edge<INDEX_>,
             INDEX_,
             std::remove_cvref_t<decltype(std::declval<DOWN_SEQ>()[0zu])>,
             std::remove_cvref_t<decltype(std::declval<RIGHT_SEQ>()[0zu])>,
@@ -303,7 +301,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
             }
             if (e.type == edge_type::FREE_RIDE) {
                 const auto& [n1, n2] { e.inner_edge };
-                return std::tuple<N, N, ED> { n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
+                return std::tuple<N, N, ED> { n1, n2, freeride_scorer({ std::nullopt }, { std::nullopt }) };
             } else {
                 return g.get_edge(e.inner_edge);
             }
@@ -422,7 +420,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                     N n1 { std::get<1zu>(raw_full_edge) };
                     N n2 { std::get<2zu>(raw_full_edge) };
                     E e { edge_type::NORMAL, { n1, n2 } };
-                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
+                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer({ std::nullopt }, { std::nullopt }) };
                 })
             };
             bool has_freeride_to_leaf { n != get_leaf_node() };
@@ -432,7 +430,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                 | std::views::transform([n, this](const N& n2) {
                     N n1 { n };
                     E e { edge_type::FREE_RIDE, { n1, n2 } };
-                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
+                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer({ std::nullopt }, { std::nullopt }) };
                 })
             };
             bool has_freeride_from_root { n == get_root_node() };
@@ -449,7 +447,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                     N n1 { I0, I0 };
                     N n2 { std::get<0zu>(n2_coords), std::get<1zu>(n2_coords) };
                     E e { edge_type::FREE_RIDE, { n1, n2 } };
-                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
+                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer({ std::nullopt }, { std::nullopt }) };
                 })
             };
             return concat_bidirectional_view {
@@ -469,7 +467,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                     N n1 { std::get<1zu>(raw_full_edge) };
                     N n2 { std::get<2zu>(raw_full_edge) };
                     E e { edge_type::NORMAL, { n1, n2 } };
-                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
+                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer({ std::nullopt }, { std::nullopt }) };
                 })
             };
             bool has_freeride_to_leaf { n == get_leaf_node() };
@@ -485,7 +483,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                     N n1 { std::get<0zu>(n1_coords), std::get<1zu>(n1_coords) };
                     N n2 { grid_down_cnt - I1, grid_right_cnt - I1 };
                     E e { edge_type::FREE_RIDE, { n1, n2 } };
-                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
+                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer({ std::nullopt }, { std::nullopt }) };
                 })
             };
             bool has_freeride_from_root { n != get_root_node() };
@@ -495,7 +493,7 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
                 | std::views::transform([n, this](const N& n1) {
                     N n2 { n };
                     E e { edge_type::FREE_RIDE, { n1, n2 } };
-                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer(e, { std::nullopt }, { std::nullopt }) };
+                    return std::tuple<E, N, N, ED> { e, n1, n2, freeride_scorer({ std::nullopt }, { std::nullopt }) };
                 })
             };
             return concat_bidirectional_view {
@@ -705,19 +703,16 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         const sequence auto& down_seq,
         const sequence auto& right_seq,
         const scorer_without_explicit_weight<
-            local_edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
         > auto& substitution_scorer,
         const scorer_without_explicit_weight<
-            local_edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
         > auto& gap_scorer,
         const scorer_without_explicit_weight<
-            local_edge<INDEX>,
             INDEX,
             std::remove_cvref_t<decltype(down_seq[0zu])>,
             std::remove_cvref_t<decltype(right_seq[0zu])>
@@ -729,7 +724,6 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         using RIGHT_ELEM = std::remove_cvref_t<decltype(right_seq[0zu])>;
         using WEIGHT_1 = decltype(
             substitution_scorer(
-                std::declval<const local_edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<
@@ -750,7 +744,6 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         );
         using WEIGHT_2 = decltype(
             gap_scorer(
-                std::declval<const local_edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<
@@ -771,7 +764,6 @@ namespace offbynull::aligner::graphs::pairwise_local_alignment_graph {
         );
         using WEIGHT_3 = decltype(
             freeride_scorer(
-                std::declval<const local_edge<INDEX>&>(),
                 std::declval<
                     const std::optional<
                         std::pair<
