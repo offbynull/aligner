@@ -3,7 +3,6 @@
 
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/element.h"
-#include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/backward_walker_range.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/forward_walker_range.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/path_container_container_creator_pack.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/path_container_heap_container_creator_pack.h"
@@ -14,8 +13,6 @@
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::path_container {
     using offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::element::element;
-    using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::backward_walker_range
-        ::backward_walker_range;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container::forward_walker_range
         ::forward_walker_range;
     using offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::path_container
@@ -255,15 +252,6 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
                 tail = suffix_entry;
             }
             return suffix_entry;
-        }
-
-        /**
-         * Get range that walks the edges contained in this path container, in reverse.
-         *
-         * @return Range that walks stored edges in reverse.
-         */
-        forward_range_of_non_cvref<E> auto walk_path_backward() {
-            return backward_walker_range<E> { head, tail };
         }
 
         /**

@@ -8,11 +8,6 @@
 #include <utility>
 #include "offbynull/concepts.h"
 
-/**
- * Simplified interface for STL bidirectional view.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::helpers::simple_value_bidirectional_view {
     using offbynull::concepts::unqualified_object_type;
 

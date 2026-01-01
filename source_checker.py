@@ -66,6 +66,8 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::ranges::single_view': 'ranges',
     'std::ranges::common_view': 'ranges',
     'std::ranges::view_interface': 'ranges',
+    'std::ranges::iterator_t': 'ranges',
+    'std::ranges::sentinel_t': 'ranges',
     'std::views::empty': 'ranges',
     'std::views::single': 'ranges',
     'std::views::transform': 'ranges',
@@ -92,6 +94,7 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::copyable': 'concepts',
     'std::movable': 'concepts',
     'std::equality_comparable': 'concepts',
+    'std::default_initializable': 'concepts',
     'std::is_void_v': 'type_traits',
     'std::is_same_v': 'type_traits',
     'std::is_object_v': 'type_traits',
@@ -107,6 +110,9 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::decay_t': 'type_traits',
     'std::invoke_result_t': 'type_traits',
     'std::conditional_t': 'type_traits',
+    'std::common_reference_t': 'type_traits',
+    'std::common_type_t': 'type_traits',
+    'std::is_copy_assignable_v': 'type_traits',
     'std::numeric_limits': 'limits',
     'std::begin': 'iterator',
     'std::end': 'iterator',
@@ -125,6 +131,8 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::sized_sentinel_for': 'iterator',
     'std::iter_reference_t': 'iterator',
     'std::iterator_traits': 'iterator',
+    'std::iter_value_t': 'iterator',
+    'std::iter_difference_t': 'iterator',
     'std::lower_bound': 'algorithm',
     'std::reverse': 'algorithm',
     'std::sort': 'algorithm',
@@ -175,6 +183,10 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
     'std::forward': 'utility',
     'std::move': 'utility',
     'std::unreachable': 'utility',
+    'std::monostate': 'utility',
+    'std::as_const': 'utility',
+    'std::in_place_index': 'utility',
+    'std::in_place_index_t': 'utility',
     'std::tuple': 'tuple',
     'std::tuple_element_t': 'tuple',
     'std::tuple_size': 'tuple',
@@ -247,6 +259,25 @@ SYSTEM_TYPE_TO_HEADER_MAPPING = {
 }
 
 
+def check_problematic_standard_range_types(path: Path, content: str):
+    assert(path.suffix in {'.cpp', '.h'})
+    content = content.strip()
+    content_lines = [line for line in content.splitlines(keepends=False) if line]
+    base_path = Path(__file__).resolve().parent
+    path = path.relative_to(base_path)
+    result = CheckResult.SUCCESS
+    for line in content_lines:
+        if 'IGNORE_PROBLEMATIC_RANGE' in line:
+            continue
+        if 'std::views::filter' in line or 'std::ranges::filter_view' in line:
+            print(f'{path}: if this filter will ever be made const, it\'ll fail because it caches on first access\n  > {line}')
+            result = CheckResult.FAIL
+        if 'std::views::join' in line or 'std::ranges::join_view' in line:
+            print(f'{path}: if this join view\'s nested ranges are bidirectional, the join view itself WON\'T BE BIDIRECTIONAL in many cases\n  > {line}')
+            result = CheckResult.FAIL
+    return result
+
+
 def check_system_includes(path: Path, content: str):
     assert(path.suffix in {'.cpp', '.h'})
     content = content.strip()
@@ -304,6 +335,9 @@ def main():
         if source_path.suffix == '.h':
             if check_guards(source_path, source_path.read_text()) == CheckResult.FAIL:
                 result = CheckResult.FAIL
+        # if source_path.suffix == '.h':
+        #     if check_problematic_standard_range_types(source_path, source_path.read_text()) == CheckResult.FAIL:
+        #         result = CheckResult.FAIL
         if source_path.name.endswith('_test.cpp'):
             if check_test_group_name(source_path, source_path.read_text()) == CheckResult.FAIL:
                 result = CheckResult.FAIL

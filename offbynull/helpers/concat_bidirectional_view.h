@@ -8,12 +8,6 @@
 #include <cstdint>
 #include "offbynull/utils.h"
 
-/**
- * View that concatenates two bidirectional ranges together, similar to `std::views::concat` but works with C++20 (`std::views::concat` is
- * only available in C++26 onward.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::helpers::concat_bidirectional_view {
     class sentinel {
     public:

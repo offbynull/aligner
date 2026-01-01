@@ -10,11 +10,6 @@
 #include "offbynull/utils.h"
 #include "offbynull/concepts.h"
 
-/**
- * View that flattens a nested bidirectional range, similar to STL `join_view` but supports bidirectionality.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::helpers::join_bidirectional_view {
     using offbynull::concepts::bidirectional_range_of_bidirectional_range;
 
@@ -416,7 +411,7 @@ namespace offbynull::helpers::join_bidirectional_view {
         join_bidirectional_view<R>& operator=(const join_bidirectional_view<R>& other) = default;
         join_bidirectional_view<R>& operator=(join_bidirectional_view<R>&& other) = default;
 
-        std::bidirectional_iterator auto begin() {
+        std::bidirectional_iterator auto begin() const {
             return iterator(
                 std::ranges::begin(range),
                 std::ranges::end(range),
@@ -424,7 +419,7 @@ namespace offbynull::helpers::join_bidirectional_view {
             );
         }
 
-        std::bidirectional_iterator auto end() {
+        std::bidirectional_iterator auto end() const {
             return iterator(
                 std::ranges::begin(range),
                 std::ranges::end(range),

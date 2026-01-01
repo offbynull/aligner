@@ -149,6 +149,7 @@ gtest = executable(
 #                'offbynull/helpers/blankable_bidirectional_view_test.cpp',
 #                'offbynull/helpers/join_bidirectional_view_test.cpp',
 #                'offbynull/helpers/concat_bidirectional_view_test.cpp',
+                'offbynull/helpers/variant_bidirectional_view_test.cpp',
 #                'offbynull/aligner/graph/utils_test.cpp',
 #                'offbynull/aligner/graph/sliceable_pairwise_alignment_graph_test.cpp',
 #                'offbynull/aligner/graphs/directed_graph_test.cpp',

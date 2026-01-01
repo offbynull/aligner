@@ -37,11 +37,6 @@ static_assert(false, "Struct packing not supported by compiler. Turn off OBN_PAC
 #define PACK_STRUCT_STOP
 #endif
 
-/**
- * Utility / helper functions.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::utils {
     using offbynull::concepts::unqualified_object_type;
     using offbynull::concepts::widenable_to_size_t;

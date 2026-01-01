@@ -1,6 +1,7 @@
 #ifndef OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_PATH_CONTAINER_FORWARD_WALKER_RANGE_H
 #define OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_PATH_CONTAINER_FORWARD_WALKER_RANGE_H
 
+#include <ranges>
 #include "offbynull/aligner/graph/sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/element.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/path_container/forward_walker_iterator.h"
@@ -42,13 +43,15 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
         // No point in documenting anything below here. These are the barebones functions required by a range?
 
         forward_walker_iterator<E> begin() const {
-            return forward_walker_iterator<E> { head };
+            return forward_walker_iterator<E> { head, tail, head };
         }
 
         forward_walker_iterator<E> end() const {
-            return forward_walker_iterator<E> { nullptr };
+            return forward_walker_iterator<E> { head, tail, nullptr };
         }
     };
+
+    static_assert(std::ranges::bidirectional_range<forward_walker_range<int>>);
 }
 
 #endif //OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_PATH_CONTAINER_FORWARD_WALKER_RANGE_H

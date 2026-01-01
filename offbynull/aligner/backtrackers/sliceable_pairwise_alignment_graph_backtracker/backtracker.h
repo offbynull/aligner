@@ -8,6 +8,9 @@
 #include <variant>
 #include <type_traits>
 #include <stdexcept>
+#include <array>
+#include <ranges>
+#include <functional>
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_node.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtrackable_edge.h"
 #include "offbynull/aligner/backtrackers/sliceable_pairwise_alignment_graph_backtracker/backtracker_container_creator_pack.h"
@@ -22,6 +25,8 @@
 #include "offbynull/aligner/graphs/suffix_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/middle_sliceable_pairwise_alignment_graph.h"
 #include "offbynull/aligner/graphs/reversed_sliceable_pairwise_alignment_graph.h"
+#include "offbynull/helpers/variant_bidirectional_view.h"
+#include "offbynull/helpers/join_bidirectional_view.h"
 #include "offbynull/concepts.h"
 
 namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_backtracker::backtracker {
@@ -51,6 +56,67 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     using offbynull::concepts::widenable_to_size_t;
     using offbynull::concepts::unqualified_object_type;
     using offbynull::utils::static_vector_typer;
+    using offbynull::helpers::variant_bidirectional_view::variant_bidirectional_view;
+    using offbynull::helpers::join_bidirectional_view::join_bidirectional_view_adaptor;
+
+    template<
+        bool debug_mode,
+        sliceable_pairwise_alignment_graph G,
+        backtracker_container_creator_pack<
+            typename G::N,
+            typename G::E,
+            typename G::ED
+        > CONTAINER_CREATOR_PACK
+    >
+    struct part_edge_extractor {
+        using N = typename G::N;
+        using E = typename G::E;
+        using SEGMENT_G = middle_sliceable_pairwise_alignment_graph<debug_mode, G>;
+        using SEGMENT_SLICED_SUBDIVIDER_CONTAINER_CREATOR_PATH = decltype(
+            std::declval<CONTAINER_CREATOR_PACK>().create_sliced_subdivider_container_creator_pack()
+        );
+        using SEGMENT_SLICED_SUBDIVIDER = sliced_subdivider<
+            debug_mode,
+            SEGMENT_G,
+            SEGMENT_SLICED_SUBDIVIDER_CONTAINER_CREATOR_PATH
+        >;
+        using SEGMENT_RANGE = decltype(std::declval<SEGMENT_SLICED_SUBDIVIDER>().subdivide().walk_path_forward());
+        using HOP_RANGE = std::array<E, 1>;
+        using HOP_ = hop<E>;
+        using SEGMENT_ = segment<N>;
+
+        std::reference_wrapper<const G> g;
+        std::reference_wrapper<const CONTAINER_CREATOR_PACK> container_creator_pack;
+
+        auto operator()(auto&& part) const {
+            if (const HOP_* hop_ptr = std::get_if<HOP_>(&part)) {
+                HOP_RANGE ret { hop_ptr->edge };
+                return variant_bidirectional_view<SEGMENT_RANGE, HOP_RANGE> { ret };
+            } else if (const SEGMENT_* segment_ptr = std::get_if<SEGMENT_>(&part)) {
+                middle_sliceable_pairwise_alignment_graph<debug_mode, G> g_segment {
+                    g.get(),
+                    segment_ptr->from_node,
+                    segment_ptr->to_node
+                };
+                sliced_subdivider<
+                    debug_mode,
+                    decltype(g_segment),
+                    SEGMENT_SLICED_SUBDIVIDER_CONTAINER_CREATOR_PATH
+                > subdivider {
+                    g_segment,
+                    container_creator_pack.get().create_sliced_subdivider_container_creator_pack()
+                };
+                auto path_container { subdivider.subdivide() };
+                return variant_bidirectional_view<SEGMENT_RANGE, HOP_RANGE> {
+                    path_container.walk_path_forward()
+                };
+            }
+            if constexpr (debug_mode) {
+                throw std::runtime_error { "This should never happen" };
+            }
+            std::unreachable();
+        }
+    };
 
     /**
      * Backtracker for @ref offbynull::aligner::graph::sliceable_pairwise_alignment_graph::sliceable_pairwise_alignment_graph
@@ -159,45 +225,29 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             > resident_segmenter_ {
                 container_creator_pack.create_resident_segmenter_container_creator_pack()
             };
-            using hop_ = hop<E>;
-            using segment_ = segment<N>;
-            const auto& [parts, final_weight] {
+            auto&& [parts, final_weight] {
                 resident_segmenter_.backtrack_segmentation_points(g, max_path_weight_comparison_tolerance)
             };
-            PATH_CONTAINER path {
-                container_creator_pack.create_path_container(
-                    g.path_edge_capacity
-                )
+            // NOTE: Why not inline part_edge_extractor as a lambda? There's a weird thing going on where if a lambda captures variables (g
+            //       and container_creator_pack in this case), it no longer supports copy assignment. Without copy assignment, the join
+            //       below fails.
+            static_assert(std::is_copy_assignable_v<decltype(parts)>);
+            static_assert(std::is_copy_assignable_v<decltype(std::move(parts))>);
+            auto edges_of_parts {
+                std::move(parts)
+                | std::views::transform(part_edge_extractor<debug_mode, G, CONTAINER_CREATOR_PACK> { g, container_creator_pack })
             };
-            for (const auto& part : parts) {
-                if (const hop_* hop_ptr = std::get_if<hop_>(&part)) {
-                    path.push_back(hop_ptr->edge);
-                } else if (const segment_* segment_ptr = std::get_if<segment_>(&part)) {
-                    middle_sliceable_pairwise_alignment_graph<debug_mode, G> g_segment {
-                        g,
-                        segment_ptr->from_node,
-                        segment_ptr->to_node
-                    };
-                    sliced_subdivider<
-                        debug_mode,
-                        decltype(g_segment),
-                        SLICED_SUBDIVIDER_CONTAINER_CREATOR_PACK
-                    > subdivider {
-                        g_segment,
-                        container_creator_pack.create_sliced_subdivider_container_creator_pack()
-                    };
-                    auto path_container { subdivider.subdivide() };
-                    for (const E& edge : path_container.walk_path_forward()) {
-                        path.push_back(edge);
-                    }
-                } else {
-                    if constexpr (debug_mode) {
-                        throw std::runtime_error { "This should never happen" };
-                    }
-                }
-            }
+            static_assert(std::ranges::bidirectional_range<decltype(edges_of_parts)>);
+            static_assert(std::is_copy_assignable_v<part_edge_extractor<debug_mode, G, CONTAINER_CREATOR_PACK>>);
+            static_assert(std::is_copy_assignable_v<
+                decltype(std::views::transform(part_edge_extractor<debug_mode, G, CONTAINER_CREATOR_PACK> { g, container_creator_pack }))
+            >);
+            static_assert(std::is_copy_assignable_v<decltype(edges_of_parts)>); // Here's why this is failing: std::moving results in an
+                                                                                // owning_view being created, which is not copy assignable.
+                                                                                // Not std::moving will mean a dangling reference when the
+                                                                                // range gets returned below. No good options here.
             return std::make_pair(
-                std::move(path),
+                std::move(edges_of_parts) | std::views::join,
                 final_weight
             );  // NOTE: No dangling issues - make_pair() stores values, not refs.
         }

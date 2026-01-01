@@ -11,11 +11,6 @@
 #include <utility>
 #include <vector>
 
-/**
- * Common concepts.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::concepts {
     /**
      * Concept that's satisfied if `T` matches one of the types within `Vs`.

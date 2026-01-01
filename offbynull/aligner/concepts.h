@@ -4,11 +4,6 @@
 #include <concepts>
 #include "offbynull/concepts.h"
 
-/**
- * Common aligner concepts.
- *
- * @author Kasra Faghihi
- */
 namespace offbynull::aligner::concepts {
     using offbynull::concepts::unqualified_object_type;
 

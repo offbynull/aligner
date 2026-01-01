@@ -21,22 +21,30 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
     template<backtrackable_edge E>
     class forward_walker_iterator {
     private:
+        element<E>* head;
+        element<E>* tail;
         element<E>* current;
 
     public:
-        // No point in documenting anything here. This is the interface for a forward iterator?
-
         using difference_type = std::ptrdiff_t;
         using value_type = E;
         using pointer = value_type*;
         using reference = value_type&;
-        using iterator_category = std::forward_iterator_tag;
+        using iterator_category = std::bidirectional_iterator_tag;
 
         forward_walker_iterator()
-        : current {} {}
+        : head {}
+        , tail {}
+        , current {} {}
 
-        forward_walker_iterator(element<E>* head)
-        : current { head } {}
+        forward_walker_iterator(
+            element<E>* head_,
+            element<E>* tail_,
+            element<E>* current_
+        )
+        : head { head_ }
+        , tail { tail_ }
+        , current { current_ } {}
 
         reference operator*() const {
             return current->backtracking_edge;
@@ -53,10 +61,27 @@ namespace offbynull::aligner::backtrackers::sliceable_pairwise_alignment_graph_b
             return tmp;
         }
 
+        forward_walker_iterator& operator--() {
+            if (current == nullptr) {
+                current = tail;
+            } else {
+                current = current->prev;
+            }
+            return *this;
+        }
+
+        forward_walker_iterator operator--(int) {
+            forward_walker_iterator tmp = *this;
+            --(*this);
+            return tmp;
+        }
+
         bool operator==(const forward_walker_iterator& other) const {
             return current == other.current;
         }
     };
+
+    static_assert(std::bidirectional_iterator<forward_walker_iterator<int>>);
 }
 
 #endif //OFFBYNULL_ALIGNER_BACKTRACKERS_SLICEABLE_PAIRWISE_ALIGNMENT_GRAPH_BACKTRACKER_PATH_CONTAINER_FORWARD_WALKER_ITERATOR_H
